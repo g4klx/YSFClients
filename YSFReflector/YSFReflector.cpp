@@ -19,6 +19,7 @@
 #include "YSFReflector.h"
 #include "StopWatch.h"
 #include "Network.h"
+#include "Version.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -66,6 +67,8 @@ void CYSFReflector::run()
 	CTimer pollTimer(1000U, 60U);
 	pollTimer.start();
 
+	::fprintf(stdout, "Starting YSFReflector-%s\n", VERSION);
+
 	for (;;) {
 		unsigned char buffer[200U];
 
@@ -78,8 +81,6 @@ void CYSFReflector::run()
 					if ((*it)->m_callsign != callsign)
 						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
 				}
-			} else {
-				::fprintf(stdout, "Data received from an unknown repeater - %s\n", callsign.c_str());
 			}
 		}
 
@@ -118,8 +119,10 @@ void CYSFReflector::run()
 		}
 
 		// Remove any repeaters that haven't reported for a while
-		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it)
 			(*it)->m_timer.clock(ms);
+
+		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			if ((*it)->m_timer.hasExpired()) {
 				::fprintf(stdout, "Removing %s\n", (*it)->m_callsign.c_str());
 				m_repeaters.erase(it);

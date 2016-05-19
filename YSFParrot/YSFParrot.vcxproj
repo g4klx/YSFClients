@@ -147,6 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="StopWatch.h" />
+    <ClInclude Include="Version.h" />
     <ClInclude Include="YSFParrot.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Timer.h" />

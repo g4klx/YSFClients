@@ -20,6 +20,7 @@
 #include "YSFParrot.h"
 #include "Parrot.h"
 #include "Network.h"
+#include "Version.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -70,6 +71,8 @@ void CYSFParrot::run()
 	CStopWatch playoutTimer;
 	unsigned int count = 0U;
 	bool playing = false;
+
+	::fprintf(stdout, "Starting YSFParrot-%s\n", VERSION);
 
 	for (;;) {
 		unsigned char buffer[200U];
