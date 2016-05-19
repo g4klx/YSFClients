@@ -74,7 +74,7 @@ void CYSFReflector::run()
 			std::string callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
 			CYSFRepeater* rpt = findRepeater(callsign);
 			if (rpt != NULL) {
-				for (auto it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 					if ((*it)->m_callsign != callsign)
 						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
 				}
@@ -112,13 +112,13 @@ void CYSFReflector::run()
 
 		pollTimer.clock(ms);
 		if (pollTimer.hasExpired()) {
-			for (auto it = m_repeaters.begin(); it != m_repeaters.end(); ++it)
+			for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it)
 				network.writePoll((*it)->m_address, (*it)->m_port);
 			pollTimer.start();
 		}
 
 		// Remove any repeaters that haven't reported for a while
-		for (auto it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			(*it)->m_timer.clock(ms);
 			if ((*it)->m_timer.hasExpired()) {
 				::fprintf(stdout, "Removing %s\n", (*it)->m_callsign.c_str());
@@ -141,7 +141,7 @@ void CYSFReflector::run()
 
 CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
 {
-	for (auto it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 		if ((*it)->m_callsign == callsign)
 			return *it;
 	}

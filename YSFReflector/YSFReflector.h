@@ -33,6 +33,7 @@
 #include <winsock.h>
 #endif
 
+#include <string>
 #include <vector>
 
 class CYSFRepeater {
