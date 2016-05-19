@@ -1,0 +1,15 @@
+Debug
+Release
+x64
+MMDVMHost
+*.o
+*.opendb
+*.bak
+*.obj
+*~
+*.sdf
+*.log
+*.zip
+*.exe
+*.user
+.vs
