@@ -8,7 +8,7 @@ OBJECTS = Network.o StopWatch.o Timer.o UDPSocket.o Utils.o YSFReflector.o
 
 all:		YSFReflector
 
-YSFParrot:	$(OBJECTS)
+YSFReflector:	$(OBJECTS)
 		$(CXX) $(OBJECTS) $(CFLAGS) $(LIBS) -o YSFReflector
 
 %.o: %.cpp

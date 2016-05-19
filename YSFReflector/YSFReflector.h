@@ -21,6 +21,9 @@
 
 #include "Timer.h"
 
+#include <string>
+#include <vector>
+
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <netdb.h>
 #include <sys/time.h>
@@ -32,9 +35,6 @@
 #else
 #include <winsock.h>
 #endif
-
-#include <string>
-#include <vector>
 
 class CYSFRepeater {
 public:
