@@ -12,4 +12,5 @@ MMDVMHost
 *.zip
 *.exe
 *.user
+*.VC.db
 .vs
