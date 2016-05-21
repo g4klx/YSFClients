@@ -71,6 +71,7 @@ void CYSFReflector::run()
 
 	CTimer watchdogTimer(1000U, 0U, 1500U);
 
+	unsigned char tag[YSF_CALLSIGN_LENGTH];
 	unsigned char src[YSF_CALLSIGN_LENGTH];
 	unsigned char dst[YSF_CALLSIGN_LENGTH];
 
@@ -80,6 +81,8 @@ void CYSFReflector::run()
 		unsigned int len = network.readData(buffer);
 		if (len > 0U) {
 			if (!watchdogTimer.isRunning()) {
+				::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
+
 				if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
 					::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
 				else
@@ -91,38 +94,42 @@ void CYSFReflector::run()
 					::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
 
 				::fprintf(stdout, "Received data from %10.10s to %10.10s at %10.10s\n", src, dst, buffer + 4U);
-			}
-			else {
-				bool changed = false;
+			} else {
+				if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
+					bool changed = false;
 
-				if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
-					::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-					changed = true;
-				}
+					if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
+						changed = true;
+					}
 
-				if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
-					::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-					changed = true;
-				}
+					if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
+						changed = true;
+					}
 
-				if (changed)
-					::fprintf(stdout, "Received data from %10.10s to %10.10s at %10.10s\n", src, dst, buffer + 4U);
-			}
-
-			watchdogTimer.start();
-
-			std::string callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
-			CYSFRepeater* rpt = findRepeater(callsign);
-			if (rpt != NULL) {
-				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-					if ((*it)->m_callsign != callsign)
-						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
+					if (changed)
+						::fprintf(stdout, "Received data from %10.10s to %10.10s at %10.10s\n", src, dst, buffer + 4U);
 				}
 			}
 
-			if (buffer[34U] == 0x01U) {
-				::fprintf(stdout, "Received end of transmission\n");
-				watchdogTimer.stop();
+			// Only accept transmission from an already accepted repeater
+			if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
+				watchdogTimer.start();
+
+				std::string callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
+				CYSFRepeater* rpt = findRepeater(callsign);
+				if (rpt != NULL) {
+					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+						if ((*it)->m_callsign != callsign)
+							network.writeData(buffer, (*it)->m_address, (*it)->m_port);
+					}
+				}
+
+				if (buffer[34U] == 0x01U) {
+					::fprintf(stdout, "Received end of transmission\n");
+					watchdogTimer.stop();
+				}
 			}
 		}
 
