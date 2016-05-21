@@ -32,7 +32,7 @@ m_address(),
 m_port(0U),
 m_debug(debug),
 m_buffer(1000U, "YSF Network"),
-m_pollTimer(1000U, 60U)
+m_pollTimer(1000U, 5U)
 {
 }
 

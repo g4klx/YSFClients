@@ -64,7 +64,7 @@ void CYSFReflector::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	CTimer pollTimer(1000U, 60U);
+	CTimer pollTimer(1000U, 5U);
 	pollTimer.start();
 
 	::fprintf(stdout, "Starting YSFReflector-%s\n", VERSION);

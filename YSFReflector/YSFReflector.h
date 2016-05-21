@@ -42,7 +42,7 @@ public:
 	m_callsign(),
 	m_address(),
 	m_port(0U),
-	m_timer(1000U, 300U)
+	m_timer(1000U, 60U)
 	{
 	}
 
