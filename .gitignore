@@ -14,3 +14,4 @@ MMDVMHost
 *.user
 *.VC.db
 .vs
+autom4te.cache/
