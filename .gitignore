@@ -15,3 +15,7 @@ MMDVMHost
 *.VC.db
 .vs
 autom4te.cache/
+.deps/
+Makefile
+config.status
+YSFReflector/ysfreflector
