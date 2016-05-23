@@ -21,13 +21,22 @@
 #include "Network.h"
 #include "Version.h"
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <Windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #include <cstdio>
 #include <cstdlib>
+#include <cstdarg>
+#include <ctime>
+#include <cstring>
 
 int main(int argc, char** argv)
 {
 	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFReflector <port>\n");
+		::fprintf(stderr, "Usage: YSFReflector <port> [log file]\n");
 		return 1;
 	}
 
@@ -37,15 +46,28 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	CYSFReflector Reflector(port);
+	FILE* fp = NULL;
+	if (argc > 2) {
+		fp = ::fopen(argv[2], "wt");
+		if (fp == NULL) {
+			::fprintf(stderr, "YSFReflector: cannot open the logging file - %s\n", argv[2]);
+			return 1;
+		}
+	}
+
+	CYSFReflector Reflector(port, fp);
 	Reflector.run();
+
+	if (fp != NULL)
+		::fclose(fp);
 
 	return 0;
 }
 
-CYSFReflector::CYSFReflector(unsigned int port) :
+CYSFReflector::CYSFReflector(unsigned int port, FILE* fp) :
 m_port(port),
-m_repeaters()
+m_repeaters(),
+m_fp(fp)
 {
 }
 
@@ -67,7 +89,7 @@ void CYSFReflector::run()
 	CTimer pollTimer(1000U, 5U);
 	pollTimer.start();
 
-	::fprintf(stdout, "Starting YSFReflector-%s\n", VERSION);
+	log("Starting YSFReflector-%s", VERSION);
 
 	CTimer watchdogTimer(1000U, 0U, 1500U);
 
@@ -93,7 +115,7 @@ void CYSFReflector::run()
 				else
 					::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
 
-				::fprintf(stdout, "Received data from %10.10s to %10.10s at %10.10s\n", src, dst, buffer + 4U);
+				log("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 			} else {
 				if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
 					bool changed = false;
@@ -109,7 +131,7 @@ void CYSFReflector::run()
 					}
 
 					if (changed)
-						::fprintf(stdout, "Received data from %10.10s to %10.10s at %10.10s\n", src, dst, buffer + 4U);
+						log("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 				}
 			}
 
@@ -127,7 +149,7 @@ void CYSFReflector::run()
 				}
 
 				if (buffer[34U] == 0x01U) {
-					::fprintf(stdout, "Received end of transmission\n");
+					log("Received end of transmission");
 					watchdogTimer.stop();
 				}
 			}
@@ -141,7 +163,7 @@ void CYSFReflector::run()
 		if (ret) {
 			CYSFRepeater* rpt = findRepeater(callsign);
 			if (rpt == NULL) {
-				::fprintf(stdout, "Adding %s\n", callsign.c_str());
+				log("Adding %s", callsign.c_str());
 				rpt = new CYSFRepeater;
 				rpt->m_timer.start();
 				rpt->m_callsign = callsign;
@@ -173,7 +195,7 @@ void CYSFReflector::run()
 
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			if ((*it)->m_timer.hasExpired()) {
-				::fprintf(stdout, "Removing %s\n", (*it)->m_callsign.c_str());
+				log("Removing %s", (*it)->m_callsign.c_str());
 				m_repeaters.erase(it);
 				break;
 			}
@@ -181,7 +203,7 @@ void CYSFReflector::run()
 
 		watchdogTimer.clock(ms);
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			::fprintf(stdout, "Watchdog has expired\n");
+			log("Network watchdog has expired");
 			watchdogTimer.stop();
 		}
 
@@ -205,4 +227,37 @@ CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
 	}
 
 	return NULL;
+}
+
+void CYSFReflector::log(const char* text, ...)
+{
+	char buffer[300U];
+#if defined(_WIN32) || defined(_WIN64)
+	SYSTEMTIME st;
+	::GetSystemTime(&st);
+
+	::sprintf(buffer, "%04u-%02u-%02u %02u:%02u:%02u ", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+#else
+	struct timeval now;
+	::gettimeofday(&now, NULL);
+
+	struct tm* tm = ::gmtime(&now.tv_sec);
+
+	::sprintf(buffer, "%04d-%02d-%02d %02d:%02d:%02d ", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+#endif
+
+	va_list vl;
+	va_start(vl, text);
+
+	::vsprintf(buffer + ::strlen(buffer), text, vl);
+
+	va_end(vl);
+
+	if (m_fp != NULL) {
+		::fprintf(m_fp, "%s\n", buffer);
+		::fflush(m_fp);
+	}
+
+	::fprintf(stdout, "%s\n", buffer);
+	::fflush(stdout);
 }

@@ -21,6 +21,7 @@
 
 #include "Timer.h"
 
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -55,7 +56,7 @@ public:
 class CYSFReflector
 {
 public:
-	CYSFReflector(unsigned int port);
+	CYSFReflector(unsigned int port, FILE* fp);
 	~CYSFReflector();
 
 	void run();
@@ -63,8 +64,10 @@ public:
 private:
 	unsigned int               m_port;
 	std::vector<CYSFRepeater*> m_repeaters;
+	FILE*                      m_fp;
 
 	CYSFRepeater* findRepeater(const std::string& callsign) const;
+	void log(const char* text, ...);
 };
 
 #endif
