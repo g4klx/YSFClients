@@ -4,9 +4,11 @@
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
 
+PKG_NAME="ysfreflector"
+
 (test -f $srcdir/YSFReflector.cpp) || {
     echo -n "**Error**: Directory "\`$srcdir\'" does not look like the"
-    echo " ysfreflector top-level directory"
+    echo " top-level $PKG_NAME directory"
     exit 1
 }
 
