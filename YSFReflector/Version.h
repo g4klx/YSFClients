@@ -19,8 +19,6 @@
 #if !defined(VERSION_H)
 #define	VERSION_H
 
-#ifdef WIN32
 const char* VERSION = "20160517";
-#endif
 
 #endif
