@@ -1,0 +1,6 @@
+#
+# These are the allowed hosts for this node
+#
+# The format is <name> <address/name> <port>
+#
+YSF001	c4fm.duckdns.org	420000
