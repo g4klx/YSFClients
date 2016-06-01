@@ -29,7 +29,7 @@
 
 class CNetwork {
 public:
-	CNetwork(unsigned int port, bool debug);
+	CNetwork(unsigned int port, const std::string& name, const std::string& description, bool debug);
 	~CNetwork();
 
 	bool open();
@@ -44,13 +44,18 @@ public:
 
 	void clock(unsigned int ms);
 
+	void setCount(unsigned int count);
+
 private:
 	CUDPSocket   m_socket;
+	std::string  m_name;
+	std::string  m_description;
 	in_addr      m_address;
 	unsigned int m_port;
 	std::string  m_callsign;
 	bool         m_debug;
 	CRingBuffer<unsigned char> m_buffer;
+	unsigned char* m_status;
 };
 
 #endif

@@ -12,6 +12,7 @@
  */
 
 #include "Utils.h"
+#include "Log.h"
 
 #include <cstdio>
 #include <cassert>
@@ -27,7 +28,7 @@ void CUtils::dump(int level, const std::string& title, const unsigned char* data
 {
 	assert(data != NULL);
 
-	::fprintf(stdout, "%s\n", title.c_str());
+	::Log(level, "%s", title.c_str());
 
 	unsigned int offset = 0U;
 
@@ -58,7 +59,7 @@ void CUtils::dump(int level, const std::string& title, const unsigned char* data
 
 		output += '*';
 
-		::fprintf(stdout, "%04X:  %s\n", offset, output.c_str());
+		::Log(level, "%04X:  %s", offset, output.c_str());
 
 		offset += 16U;
 

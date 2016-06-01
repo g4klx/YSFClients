@@ -20,6 +20,7 @@
 #define	YSFReflector_H
 
 #include "Timer.h"
+#include "Conf.h"
 
 #include <cstdio>
 #include <string>
@@ -56,18 +57,17 @@ public:
 class CYSFReflector
 {
 public:
-	CYSFReflector(unsigned int port, FILE* fp);
+	CYSFReflector(const std::string& file);
 	~CYSFReflector();
 
 	void run();
 
 private:
-	unsigned int               m_port;
+	CConf                      m_conf;
+	std::string                m_file;
 	std::vector<CYSFRepeater*> m_repeaters;
-	FILE*                      m_fp;
 
 	CYSFRepeater* findRepeater(const std::string& callsign) const;
-	void log(const char* text, ...);
 };
 
 #endif

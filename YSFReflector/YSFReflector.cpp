@@ -20,11 +20,18 @@
 #include "StopWatch.h"
 #include "Network.h"
 #include "Version.h"
+#include "Log.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
 #include <sys/time.h>
+#endif
+
+#if defined(_WIN32) || defined(_WIN64)
+const char* DEFAULT_INI_FILE = "YSFReflector.ini";
+#else
+const char* DEFAULT_INI_FILE = "/etc/YSFReflector.ini";
 #endif
 
 #include <cstdio>
@@ -35,39 +42,34 @@
 
 int main(int argc, char** argv)
 {
-	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFReflector <port> [log file]\n");
-		return 1;
-	}
-
-	unsigned int port = ::atoi(argv[1]);
-	if (port == 0U) {
-		::fprintf(stderr, "YSFReflector: invalid port number\n");
-		return 1;
-	}
-
-	FILE* fp = NULL;
-	if (argc > 2) {
-		fp = ::fopen(argv[2], "wt");
-		if (fp == NULL) {
-			::fprintf(stderr, "YSFReflector: cannot open the logging file - %s\n", argv[2]);
-			return 1;
+	const char* iniFile = DEFAULT_INI_FILE;
+	if (argc > 1) {
+		for (int currentArg = 1; currentArg < argc; ++currentArg) {
+			std::string arg = argv[currentArg];
+			if ((arg == "-v") || (arg == "--version")) {
+				::fprintf(stdout, "YSFReflector version %s\n", VERSION);
+				return 0;
+			}
+			else if (arg.substr(0, 1) == "-") {
+				::fprintf(stderr, "Usage: YSFReflector [-v|--version] [filename]\n");
+				return 1;
+			}
+			else {
+				iniFile = argv[currentArg];
+			}
 		}
 	}
 
-	CYSFReflector Reflector(port, fp);
-	Reflector.run();
-
-	if (fp != NULL)
-		::fclose(fp);
+	CYSFReflector* reflector = new CYSFReflector(std::string(iniFile));
+	reflector->run();
+	delete reflector;
 
 	return 0;
 }
 
-CYSFReflector::CYSFReflector(unsigned int port, FILE* fp) :
-m_port(port),
-m_repeaters(),
-m_fp(fp)
+CYSFReflector::CYSFReflector(const std::string& file) :
+m_conf(file),
+m_repeaters()
 {
 }
 
@@ -77,9 +79,80 @@ CYSFReflector::~CYSFReflector()
 
 void CYSFReflector::run()
 {
-	CNetwork network(m_port, false);
+	bool ret = m_conf.read();
+	if (!ret) {
+		::fprintf(stderr, "YSFRefector: cannot read the .ini file\n");
+		return;
+	}
 
-	bool ret = network.open();
+	ret = ::LogInitialise(m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel());
+	if (!ret) {
+		::fprintf(stderr, "YSFReflector: unable to open the log file\n");
+		return;
+	}
+
+#if !defined(_WIN32) && !defined(_WIN64)
+	bool m_daemon = m_conf.getDaemon();
+	if (m_daemon) {
+		// Create new process
+		pid_t pid = ::fork();
+		if (pid == -1) {
+			::LogWarning("Couldn't fork() , exiting");
+			return -1;
+		}
+		else if (pid != 0)
+			exit(EXIT_SUCCESS);
+
+		// Create new session and process group
+		if (::setsid() == -1) {
+			::LogWarning("Couldn't setsid(), exiting");
+			return -1;
+		}
+
+		// Set the working directory to the root directory
+		if (::chdir("/") == -1) {
+			::LogWarning("Couldn't cd /, exiting");
+			return -1;
+		}
+
+		::close(STDIN_FILENO);
+		::close(STDOUT_FILENO);
+		::close(STDERR_FILENO);
+
+		//If we are currently root...
+		if (getuid() == 0) {
+			struct passwd* user = ::getpwnam("mmdvm");
+			if (user == NULL) {
+				::LogError("Could not get the mmdvm user, exiting");
+				return -1;
+			}
+
+			uid_t mmdvm_uid = user->pw_uid;
+			gid_t mmdvm_gid = user->pw_gid;
+
+			//Set user and group ID's to mmdvm:mmdvm
+			if (setgid(mmdvm_gid) != 0) {
+				::LogWarning("Could not set mmdvm GID, exiting");
+				return -1;
+			}
+
+			if (setuid(mmdvm_uid) != 0) {
+				::LogWarning("Could not set mmdvm UID, exiting");
+				return -1;
+			}
+
+			//Double check it worked (AKA Paranoia) 
+			if (setuid(0) != -1) {
+				::LogWarning("It's possible to regain root - something is wrong!, exiting");
+				return -1;
+			}
+		}
+	}
+#endif
+
+	CNetwork network(m_conf.getNetworkPort(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
+
+	ret = network.open();
 	if (!ret)
 		return;
 
@@ -89,7 +162,7 @@ void CYSFReflector::run()
 	CTimer pollTimer(1000U, 5U);
 	pollTimer.start();
 
-	log("Starting YSFReflector-%s", VERSION);
+	LogMessage("Starting YSFReflector-%s", VERSION);
 
 	CTimer watchdogTimer(1000U, 0U, 1500U);
 
@@ -115,7 +188,7 @@ void CYSFReflector::run()
 				else
 					::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
 
-				log("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+				LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 			} else {
 				if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
 					bool changed = false;
@@ -131,7 +204,7 @@ void CYSFReflector::run()
 					}
 
 					if (changed)
-						log("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+						LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 				}
 			}
 
@@ -149,7 +222,7 @@ void CYSFReflector::run()
 				}
 
 				if (buffer[34U] == 0x01U) {
-					log("Received end of transmission");
+					LogMessage("Received end of transmission");
 					watchdogTimer.stop();
 				}
 			}
@@ -163,13 +236,14 @@ void CYSFReflector::run()
 		if (ret) {
 			CYSFRepeater* rpt = findRepeater(callsign);
 			if (rpt == NULL) {
-				log("Adding %s", callsign.c_str());
+				LogMessage("Adding %s", callsign.c_str());
 				rpt = new CYSFRepeater;
 				rpt->m_timer.start();
 				rpt->m_callsign = callsign;
 				rpt->m_address  = address;
 				rpt->m_port     = port;
 				m_repeaters.push_back(rpt);
+				network.setCount(m_repeaters.size());
 			} else {
 				rpt->m_timer.start();
 				rpt->m_address = address;
@@ -195,15 +269,16 @@ void CYSFReflector::run()
 
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			if ((*it)->m_timer.hasExpired()) {
-				log("Removing %s", (*it)->m_callsign.c_str());
+				LogMessage("Removing %s", (*it)->m_callsign.c_str());
 				m_repeaters.erase(it);
+				network.setCount(m_repeaters.size());
 				break;
 			}
 		}
 
 		watchdogTimer.clock(ms);
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			log("Network watchdog has expired");
+			LogMessage("Network watchdog has expired");
 			watchdogTimer.stop();
 		}
 
@@ -217,6 +292,8 @@ void CYSFReflector::run()
 	}
 
 	network.close();
+
+	::LogFinalise();
 }
 
 CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
@@ -227,37 +304,4 @@ CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
 	}
 
 	return NULL;
-}
-
-void CYSFReflector::log(const char* text, ...)
-{
-	char buffer[300U];
-#if defined(_WIN32) || defined(_WIN64)
-	SYSTEMTIME st;
-	::GetSystemTime(&st);
-
-	::sprintf(buffer, "%04u-%02u-%02u %02u:%02u:%02u ", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-#else
-	struct timeval now;
-	::gettimeofday(&now, NULL);
-
-	struct tm* tm = ::gmtime(&now.tv_sec);
-
-	::sprintf(buffer, "%04d-%02d-%02d %02d:%02d:%02d ", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-#endif
-
-	va_list vl;
-	va_start(vl, text);
-
-	::vsprintf(buffer + ::strlen(buffer), text, vl);
-
-	va_end(vl);
-
-	if (m_fp != NULL) {
-		::fprintf(m_fp, "%s\n", buffer);
-		::fflush(m_fp);
-	}
-
-	::fprintf(stdout, "%s\n", buffer);
-	::fflush(stdout);
 }

@@ -26,18 +26,26 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(unsigned int port, bool debug) :
+CNetwork::CNetwork(unsigned int port, const std::string& name, const std::string& description, bool debug) :
 m_socket(port),
+m_name(name),
+m_description(description),
 m_address(),
 m_port(0U),
 m_callsign(),
 m_debug(debug),
-m_buffer(1000U, "YSF Network")
+m_buffer(1000U, "YSF Network"),
+m_status(NULL)
 {
+	m_name.resize(16U, ' ');
+	m_description.resize(14U, ' ');
+
+	m_status = new unsigned char[50U];
 }
 
 CNetwork::~CNetwork()
 {
+	delete[] m_status;
 }
 
 bool CNetwork::open()
@@ -101,6 +109,12 @@ void CNetwork::clock(unsigned int ms)
 		return;
 	}
 
+	// Handle incoming status requests
+	if (::memcmp(buffer, "YSFS", 4U) == 0) {
+		m_socket.write(m_status, 42U, address, port);
+		return;
+	}
+
 	// Invalid packet type?
 	if (::memcmp(buffer, "YSFD", 4U) != 0)
 		return;
@@ -140,6 +154,33 @@ bool CNetwork::readPoll(std::string& callsign, in_addr& address, unsigned int& p
 	m_port = 0U;
 
 	return true;
+}
+
+void CNetwork::setCount(unsigned int count)
+{
+	if (count > 999U)
+		count = 999U;
+
+	unsigned int hash = 0U;
+
+	for (unsigned int i = 0U; i < m_name.size(); i++) {
+		hash += m_name.at(i);
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
+	}
+
+	for (unsigned int i = 0U; i < m_description.size(); i++) {
+		hash += m_description.at(i);
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
+	}
+
+	// Final avalanche
+	hash += (hash << 3);
+	hash ^= (hash >> 11);
+	hash += (hash << 15);
+
+	::sprintf((char*)m_status, "YSFS%05u%16.16s%14.14s%03u", hash % 100000U, m_name.c_str(), m_description.c_str(), count);
 }
 
 void CNetwork::close()
