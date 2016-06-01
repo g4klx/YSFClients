@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="APRSWriterThread.h" />
     <ClInclude Include="Conf.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="Golay24128.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="StopWatch.h" />
     <ClInclude Include="TCPSocket.h" />
+    <ClInclude Include="Thread.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="Utils.h" />
@@ -168,6 +170,7 @@
     <ClInclude Include="YSFPayload.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="APRSWriterThread.cpp" />
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="CRC.cpp" />
     <ClCompile Include="Golay24128.cpp" />
@@ -177,6 +180,7 @@
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="StopWatch.cpp" />
     <ClCompile Include="TCPSocket.cpp" />
+    <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="UDPSocket.cpp" />
     <ClCompile Include="Utils.cpp" />

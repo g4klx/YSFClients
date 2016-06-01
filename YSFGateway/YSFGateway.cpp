@@ -20,6 +20,7 @@
 #include "StopWatch.h"
 #include "Version.h"
 #include "YSFFICH.h"
+#include "Thread.h"
 #include "Timer.h"
 #include "Log.h"
 
@@ -261,13 +262,8 @@ int CYSFGateway::run()
 			watchdogTimer.stop();
 		}
 
-		if (ms < 5U) {
-#if defined(_WIN32) || defined(_WIN64)
-			::Sleep(5UL);		// 5ms
-#else
-			::usleep(5000);		// 5ms
-#endif
-		}
+		if (ms < 5U)
+			CThread::sleep(5U);
 	}
 
 	rptNetwork.close();
