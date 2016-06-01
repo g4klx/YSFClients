@@ -43,6 +43,10 @@ public:
 private:
 	CNetwork*   m_network;
 	std::string m_reflector;
+
+	WX_STATUS processConnect();
+	void processDX();
+	void processAll();
 };
 
 #endif

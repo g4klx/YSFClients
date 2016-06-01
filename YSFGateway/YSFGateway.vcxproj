@@ -155,6 +155,7 @@
     <ClInclude Include="Network.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="StopWatch.h" />
+    <ClInclude Include="TCPSocket.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="Utils.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="StopWatch.cpp" />
+    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="UDPSocket.cpp" />
     <ClCompile Include="Utils.cpp" />

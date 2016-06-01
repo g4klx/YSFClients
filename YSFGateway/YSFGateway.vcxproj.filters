@@ -68,6 +68,9 @@
     <ClInclude Include="WiresX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TCPSocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Network.cpp">
@@ -116,6 +119,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WiresX.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TCPSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

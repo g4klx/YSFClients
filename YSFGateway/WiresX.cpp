@@ -17,9 +17,14 @@
 */
 
 #include "WiresX.h"
+#include "YSFPayload.h"
 
 #include <cstdio>
 #include <cassert>
+
+const unsigned char CALL_DX[]      = {0x5DU, 0x71U};
+const unsigned char CALL_CONNECT[] = {0x5DU, 0x41U};
+const unsigned char CALL_ALL[]     = {0x5DU, 0x66U};
 
 CWiresX::CWiresX(CNetwork* network) :
 m_network(network),
@@ -34,10 +39,47 @@ CWiresX::~CWiresX()
 
 WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn)
 {
+	if (fi != YSF_FI_COMMUNICATIONS || dt != YSF_DT_DATA_FR_MODE || fn != 1U)
+		return WXS_NONE;
+
+	unsigned char buffer[20U];
+
+	CYSFPayload payload;
+	bool valid = payload.readDataFRModeData2(data, buffer);
+	if (!valid)
+		return WXS_NONE;
+
+	if (::memcmp(buffer + 1U, CALL_DX, 2U) == 0)
+		processDX();
+	else if (::memcmp(buffer + 1U, CALL_ALL, 2U) == 0)
+		processAll();
+	else if (::memcmp(buffer + 1U, CALL_CONNECT, 2U) == 0)
+		return processConnect();
+
 	return WXS_NONE;
 }
 
 std::string CWiresX::getReflector() const
 {
 	return m_reflector;
+}
+
+void CWiresX::processDX()
+{
+
+}
+
+void CWiresX::processAll()
+{
+
+}
+
+WX_STATUS CWiresX::processConnect()
+{
+	return WXS_NONE;
+}
+
+void CWiresX::clock(unsigned int ms)
+{
+
 }

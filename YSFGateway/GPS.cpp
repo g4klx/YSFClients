@@ -231,3 +231,8 @@ void CGPS::transmitGPS(const unsigned char* source)
 
 	m_sent = true;
 }
+
+void CGPS::clock(unsigned int ms)
+{
+
+}
