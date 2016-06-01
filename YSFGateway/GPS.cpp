@@ -26,9 +26,9 @@
 #include <cassert>
 #include <cstring>
 
-const unsigned char NULL_GPS[] = {0x47U, 0x63U, 0x5FU};
-const unsigned char SHRT_GPS[] = {0x22U, 0x62U, 0x5FU};
-const unsigned char LONG_GPS[] = {0x47U, 0x64U, 0x5FU};
+const unsigned char NULL_GPS[] = {0x47U, 0x63U};
+const unsigned char SHRT_GPS[] = {0x22U, 0x62U};
+const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 
 CGPS::CGPS(const std::string& hostname, unsigned int port, const std::string& password) :
 m_hostname(hostname),
@@ -70,17 +70,17 @@ void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned
 				m_dt2 = true;
 
 				// If no GPS data then mark it as complete for this transmission
-				if (::memcmp(m_buffer + 1U, NULL_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, NULL_GPS, 2U) == 0) {
 					CUtils::dump("Null GPS data received", m_buffer, 20U);
 					m_sent = true;
 				}
 
-				if (::memcmp(m_buffer + 1U, SHRT_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, SHRT_GPS, 2U) == 0) {
 					CUtils::dump("Short GPS data received", m_buffer, 20U);
 					transmitGPS(source);
 				}
 
-				if (::memcmp(m_buffer + 1U, LONG_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, LONG_GPS, 2U) == 0) {
 					CUtils::dump("Long GPS data received", m_buffer, 20U);
 					transmitGPS(source);
 				}
@@ -93,7 +93,7 @@ void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned
 				m_dt1 = true;
 
 				// If no GPS data then mark it as complete for this transmission
-				if (::memcmp(m_buffer + 1U, NULL_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, NULL_GPS, 2U) == 0) {
 					CUtils::dump("Null GPS data received", m_buffer, 20U);
 					m_sent = true;
 					m_dt2  = true;
@@ -106,12 +106,12 @@ void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned
 			if (valid) {
 				m_dt2  = true;
 
-				if (::memcmp(m_buffer + 1U, SHRT_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, SHRT_GPS, 2U) == 0) {
 					CUtils::dump("Short GPS data received", m_buffer, 20U);
 					transmitGPS(source);
 				}
 
-				if (::memcmp(m_buffer + 1U, LONG_GPS, 3U) == 0) {
+				if (::memcmp(m_buffer + 1U, LONG_GPS, 2U) == 0) {
 					CUtils::dump("Long GPS data received", m_buffer, 20U);
 					transmitGPS(source);
 				}
@@ -133,6 +133,101 @@ void CGPS::transmitGPS(const unsigned char* source)
 	if (::memcmp(source, "          ", YSF_CALLSIGN_LENGTH) == 0)
 		return;
 
+	for (unsigned int i = 5U; i < 11U; i++) {
+		unsigned char b = m_buffer[i] & 0xF0U;
+		if (b != 0x50U && b != 0x30U)
+			return;                                // error/unknown
+	}
+
+	unsigned int tens = m_buffer[5U] & 0x0FU;
+	unsigned int units = m_buffer[6U] & 0x0FU;
+	unsigned int lat_deg = (tens * 10U) + units;
+	if (tens > 9U || units > 9U || lat_deg > 89U)
+		return;                                // error/unknown
+
+	tens = m_buffer[7U] & 0x0FU;
+	units = m_buffer[8U] & 0x0FU;
+	unsigned int lat_min = (tens * 10U) + units;
+	if (tens > 9U || units > 9U || lat_min > 59U)
+		return;                                // error/unknown
+
+	tens = m_buffer[9U] & 0x0FU;
+	units = m_buffer[10U] & 0x0FU;
+	unsigned int lat_min_frac = (tens * 10U) + units;
+	if (tens > 9U || units > 10U || lat_min_frac > 99U)    // units > 10 ??? .. more buggy Yaesu firmware ?
+		return;                                // error/unknown
+
+	int lat_dir;
+	unsigned char b = m_buffer[6U] & 0xF0U;                            // currently a guess
+	if (b == 0x30U)
+		lat_dir = 1;                           // N
+	else if (b == 0x50U)
+		lat_dir = -1;                          // S
+	else
+		return;                                // error/unknown
+
+	unsigned int lon_deg;
+	b = m_buffer[9U] & 0xF0U;
+	if (b == 0x50U) {
+	    // lon deg 0 to 9, and 100 to 179
+		b = m_buffer[11U];
+		if (b >= 0x76U && b <= 0x7FU)
+			lon_deg = b - 0x76U;               // 0 to 9
+		else if (b >= 0x6CU && b <= 0x75U)
+			lon_deg = 100U + (b - 0x6CU);      // 100 to 109
+		else if (b >= 0x16U && b <= 0x6BU)
+			lon_deg = 110U + (b - 0x16U);      // 110 to 179
+		else
+			return;                            // error/unknown
+	} else if (b == 0x30U) {
+	    // lon deg 10 to 99
+		b = m_buffer[11U];
+		if (b >= 0x26U && b <= 0x7FU)
+			lon_deg = 10U + (b - 0x26U);       // 10 to 99
+		else
+			return;                            // error/unknown
+	} else {
+		return;                                // error/unknown
+	}
+
+	unsigned int lon_min;
+	b = m_buffer[12U];
+	if (b >= 0x58U && b <= 0x61U)
+		lon_min = b - 0x58U;                   // 0 to 9
+	else if (b >= 0x26U && b <= 0x57U)
+		lon_min = 10U + (b - 0x26U);            // 10 to 59
+	else
+		return;                                // error/unknown
+
+	unsigned int lon_min_frac;
+	b = m_buffer[13U];
+	if (b >= 0x1CU && b <= 0x7FU)
+		lon_min_frac = b - 0x1CU;
+	else
+		return;                                // error/unknown
+
+	int lon_dir;
+	b = m_buffer[10U] & 0xF0U;
+	if (b == 0x30U)
+		lon_dir = 1;                           // E
+	else if (b == 0x50U)
+		lon_dir = -1;                          // W
+	else
+		return;                                // error/unknown
+
+	unsigned int lat_sec = lat_min_frac * 60U;
+	lat_sec = (lat_sec + (lat_sec % 100U)) / 100U;    // with rounding
+
+	unsigned int lon_sec = lon_min_frac * 60U;
+	lon_sec = (lon_sec + (lon_sec % 100U)) / 100U;    // with rounding
+
+	// >= 0 is north, < 0 is south
+	float latitude = lat_deg + ((lat_min + ((float)lat_min_frac * 0.01F)) * (1.0F / 60.0F));
+	latitude *= lat_dir;
+
+	// >= 0 is east, < 0 is west
+	float longitude = lon_deg + ((lon_min + ((float)lon_min_frac * 0.01F)) * (1.0F / 60.0F));
+	longitude *= lon_dir;
 
 	m_sent = true;
 }
