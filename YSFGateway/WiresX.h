@@ -20,6 +20,7 @@
 #define	WIRESX_H
 
 #include "Network.h"
+#include "Timer.h"
 
 #include <string>
 
@@ -41,12 +42,16 @@ public:
 	void clock(unsigned int ms);
 
 private:
-	CNetwork*   m_network;
-	std::string m_reflector;
+	CNetwork*      m_network;
+	std::string    m_reflector;
+	CTimer         m_timer;
+	unsigned char* m_csd1;
 
 	WX_STATUS processConnect();
 	void processDX();
 	void processAll();
+
+	void createReply(const unsigned char* data, unsigned int length);
 };
 
 #endif

@@ -186,6 +186,8 @@ bool CYSFPayload::readDataFRModeData1(const unsigned char* data, unsigned char* 
 	assert(data != NULL);
 	assert(dt != NULL);
 
+	::memset(dt, ' ', 20U);
+
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
 	unsigned char dch[45U];
@@ -230,6 +232,8 @@ bool CYSFPayload::readDataFRModeData2(const unsigned char* data, unsigned char* 
 {
 	assert(data != NULL);
 	assert(dt != NULL);
+
+	::memset(dt, ' ', 20U);
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 

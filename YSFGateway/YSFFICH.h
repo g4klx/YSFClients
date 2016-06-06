@@ -34,6 +34,12 @@ public:
 	unsigned char getFT() const;
 	unsigned char getDT() const;
 
+	void setFI(unsigned char fi);
+	void setBN(unsigned char bn);
+	void setBT(unsigned char bt);
+	void setFN(unsigned char fn);
+	void setFT(unsigned char ft);
+
 	void load(const unsigned char* fich);
 
 private:

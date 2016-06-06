@@ -226,12 +226,12 @@ int CYSFGateway::run()
 
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn);
+			}
 
-				if (fi == YSF_FI_TERMINATOR) {
-					if (m_gps != NULL)
-						m_gps->reset();
-					watchdogTimer.stop();
-				}
+			if (buffer[34U] == 0x01U) {
+				if (m_gps != NULL)
+					m_gps->reset();
+				watchdogTimer.stop();
 			}
 
 			if (networkEnabled && m_linked)

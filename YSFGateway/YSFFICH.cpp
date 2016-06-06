@@ -190,3 +190,33 @@ void CYSFFICH::load(const unsigned char* fich)
 
 	::memcpy(m_fich, fich, 4U);
 }
+
+void CYSFFICH::setFI(unsigned char fi)
+{
+	m_fich[0U] &= 0x3FU;
+	m_fich[0U] |= (fi << 6) & 0xC0U;
+}
+
+void CYSFFICH::setBN(unsigned char bn)
+{
+	m_fich[0U] &= 0xFCU;
+	m_fich[0U] |= bn & 0x03U;
+}
+
+void CYSFFICH::setBT(unsigned char bt)
+{
+	m_fich[1U] &= 0x3FU;
+	m_fich[1U] |= (bt << 6) & 0xC0U;
+}
+
+void CYSFFICH::setFN(unsigned char fn)
+{
+	m_fich[0U] &= 0xC7U;
+	m_fich[0U] |= (fn << 3) & 0x38U;
+}
+
+void CYSFFICH::setFT(unsigned char ft)
+{
+	m_fich[1U] &= 0xF8U;
+	m_fich[1U] |= ft & 0x07U;
+}
