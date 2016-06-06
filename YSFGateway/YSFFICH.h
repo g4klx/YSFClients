@@ -34,8 +34,7 @@ public:
 	unsigned char getFT() const;
 	unsigned char getDT() const;
 
-	void setMR(unsigned char mr);
-	void setVoIP(bool set);
+	void load(const unsigned char* fich);
 
 private:
 	unsigned char* m_fich;

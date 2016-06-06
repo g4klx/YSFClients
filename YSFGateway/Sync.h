@@ -16,16 +16,15 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if !defined(CRC_H)
-#define	CRC_H
+#if !defined(SYNC_H)
+#define	SYNC_H
 
-class CCRC
+class CSync
 {
 public:
-	static void addCCITT16(unsigned char* in, unsigned int length);
-	static bool checkCCITT16(const unsigned char* in, unsigned int length);
+	static void add(unsigned char* data);
 
-	static unsigned char addCRC(const unsigned char* in, unsigned int length);
+private:
 };
 
 #endif

@@ -16,16 +16,17 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if !defined(CRC_H)
-#define	CRC_H
+#include "Sync.h"
 
-class CCRC
+#include "YSFDefines.h"
+
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+
+void CSync::add(unsigned char* data)
 {
-public:
-	static void addCCITT16(unsigned char* in, unsigned int length);
-	static bool checkCCITT16(const unsigned char* in, unsigned int length);
+	assert(data != NULL);
 
-	static unsigned char addCRC(const unsigned char* in, unsigned int length);
-};
-
-#endif
+	::memcpy(data, YSF_SYNC_BYTES, YSF_SYNC_LENGTH_BYTES);
+}

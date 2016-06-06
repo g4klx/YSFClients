@@ -101,7 +101,7 @@ bool CYSFFICH::decode(const unsigned char* bytes)
 	m_fich[4U] = ((b2 << 4) & 0xF0U) | ((b3 >> 8) & 0x0FU);
 	m_fich[5U] = (b3 >> 0) & 0xFFU;
 
-	return CCRC::checkCCITT162(m_fich, 6U);
+	return CCRC::checkCCITT16(m_fich, 6U);
 }
 
 void CYSFFICH::encode(unsigned char* bytes)
@@ -111,7 +111,7 @@ void CYSFFICH::encode(unsigned char* bytes)
 	// Skip the sync bytes
 	bytes += YSF_SYNC_LENGTH_BYTES;
 
-	CCRC::addCCITT162(m_fich, 6U);
+	CCRC::addCCITT16(m_fich, 6U);
 
 	unsigned int b0 = ((m_fich[0U] << 4) & 0xFF0U) | ((m_fich[1U] >> 4) & 0x00FU);
 	unsigned int b1 = ((m_fich[1U] << 8) & 0xF00U) | ((m_fich[2U] >> 0) & 0x0FFU);
@@ -184,16 +184,9 @@ unsigned char CYSFFICH::getDT() const
 	return m_fich[2U] & 0x03U;
 }
 
-void CYSFFICH::setMR(unsigned char mr)
+void CYSFFICH::load(const unsigned char* fich)
 {
-	m_fich[2U] &= 0xC7U;
-	m_fich[2U] |= (mr << 3) & 0x38U;
-}
+	assert(fich != NULL);
 
-void CYSFFICH::setVoIP(bool on)
-{
-	if (on)
-		m_fich[2U] |= 0x04U;
-	else
-		m_fich[2U] &= 0xFBU;
+	::memcpy(m_fich, fich, 4U);
 }
