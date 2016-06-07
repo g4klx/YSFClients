@@ -30,6 +30,14 @@ enum WX_STATUS {
 	WXS_DISCONNECT
 };
 
+enum WXSI_STATUS {
+	WXSI_NONE,
+	WXSI_DX,
+	WXSI_CONNECT,
+	WXSI_DISCONNECT,
+	WXSI_ALL
+};
+
 class CWiresX {
 public:
 	CWiresX(CNetwork* network);
@@ -45,13 +53,22 @@ private:
 	CNetwork*      m_network;
 	std::string    m_reflector;
 	CTimer         m_timer;
+	unsigned char  m_seqNo;
 	unsigned char* m_csd1;
+	WXSI_STATUS    m_status;
 
-	WX_STATUS processConnect();
+	void processConnect(const unsigned char* data);
+	void processDisconnect();
 	void processDX();
 	void processAll();
 
+	void sendDXReply();
+	void sendConnectReply();
+	void sendDisconnectReply();
+	void sendAllReply();
+
 	void createReply(const unsigned char* data, unsigned int length);
+	unsigned char calculateFT(unsigned int length) const;
 };
 
 #endif

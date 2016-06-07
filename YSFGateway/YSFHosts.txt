@@ -1,6 +1,12 @@
 #
 # These are the allowed hosts for this node
 #
-# The format is <name> <address/name> <port>
+# The format is <address/name> <port>
 #
-YSF001	c4fm.duckdns.org	420000
+c4fm.duckdns.org 42000
+c4fm.ea3hkb.com 42000
+ysf.on4top.be 42000
+c4fm.sustrai.org 42000
+ysf.ve2mrc.com 42000
+ysf.hamlabs.no 42000
+ysf007.spain-dmr.es 42000

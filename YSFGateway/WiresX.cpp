@@ -26,11 +26,17 @@
 #include <cstdio>
 #include <cassert>
 
-const unsigned char CALL_DX[]      = {0x5DU, 0x71U};
-const unsigned char CALL_CONNECT[] = {0x5DU, 0x41U};
-const unsigned char CALL_ALL[]     = {0x5DU, 0x66U};
+const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
+const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
+const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
+const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
 
-const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x15U, 0x00U};
+const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU, 0x26U};
+const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
+const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
+const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
+
+const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL       ";
 
@@ -38,7 +44,9 @@ CWiresX::CWiresX(CNetwork* network) :
 m_network(network),
 m_reflector(),
 m_timer(1000U, 0U, 100U + 750U),
-m_csd1(NULL)
+m_seqNo(0U),
+m_csd1(NULL),
+m_status(WXSI_NONE)
 {
 	assert(network != NULL);
 
@@ -84,14 +92,22 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 			return WXS_NONE;
 		}
 
-		if (::memcmp(buffer + 1U, CALL_DX, 2U) == 0)
+		if (::memcmp(buffer + 1U, DX_REQ, 3U) == 0) {
 			processDX();
-		else if (::memcmp(buffer + 1U, CALL_ALL, 2U) == 0)
+			return WXS_NONE;
+		} else if (::memcmp(buffer + 1U, ALL_REQ, 3U) == 0) {
 			processAll();
-		else if (::memcmp(buffer + 1U, CALL_CONNECT, 2U) == 0)
-			return processConnect();
-		else
+			return WXS_NONE;
+		} else if (::memcmp(buffer + 1U, CONN_REQ, 3U) == 0) {
+			processConnect(buffer + 5U);
+			return WXS_CONNECT;
+		} else if (::memcmp(buffer + 1U, DISC_REQ, 3U) == 0) {
+			processDisconnect();
+			return WXS_DISCONNECT;
+		} else {
 			::memset(m_csd1, ' ', 20U);
+			return WXS_NONE;
+		}
 	}
 
 	return WXS_NONE;
@@ -106,17 +122,32 @@ void CWiresX::processDX()
 {
 	::LogDebug("Received DX from %10.10s", m_csd1 + 10U);
 
+	m_status = WXSI_DX;
 	m_timer.start();
 }
 
 void CWiresX::processAll()
 {
-
+	m_status = WXSI_ALL;
+	m_timer.start();
 }
 
-WX_STATUS CWiresX::processConnect()
+void CWiresX::processConnect(const unsigned char* data)
 {
-	return WXS_NONE;
+	::LogDebug("Received Connect to %5.5s from %10.10s", data + 5U, m_csd1 + 10U);
+
+	m_reflector = std::string((char*)(data + 5U), 5U);
+
+	m_status = WXSI_CONNECT;
+	m_timer.start();
+}
+
+void CWiresX::processDisconnect()
+{
+	::LogDebug("Received Disconect from %10.10s", m_csd1 + 10U);
+
+	m_status = WXSI_DISCONNECT;
+	m_timer.start();
 }
 
 void CWiresX::clock(unsigned int ms)
@@ -125,21 +156,24 @@ void CWiresX::clock(unsigned int ms)
 	if (m_timer.isRunning() && m_timer.hasExpired()) {
 		LogDebug("Send reply");
 
-		unsigned char data[150U];
-		::memset(data, 0x00U, 150U);
-		::memset(data, ' ', 128U);
+		switch (m_status) {
+		case WXSI_DX:
+			sendDXReply();
+			break;
+		case WXSI_ALL:
+			sendAllReply();
+			break;
+		case WXSI_CONNECT:
+			sendConnectReply();
+			break;
+		case WXSI_DISCONNECT:
+			sendDisconnectReply();
+			break;
+		default:
+			break;
+		}
 
-		data[0U] = 0x03U;			// XXX Serial no
-		data[1U] = 0x5DU;
-		data[2U] = 0x51U;
-		data[3U] = 0x5FU;			// Start of data marker
-		data[4U] = 0x26U;			// Repeater type
-
-		data[127U] = 0x03U;			// End of data marker
-		data[128U] = CCRC::addCRC(data, 128U);
-
-		createReply(data, 140U);
-
+		m_status = WXSI_NONE;
 		m_timer.stop();
 	}
 }
@@ -148,6 +182,9 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 {
 	assert(data != NULL);
 	assert(length > 0U);
+
+	unsigned char ft = calculateFT(length);
+	unsigned char bt = length / 260U;
 
 	// Write the header
 	unsigned char buffer[200U];
@@ -159,6 +196,8 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	CYSFFICH fich;
 	fich.load(DEFAULT_FICH);
 	fich.setFI(YSF_FI_HEADER);
+	fich.setBT(bt);
+	fich.setFT(ft);
 	fich.encode(buffer + 35U);
 
 	CYSFPayload payload;
@@ -167,8 +206,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	m_network->write(buffer);
 
-	unsigned char bt = length / 260U;
-	fich.setBT(bt);
+	fich.setFI(YSF_FI_COMMUNICATIONS);
 
 	unsigned char fn = 0U;
 	unsigned char bn = 0U;
@@ -178,13 +216,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 		switch (fn) {
 		case 0U: {
 				unsigned int len = length - offset;
-				if (len > 220U)      fich.setFT(7U);
-				else if (len > 180U) fich.setFT(6U);
-				else if (len > 140U) fich.setFT(5U);
-				else if (len > 100U) fich.setFT(4U);
-				else if (len > 60U)  fich.setFT(3U);
-				else if (len > 20U)  fich.setFT(2U);
-				else                 fich.setFT(1U);
+				ft = calculateFT(len);
 				payload.writeDataFRModeData1(m_csd1, buffer + 35U);
 				// payload.writeDataFRModeData2("                   ", buffer + 35U);
 			}
@@ -202,9 +234,10 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 			break;
 		}
 
+		fich.setFT(ft);
 		fich.setFN(fn);
+		fich.setBT(bt);
 		fich.setBN(bn);
-		fich.setFI(YSF_FI_COMMUNICATIONS);
 		fich.encode(buffer + 35U);
 
 		m_network->write(buffer);
@@ -219,12 +252,62 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	// Write the trailer
 	buffer[34U] = 0x01U;
 
-	fich.load(DEFAULT_FICH);
 	fich.setFI(YSF_FI_TERMINATOR);
+	fich.setFN(fn);
+	fich.setBN(bn);
 	fich.encode(buffer + 35U);
 
 	payload.writeDataFRModeData1(m_csd1, buffer + 35U);
 	// payload.writeDataFRModeData2("                   ", buffer + 35U);
 
 	m_network->write(buffer);
+}
+
+unsigned char CWiresX::calculateFT(unsigned int length) const
+{
+	if (length > 220U) return 7U;
+
+	if (length > 180U) return 6U;
+
+	if (length > 140U) return 5U;
+
+	if (length > 100U) return 4U;
+
+	if (length > 60U)  return 3U;
+
+	if (length > 20U)  return 2U;
+
+	return 1U;
+}
+
+void CWiresX::sendDXReply()
+{
+	unsigned char data[150U];
+	::memset(data, 0x00U, 150U);
+	::memset(data, ' ', 128U);
+
+	data[0U] = m_seqNo;
+	::memcmp(data + 1U, DX_RESP, 4U);
+
+	data[127U] = 0x03U;			// End of data marker
+	data[128U] = CCRC::addCRC(data, 128U);
+
+	createReply(data, 140U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendConnectReply()
+{
+
+}
+
+void CWiresX::sendDisconnectReply()
+{
+
+}
+
+void CWiresX::sendAllReply()
+{
+
 }
