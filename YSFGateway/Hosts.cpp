@@ -24,7 +24,8 @@
 #include <cctype>
 
 CHosts::CHosts(const std::string& filename) :
-m_filename(filename)
+m_filename(filename),
+m_hosts()
 {
 }
 
@@ -47,24 +48,22 @@ bool CHosts::read()
 
 		char* p1 = ::strtok(buffer, " \t\r\n");
 		char* p2 = ::strtok(NULL, " \t\r\n");
-		char* p3 = ::strtok(NULL, " \t\r\n");
 
-		if (p1 != NULL && p2 != NULL && p3 != NULL) {
-			std::string name    = std::string(p1);
-			std::string address = std::string(p2);
-			unsigned int port   = (unsigned int)::atoi(p3);
+		if (p1 != NULL && p2 != NULL) {
+			std::string address = std::string(p1);
+			unsigned int port   = (unsigned int)::atoi(p2);
 
 			CYSFHost* host = new CYSFHost;
 			host->m_address = address;
 			host->m_port    = port;
 
-			m_table[p1] = host;
+			m_hosts.push_back(host);
 		}
 	}
 
 	::fclose(fp);
 
-	size_t size = m_table.size();
+	size_t size = m_hosts.size();
 	if (size == 0U)
 		return false;
 
@@ -73,27 +72,7 @@ bool CHosts::read()
 	return true;
 }
 
-CYSFHost* CHosts::find(const std::string& name) const
+std::vector<CYSFHost*>& CHosts::list()
 {
-	CYSFHost* host = NULL;
-
-	try {
-		host = m_table.at(name);
-	} catch (...) {
-		// Nothing to do
-	}
-
-	return host;
-}
-
-std::vector<std::string>& CHosts::list() const
-{
-	std::vector<std::string> hosts;
-
-	for (std::map<std::string, CYSFHost*>::const_iterator it = m_table.begin(); it != m_table.end(); ++it) {
-		std::pair<std::string, CYSFHost*> t = *it;
-		hosts.push_back(t.first);
-	}
-
-	return hosts;
+	return m_hosts;
 }

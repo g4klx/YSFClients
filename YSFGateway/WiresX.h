@@ -19,6 +19,7 @@
 #if !defined(WIRESX_H)
 #define	WIRESX_H
 
+#include "Reflectors.h"
 #include "Network.h"
 #include "Timer.h"
 
@@ -40,24 +41,34 @@ enum WXSI_STATUS {
 
 class CWiresX {
 public:
-	CWiresX(CNetwork* network);
+	CWiresX(CNetwork* network, const std::string& hostsFile, unsigned int statusPort);
 	~CWiresX();
+
+	void setInfo(const std::string& name, const std::string& description, unsigned int txFrequency, unsigned int rxFrequency);
+
+	bool start();
 
 	WX_STATUS process(const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn);
 
-	std::string getReflector() const;
+	CYSFReflector* getReflector() const;
 
 	void clock(unsigned int ms);
 
 private:
 	CNetwork*      m_network;
-	std::string    m_reflector;
+	CReflectors    m_reflectors;
+	CYSFReflector* m_reflector;
+	std::string    m_id;
+	std::string    m_name;
+	std::string    m_description;
+	unsigned int   m_txFrequency;
+	unsigned int   m_rxFrequency;
 	CTimer         m_timer;
 	unsigned char  m_seqNo;
 	unsigned char* m_csd1;
 	WXSI_STATUS    m_status;
 
-	void processConnect(const unsigned char* data);
+	WX_STATUS processConnect(const unsigned char* data);
 	void processDisconnect();
 	void processDX();
 	void processAll();

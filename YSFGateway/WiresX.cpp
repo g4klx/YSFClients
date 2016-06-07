@@ -40,15 +40,22 @@ const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL       ";
 
-CWiresX::CWiresX(CNetwork* network) :
+CWiresX::CWiresX(CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
 m_network(network),
-m_reflector(),
+m_reflectors(hostsFile, statusPort),
+m_reflector(NULL),
+m_id(),
+m_name(),
+m_description(),
+m_txFrequency(0U),
+m_rxFrequency(0U),
 m_timer(1000U, 0U, 100U + 750U),
 m_seqNo(0U),
 m_csd1(NULL),
 m_status(WXSI_NONE)
 {
 	assert(network != NULL);
+	assert(statusPort > 0U);
 
 	m_csd1 = new unsigned char[20U];
 }
@@ -56,6 +63,42 @@ m_status(WXSI_NONE)
 CWiresX::~CWiresX()
 {
 	delete[] m_csd1;
+}
+
+void CWiresX::setInfo(const std::string& name, const std::string& description, unsigned int txFrequency, unsigned int rxFrequency)
+{
+	assert(txFrequency > 0U);
+	assert(rxFrequency > 0U);
+
+	m_name        = name;
+	m_description = description;
+	m_txFrequency = txFrequency;
+	m_rxFrequency = rxFrequency;
+
+	unsigned int hash = 0U;
+
+	for (unsigned int i = 0U; i < name.size(); i++) {
+		hash += name.at(i);
+		hash += (hash << 10);
+		hash ^= (hash >> 6);
+	}
+
+	// Final avalanche
+	hash += (hash << 3);
+	hash ^= (hash >> 11);
+	hash += (hash << 15);
+
+	char id[10U];
+	::sprintf(id, "%05u", hash % 100000U);
+
+	LogInfo("The ID of this repeater is %s", id);
+
+	m_id = std::string(id);
+}
+
+bool CWiresX::start()
+{
+	return m_reflectors.load();
 }
 
 WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn)
@@ -99,8 +142,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 			processAll();
 			return WXS_NONE;
 		} else if (::memcmp(buffer + 1U, CONN_REQ, 3U) == 0) {
-			processConnect(buffer + 5U);
-			return WXS_CONNECT;
+			return processConnect(buffer + 5U);
 		} else if (::memcmp(buffer + 1U, DISC_REQ, 3U) == 0) {
 			processDisconnect();
 			return WXS_DISCONNECT;
@@ -113,7 +155,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 	return WXS_NONE;
 }
 
-std::string CWiresX::getReflector() const
+CYSFReflector* CWiresX::getReflector() const
 {
 	return m_reflector;
 }
@@ -132,14 +174,20 @@ void CWiresX::processAll()
 	m_timer.start();
 }
 
-void CWiresX::processConnect(const unsigned char* data)
+WX_STATUS CWiresX::processConnect(const unsigned char* data)
 {
 	::LogDebug("Received Connect to %5.5s from %10.10s", data + 5U, m_csd1 + 10U);
 
-	m_reflector = std::string((char*)(data + 5U), 5U);
+	std::string id = std::string((char*)(data + 4U), 5U);
+
+	m_reflector = m_reflectors.find(id);
+	if (m_reflector == NULL)
+		return WXS_NONE;
 
 	m_status = WXSI_CONNECT;
 	m_timer.start();
+
+	return WXS_CONNECT;
 }
 
 void CWiresX::processDisconnect()

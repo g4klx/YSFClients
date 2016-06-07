@@ -10,3 +10,4 @@ c4fm.sustrai.org 42000
 ysf.ve2mrc.com 42000
 ysf.hamlabs.no 42000
 ysf007.spain-dmr.es 42000
+ysfreflector.dvswitch.org 42000

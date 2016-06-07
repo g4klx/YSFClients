@@ -17,6 +17,7 @@
 */
 
 #include "YSFGateway.h"
+#include "Reflectors.h"
 #include "StopWatch.h"
 #include "Version.h"
 #include "YSFFICH.h"
@@ -74,7 +75,6 @@ int main(int argc, char** argv)
 CYSFGateway::CYSFGateway(const std::string& configFile) :
 m_conf(configFile),
 m_gps(NULL),
-m_hosts(NULL),
 m_wiresX(NULL),
 m_netNetwork(NULL),
 m_linked(false)
@@ -157,13 +157,9 @@ int CYSFGateway::run()
 	}
 #endif
 
-	std::string fileName = m_conf.getNetworkHosts();
-	m_hosts = new CHosts(fileName);
-	m_hosts->read();
-
 	bool debug = m_conf.getNetworkDebug();
 	unsigned int rptPort = m_conf.getPort();
-	unsigned int netPort = m_conf.getNetworkPort();
+	unsigned int netPort = m_conf.getNetworkDataPort();
 
 	CNetwork rptNetwork(rptPort, debug);
 	m_netNetwork = new CNetwork(netPort, debug);
@@ -181,9 +177,12 @@ int CYSFGateway::run()
 	}
 
 	bool networkEnabled = m_conf.getNetworkEnabled();
+	if (networkEnabled) {
+		std::string fileName = m_conf.getNetworkHosts();
+		unsigned int port = m_conf.getNetworkStatusPort();
 
-	if (networkEnabled)
-		m_wiresX = new CWiresX(&rptNetwork);
+		m_wiresX = new CWiresX(&rptNetwork, fileName, port);
+	}
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -211,8 +210,12 @@ int CYSFGateway::run()
 				if (m_wiresX != NULL) {
 					WX_STATUS status = m_wiresX->process(buffer + 35U, fi, dt, fn);
 					switch (status) {
-					case WXS_CONNECT:
-						connect(buffer + 14U);
+					case WXS_CONNECT: {
+							CYSFReflector* reflector = m_wiresX->getReflector();
+							LogMessage("Connect to %05u has been requested by %10.10s", reflector->m_id, buffer + 14U);
+							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_linked = true;
+						}
 						break;
 					case WXS_DISCONNECT:
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
@@ -270,7 +273,6 @@ int CYSFGateway::run()
 	m_netNetwork->close();
 
 	delete m_gps;
-	delete m_hosts;
 	delete m_netNetwork;
 	delete m_wiresX;
 
@@ -289,27 +291,4 @@ void CYSFGateway::createGPS()
 	std::string password = m_conf.getAPRSPassword();
 
 	m_gps = new CGPS(hostname, port, password);
-}
-
-bool CYSFGateway::connect(const unsigned char* source)
-{
-	std::string reflector = m_wiresX->getReflector();
-
-	CYSFHost* host = m_hosts->find(reflector);
-	if (host == NULL) {
-		LogMessage("Request made for invalid reflector %s by %10.10s", reflector.c_str(), source);
-		return false;
-	}
-	
-	std::string address = host->m_address;
-	unsigned int port = host->m_port;
-
-	in_addr addr = CUDPSocket::lookup(address);
-	if (addr.s_addr == INADDR_NONE)
-		return false;
-
-	LogMessage("Connect to %s has been requested by %10.10s", reflector.c_str(), source);
-
-	m_netNetwork->setDestination(addr, port);
-	m_linked = true;
 }

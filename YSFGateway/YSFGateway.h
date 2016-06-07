@@ -21,7 +21,6 @@
 
 #include "Network.h"
 #include "WiresX.h"
-#include "Hosts.h"
 #include "Conf.h"
 #include "GPS.h"
 
@@ -38,13 +37,11 @@ public:
 private:
 	CConf     m_conf;
 	CGPS*     m_gps;
-	CHosts*   m_hosts;
 	CWiresX*  m_wiresX;
 	CNetwork* m_netNetwork;
 	bool      m_linked;
 
 	void createGPS();
-	bool connect(const unsigned char* source);
 };
 
 #endif

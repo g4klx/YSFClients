@@ -59,7 +59,8 @@ public:
 
   // The Network section
   bool         getNetworkEnabled() const;
-  unsigned int getNetworkPort() const;
+  unsigned int getNetworkDataPort() const;
+  unsigned int getNetworkStatusPort() const;
   std::string  getNetworkHosts() const;
   bool         getNetworkDebug() const;
 
@@ -89,7 +90,8 @@ private:
   std::string  m_aprsPassword;
 
   bool         m_networkEnabled;
-  unsigned int m_networkPort;
+  unsigned int m_networkDataPort;
+  unsigned int m_networkStatusPort;
   std::string  m_networkHosts;
   bool         m_networkDebug;
 };

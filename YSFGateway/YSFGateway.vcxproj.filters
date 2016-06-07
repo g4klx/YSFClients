@@ -80,6 +80,9 @@
     <ClInclude Include="Sync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Reflectors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Network.cpp">
@@ -140,6 +143,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflectors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

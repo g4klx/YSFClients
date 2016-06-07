@@ -57,7 +57,8 @@ m_aprsHostname(),
 m_aprsPort(0U),
 m_aprsPassword(),
 m_networkEnabled(false),
-m_networkPort(0U),
+m_networkDataPort(0U),
+m_networkStatusPort(0U),
 m_networkHosts(),
 m_networkDebug(false)
 {
@@ -152,8 +153,10 @@ bool CConf::read()
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_networkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Port") == 0)
-			m_networkPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "DataPort") == 0)
+			m_networkDataPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "StatusPort") == 0)
+			m_networkStatusPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Hosts") == 0)
 			m_networkHosts = value;
 		else if (::strcmp(key, "Debug") == 0)
@@ -266,9 +269,14 @@ bool CConf::getNetworkEnabled() const
 	return m_networkEnabled;
 }
 
-unsigned int CConf::getNetworkPort() const
+unsigned int CConf::getNetworkDataPort() const
 {
-  return m_networkPort;
+  return m_networkDataPort;
+}
+
+unsigned int CConf::getNetworkStatusPort() const
+{
+	return m_networkStatusPort;
 }
 
 std::string CConf::getNetworkHosts() const

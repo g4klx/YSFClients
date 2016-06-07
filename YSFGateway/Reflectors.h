@@ -16,30 +16,54 @@
 *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef	Hosts_H
-#define	Hosts_H
+#if !defined(Reflectors_H)
+#define	Reflectors_H
+
+#include "UDPSocket.h"
+#include "Timer.h"
+#include "Hosts.h"
 
 #include <string>
-#include <vector>
 
-class CYSFHost {
+class CYSFReflector {
 public:
-	std::string  m_address;
+	CYSFReflector() :
+	m_id(),
+	m_name(),
+	m_desc(),
+	m_count(0U),
+	m_address(),
+	m_port(0U),
+	m_timer(1000U, 700U)
+	{
+	}
+
+	std::string  m_id;
+	std::string  m_name;
+	std::string  m_desc;
+	unsigned int m_count;
+	in_addr      m_address;
 	unsigned int m_port;
+	CTimer       m_timer;
 };
 
-class CHosts {
+class CReflectors {
 public:
-	CHosts(const std::string& filename);
-	~CHosts();
+	CReflectors(const std::string& hostsFile, unsigned int statusPort);
+	~CReflectors();
 
-	bool read();
+	bool load();
 
-	std::vector<CYSFHost*>& list();
+	CYSFReflector* find(const std::string& id);
+
+	void clock(unsigned int ms);
 
 private:
-	std::string            m_filename;
-	std::vector<CYSFHost*> m_hosts;
+	std::string                 m_hostsFile;
+	CUDPSocket                  m_socket;
+	std::vector<CYSFReflector*> m_reflectors;
+	std::vector <CYSFReflector*>::iterator m_it;
+	CTimer                      m_timer;
 };
 
 #endif
