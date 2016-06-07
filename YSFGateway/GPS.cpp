@@ -229,6 +229,8 @@ void CGPS::transmitGPS(const unsigned char* source)
 	float longitude = lon_deg + ((lon_min + ((float)lon_min_frac * 0.01F)) * (1.0F / 60.0F));
 	longitude *= lon_dir;
 
+	LogMessage("GPS Position of lat=%f long=%f", latitude, longitude);
+
 	m_sent = true;
 }
 

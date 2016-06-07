@@ -208,9 +208,9 @@ void CWiresX::processAll()
 
 WX_STATUS CWiresX::processConnect(const unsigned char* data)
 {
-	::LogDebug("Received Connect to %5.5s from %10.10s", data + 5U, m_source + 10U);
+	::LogDebug("Received Connect to %5.5s from %10.10s", data, m_source + 10U);
 
-	std::string id = std::string((char*)(data + 4U), 5U);
+	std::string id = std::string((char*)data, 5U);
 
 	m_reflector = m_reflectors.find(id);
 	if (m_reflector == NULL)

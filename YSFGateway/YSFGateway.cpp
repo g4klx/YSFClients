@@ -228,7 +228,7 @@ int CYSFGateway::run()
 					switch (status) {
 					case WXS_CONNECT: {
 							CYSFReflector* reflector = m_wiresX->getReflector();
-							LogMessage("Connect to %05u has been requested by %10.10s", reflector->m_id, buffer + 14U);
+							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_linked = true;
 						}
