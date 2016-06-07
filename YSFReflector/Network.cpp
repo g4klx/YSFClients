@@ -169,12 +169,6 @@ void CNetwork::setCount(unsigned int count)
 		hash ^= (hash >> 6);
 	}
 
-	for (unsigned int i = 0U; i < m_description.size(); i++) {
-		hash += m_description.at(i);
-		hash += (hash << 10);
-		hash ^= (hash >> 6);
-	}
-
 	// Final avalanche
 	hash += (hash << 3);
 	hash ^= (hash >> 11);
