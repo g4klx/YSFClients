@@ -200,6 +200,8 @@ void CWiresX::processDX()
 
 void CWiresX::processAll()
 {
+	::LogDebug("Received ALL from %10.10s", m_source + 10U);
+
 	m_status = WXSI_ALL;
 	m_timer.start();
 }
@@ -504,5 +506,68 @@ void CWiresX::sendDisconnectReply()
 
 void CWiresX::sendAllReply()
 {
+	std::vector<CYSFReflector*>& curr = m_reflectors.current();
 
+	unsigned char data[1100U];
+	::memset(data, 0x00U, 1100U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = ALL_RESP[i];
+
+	data[5U] = '2';
+	data[6U] = '1';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 7U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 12U] = m_callsign.at(i);
+
+	unsigned int total = curr.size();
+	if (total > 999U) total = 999U;
+
+	unsigned int n = curr.size();
+	if (n > 20U) n = 20U;
+
+	::sprintf((char*)(data + 22U), "%03u%03u", n, total);
+
+	data[28U] = 0x0DU;
+
+	unsigned int offset = 29U;
+	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
+		CYSFReflector* refl = curr.at(j);
+
+		data[offset + 0U] = '5';
+
+		for (unsigned int i = 0U; i < 5U; i++)
+			data[i + offset + 1U] = refl->m_id.at(i);
+
+		for (unsigned int i = 0U; i < 16U; i++)
+			data[i + offset + 6U] = refl->m_name.at(i);
+
+		for (unsigned int i = 0U; i < 3U; i++)
+			data[i + offset + 22U] = refl->m_count.at(i);
+
+		for (unsigned int i = 0U; i < 10U; i++)
+			data[i + offset + 25U] = ' ';
+
+		for (unsigned int i = 0U; i < 14U; i++)
+			data[i + offset + 35U] = refl->m_desc.at(i);
+
+		data[offset + 49U] = 0x0DU;
+	}
+
+	data[offset + 0U] = 0x03U;			// End of data marker
+	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
+
+	unsigned int blocks = (offset + 1U) / 20U;
+	if ((blocks % 20U) > 0U) blocks++;
+
+	CUtils::dump(1U, "ALL Reply", data, blocks * 20U);
+
+	createReply(data, blocks * 20U);
+
+	m_seqNo++;
 }

@@ -56,6 +56,8 @@ public:
 
 	CYSFReflector* find(const std::string& id);
 
+	std::vector<CYSFReflector*>& current();
+
 	void clock(unsigned int ms);
 
 private:
@@ -63,6 +65,7 @@ private:
 	CUDPSocket                  m_socket;
 	std::vector<CYSFReflector*> m_reflectors;
 	std::vector <CYSFReflector*>::iterator m_it;
+	std::vector<CYSFReflector*> m_current;
 	CTimer                      m_timer;
 };
 

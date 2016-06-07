@@ -29,6 +29,7 @@ m_hostsFile(hostsFile),
 m_socket(statusPort),
 m_reflectors(),
 m_it(),
+m_current(),
 m_timer(1000U, 60U)
 {
 	assert(statusPort > 0U);
@@ -79,6 +80,18 @@ CYSFReflector* CReflectors::find(const std::string& id)
 	LogMessage("Trying to find non existent reflector with an id of %s", id.c_str());
 
 	return NULL;
+}
+
+std::vector<CYSFReflector*>& CReflectors::current()
+{
+	m_current.clear();
+
+	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
+		if ((*it)->m_timer.isRunning() && !(*it)->m_timer.hasExpired())
+			m_current.push_back(*it);
+	}
+
+	return m_current;
 }
 
 void CReflectors::clock(unsigned int ms)
