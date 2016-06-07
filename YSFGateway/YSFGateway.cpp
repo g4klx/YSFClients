@@ -18,6 +18,7 @@
 
 #include "YSFGateway.h"
 #include "Reflectors.h"
+#include "UDPSocket.h"
 #include "StopWatch.h"
 #include "Version.h"
 #include "YSFFICH.h"
@@ -157,12 +158,16 @@ int CYSFGateway::run()
 	}
 #endif
 
-	bool debug = m_conf.getNetworkDebug();
-	unsigned int rptPort = m_conf.getPort();
-	unsigned int netPort = m_conf.getNetworkDataPort();
+	std::string callsign = m_conf.getCallsign();
 
-	CNetwork rptNetwork(rptPort, debug);
-	m_netNetwork = new CNetwork(netPort, debug);
+	bool debug = m_conf.getNetworkDebug();
+	in_addr rptAddress    = CUDPSocket::lookup(m_conf.getRptAddress());
+	unsigned int rptPort  = m_conf.getRptPort();
+	std::string myAddress = m_conf.getMyAddress();
+	unsigned int myPort   = m_conf.getMyPort();
+
+	CNetwork rptNetwork(myAddress, myPort, debug);
+	rptNetwork.setDestination(rptAddress, rptPort);
 
 	ret = rptNetwork.open();
 	if (!ret) {
@@ -170,6 +175,9 @@ int CYSFGateway::run()
 		return 1;
 	}
 
+	unsigned int netPort = m_conf.getNetworkDataPort();
+
+	m_netNetwork = new CNetwork(netPort, debug);
 	ret = m_netNetwork->open();
 	if (!ret) {
 		::LogError("Cannot open the reflector network port");
@@ -181,7 +189,15 @@ int CYSFGateway::run()
 		std::string fileName = m_conf.getNetworkHosts();
 		unsigned int port = m_conf.getNetworkStatusPort();
 
-		m_wiresX = new CWiresX(&rptNetwork, fileName, port);
+		m_wiresX = new CWiresX(callsign, &rptNetwork, fileName, port);
+
+		std::string name = m_conf.getName();
+		unsigned int txFrequency = m_conf.getTxFrequency();
+		unsigned int rxFrequency = m_conf.getRxFrequency();
+
+		m_wiresX->setInfo(name, txFrequency, rxFrequency);
+
+		m_wiresX->start();
 	}
 
 	CStopWatch stopWatch;

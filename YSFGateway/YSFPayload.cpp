@@ -282,7 +282,7 @@ void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* d
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
-	unsigned char output[20U];
+	unsigned char output[25U];
 	for (unsigned int i = 0U; i < 20U; i++)
 		output[i] = dt[i] ^ WHITENING_DATA[i];
 
@@ -326,7 +326,7 @@ void CYSFPayload::writeDataFRModeData2(const unsigned char* dt, unsigned char* d
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
-	unsigned char output[20U];
+	unsigned char output[25U];
 	for (unsigned int i = 0U; i < 20U; i++)
 		output[i] = dt[i] ^ WHITENING_DATA[i];
 

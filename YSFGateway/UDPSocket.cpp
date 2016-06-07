@@ -151,6 +151,8 @@ bool CUDPSocket::open()
 #endif
 			return false;
 		}
+
+		LogInfo("Opening UDP port on %u", m_port);
 	}
 
 	return true;

@@ -38,7 +38,10 @@ enum SECTION {
 CConf::CConf(const std::string& file) :
 m_file(file),
 m_callsign(),
-m_port(0U),
+m_rptAddress(),
+m_rptPort(0U),
+m_myAddress(),
+m_myPort(0U),
 m_daemon(false),
 m_rxFrequency(0U),
 m_txFrequency(0U),
@@ -111,8 +114,14 @@ bool CConf::read()
 			for (unsigned int i = 0U; value[i] != 0; i++)
 				value[i] = ::toupper(value[i]);
 			m_callsign = value;
-		} else if (::strcmp(key, "Port") == 0)
-			m_port = (unsigned int)::atoi(value);
+		} else if (::strcmp(key, "RptAddress") == 0)
+			m_rptAddress = value;
+		else if (::strcmp(key, "RptPort") == 0)
+			m_rptPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "MyAddress") == 0)
+			m_myAddress = value;
+		else if (::strcmp(key, "MyPort") == 0)
+			m_myPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Daemon") == 0)
 			m_daemon = ::atoi(value) == 1;
 	} else if (section == SECTION_INFO) {
@@ -174,9 +183,24 @@ std::string CConf::getCallsign() const
   return m_callsign;
 }
 
-unsigned int CConf::getPort() const
+std::string CConf::getRptAddress() const
 {
-	return m_port;
+	return m_rptAddress;
+}
+
+unsigned int CConf::getRptPort() const
+{
+	return m_rptPort;
+}
+
+std::string CConf::getMyAddress() const
+{
+	return m_myAddress;
+}
+
+unsigned int CConf::getMyPort() const
+{
+	return m_myPort;
 }
 
 bool CConf::getDaemon() const

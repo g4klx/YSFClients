@@ -41,10 +41,10 @@ enum WXSI_STATUS {
 
 class CWiresX {
 public:
-	CWiresX(CNetwork* network, const std::string& hostsFile, unsigned int statusPort);
+	CWiresX(const std::string& callsign, CNetwork* network, const std::string& hostsFile, unsigned int statusPort);
 	~CWiresX();
 
-	void setInfo(const std::string& name, const std::string& description, unsigned int txFrequency, unsigned int rxFrequency);
+	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);
 
 	bool start();
 
@@ -55,17 +55,20 @@ public:
 	void clock(unsigned int ms);
 
 private:
+	std::string    m_callsign;
 	CNetwork*      m_network;
 	CReflectors    m_reflectors;
 	CYSFReflector* m_reflector;
 	std::string    m_id;
 	std::string    m_name;
-	std::string    m_description;
 	unsigned int   m_txFrequency;
 	unsigned int   m_rxFrequency;
 	CTimer         m_timer;
 	unsigned char  m_seqNo;
+	unsigned char* m_source;
 	unsigned char* m_csd1;
+	unsigned char* m_csd2;
+	unsigned char* m_csd3;
 	WXSI_STATUS    m_status;
 
 	WX_STATUS processConnect(const unsigned char* data);

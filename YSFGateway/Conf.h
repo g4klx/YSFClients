@@ -32,7 +32,10 @@ public:
 
   // The General section
   std::string  getCallsign() const;
-  unsigned int getPort() const;
+  std::string  getRptAddress() const;
+  unsigned int getRptPort() const;
+  std::string  getMyAddress() const;
+  unsigned int getMyPort() const;
   bool         getDaemon() const;
 
   // The Info section
@@ -67,7 +70,10 @@ public:
 private:
   std::string  m_file;
   std::string  m_callsign;
-  unsigned int m_port;
+  std::string  m_rptAddress;
+  unsigned int m_rptPort;
+  std::string  m_myAddress;
+  unsigned int m_myPort;
   bool         m_daemon;
 
   unsigned int m_rxFrequency;

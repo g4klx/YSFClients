@@ -31,7 +31,7 @@ public:
 	m_id(),
 	m_name(),
 	m_desc(),
-	m_count(0U),
+	m_count("000"),
 	m_address(),
 	m_port(0U),
 	m_timer(1000U, 700U)
@@ -41,7 +41,7 @@ public:
 	std::string  m_id;
 	std::string  m_name;
 	std::string  m_desc;
-	unsigned int m_count;
+	std::string  m_count;
 	in_addr      m_address;
 	unsigned int m_port;
 	CTimer       m_timer;

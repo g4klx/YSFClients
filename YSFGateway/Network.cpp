@@ -27,6 +27,17 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
+CNetwork::CNetwork(const std::string& address, unsigned int port, bool debug) :
+m_socket(address, port),
+m_debug(debug),
+m_address(),
+m_port(0U),
+m_buffer(1000U, "YSF Network Buffer"),
+m_timer(1000U, 5U)
+{
+	assert(port > 0U);
+}
+
 CNetwork::CNetwork(unsigned int port, bool debug) :
 m_socket(port),
 m_debug(debug),
@@ -123,8 +134,11 @@ void CNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (address.s_addr != m_address.s_addr || port != m_port)
+	if (address.s_addr != m_address.s_addr || port != m_port) {
+		LogDebug("Addr: %u != %u || Port: %u != %u", address.s_addr, m_address.s_addr, port, m_port);
+		CUtils::dump("Data from unknown address/port", buffer, length);
 		return;
+	}
 
 	// Handle incoming polls
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {

@@ -69,13 +69,10 @@ CYSFReflector* CReflectors::find(const std::string& id)
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
 		if (id == (*it)->m_id)
-			if ((*it)->m_timer.isRunning() && (*it)->m_timer.hasExpired()) {
-				LogDebug("Found id %s, but it has expired", id.c_str());
-				return NULL;
-			} else {
-				return *it;
-			}
+			return *it;
 	}
+
+	LogMessage("Trying to find non existent reflector with an id of %s", id.c_str());
 
 	return NULL;
 }
@@ -105,7 +102,9 @@ void CReflectors::clock(unsigned int ms)
 			std::string id   = std::string((char*)(buffer + 4U), 5U);
 			std::string name = std::string((char*)(buffer + 9U), 16U);
 			std::string desc = std::string((char*)(buffer + 25U), 14U);
-			unsigned int cnt = ::atoi((char*)(buffer + 39U));
+			std::string cnt  = std::string((char*)(buffer + 39U), 3U);
+
+			LogDebug("Have YSFS reply from %s/%s/%s/%s", id.c_str(), name.c_str(), desc.c_str(), cnt.c_str());
 
 			for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
 				in_addr      itAddr = (*it)->m_address;
@@ -117,6 +116,7 @@ void CReflectors::clock(unsigned int ms)
 					(*it)->m_desc  = desc;
 					(*it)->m_count = cnt;
 					(*it)->m_timer.start();
+					LogDebug("Updating %s", id.c_str());
 					break;
 				}
 			}

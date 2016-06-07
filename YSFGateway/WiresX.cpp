@@ -19,6 +19,7 @@
 #include "WiresX.h"
 #include "YSFPayload.h"
 #include "YSFFICH.h"
+#include "Utils.h"
 #include "Sync.h"
 #include "CRC.h"
 #include "Log.h"
@@ -40,40 +41,52 @@ const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL       ";
 
-CWiresX::CWiresX(CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
+CWiresX::CWiresX(const std::string& callsign, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
+m_callsign(callsign),
 m_network(network),
 m_reflectors(hostsFile, statusPort),
 m_reflector(NULL),
 m_id(),
 m_name(),
-m_description(),
 m_txFrequency(0U),
 m_rxFrequency(0U),
 m_timer(1000U, 0U, 100U + 750U),
 m_seqNo(0U),
+m_source(NULL),
 m_csd1(NULL),
+m_csd2(NULL),
+m_csd3(NULL),
 m_status(WXSI_NONE)
 {
 	assert(network != NULL);
 	assert(statusPort > 0U);
 
-	m_csd1 = new unsigned char[20U];
+	m_callsign.resize(YSF_CALLSIGN_LENGTH, ' ');
+
+	m_source = new unsigned char[20U];
+	m_csd1   = new unsigned char[20U];
+	m_csd2   = new unsigned char[20U];
+	m_csd3   = new unsigned char[20U];
 }
 
 CWiresX::~CWiresX()
 {
+	delete[] m_csd3;
+	delete[] m_csd2;
 	delete[] m_csd1;
+	delete[] m_source;
 }
 
-void CWiresX::setInfo(const std::string& name, const std::string& description, unsigned int txFrequency, unsigned int rxFrequency)
+void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency)
 {
 	assert(txFrequency > 0U);
 	assert(rxFrequency > 0U);
 
 	m_name        = name;
-	m_description = description;
 	m_txFrequency = txFrequency;
 	m_rxFrequency = rxFrequency;
+
+	m_name.resize(14U, ' ');
 
 	unsigned int hash = 0U;
 
@@ -94,6 +107,20 @@ void CWiresX::setInfo(const std::string& name, const std::string& description, u
 	LogInfo("The ID of this repeater is %s", id);
 
 	m_id = std::string(id);
+
+	::memset(m_csd1, '*', 20U);
+	::memset(m_csd2, ' ', 20U);
+	::memset(m_csd3, ' ', 20U);
+
+	for (unsigned int i = 0U; i < 10U; i++) {
+		m_csd1[i + 10U] = m_callsign.at(i);
+		m_csd2[i + 0U]  = m_callsign.at(i);
+	}
+
+	for (unsigned int i = 0U; i < 5U; i++) {
+		m_csd3[i + 0U]  = m_id.at(i);
+		m_csd3[i + 10U] = m_id.at(i);
+	}
 }
 
 bool CWiresX::start()
@@ -111,19 +138,13 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 	CYSFPayload payload;
 
 	if (fi == YSF_FI_HEADER) {
-		payload.readDataFRModeData1(data, m_csd1);
+		payload.readDataFRModeData1(data, m_source);
 		return WXS_NONE;
 	}
 
 	if (fi == YSF_FI_COMMUNICATIONS && fn == 0U) {
-		if (::memcmp(m_csd1, "                    ", 20U) == 0)
-			payload.readDataFRModeData1(data, m_csd1);
-		return WXS_NONE;
-	}
-
-	if (fi == YSF_FI_TERMINATOR) {
-		if (::memcmp(m_csd1, "                    ", 20U) == 0)
-			payload.readDataFRModeData1(data, m_csd1);
+		if (::memcmp(m_source, "                    ", 20U) == 0)
+			payload.readDataFRModeData1(data, m_source);
 		return WXS_NONE;
 	}
 
@@ -131,7 +152,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 		unsigned char buffer[20U];
 		bool valid = payload.readDataFRModeData2(data, buffer);
 		if (!valid) {
-			::memset(m_csd1, ' ', 20U);
+			::memset(m_source, ' ', 20U);
 			return WXS_NONE;
 		}
 
@@ -147,7 +168,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 			processDisconnect();
 			return WXS_DISCONNECT;
 		} else {
-			::memset(m_csd1, ' ', 20U);
+			::memset(m_source, ' ', 20U);
 			return WXS_NONE;
 		}
 	}
@@ -162,7 +183,7 @@ CYSFReflector* CWiresX::getReflector() const
 
 void CWiresX::processDX()
 {
-	::LogDebug("Received DX from %10.10s", m_csd1 + 10U);
+	::LogDebug("Received DX from %10.10s", m_source + 10U);
 
 	m_status = WXSI_DX;
 	m_timer.start();
@@ -176,7 +197,7 @@ void CWiresX::processAll()
 
 WX_STATUS CWiresX::processConnect(const unsigned char* data)
 {
-	::LogDebug("Received Connect to %5.5s from %10.10s", data + 5U, m_csd1 + 10U);
+	::LogDebug("Received Connect to %5.5s from %10.10s", data + 5U, m_source + 10U);
 
 	std::string id = std::string((char*)(data + 4U), 5U);
 
@@ -192,7 +213,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* data)
 
 void CWiresX::processDisconnect()
 {
-	::LogDebug("Received Disconect from %10.10s", m_csd1 + 10U);
+	::LogDebug("Received Disconect from %10.10s", m_source + 10U);
 
 	m_status = WXSI_DISCONNECT;
 	m_timer.start();
@@ -200,10 +221,10 @@ void CWiresX::processDisconnect()
 
 void CWiresX::clock(unsigned int ms)
 {
+	m_reflectors.clock(ms);
+
 	m_timer.clock(ms);
 	if (m_timer.isRunning() && m_timer.hasExpired()) {
-		LogDebug("Send reply");
-
 		switch (m_status) {
 		case WXSI_DX:
 			sendDXReply();
@@ -250,7 +271,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	CYSFPayload payload;
 	payload.writeDataFRModeData1(m_csd1, buffer + 35U);
-	// payload.writeDataFRModeData2("                   ", buffer + 35U);
+	payload.writeDataFRModeData2(m_csd2, buffer + 35U);
 
 	m_network->write(buffer);
 
@@ -266,11 +287,11 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 				unsigned int len = length - offset;
 				ft = calculateFT(len);
 				payload.writeDataFRModeData1(m_csd1, buffer + 35U);
-				// payload.writeDataFRModeData2("                   ", buffer + 35U);
+				payload.writeDataFRModeData2(m_csd2, buffer + 35U);
 			}
 			break;
 		case 1U:
-			// payload.writeDataFRModeData1("                   ", buffer + 35U);
+			payload.writeDataFRModeData1(m_csd3, buffer + 35U);
 			payload.writeDataFRModeData2(data + offset, buffer + 35U);
 			offset += 20U;
 			break;
@@ -306,7 +327,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	fich.encode(buffer + 35U);
 
 	payload.writeDataFRModeData1(m_csd1, buffer + 35U);
-	// payload.writeDataFRModeData2("                   ", buffer + 35U);
+	payload.writeDataFRModeData2(m_csd2, buffer + 35U);
 
 	m_network->write(buffer);
 }
@@ -335,10 +356,46 @@ void CWiresX::sendDXReply()
 	::memset(data, ' ', 128U);
 
 	data[0U] = m_seqNo;
-	::memcmp(data + 1U, DX_RESP, 4U);
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = DX_RESP[i];
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 5U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 10U] = m_callsign.at(i);
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 20U] = m_name.at(i);
+
+	data[34U] = '1';
+	data[35U] = '2';
+
+	data[57U] = '0';
+	data[58U] = '0';
+	data[59U] = '0';
+
+	unsigned int offset;
+	char sign;
+	if (m_txFrequency >= m_rxFrequency) {
+		offset = m_txFrequency - m_rxFrequency;
+		sign = '-';
+	} else {
+		offset = m_rxFrequency - m_txFrequency;
+		sign = '+';
+	}
+
+	char freq[30U];
+	::sprintf(freq, "%05u.%06u%c%03u.%06u", m_txFrequency / 1000000U, m_txFrequency % 1000000U, sign, offset / 1000000U, offset % 1000000U);
+
+	for (unsigned int i = 0U; i < 23U; i++)
+		data[i + 84U] = freq[i];
 
 	data[127U] = 0x03U;			// End of data marker
 	data[128U] = CCRC::addCRC(data, 128U);
+
+	CUtils::dump(1U, "DX Reply", data, 140U);
 
 	createReply(data, 140U);
 
@@ -347,12 +404,93 @@ void CWiresX::sendDXReply()
 
 void CWiresX::sendConnectReply()
 {
+	assert(m_reflector != NULL);
 
+	unsigned char data[110U];
+	::memset(data, 0x00U, 110U);
+	::memset(data, ' ', 90U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = CONN_RESP[i];
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 5U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 10U] = m_callsign.at(i);
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 20U] = m_name.at(i);
+
+	data[34U] = '1';
+	data[35U] = '5';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 36U] = m_reflector->m_id.at(i);
+
+	for (unsigned int i = 0U; i < 16U; i++)
+		data[i + 41U] = m_reflector->m_name.at(i);
+
+	for (unsigned int i = 0U; i < 3U; i++)
+		data[i + 57U] = m_reflector->m_count.at(i);
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 70U] = m_reflector->m_desc.at(i);
+
+	data[84U] = '0';
+	data[85U] = '0';
+	data[86U] = '0';
+	data[87U] = '0';
+	data[88U] = '0';
+	data[89U] = '0';
+
+	data[90U] = 0x03U;			// End of data marker
+	data[91U] = CCRC::addCRC(data, 91U);
+
+	CUtils::dump(1U, "CONNECT Reply", data, 100U);
+
+	createReply(data, 100U);
+
+	m_seqNo++;
 }
 
 void CWiresX::sendDisconnectReply()
 {
+	unsigned char data[110U];
+	::memset(data, 0x00U, 110U);
+	::memset(data, ' ', 90U);
 
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = DISC_RESP[i];
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 5U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 10U] = m_callsign.at(i);
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 20U] = m_name.at(i);
+
+	data[34U] = '1';
+	data[35U] = '2';
+
+	data[57U] = '0';
+	data[58U] = '0';
+	data[59U] = '0';
+
+	data[89U] = 0x03U;			// End of data marker
+	data[90U] = CCRC::addCRC(data, 90U);
+
+	CUtils::dump(1U, "DISCONNECT Reply", data, 100U);
+
+	createReply(data, 100U);
+
+	m_seqNo++;
 }
 
 void CWiresX::sendAllReply()
