@@ -39,7 +39,7 @@ const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
-const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL       ";
+const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL      ";
 
 CWiresX::CWiresX(const std::string& callsign, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
 m_callsign(callsign),
@@ -52,6 +52,7 @@ m_txFrequency(0U),
 m_rxFrequency(0U),
 m_timer(1000U, 0U, 100U + 750U),
 m_seqNo(0U),
+m_header(NULL),
 m_source(NULL),
 m_csd1(NULL),
 m_csd2(NULL),
@@ -63,6 +64,7 @@ m_status(WXSI_NONE)
 
 	m_callsign.resize(YSF_CALLSIGN_LENGTH, ' ');
 
+	m_header = new unsigned char[34U];
 	m_source = new unsigned char[20U];
 	m_csd1   = new unsigned char[20U];
 	m_csd2   = new unsigned char[20U];
@@ -75,6 +77,7 @@ CWiresX::~CWiresX()
 	delete[] m_csd2;
 	delete[] m_csd1;
 	delete[] m_source;
+	delete[] m_header;
 }
 
 void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency)
@@ -121,6 +124,12 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 		m_csd3[i + 0U]  = m_id.at(i);
 		m_csd3[i + 10U] = m_id.at(i);
 	}
+
+	for (unsigned int i = 0U; i < 34U; i++)
+		m_header[i] = NET_HEADER[i];
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		m_header[i + 14U] = m_callsign.at(i);
 }
 
 bool CWiresX::start()
@@ -257,7 +266,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	// Write the header
 	unsigned char buffer[200U];
-	::memcpy(buffer, NET_HEADER, 34U);
+	::memcpy(buffer, m_header, 34U);
 	buffer[34U] = 0x00U;
 
 	CSync::add(buffer + 35U);

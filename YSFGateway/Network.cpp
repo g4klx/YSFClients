@@ -134,15 +134,12 @@ void CNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (address.s_addr != m_address.s_addr || port != m_port) {
-		LogDebug("Addr: %u != %u || Port: %u != %u", address.s_addr, m_address.s_addr, port, m_port);
-		CUtils::dump("Data from unknown address/port", buffer, length);
+	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
-	}
 
 	// Handle incoming polls
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {
-		// XXX How to handle lost polls?
+		writePoll();
 		return;
 	}
 

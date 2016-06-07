@@ -65,6 +65,7 @@ private:
 	unsigned int   m_rxFrequency;
 	CTimer         m_timer;
 	unsigned char  m_seqNo;
+	unsigned char* m_header;
 	unsigned char* m_source;
 	unsigned char* m_csd1;
 	unsigned char* m_csd2;

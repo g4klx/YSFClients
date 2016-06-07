@@ -52,10 +52,14 @@ bool CReflectors::load()
 	std::vector<CYSFHost*>& hostList = hosts.list();
 
 	for (std::vector<CYSFHost*>::const_iterator it = hostList.begin(); it != hostList.end(); ++it) {
-		CYSFReflector* reflector = new CYSFReflector;
-		reflector->m_address = CUDPSocket::lookup((*it)->m_address);
-		reflector->m_port    = (*it)->m_port;
-		m_reflectors.push_back(reflector);
+		in_addr address = CUDPSocket::lookup((*it)->m_address);
+
+		if (address.s_addr != INADDR_NONE) {
+			CYSFReflector* reflector = new CYSFReflector;
+			reflector->m_address = address;
+			reflector->m_port    = (*it)->m_port;
+			m_reflectors.push_back(reflector);
+		}
 	}
 
 	m_it = m_reflectors.begin();
