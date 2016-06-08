@@ -229,7 +229,30 @@ void CGPS::transmitGPS(const unsigned char* source)
 	float longitude = lon_deg + ((lon_min + ((float)lon_min_frac * 0.01F)) * (1.0F / 60.0F));
 	longitude *= lon_dir;
 
-	LogMessage("GPS Position of lat=%f long=%f", latitude, longitude);
+	char radio[10U];
+
+	switch (m_buffer[4U]) {
+	case 0x24U:
+		::strcpy(radio, "FT-1");
+		break;
+	case 0x25U:
+		::strcpy(radio, "FTM-400");
+		break;
+	case 0x26U:
+		::strcpy(radio, "DR-1X");
+		break;
+	case 0x28U:
+		::strcpy(radio, "FT-2");
+		break;
+	case 0x29U:
+		::strcpy(radio, "FTM-100");
+		break;
+	default:
+		::sprintf(radio, "0x%02X", m_buffer[4U]);
+		break;
+	}
+
+	LogMessage("GPS Position of radio=%s lat=%f long=%f", radio, latitude, longitude);
 
 	m_sent = true;
 }
