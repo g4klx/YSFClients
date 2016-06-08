@@ -104,7 +104,7 @@ void CAPRSWriterThread::entry()
 
 				if (!m_connected){
 					LogError("Reconnect attempt to the APRS server has failed");
-					Sleep(10000UL);		// 10 secs
+					sleep(10000UL);		// 10 secs
 				}
 			}
 
