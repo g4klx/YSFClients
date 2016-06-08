@@ -78,7 +78,8 @@ m_conf(configFile),
 m_gps(NULL),
 m_wiresX(NULL),
 m_netNetwork(NULL),
-m_linked(false)
+m_linked(false),
+m_exclude(false)
 {
 }
 
@@ -223,6 +224,9 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 				unsigned char fn = fich.getFN();
 
+				// Don't send out control data
+				m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+
 				if (m_wiresX != NULL) {
 					WX_STATUS status = m_wiresX->process(buffer + 35U, fi, dt, fn);
 					switch (status) {
@@ -247,14 +251,15 @@ int CYSFGateway::run()
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn);
 			}
 
+			if (networkEnabled && m_linked && !m_exclude)
+				m_netNetwork->write(buffer);
+
 			if (buffer[34U] == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
 				watchdogTimer.stop();
+				m_exclude = false;
 			}
-
-			if (networkEnabled && m_linked)
-				m_netNetwork->write(buffer);
 		}
 
 		len = m_netNetwork->read(buffer);
@@ -279,6 +284,7 @@ int CYSFGateway::run()
 			if (m_gps != NULL)
 				m_gps->reset();
 			watchdogTimer.stop();
+			m_exclude = false;
 		}
 
 		if (ms < 5U)

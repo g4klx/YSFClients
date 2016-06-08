@@ -40,6 +40,7 @@ private:
 	CWiresX*  m_wiresX;
 	CNetwork* m_netNetwork;
 	bool      m_linked;
+	bool      m_exclude;
 
 	void createGPS();
 };
