@@ -50,7 +50,7 @@ m_id(),
 m_name(),
 m_txFrequency(0U),
 m_rxFrequency(0U),
-m_timer(1000U, 0U, 100U + 750U),
+m_timer(1000U, 1U),
 m_seqNo(0U),
 m_header(NULL),
 m_source(NULL),
@@ -122,7 +122,7 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 
 	for (unsigned int i = 0U; i < 5U; i++) {
 		m_csd3[i + 0U]  = m_id.at(i);
-		m_csd3[i + 10U] = m_id.at(i);
+		m_csd3[i + 15U] = m_id.at(i);
 	}
 
 	for (unsigned int i = 0U; i < 34U; i++)
@@ -455,10 +455,9 @@ void CWiresX::sendConnectReply()
 	data[86U] = '0';
 	data[87U] = '0';
 	data[88U] = '0';
-	data[89U] = '0';
 
-	data[90U] = 0x03U;			// End of data marker
-	data[91U] = CCRC::addCRC(data, 91U);
+	data[89U] = 0x03U;			// End of data marker
+	data[90U] = CCRC::addCRC(data, 90U);
 
 	CUtils::dump(1U, "CONNECT Reply", data, 100U);
 
