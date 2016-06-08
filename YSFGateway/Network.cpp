@@ -139,7 +139,7 @@ void CNetwork::clock(unsigned int ms)
 
 	// Handle incoming polls
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {
-		writePoll();
+		// How do we handle a loss of polls?
 		return;
 	}
 
