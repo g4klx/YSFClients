@@ -22,6 +22,7 @@
 
 #include <cstdio>
 #include <cassert>
+#include <cstring>
 
 #if defined(_WIN32) || defined(_WIN64)
 typedef int ssize_t;
