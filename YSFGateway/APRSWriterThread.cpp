@@ -110,7 +110,7 @@ void CAPRSWriterThread::entry()
 
 			if (m_connected) {
 				if (!m_queue.isEmpty()){
-					char* p;
+					char* p = NULL;
 					m_queue.getData(&p, 1U);
 
 					LogMessage("APRS ==> %s", p);
@@ -151,7 +151,7 @@ void CAPRSWriterThread::entry()
 			m_socket.close();
 
 		while (!m_queue.isEmpty()) {
-			char* p;
+			char* p = NULL;
 			m_queue.getData(&p, 1U);
 			delete[] p;
 		}
