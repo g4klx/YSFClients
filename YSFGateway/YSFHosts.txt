@@ -12,3 +12,5 @@ ysf.hamlabs.no						42000
 c4fm.spain-dmr.es					42000
 ysfreflector.dvswitch.org	42000
 c4fm.from-ct.com					43000
+c4fm-it.selfip.com        42000
+c4fm-mi5.kb8zgl.net       42000
