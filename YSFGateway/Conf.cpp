@@ -118,9 +118,9 @@ bool CConf::read()
 			m_rptAddress = value;
 		else if (::strcmp(key, "RptPort") == 0)
 			m_rptPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "MyAddress") == 0)
+		else if (::strcmp(key, "LocalAddress") == 0)
 			m_myAddress = value;
-		else if (::strcmp(key, "MyPort") == 0)
+		else if (::strcmp(key, "LocalPort") == 0)
 			m_myPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Daemon") == 0)
 			m_daemon = ::atoi(value) == 1;
