@@ -57,6 +57,7 @@ public:
 
 private:
 	std::string    m_callsign;
+	std::string    m_node;
 	CNetwork*      m_network;
 	CReflectors    m_reflectors;
 	CYSFReflector* m_reflector;

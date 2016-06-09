@@ -29,8 +29,8 @@ typedef void (*ReadAPRSFrameCallback)(const std::string&);
 
 class CAPRSWriterThread : public CThread {
 public:
-	CAPRSWriterThread(const std::string& callsign, const std::string& address, const std::string& hostname, unsigned int port);
-	CAPRSWriterThread(const std::string& callsign, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName);
+	CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port);
+	CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName);
 	virtual ~CAPRSWriterThread();
 
 	virtual bool start();
@@ -47,6 +47,7 @@ public:
 
 private:
 	std::string            m_username;
+	std::string            m_password;
 	std::string	           m_ssid;
 	CTCPSocket             m_socket;
 	CRingBuffer<char*>     m_queue;
@@ -57,7 +58,6 @@ private:
 	std::string            m_clientName;
 
 	bool connect();
-	unsigned int getAPRSPassword(std::string username) const;
 };
 
 #endif

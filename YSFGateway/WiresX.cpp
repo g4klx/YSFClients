@@ -44,6 +44,7 @@ const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL      ";
 
 CWiresX::CWiresX(const std::string& callsign, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
 m_callsign(callsign),
+m_node(),
 m_network(network),
 m_reflectors(hostsFile, statusPort),
 m_reflector(NULL),
@@ -64,6 +65,10 @@ m_search()
 {
 	assert(network != NULL);
 	assert(statusPort > 0U);
+
+	m_node = callsign;
+	m_node.append("-ND");
+	m_node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	m_callsign.resize(YSF_CALLSIGN_LENGTH, ' ');
 
@@ -118,10 +123,11 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 	::memset(m_csd2, ' ', 20U);
 	::memset(m_csd3, ' ', 20U);
 
-	for (unsigned int i = 0U; i < 10U; i++) {
-		m_csd1[i + 10U] = m_callsign.at(i);
-		m_csd2[i + 0U]  = m_callsign.at(i);
-	}
+	for (unsigned int i = 0U; i < 10U; i++)
+		m_csd1[i + 10U] = m_node.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		m_csd2[i + 0U] = m_callsign.at(i);
 
 	for (unsigned int i = 0U; i < 5U; i++) {
 		m_csd3[i + 0U]  = m_id.at(i);
@@ -132,7 +138,7 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 		m_header[i] = NET_HEADER[i];
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		m_header[i + 14U] = m_callsign.at(i);
+		m_header[i + 14U] = m_node.at(i);
 }
 
 bool CWiresX::start()
@@ -409,7 +415,7 @@ void CWiresX::sendDXReply()
 		data[i + 5U] = m_id.at(i);
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		data[i + 10U] = m_callsign.at(i);
+		data[i + 10U] = m_node.at(i);
 
 	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 20U] = m_name.at(i);
@@ -464,7 +470,7 @@ void CWiresX::sendConnectReply()
 		data[i + 5U] = m_id.at(i);
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		data[i + 10U] = m_callsign.at(i);
+		data[i + 10U] = m_node.at(i);
 
 	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 20U] = m_name.at(i);
@@ -515,7 +521,7 @@ void CWiresX::sendDisconnectReply()
 		data[i + 5U] = m_id.at(i);
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		data[i + 10U] = m_callsign.at(i);
+		data[i + 10U] = m_node.at(i);
 
 	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 20U] = m_name.at(i);
@@ -556,7 +562,7 @@ void CWiresX::sendAllReply()
 		data[i + 7U] = m_id.at(i);
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		data[i + 12U] = m_callsign.at(i);
+		data[i + 12U] = m_node.at(i);
 
 	unsigned int total = curr.size();
 	if (total > 999U) total = 999U;
@@ -625,7 +631,7 @@ void CWiresX::sendSearchReply()
 		data[i + 7U] = m_id.at(i);
 
 	for (unsigned int i = 0U; i < 10U; i++)
-		data[i + 12U] = m_callsign.at(i);
+		data[i + 12U] = m_node.at(i);
 
 	unsigned int total = curr.size();
 	if (total > 999U) total = 999U;

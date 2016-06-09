@@ -33,9 +33,10 @@ const unsigned int CALLSIGN_LENGTH = 8U;
 
 const unsigned int APRS_TIMEOUT = 10U;
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& address, const std::string& hostname, unsigned int port) :
+CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
 CThread(),
 m_username(callsign),
+m_password(password),
 m_ssid(callsign),
 m_socket(hostname, port, address),
 m_queue(20U, "APRS Queue"),
@@ -46,6 +47,7 @@ m_filter(),
 m_clientName("YSFGateway")
 {
 	assert(!callsign.empty());
+	assert(!password.empty());
 	assert(!hostname.empty());
 	assert(port > 0U);
 
@@ -56,9 +58,10 @@ m_clientName("YSFGateway")
 	m_ssid = m_ssid.substr(CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
 CThread(),
 m_username(callsign),
+m_password(password),
 m_ssid(callsign),
 m_socket(hostname, port, address),
 m_queue(20U, "APRS Queue"),
@@ -69,6 +72,7 @@ m_filter(filter),
 m_clientName(clientName)
 {
 	assert(!callsign.empty());
+	assert(!password.empty());
 	assert(!hostname.empty());
 	assert(port > 0U);
 
@@ -200,8 +204,6 @@ void CAPRSWriterThread::stop()
 
 bool CAPRSWriterThread::connect()
 {
-	unsigned int password = getAPRSPassword(m_username);
-
 	bool ret = m_socket.open();
 	if (!ret)
 		return false;
@@ -223,7 +225,7 @@ bool CAPRSWriterThread::connect()
 		filter.insert(0U, " filter ");
 
 	char connectString[200U];
-	::sprintf(connectString, "user %s-%s pass %u vers %s%s\n", m_username.c_str(), m_ssid.c_str(), password, (m_clientName.length() ? m_clientName : "YSFGateway").c_str(), filter.c_str());
+	::sprintf(connectString, "user %s-%s pass %s vers %s%s\n", m_username.c_str(), m_ssid.c_str(), m_password.c_str(), (m_clientName.length() ? m_clientName : "YSFGateway").c_str(), filter.c_str());
 
 	ret = m_socket.writeLine(std::string(connectString));
 	if (!ret) {
@@ -249,19 +251,4 @@ bool CAPRSWriterThread::connect()
 	LogMessage("Connected to the APRS server");
 
 	return true;
-}
-
-unsigned int CAPRSWriterThread::getAPRSPassword(std::string callsign) const
-{
-	unsigned int len = callsign.length();
-
-	uint16_t hash = 0x73E2U;
-
-	for (unsigned int i = 0U; i < len; i += 2U) {
-		hash ^= (char)callsign.at(i) << 8;
-		if (i + 1 < len)
-			hash ^= (char)callsign.at(i + 1);
-	}
-
-	return hash & 0x7FFFU;
 }
