@@ -50,7 +50,7 @@ m_id(),
 m_name(),
 m_txFrequency(0U),
 m_rxFrequency(0U),
-m_timer(1000U, 1U),
+m_timer(1000U, 2U),
 m_seqNo(0U),
 m_header(NULL),
 m_source(NULL),
@@ -303,9 +303,18 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 			break;
 		case 1U:
 			payload.writeDataFRModeData1(m_csd3, buffer + 35U);
-			payload.writeDataFRModeData2(data + offset, buffer + 35U);
-			offset += 20U;
-			break;
+			if (bn == 0U) {
+				payload.writeDataFRModeData2(data + offset, buffer + 35U);
+				offset += 20U;
+			} else {
+				// All subsequent entries start with 0x00U
+				unsigned char buffer[20U];
+				::memcpy(buffer + 1U, data + offset, 19U);
+				buffer[0U] = 0x00U;
+				payload.writeDataFRModeData2(buffer, buffer + 35U);
+				offset += 19U;
+			}
+			break				;
 		default:
 			payload.writeDataFRModeData1(data + offset, buffer + 35U);
 			offset += 20U;

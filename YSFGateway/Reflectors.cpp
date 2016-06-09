@@ -20,9 +20,11 @@
 #include "Hosts.h"
 #include "Log.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cassert>
 #include <cstring>
+#include <cctype>
 
 CReflectors::CReflectors(const std::string& hostsFile, unsigned int statusPort) :
 m_hostsFile(hostsFile),
@@ -30,13 +32,15 @@ m_socket(statusPort),
 m_reflectors(),
 m_it(),
 m_current(),
-m_timer(1000U, 60U)
+m_timer(1000U, 15U)
 {
 	assert(statusPort > 0U);
 }
 
 CReflectors::~CReflectors()
 {
+	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
+		delete *it;
 }
 
 bool CReflectors::load()
@@ -82,14 +86,33 @@ CYSFReflector* CReflectors::find(const std::string& id)
 	return NULL;
 }
 
+static int refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
+{
+	assert(r1 != NULL);
+	assert(r2 != NULL);
+
+	std::string name1 = r1->m_name;
+	std::string name2 = r2->m_name;
+
+	for (unsigned int i = 0U; i < name1.size() && i < name2.size(); i++) {
+		int c = ::toupper(name1.at(i)) - ::toupper(name2.at(i));
+		if (c != 0)
+			return c;
+	}
+
+	return int(name1.size()) - int(name2.size());
+}
+
 std::vector<CYSFReflector*>& CReflectors::current()
 {
 	m_current.clear();
 
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
-		if ((*it)->m_timer.isRunning())
+		if ((*it)->m_seen)
 			m_current.push_back(*it);
 	}
+
+	std::sort(m_current.begin(), m_current.end(), ::refComparison);
 
 	return m_current;
 }
@@ -121,7 +144,7 @@ void CReflectors::clock(unsigned int ms)
 			std::string desc = std::string((char*)(buffer + 25U), 14U);
 			std::string cnt  = std::string((char*)(buffer + 39U), 3U);
 
-			LogDebug("Have YSFS reply from %s/%s/%s/%s", id.c_str(), name.c_str(), desc.c_str(), cnt.c_str());
+			LogDebug("Have reflector status reply from %s/%s/%s/%s", id.c_str(), name.c_str(), desc.c_str(), cnt.c_str());
 
 			for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
 				in_addr      itAddr = (*it)->m_address;
@@ -132,14 +155,10 @@ void CReflectors::clock(unsigned int ms)
 					(*it)->m_name  = name;
 					(*it)->m_desc  = desc;
 					(*it)->m_count = cnt;
-					(*it)->m_timer.start();
-					LogDebug("Updating %s", id.c_str());
+					(*it)->m_seen  = true;
 					break;
 				}
 			}
 		}
 	}
-
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
-		(*it)->m_timer.clock(ms);
 }
