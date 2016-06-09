@@ -87,7 +87,7 @@ std::vector<CYSFReflector*>& CReflectors::current()
 	m_current.clear();
 
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
-		if ((*it)->m_timer.isRunning() && !(*it)->m_timer.hasExpired())
+		// if ((*it)->m_timer.isRunning() && !(*it)->m_timer.hasExpired())
 			m_current.push_back(*it);
 	}
 
