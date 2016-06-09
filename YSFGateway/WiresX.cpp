@@ -26,6 +26,7 @@
 
 #include <cstdio>
 #include <cassert>
+#include <cstdlib>
 
 const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
@@ -57,7 +58,9 @@ m_source(NULL),
 m_csd1(NULL),
 m_csd2(NULL),
 m_csd3(NULL),
-m_status(WXSI_NONE)
+m_status(WXSI_NONE),
+m_start(0U),
+m_search()
 {
 	assert(network != NULL);
 	assert(statusPort > 0U);
@@ -169,7 +172,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned
 			processDX();
 			return WXS_NONE;
 		} else if (::memcmp(buffer + 1U, ALL_REQ, 3U) == 0) {
-			processAll();
+			processAll(buffer + 5U);
 			return WXS_NONE;
 		} else if (::memcmp(buffer + 1U, CONN_REQ, 3U) == 0) {
 			return processConnect(buffer + 5U);
@@ -198,12 +201,31 @@ void CWiresX::processDX()
 	m_timer.start();
 }
 
-void CWiresX::processAll()
+void CWiresX::processAll(const unsigned char* data)
 {
-	::LogDebug("Received ALL from %10.10s", m_source + 10U);
+	if (data[0U] == '0' && data[1] == '1') {
+		::LogDebug("Received ALL for \"%3.3s\" from %10.10s", data + 2U, m_source + 10U);
 
-	m_status = WXSI_ALL;
-	m_timer.start();
+		char buffer[4U];
+		::memcpy(buffer, data + 2U, 3U);
+		buffer[3U] = 0x00U;
+
+		m_start = ::atoi(buffer);
+		if (m_start > 0U)
+			m_start--;
+
+		m_status = WXSI_ALL;
+
+		m_timer.start();
+	} else if (data[0U] == '1' && data[1U] == '1') {
+		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, m_source + 10U);
+
+		m_search = std::string((char*)(data + 5U), 16U);
+
+		m_status = WXSI_SEARCH;
+
+		m_timer.start();
+	}
 }
 
 WX_STATUS CWiresX::processConnect(const unsigned char* data)
@@ -242,6 +264,9 @@ void CWiresX::clock(unsigned int ms)
 			break;
 		case WXSI_ALL:
 			sendAllReply();
+			break;
+		case WXSI_SEARCH:
+			sendSearchReply();
 			break;
 		case WXSI_CONNECT:
 			sendConnectReply();
@@ -308,13 +333,13 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 				offset += 20U;
 			} else {
 				// All subsequent entries start with 0x00U
-				unsigned char buffer[20U];
-				::memcpy(buffer + 1U, data + offset, 19U);
-				buffer[0U] = 0x00U;
-				payload.writeDataFRModeData2(buffer, buffer + 35U);
+				unsigned char temp[20U];
+				::memcpy(temp + 1U, data + offset, 19U);
+				temp[0U] = 0x00U;
+				payload.writeDataFRModeData2(temp, buffer + 35U);
 				offset += 19U;
 			}
-			break				;
+			break;
 		default:
 			payload.writeDataFRModeData1(data + offset, buffer + 35U);
 			offset += 20U;
@@ -536,7 +561,7 @@ void CWiresX::sendAllReply()
 	unsigned int total = curr.size();
 	if (total > 999U) total = 999U;
 
-	unsigned int n = curr.size();
+	unsigned int n = curr.size() - m_start;
 	if (n > 20U) n = 20U;
 
 	::sprintf((char*)(data + 22U), "%03u%03u", n, total);
@@ -545,7 +570,7 @@ void CWiresX::sendAllReply()
 
 	unsigned int offset = 29U;
 	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
-		CYSFReflector* refl = curr.at(j);
+		CYSFReflector* refl = curr.at(j + m_start);
 
 		data[offset + 0U] = '5';
 
@@ -574,6 +599,75 @@ void CWiresX::sendAllReply()
 	if ((blocks % 20U) > 0U) blocks++;
 
 	CUtils::dump(1U, "ALL Reply", data, blocks * 20U);
+
+	createReply(data, blocks * 20U);
+
+	m_seqNo++;
+}
+
+// XXX This is wrong
+void CWiresX::sendSearchReply()
+{
+	std::vector<CYSFReflector*>& curr = m_reflectors.current();
+
+	unsigned char data[1100U];
+	::memset(data, 0x00U, 1100U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = ALL_RESP[i];
+
+	data[5U] = '1';
+	data[6U] = '1';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 7U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 12U] = m_callsign.at(i);
+
+	unsigned int total = curr.size();
+	if (total > 999U) total = 999U;
+
+	unsigned int n = curr.size() - m_start;
+	if (n > 20U) n = 20U;
+
+	::sprintf((char*)(data + 22U), "%03u%03u", n, total);
+
+	data[28U] = 0x0DU;
+
+	unsigned int offset = 29U;
+	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
+		CYSFReflector* refl = curr.at(j + m_start);
+
+		data[offset + 0U] = '5';
+
+		for (unsigned int i = 0U; i < 5U; i++)
+			data[i + offset + 1U] = refl->m_id.at(i);
+
+		for (unsigned int i = 0U; i < 16U; i++)
+			data[i + offset + 6U] = refl->m_name.at(i);
+
+		for (unsigned int i = 0U; i < 3U; i++)
+			data[i + offset + 22U] = refl->m_count.at(i);
+
+		for (unsigned int i = 0U; i < 10U; i++)
+			data[i + offset + 25U] = ' ';
+
+		for (unsigned int i = 0U; i < 14U; i++)
+			data[i + offset + 35U] = refl->m_desc.at(i);
+
+		data[offset + 49U] = 0x0DU;
+	}
+
+	data[offset + 0U] = 0x03U;			// End of data marker
+	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
+
+	unsigned int blocks = (offset + 1U) / 20U;
+	if ((blocks % 20U) > 0U) blocks++;
+
+	CUtils::dump(1U, "SEARCH Reply", data, blocks * 20U);
 
 	createReply(data, blocks * 20U);
 

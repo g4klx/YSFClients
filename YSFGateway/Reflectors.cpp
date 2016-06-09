@@ -86,7 +86,7 @@ CYSFReflector* CReflectors::find(const std::string& id)
 	return NULL;
 }
 
-static int refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
+static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 {
 	assert(r1 != NULL);
 	assert(r2 != NULL);
@@ -94,13 +94,13 @@ static int refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 	std::string name1 = r1->m_name;
 	std::string name2 = r2->m_name;
 
-	for (unsigned int i = 0U; i < name1.size() && i < name2.size(); i++) {
+	for (unsigned int i = 0U; i < 16U; i++) {
 		int c = ::toupper(name1.at(i)) - ::toupper(name2.at(i));
 		if (c != 0)
-			return c;
+			return c < 0;
 	}
 
-	return int(name1.size()) - int(name2.size());
+	return false;
 }
 
 std::vector<CYSFReflector*>& CReflectors::current()
@@ -112,13 +112,17 @@ std::vector<CYSFReflector*>& CReflectors::current()
 			m_current.push_back(*it);
 	}
 
-	std::sort(m_current.begin(), m_current.end(), ::refComparison);
+	std::sort(m_current.begin(), m_current.end(), refComparison);
 
 	return m_current;
 }
 
 void CReflectors::clock(unsigned int ms)
 {
+	// Nothing to do, avoid crashes
+	if (m_reflectors.size() == 0U)
+		return;
+
 	m_timer.clock(ms);
 	if (m_timer.isRunning() && m_timer.hasExpired()) {
 		m_socket.write((unsigned char*)"YSFS", 4U, (*m_it)->m_address, (*m_it)->m_port);

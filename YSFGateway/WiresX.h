@@ -36,7 +36,8 @@ enum WXSI_STATUS {
 	WXSI_DX,
 	WXSI_CONNECT,
 	WXSI_DISCONNECT,
-	WXSI_ALL
+	WXSI_ALL,
+	WXSI_SEARCH
 };
 
 class CWiresX {
@@ -71,16 +72,19 @@ private:
 	unsigned char* m_csd2;
 	unsigned char* m_csd3;
 	WXSI_STATUS    m_status;
+	unsigned int   m_start;
+	std::string    m_search;
 
 	WX_STATUS processConnect(const unsigned char* data);
 	void processDisconnect();
 	void processDX();
-	void processAll();
+	void processAll(const unsigned char* data);
 
 	void sendDXReply();
 	void sendConnectReply();
 	void sendDisconnectReply();
 	void sendAllReply();
+	void sendSearchReply();
 
 	void createReply(const unsigned char* data, unsigned int length);
 	unsigned char calculateFT(unsigned int length) const;
