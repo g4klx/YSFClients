@@ -82,7 +82,7 @@ void CYSFParrot::run()
 			parrot.write(buffer);
 			watchdogTimer.start();
 
-			if (buffer[34U] == 0x01U) {
+			if ((buffer[34U] & 0x01U) == 0x01U) {
 				::fprintf(stdout, "Received end of transmission\n");
 				turnaroundTimer.start();
 				watchdogTimer.stop();

@@ -254,7 +254,7 @@ int CYSFGateway::run()
 			if (networkEnabled && m_linked && !m_exclude)
 				m_netNetwork->write(buffer);
 
-			if (buffer[34U] == 0x01U) {
+			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
 				watchdogTimer.stop();

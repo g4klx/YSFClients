@@ -226,7 +226,7 @@ void CYSFReflector::run()
 					}
 				}
 
-				if (buffer[34U] == 0x01U) {
+				if ((buffer[34U] & 0x01U) == 0x01U) {
 					LogMessage("Received end of transmission");
 					watchdogTimer.stop();
 				}
