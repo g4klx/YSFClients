@@ -161,7 +161,7 @@ int CYSFGateway::run()
 
 	std::string callsign = m_conf.getCallsign();
 
-	bool debug = m_conf.getNetworkDebug();
+	bool debug            = m_conf.getNetworkDebug();
 	in_addr rptAddress    = CUDPSocket::lookup(m_conf.getRptAddress());
 	unsigned int rptPort  = m_conf.getRptPort();
 	std::string myAddress = m_conf.getMyAddress();
@@ -188,11 +188,11 @@ int CYSFGateway::run()
 	bool networkEnabled = m_conf.getNetworkEnabled();
 	if (networkEnabled) {
 		std::string fileName = m_conf.getNetworkHosts();
-		unsigned int port = m_conf.getNetworkStatusPort();
+		unsigned int port    = m_conf.getNetworkStatusPort();
 
 		m_wiresX = new CWiresX(callsign, &rptNetwork, fileName, port);
 
-		std::string name = m_conf.getName();
+		std::string name         = m_conf.getName();
 		unsigned int txFrequency = m_conf.getTxFrequency();
 		unsigned int rxFrequency = m_conf.getRxFrequency();
 
@@ -213,8 +213,7 @@ int CYSFGateway::run()
 	for (;;) {
 		unsigned char buffer[200U];
 
-		unsigned int len = rptNetwork.read(buffer);
-		if (len > 0U) {
+		while (rptNetwork.read(buffer) > 0U) {
 			watchdogTimer.start();
 
 			CYSFFICH fich;
@@ -262,8 +261,7 @@ int CYSFGateway::run()
 			}
 		}
 
-		len = m_netNetwork->read(buffer);
-		if (len > 0U) {
+		while (m_netNetwork->read(buffer) > 0U) {
 			if (networkEnabled && m_linked)
 				rptNetwork.write(buffer);
 		}
