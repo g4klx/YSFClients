@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="APRSWriter.h" />
     <ClInclude Include="APRSWriterThread.h" />
     <ClInclude Include="Conf.h" />
     <ClInclude Include="CRC.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="YSFPayload.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="APRSWriter.cpp" />
     <ClCompile Include="APRSWriterThread.cpp" />
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="CRC.cpp" />

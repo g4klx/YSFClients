@@ -1,0 +1,276 @@
+/*
+ *   Copyright (C) 2010-2014,2016 by Jonathan Naylor G4KLX
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include "APRSWriter.h"
+
+#include "YSFDefines.h"
+
+#include <cstdio>
+#include <cassert>
+#include <cstring>
+#include <ctime>
+
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port) :
+m_thread(NULL),
+m_enabled(false),
+m_idTimer(1000U, 20U * 60U),		// 20 minutes
+m_callsign(),
+m_txFrequency(0U),
+m_rxFrequency(0U),
+m_latitude(0.0F),
+m_longitude(0.0F),
+m_height(0),
+m_band()
+{
+	assert(!callsign.empty());
+	assert(!password.empty());
+	assert(!address.empty());
+	assert(port > 0U);
+
+	m_thread = new CAPRSWriterThread(callsign, password, address, port);
+}
+
+CAPRSWriter::~CAPRSWriter()
+{
+}
+
+void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
+{
+	m_txFrequency = txFrequency;
+	m_rxFrequency = rxFrequency;
+	m_latitude    = latitude;
+	m_longitude   = longitude;
+	m_height      = height;
+
+	if (txFrequency >= 1200000000U)
+		m_band = "A";
+	else if (txFrequency >= 420000000U)
+		m_band = "B";
+	else if (txFrequency >= 144000000U)
+		m_band = "C";
+	else if (txFrequency >= 50000000U)
+		m_band = "D";
+	else if (txFrequency >= 28000000U)
+		m_band = "D";
+}
+
+bool CAPRSWriter::open()
+{
+	return m_thread->start();
+}
+
+void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned char radio, float fLatitude, float fLongitude)
+{
+	assert(source != NULL);
+	assert(type != NULL);
+
+	char callsign[11U];
+	::memcpy(callsign, source, YSF_CALLSIGN_LENGTH);
+	callsign[YSF_CALLSIGN_LENGTH] = 0x00U;
+
+	char* p = ::strchr(callsign, ' ');
+	if (p != NULL)
+		*p = 0x00U;
+
+	p = ::strchr(callsign, '/');
+	if (p != NULL)
+		*p = 0x00U;
+
+	double tempLat = ::fabs(fLatitude);
+	double tempLong = ::fabs(fLongitude);
+
+	double latitude = ::floor(tempLat);
+	double longitude = ::floor(tempLong);
+
+	latitude = (tempLat - latitude)  * 60.0 + latitude  * 100.0;
+	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
+
+	char lat[20U];
+	if (latitude >= 1000.0F)
+		::sprintf(lat, "%.2lf", latitude);
+	else if (latitude >= 100.0F)
+		::sprintf(lat, "0%.2lf", latitude);
+	else if (latitude >= 10.0F)
+		::sprintf(lat, "00%.2lf", latitude);
+	else
+		::sprintf(lat, "000%.2lf", latitude);
+
+	char lon[20U];
+	if (longitude >= 10000.0F)
+		::sprintf(lon, "%.2lf", longitude);
+	else if (longitude >= 1000.0F)
+		::sprintf(lon, "0%.2lf", longitude);
+	else if (longitude >= 100.0F)
+		::sprintf(lon, "00%.2lf", longitude);
+	else if (longitude >= 10.0F)
+		::sprintf(lon, "000%.2lf", longitude);
+	else
+		::sprintf(lon, "0000%.2lf", longitude);
+
+	// Convert commas to periods in the latitude, longitude and frequencies
+	p = ::strchr(lat, ',');
+	if (p != NULL)
+		*p = '.';
+
+	p = ::strchr(lon, ',');
+	if (p != NULL)
+		*p = '.';
+
+	char symbol;
+	switch (radio) {
+	case 0x24U:
+	case 0x28U:
+		symbol = '[';
+		break;
+	case 0x25U:
+	case 0x29U:
+		symbol = '>';
+		break;
+	case 0x26U:
+		symbol = 'r';
+		break;
+	default:
+		symbol = '-';
+		break;
+	}
+
+	char output[300U];
+	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s-%s:!%s%c/%s%c%c %s via MMDVM",
+		callsign, m_callsign.c_str(), m_band.c_str(),
+		lat, (fLatitude < 0.0F) ? 'S' : 'N',
+		lon, (fLongitude < 0.0F) ? 'W' : 'E',
+		symbol, type);
+
+	m_thread->write(output);
+}
+
+void CAPRSWriter::clock(unsigned int ms)
+{
+	m_idTimer.clock(ms);
+
+	if (m_idTimer.hasExpired()) {
+		sendIdFrames();
+		m_idTimer.start();
+	}
+}
+
+void CAPRSWriter::close()
+{
+	m_thread->stop();
+}
+
+void CAPRSWriter::sendIdFrames()
+{
+	if (!m_thread->isConnected())
+		return;
+
+	time_t now;
+	::time(&now);
+	struct tm* tm = ::gmtime(&now);
+
+	// Default values aren't passed on
+	if (m_latitude == 0.0F && m_longitude == 0.0F)
+		return;
+
+	char desc[100U];
+	if (m_txFrequency != 0U) {
+		float offset = float(int(m_rxFrequency) - int(m_txFrequency)) / 1000000.0F;
+		::sprintf(desc, "MMDVM Voice %.5lfMHz %c%.4lfMHz",
+			float(m_txFrequency) / 1000000.0F,
+			offset < 0.0F ? '-' : '+',
+			::fabs(offset));
+	} else {
+		::strcpy(desc, "MMDVM Voice");
+	}
+
+	char* band;
+	if (m_txFrequency >= 1200000000U)
+		band = "1.2";
+	else if (m_txFrequency >= 420000000U)
+		band = "440";
+	else if (m_txFrequency >= 144000000U)
+		band = "2m";
+	else if (m_txFrequency >= 50000000U)
+		band = "6m";
+	else if (m_txFrequency >= 28000000U)
+		band = "10m";
+
+	double tempLat  = ::fabs(m_latitude);
+	double tempLong = ::fabs(m_longitude);
+
+	double latitude  = ::floor(tempLat);
+	double longitude = ::floor(tempLong);
+
+	latitude  = (tempLat  - latitude)  * 60.0 + latitude  * 100.0;
+	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
+
+	char lat[20U];
+	if (latitude >= 1000.0F)
+		::sprintf(lat, "%.2lf", latitude);
+	else if (latitude >= 100.0F)
+		::sprintf(lat, "0%.2lf", latitude);
+	else if (latitude >= 10.0F)
+		::sprintf(lat, "00%.2lf", latitude);
+	else
+		::sprintf(lat, "000%.2lf", latitude);
+
+	char lon[20U];
+	if (longitude >= 10000.0F)
+		::sprintf(lon, "%.2lf", longitude);
+	else if (longitude >= 1000.0F)
+		::sprintf(lon, "0%.2lf", longitude);
+	else if (longitude >= 100.0F)
+		::sprintf(lon, "00%.2lf", longitude);
+	else if (longitude >= 10.0F)
+		::sprintf(lon, "000%.2lf", longitude);
+	else
+		::sprintf(lon, "0000%.2lf", longitude);
+
+	// Convert commas to periods in the latitude, longitude and frequencies
+	char* p = ::strchr(lat, ',');
+	if (p != NULL)
+		*p = '.';
+
+	p = ::strchr(lon, ',');
+	if (p != NULL)
+		*p = '.';
+
+	p = ::strchr(desc, ',');
+	if (p != NULL)
+		*p = '.';
+
+	char output[500U];
+	::sprintf(output, "%s-S>APDG03,TCPIP*,qAC,%s-NDS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0f%s %s",
+		m_callsign.c_str(), m_callsign.c_str(), m_callsign.c_str(), m_band.c_str(),
+		tm->tm_mday, tm->tm_hour, tm->tm_min,
+		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
+		lon, (m_longitude < 0.0F) ? 'W' : 'E',
+		float(m_height) * 3.28F, band, desc);
+
+	m_thread->write(output);
+
+	::sprintf(output, "%s-%s>APDG04,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0f%s %s",
+		m_callsign.c_str(), m_band.c_str(), m_callsign.c_str(), m_band.c_str(),
+		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
+		lon, (m_longitude < 0.0F) ? 'W' : 'E',
+		float(m_height) * 3.28F, band, desc);
+
+	m_thread->write(output);
+
+	m_idTimer.start();
+}

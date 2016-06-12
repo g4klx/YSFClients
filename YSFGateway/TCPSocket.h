@@ -37,12 +37,9 @@
 
 class CTCPSocket {
 public:
-	CTCPSocket(const std::string& address, unsigned int port, const std::string& localAddress);
-	CTCPSocket(int fd);
-	CTCPSocket();
+	CTCPSocket(const std::string& address, unsigned int port);
 	~CTCPSocket();
 
-	bool open(const std::string& address, unsigned int port, const std::string& localAddress);
 	bool open();
 
 	int  read(unsigned char* buffer, unsigned int length, unsigned int secs, unsigned int msecs = 0U);
@@ -55,7 +52,6 @@ public:
 private:
 	std::string    m_address;
 	unsigned short m_port;
-	std::string    m_localAddress;
 	int            m_fd;
 };
 

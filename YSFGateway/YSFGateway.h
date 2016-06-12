@@ -35,12 +35,13 @@ public:
 	int run();
 
 private:
-	CConf     m_conf;
-	CGPS*     m_gps;
-	CWiresX*  m_wiresX;
-	CNetwork* m_netNetwork;
-	bool      m_linked;
-	bool      m_exclude;
+	std::string m_callsign;
+	CConf       m_conf;
+	CGPS*       m_gps;
+	CWiresX*    m_wiresX;
+	CNetwork*   m_netNetwork;
+	bool        m_linked;
+	bool        m_exclude;
 
 	void createGPS();
 };

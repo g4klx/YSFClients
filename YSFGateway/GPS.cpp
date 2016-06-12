@@ -30,15 +30,16 @@ const unsigned char NULL_GPS[] = {0x47U, 0x63U};
 const unsigned char SHRT_GPS[] = {0x22U, 0x62U};
 const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 
-CGPS::CGPS(const std::string& hostname, unsigned int port, const std::string& password) :
-m_hostname(hostname),
-m_port(port),
-m_password(password),
+CGPS::CGPS(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port) :
+m_writer(callsign, password, address, port),
 m_buffer(NULL),
 m_dt1(false),
 m_dt2(false),
 m_sent(false)
 {
+	assert(!callsign.empty());
+	assert(!password.empty());
+	assert(!address.empty());
 	assert(port > 0U);
 
 	m_buffer = new unsigned char[20U];
@@ -47,6 +48,16 @@ m_sent(false)
 CGPS::~CGPS()
 {
 	delete[] m_buffer;
+}
+
+void CGPS::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
+{
+	m_writer.setInfo(rxFrequency, rxFrequency, latitude, longitude, height);
+}
+
+bool CGPS::open()
+{
+	return m_writer.open();
 }
 
 void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn)
@@ -252,12 +263,19 @@ void CGPS::transmitGPS(const unsigned char* source)
 		break;
 	}
 
-	LogMessage("GPS Position of radio=%s lat=%f long=%f", radio, latitude, longitude);
+	LogMessage("GPS Position from %10.10s of radio=%s lat=%f long=%f", source, radio, latitude, longitude);
+
+	m_writer.write(source, radio, m_buffer[4U], latitude, longitude);
 
 	m_sent = true;
 }
 
 void CGPS::clock(unsigned int ms)
 {
+	m_writer.clock(ms);
+}
 
+void CGPS::close()
+{
+	m_writer.close();
 }

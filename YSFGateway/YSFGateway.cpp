@@ -74,6 +74,7 @@ int main(int argc, char** argv)
 }
 
 CYSFGateway::CYSFGateway(const std::string& configFile) :
+m_callsign(),
 m_conf(configFile),
 m_gps(NULL),
 m_wiresX(NULL),
@@ -159,7 +160,7 @@ int CYSFGateway::run()
 	}
 #endif
 
-	std::string callsign = m_conf.getCallsign();
+	m_callsign = m_conf.getCallsign();
 
 	bool debug = m_conf.getNetworkDebug();
 	in_addr rptAddress    = CUDPSocket::lookup(m_conf.getRptAddress());
@@ -190,7 +191,7 @@ int CYSFGateway::run()
 		std::string fileName = m_conf.getNetworkHosts();
 		unsigned int port = m_conf.getNetworkStatusPort();
 
-		m_wiresX = new CWiresX(callsign, &rptNetwork, fileName, port);
+		m_wiresX = new CWiresX(m_callsign, &rptNetwork, fileName, port);
 
 		std::string name = m_conf.getName();
 		unsigned int txFrequency = m_conf.getTxFrequency();
@@ -294,7 +295,11 @@ int CYSFGateway::run()
 	rptNetwork.close();
 	m_netNetwork->close();
 
-	delete m_gps;
+	if (m_gps != NULL) {
+		m_gps->close();
+		delete m_gps;
+	}
+
 	delete m_netNetwork;
 	delete m_wiresX;
 
@@ -312,5 +317,19 @@ void CYSFGateway::createGPS()
 	unsigned int port    = m_conf.getAPRSPort();
 	std::string password = m_conf.getAPRSPassword();
 
-	m_gps = new CGPS(hostname, port, password);
+	m_gps = new CGPS(m_callsign, password, hostname, port);
+
+	unsigned int txFrequency = m_conf.getTxFrequency();
+	unsigned int rxFrequency = m_conf.getRxFrequency();
+	float latitude           = m_conf.getLatitude();
+	float longitude          = m_conf.getLongitude();
+	int height               = m_conf.getHeight();
+
+	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height);
+
+	bool ret = m_gps->open();
+	if (!ret) {
+		delete m_gps;
+		m_gps = NULL;
+	}
 }

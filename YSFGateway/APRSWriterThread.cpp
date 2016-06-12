@@ -33,12 +33,12 @@ const unsigned int CALLSIGN_LENGTH = 8U;
 
 const unsigned int APRS_TIMEOUT = 10U;
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port) :
+CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port) :
 CThread(),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),
-m_socket(hostname, port, address),
+m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
 m_connected(false),
@@ -48,7 +48,7 @@ m_clientName("YSFGateway")
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
-	assert(!hostname.empty());
+	assert(!address.empty());
 	assert(port > 0U);
 
 	m_username.resize(CALLSIGN_LENGTH, ' ');
@@ -58,12 +58,12 @@ m_clientName("YSFGateway")
 	m_ssid = m_ssid.substr(CALLSIGN_LENGTH - 1U, 1);
 }
 
-CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, const std::string& hostname, unsigned int port, const std::string& filter, const std::string& clientName) :
+CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port, const std::string& filter, const std::string& clientName) :
 CThread(),
 m_username(callsign),
 m_password(password),
 m_ssid(callsign),
-m_socket(hostname, port, address),
+m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
 m_connected(false),
@@ -73,7 +73,7 @@ m_clientName(clientName)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
-	assert(!hostname.empty());
+	assert(!address.empty());
 	assert(port > 0U);
 
 	m_username.resize(CALLSIGN_LENGTH, ' ');

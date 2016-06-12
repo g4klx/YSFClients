@@ -19,12 +19,18 @@
 #if !defined(GPS_H)
 #define	GPS_H
 
+#include "APRSWriter.h"
+
 #include <string>
 
 class CGPS {
 public:
-	CGPS(const std::string& hostname, unsigned int port, const std::string& password);
+	CGPS(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port);
 	~CGPS();
+
+	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height);
+
+	bool open();
 
 	void data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn);
 
@@ -32,10 +38,10 @@ public:
 
 	void reset();
 
+	void close();
+
 private:
-	std::string    m_hostname;
-	unsigned int   m_port;
-	std::string    m_password;
+	CAPRSWriter    m_writer;
 	unsigned char* m_buffer;
 	bool           m_dt1;
 	bool           m_dt2;

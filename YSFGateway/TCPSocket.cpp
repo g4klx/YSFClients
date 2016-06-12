@@ -30,10 +30,9 @@ typedef int ssize_t;
 #include <cerrno>
 #endif
 
-CTCPSocket::CTCPSocket(const std::string& address, unsigned int port, const std::string& localAddress) :
+CTCPSocket::CTCPSocket(const std::string& address, unsigned int port) :
 m_address(address),
 m_port(port),
-m_localAddress(localAddress),
 m_fd(-1)
 {
 	assert(!address.empty());
@@ -47,50 +46,11 @@ m_fd(-1)
 #endif
 }
 
-CTCPSocket::CTCPSocket(int fd) :
-m_address(),
-m_port(0U),
-m_localAddress(),
-m_fd(fd)
-{
-	assert(fd >= 0);
-
-#if defined(_WIN32) || defined(_WIN64)
-	WSAData data;
-	int wsaRet = ::WSAStartup(MAKEWORD(2, 2), &data);
-	if (wsaRet != 0)
-		LogError("Error from WSAStartup");
-#endif
-}
-
-CTCPSocket::CTCPSocket() :
-m_address(),
-m_port(0U),
-m_localAddress(),
-m_fd(-1)
-{
-#if defined(_WIN32) || defined(_WIN64)
-	WSAData data;
-	int wsaRet = ::WSAStartup(MAKEWORD(2, 2), &data);
-	if (wsaRet != 0)
-		LogError("Error from WSAStartup");
-#endif
-}
-
 CTCPSocket::~CTCPSocket()
 {
 #if defined(_WIN32) || defined(_WIN64)
 	::WSACleanup();
 #endif
-}
-
-bool CTCPSocket::open(const std::string& address, unsigned int port, const std::string& localAddress)
-{
-	m_address      = address;
-	m_port         = port;
-	m_localAddress = localAddress;
-
-	return open();
 }
 
 bool CTCPSocket::open()
@@ -109,33 +69,6 @@ bool CTCPSocket::open()
 		LogError("Cannot create the TCP client socket, err=%d", errno);
 #endif
 		return false;
-	}
-
-	if (!m_localAddress.empty()) {
-		sockaddr_in addr;
-		::memset(&addr, 0x00, sizeof(struct sockaddr_in));
-		addr.sin_family = AF_INET;
-		addr.sin_port   = 0U;
-#if defined(_WIN32) || defined(_WIN64)
-		addr.sin_addr.s_addr = ::inet_addr(m_localAddress.c_str());
-#else
-		addr.sin_addr.s_addr = ::inet_addr(m_localAddress.c_str());
-#endif
-		if (addr.sin_addr.s_addr == INADDR_NONE) {
-			LogError("The address is invalid - %s", m_localAddress.c_str());
-			close();
-			return false;
-		}
-
-		if (::bind(m_fd, (sockaddr*)&addr, sizeof(sockaddr_in)) == -1) {
-#if defined(_WIN32) || defined(_WIN64)
-			LogError("Cannot bind the TCP client address, err=%d", ::GetLastError());
-#else
-			LogError("Cannot bind the TCP client address, err=%d", errno);
-#endif
-			close();
-			return false;
-		}
 	}
 
 	struct sockaddr_in addr;
