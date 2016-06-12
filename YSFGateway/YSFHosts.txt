@@ -3,15 +3,16 @@
 #
 # The format is <address/name> <port>
 #
-c4fm.duckdns.org					42000
-c4fm.ea3hkb.com						42000
-ysf.on4top.be							42000
-c4fm.sustrai.org					42000
-ysf.ve2mrc.com						42000
-ysf.hamlabs.no						42000
-c4fm.spain-dmr.es					42000
+c4fm.duckdns.org		42000
+c4fm.ea3hkb.com			42000
+ysf.on4top.be			42000
+c4fm.sustrai.org		42000
+ysf.ve2mrc.com			42000
+ysf.hamlabs.no			42000
+c4fm.spain-dmr.es		42000
 ysfreflector.dvswitch.org	42000
-c4fm.from-ct.com					43000
-c4fm-it.selfip.com        42000
-c4fm-mi5.kb8zgl.net       42000
-ysf.darc-saar.de          42000
+c4fm.from-ct.com		43000
+c4fm-it.selfip.com		42000
+c4fm-mi5.kb8zgl.net		42000
+ysf.darc-saar.de		42000
+m55.evxonline.net		42000
