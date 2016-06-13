@@ -64,6 +64,7 @@ private:
 	CYSFReflector* m_reflector;
 	std::string    m_id;
 	std::string    m_name;
+	unsigned char* m_command;
 	unsigned int   m_txFrequency;
 	unsigned int   m_rxFrequency;
 	CTimer         m_timer;
