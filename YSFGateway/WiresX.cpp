@@ -459,8 +459,11 @@ void CWiresX::sendDXReply()
 		sign = '+';
 	}
 
+	unsigned int freqHz = m_txFrequency % 1000000U;
+	unsigned int freqkHz = (freqHz + 500U) / 1000U;
+
 	char freq[30U];
-	::sprintf(freq, "%05u.%06u%c%03u.%06u", m_txFrequency / 1000000U, m_txFrequency % 1000000U, sign, offset / 1000000U, offset % 1000000U);
+	::sprintf(freq, "%05u.%03u000%c%03u.%06u", m_txFrequency / 1000000U, freqkHz, sign, offset / 1000000U, offset % 1000000U);
 
 	for (unsigned int i = 0U; i < 23U; i++)
 		data[i + 84U] = freq[i];
