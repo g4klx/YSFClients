@@ -20,6 +20,7 @@
 #include "YSFPayload.h"
 #include "YSFDefines.h"
 #include "Utils.h"
+#include "CRC.h"
 #include "Log.h"
 
 #include <cstdio>
@@ -33,8 +34,6 @@ const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 CGPS::CGPS(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
 m_writer(callsign, suffix, password, address, port),
 m_buffer(NULL),
-m_dt1(false),
-m_dt2(false),
 m_sent(false)
 {
 	assert(!callsign.empty());
@@ -42,7 +41,7 @@ m_sent(false)
 	assert(!address.empty());
 	assert(port > 0U);
 
-	m_buffer = new unsigned char[20U];
+	m_buffer = new unsigned char[300U];
 }
 
 CGPS::~CGPS()
@@ -60,72 +59,85 @@ bool CGPS::open()
 	return m_writer.open();
 }
 
-void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn)
+void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
 {
 	if (m_sent)
 		return;
 
-	// In case we had the data but not the source callsign
-	if (m_dt1 && m_dt2) {
-		transmitGPS(source);
+	if (fi != YSF_FI_COMMUNICATIONS)
 		return;
-	}
 
 	CYSFPayload payload;
 
-	if (fi == YSF_FI_COMMUNICATIONS && dt == YSF_DT_VD_MODE1) {
-		if (fn == 3U && !m_dt1) {
-			bool valid = payload.readVDMode1Data(data, m_buffer);
-			if (valid) {
-				m_dt1 = true;
-				m_dt2 = true;
+	if (dt == YSF_DT_VD_MODE1) {
+		if (fn == 0U || fn == 1U || fn == 2U)
+			return;
 
-				// If no GPS data then mark it as complete for this transmission
-				if (::memcmp(m_buffer + 1U, NULL_GPS, 2U) == 0) {
-					CUtils::dump("Null GPS data received", m_buffer, 20U);
-					m_sent = true;
+		bool valid = payload.readVDMode1Data(data, m_buffer + (fn - 3U) * 20U);
+		if (!valid)
+			return;
+
+		if (fn == ft) {
+			bool valid = false;
+
+			// Find the end marker
+			for (unsigned int i = (fn - 2U) * 20U; i > 0U; i--) {
+				if (m_buffer[i] == 0x03U) {
+					unsigned char crc = CCRC::addCRC(m_buffer, i + 1U);
+					if (crc == m_buffer[i + 1U])
+						valid = true;
+
+					break;
 				}
+			}
 
+			if (valid) {
 				if (::memcmp(m_buffer + 1U, SHRT_GPS, 2U) == 0) {
-					CUtils::dump("Short GPS data received", m_buffer, 20U);
+					CUtils::dump("Short GPS data received", m_buffer, (fn - 2U) * 20U);
 					transmitGPS(source);
 				}
 
 				if (::memcmp(m_buffer + 1U, LONG_GPS, 2U) == 0) {
-					CUtils::dump("Long GPS data received", m_buffer, 20U);
+					CUtils::dump("Long GPS data received", m_buffer, (fn - 2U) * 20U);
 					transmitGPS(source);
 				}
+
+				m_sent = true;
 			}
 		}
-	} else if (fi == YSF_FI_COMMUNICATIONS && dt == YSF_DT_VD_MODE2) {
-		if (fn == 6U && !m_dt1) {
-			bool valid = payload.readVDMode2Data(data, m_buffer + 0U);
-			if (valid) {
-				m_dt1 = true;
+	} else if (dt == YSF_DT_VD_MODE2) {
+		if (fn != 6U && fn != 7U)
+			return;
 
-				// If no GPS data then mark it as complete for this transmission
-				if (::memcmp(m_buffer + 1U, NULL_GPS, 2U) == 0) {
-					CUtils::dump("Null GPS data received", m_buffer, 20U);
-					m_sent = true;
-					m_dt2  = true;
+		bool valid = payload.readVDMode2Data(data, m_buffer + (fn - 6U) * 10U);
+		if (!valid)
+			return;
+
+		if (fn == ft) {
+			bool valid = false;
+
+			// Find the end marker
+			for (unsigned int i = (fn - 5U) * 10U; i > 0U; i--) {
+				if (m_buffer[i] == 0x03U) {
+					unsigned char crc = CCRC::addCRC(m_buffer, i + 1U);
+					if (crc == m_buffer[i + 1U])
+						valid = true;
+					break;
 				}
 			}
-		}
-		
-		if (fn == 7U && !m_dt2) {
-			bool valid = payload.readVDMode2Data(data, m_buffer + 10U);
-			if (valid) {
-				m_dt2  = true;
 
+			if (valid) {
 				if (::memcmp(m_buffer + 1U, SHRT_GPS, 2U) == 0) {
-					CUtils::dump("Short GPS data received", m_buffer, 20U);
+					CUtils::dump("Short GPS data received", m_buffer, (fn - 5U) * 10U);
 					transmitGPS(source);
 				}
 
 				if (::memcmp(m_buffer + 1U, LONG_GPS, 2U) == 0) {
-					CUtils::dump("Long GPS data received", m_buffer, 20U);
+					CUtils::dump("Long GPS data received", m_buffer, (fn - 5U) * 10U);
 					transmitGPS(source);
 				}
+
+				m_sent = true;
 			}
 		}
 	}
@@ -133,8 +145,6 @@ void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned
 
 void CGPS::reset()
 {
-	m_dt1  = false;
-	m_dt2  = false;
 	m_sent = false;
 }
 

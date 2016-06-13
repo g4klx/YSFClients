@@ -32,7 +32,7 @@ public:
 
 	bool open();
 
-	void data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn);
+	void data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 
 	void clock(unsigned int ms);
 
@@ -43,8 +43,6 @@ public:
 private:
 	CAPRSWriter    m_writer;
 	unsigned char* m_buffer;
-	bool           m_dt1;
-	bool           m_dt2;
 	bool           m_sent;
 
 	void transmitGPS(const unsigned char* source);

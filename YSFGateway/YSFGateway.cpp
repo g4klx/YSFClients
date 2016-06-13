@@ -251,7 +251,7 @@ int CYSFGateway::run()
 				}
 
 				if (m_gps != NULL)
-					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn);
+					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
 			}
 
 			if (networkEnabled && m_linked && !m_exclude)
