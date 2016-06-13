@@ -21,6 +21,7 @@
 #include "Parrot.h"
 #include "Network.h"
 #include "Version.h"
+#include "Timer.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -105,6 +106,8 @@ void CYSFParrot::run()
 					network.write(buffer);
 					count++;
 				} else {
+					parrot.clear();
+					network.end();
 					turnaroundTimer.stop();
 					playing = false;
 					count = wanted;

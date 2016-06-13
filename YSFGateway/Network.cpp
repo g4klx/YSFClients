@@ -112,9 +112,6 @@ bool CNetwork::writePoll()
 	buffer[12U] = ' ';
 	buffer[13U] = ' ';
 
-	if (m_debug)
-		CUtils::dump(1U, "YSF Network Poll Sent", buffer, 14U);
-
 	return m_socket.write(buffer, 14U, m_address, m_port);
 }
 

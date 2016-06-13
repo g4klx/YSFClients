@@ -57,6 +57,12 @@ void CParrot::end()
 	m_ptr = 0U;
 }
 
+void CParrot::clear()
+{
+	m_used = 0U;
+	m_ptr = 0U;
+}
+
 unsigned int CParrot::read(unsigned char* data)
 {
 	assert(data != NULL);

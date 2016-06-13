@@ -31,6 +31,8 @@ public:
 
 	void end();
 
+	void clear();
+
 private:
 	unsigned char* m_data;
 	unsigned int   m_length;

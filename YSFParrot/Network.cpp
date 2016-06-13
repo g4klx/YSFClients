@@ -31,8 +31,7 @@ m_socket(port),
 m_address(),
 m_port(0U),
 m_debug(debug),
-m_buffer(1000U, "YSF Network"),
-m_pollTimer(1000U, 5U)
+m_buffer(1000U, "YSF Network")
 {
 }
 
@@ -44,16 +43,14 @@ bool CNetwork::open()
 {
 	::fprintf(stdout, "Opening YSF network connection\n");
 
-	if (m_address.s_addr == INADDR_NONE)
-		return false;
-
-	m_pollTimer.start();
-
 	return m_socket.open();
 }
 
 bool CNetwork::write(const unsigned char* data)
 {
+	if (m_port == 0U)
+		return true;
+
 	assert(data != NULL);
 
 	if (m_debug)
@@ -62,7 +59,7 @@ bool CNetwork::write(const unsigned char* data)
 	return m_socket.write(data, 155U, m_address, m_port);
 }
 
-bool CNetwork::writePoll()
+bool CNetwork::writePoll(const in_addr& address, unsigned int port)
 {
 	unsigned char buffer[20U];
 
@@ -82,20 +79,11 @@ bool CNetwork::writePoll()
 	buffer[12U] = ' ';
 	buffer[13U] = ' ';
 
-	if (m_debug)
-		CUtils::dump(1U, "YSF Network Poll Sent", buffer, 14U);
-
-	return m_socket.write(buffer, 14U, m_address, m_port);
+	return m_socket.write(buffer, 14U, address, port);
 }
 
 void CNetwork::clock(unsigned int ms)
 {
-	m_pollTimer.clock(ms);
-	if (m_pollTimer.hasExpired()) {
-		writePoll();
-		m_pollTimer.start();
-	}
-
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
@@ -104,12 +92,11 @@ void CNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	m_address.s_addr = address.s_addr;
-	m_port = port;
-
-	// Ignore incoming polls
-	if (::memcmp(buffer, "YSFP", 4U) == 0)
+	// Handle incoming polls
+	if (::memcmp(buffer, "YSFP", 4U) == 0) {
+		writePoll(address, port);
 		return;
+	}
 
 	// Handle the status command
 	if (::memcmp(buffer, "YSFS", 4U) == 0) {
@@ -122,6 +109,9 @@ void CNetwork::clock(unsigned int ms)
 	// Invalid packet type?
 	if (::memcmp(buffer, "YSFD", 4U) != 0)
 		return;
+
+	m_address.s_addr = address.s_addr;
+	m_port = port;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
@@ -139,6 +129,11 @@ unsigned int CNetwork::read(unsigned char* data)
 	m_buffer.getData(data, 155U);
 
 	return 155U;
+}
+
+void CNetwork::end()
+{
+	m_port = 0U;
 }
 
 void CNetwork::close()
