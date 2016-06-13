@@ -56,7 +56,6 @@ m_rxFrequency(0U),
 m_timer(1000U, 2U),
 m_seqNo(0U),
 m_header(NULL),
-m_source(NULL),
 m_csd1(NULL),
 m_csd2(NULL),
 m_csd3(NULL),
@@ -79,7 +78,6 @@ m_search(NULL)
 	m_command = new unsigned char[300U];
 
 	m_header = new unsigned char[34U];
-	m_source = new unsigned char[20U];
 	m_csd1   = new unsigned char[20U];
 	m_csd2   = new unsigned char[20U];
 	m_csd3   = new unsigned char[20U];
@@ -90,7 +88,6 @@ CWiresX::~CWiresX()
 	delete[] m_csd3;
 	delete[] m_csd2;
 	delete[] m_csd1;
-	delete[] m_source;
 	delete[] m_header;
 	delete[] m_command;
 }
@@ -153,56 +150,66 @@ bool CWiresX::start()
 	return m_reflectors.load();
 }
 
-WX_STATUS CWiresX::process(const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn)
+WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
 {
 	assert(data != NULL);
+	assert(source != NULL);
 
 	if (dt != YSF_DT_DATA_FR_MODE)
 		return WXS_NONE;
 
+	if (fi != YSF_FI_COMMUNICATIONS)
+		return WXS_NONE;
+
 	CYSFPayload payload;
 
-	if (fi == YSF_FI_HEADER) {
-		payload.readDataFRModeData1(data, m_source);
-		::memset(m_command, 0x00U, 300U);
+	if (fn == 0U)
 		return WXS_NONE;
-	}
 
-	if (fi == YSF_FI_COMMUNICATIONS && fn == 0U) {
-		if (::memcmp(m_source, "                    ", 20U) == 0)
-			payload.readDataFRModeData1(data, m_source);
-		::memset(m_command, 0x00U, 300U);
-		return WXS_NONE;
-	}
-
-	if (fi == YSF_FI_COMMUNICATIONS) {
-		if (fn == 1U)
-			::memset(m_command, 0x00U, 300U);
-
-		bool valid = payload.readDataFRModeData2(data, m_command + (fn - 1U) * 20U);
-		if (!valid) {
-			::memset(m_command, 0x00U, 300U);
-			::memset(m_source, ' ', 20U);
+	if (fn == 1U) {
+		bool valid = payload.readDataFRModeData2(data, m_command + 0U);
+		if (!valid)
 			return WXS_NONE;
+	} else {
+		bool valid = payload.readDataFRModeData1(data, m_command + (fn - 1U) * 20U + 0U);
+		if (!valid)
+			return WXS_NONE;
+
+		valid = payload.readDataFRModeData2(data, m_command + (fn - 1U) * 20U + 20U);
+		if (!valid)
+			return WXS_NONE;
+	}
+
+	if (fn == ft) {
+		bool valid = false;
+
+		// Find the end marker
+		for (unsigned int i = fn * 20U; i > 0U; i--) {
+			if (m_command[i] == 0x03U) {
+				unsigned char crc = CCRC::addCRC(m_command, i + 1U);
+				if (crc == m_command[i + 1U])
+					valid = true;
+				break;
+			}
 		}
 
-		if (fi == fn) {
-			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
-				processDX();
-				return WXS_NONE;
-			} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
-				processAll(m_command + 5U);
-				return WXS_NONE;
-			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
-				return processConnect(m_command + 5U);
-			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
-				processDisconnect();
-				return WXS_DISCONNECT;
-			} else {
-				CUtils::dump("Unknown Wires-X command", m_command, fn * 20U);
-				::memset(m_source, ' ', 20U);
-				return WXS_NONE;
-			}
+		if (!valid)
+			return WXS_NONE;
+
+		if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
+			processDX(source);
+			return WXS_NONE;
+		} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
+			processAll(source, m_command + 5U);
+			return WXS_NONE;
+		} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
+			return processConnect(source, m_command + 5U);
+		} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
+			processDisconnect(source);
+			return WXS_DISCONNECT;
+		} else {
+			CUtils::dump("Unknown Wires-X command", m_command, fn * 20U);
+			return WXS_NONE;
 		}
 	}
 
@@ -214,18 +221,18 @@ CYSFReflector* CWiresX::getReflector() const
 	return m_reflector;
 }
 
-void CWiresX::processDX()
+void CWiresX::processDX(const unsigned char* source)
 {
-	::LogDebug("Received DX from %10.10s", m_source + 10U);
+	::LogDebug("Received DX from %10.10s", source);
 
 	m_status = WXSI_DX;
 	m_timer.start();
 }
 
-void CWiresX::processAll(const unsigned char* data)
+void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 {
 	if (data[0U] == '0' && data[1] == '1') {
-		::LogDebug("Received ALL for \"%3.3s\" from %10.10s", data + 2U, m_source + 10U);
+		::LogDebug("Received ALL for \"%3.3s\" from %10.10s", data + 2U, source);
 
 		char buffer[4U];
 		::memcpy(buffer, data + 2U, 3U);
@@ -239,7 +246,7 @@ void CWiresX::processAll(const unsigned char* data)
 
 		m_timer.start();
 	} else if (data[0U] == '1' && data[1U] == '1') {
-		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, m_source + 10U);
+		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, source);
 
 		std::string search = std::string((char*)(data + 5U), 16U);
 
@@ -251,9 +258,9 @@ void CWiresX::processAll(const unsigned char* data)
 	}
 }
 
-WX_STATUS CWiresX::processConnect(const unsigned char* data)
+WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned char* data)
 {
-	::LogDebug("Received Connect to %5.5s from %10.10s", data, m_source + 10U);
+	::LogDebug("Received Connect to %5.5s from %10.10s", data, source);
 
 	std::string id = std::string((char*)data, 5U);
 
@@ -267,9 +274,9 @@ WX_STATUS CWiresX::processConnect(const unsigned char* data)
 	return WXS_CONNECT;
 }
 
-void CWiresX::processDisconnect()
+void CWiresX::processDisconnect(const unsigned char* source)
 {
-	::LogDebug("Received Disconect from %10.10s", m_source + 10U);
+	::LogDebug("Received Disconect from %10.10s", source);
 
 	m_status = WXSI_DISCONNECT;
 	m_timer.start();

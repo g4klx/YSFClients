@@ -50,7 +50,7 @@ public:
 
 	bool start();
 
-	WX_STATUS process(const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn);
+	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 
 	CYSFReflector* getReflector() const;
 
@@ -70,7 +70,6 @@ private:
 	CTimer         m_timer;
 	unsigned char  m_seqNo;
 	unsigned char* m_header;
-	unsigned char* m_source;
 	unsigned char* m_csd1;
 	unsigned char* m_csd2;
 	unsigned char* m_csd3;
@@ -78,10 +77,10 @@ private:
 	unsigned int   m_start;
 	CYSFReflector* m_search;
 
-	WX_STATUS processConnect(const unsigned char* data);
-	void processDisconnect();
-	void processDX();
-	void processAll(const unsigned char* data);
+	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
+	void processDisconnect(const unsigned char* source);
+	void processDX(const unsigned char* source);
+	void processAll(const unsigned char* source, const unsigned char* data);
 
 	void sendDXReply();
 	void sendConnectReply();

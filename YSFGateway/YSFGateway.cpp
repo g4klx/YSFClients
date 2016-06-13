@@ -225,12 +225,13 @@ int CYSFGateway::run()
 				unsigned char fi = fich.getFI();
 				unsigned char dt = fich.getDT();
 				unsigned char fn = fich.getFN();
+				unsigned char ft = fich.getFT();
 
 				// Don't send out control data
 				m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 
 				if (m_wiresX != NULL) {
-					WX_STATUS status = m_wiresX->process(buffer + 35U, fi, dt, fn);
+					WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 					switch (status) {
 					case WXS_CONNECT: {
 							CYSFReflector* reflector = m_wiresX->getReflector();

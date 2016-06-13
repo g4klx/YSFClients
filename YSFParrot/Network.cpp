@@ -114,7 +114,7 @@ void CNetwork::clock(unsigned int ms)
 	// Handle the status command
 	if (::memcmp(buffer, "YSFS", 4U) == 0) {
 		unsigned char status[50U];
-		::sprintf((char*)status, "YSFS%05u%16.16s%14.14s%03u", 1U, "Parrot", "Parrot", 0U);
+		::sprintf((char*)status, "YSFS%05u%-16.16s%-14.14s%03u", 1U, "Parrot", "Parrot", 0U);
 		m_socket.write(status, 42U, address, port);
 		return;
 	}
