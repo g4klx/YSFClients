@@ -37,7 +37,6 @@ CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::str
 CThread(),
 m_username(callsign),
 m_password(password),
-m_ssid(callsign),
 m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
@@ -54,15 +53,12 @@ m_clientName("YSFGateway")
 	m_username.resize(CALLSIGN_LENGTH, ' ');
 	m_username.erase(std::find_if(m_username.rbegin(), m_username.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), m_username.end());
 	std::transform(m_username.begin(), m_username.end(), m_username.begin(), ::toupper);
-
-	m_ssid = m_ssid.substr(CALLSIGN_LENGTH - 1U, 1);
 }
 
 CAPRSWriterThread::CAPRSWriterThread(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port, const std::string& filter, const std::string& clientName) :
 CThread(),
 m_username(callsign),
 m_password(password),
-m_ssid(callsign),
 m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
@@ -79,8 +75,6 @@ m_clientName(clientName)
 	m_username.resize(CALLSIGN_LENGTH, ' ');
 	m_username.erase(std::find_if(m_username.rbegin(), m_username.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), m_username.end());
 	std::transform(m_username.begin(), m_username.end(), m_username.begin(), ::toupper);
-
-	m_ssid = m_ssid.substr(CALLSIGN_LENGTH - 1U, 1);
 }
 
 CAPRSWriterThread::~CAPRSWriterThread()
@@ -225,7 +219,7 @@ bool CAPRSWriterThread::connect()
 		filter.insert(0U, " filter ");
 
 	char connectString[200U];
-	::sprintf(connectString, "user %s-%s pass %s vers %s%s\n", m_username.c_str(), m_ssid.c_str(), m_password.c_str(), (m_clientName.length() ? m_clientName : "YSFGateway").c_str(), filter.c_str());
+	::sprintf(connectString, "user %s pass %s vers %s%s\n", m_username.c_str(), m_password.c_str(), (m_clientName.length() ? m_clientName : "YSFGateway").c_str(), filter.c_str());
 
 	ret = m_socket.writeLine(std::string(connectString));
 	if (!ret) {

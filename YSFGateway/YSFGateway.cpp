@@ -314,7 +314,7 @@ void CYSFGateway::createGPS()
 	if (!m_conf.getAPRSEnabled())
 		return;
 
-	std::string hostname = m_conf.getAPRSHostname();
+	std::string hostname = m_conf.getAPRSServer();
 	unsigned int port    = m_conf.getAPRSPort();
 	std::string password = m_conf.getAPRSPassword();
 

@@ -57,7 +57,7 @@ m_logFileLevel(0U),
 m_logFilePath(),
 m_logFileRoot(),
 m_aprsEnabled(false),
-m_aprsHostname(),
+m_aprsServer(),
 m_aprsPort(0U),
 m_aprsPassword(),
 m_networkEnabled(false),
@@ -159,8 +159,8 @@ bool CConf::read()
 	} else if (section == SECTION_APRS_FI) {
 		if (::strcmp(key, "Enable") == 0)
 			m_aprsEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Hostname") == 0)
-			m_aprsHostname = value;
+		else if (::strcmp(key, "Server") == 0)
+			m_aprsServer = value;
 		else if (::strcmp(key, "Port") == 0)
 			m_aprsPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Password") == 0)
@@ -284,9 +284,9 @@ bool CConf::getAPRSEnabled() const
 	return m_aprsEnabled;
 }
 
-std::string CConf::getAPRSHostname() const
+std::string CConf::getAPRSServer() const
 {
-	return m_aprsHostname;
+	return m_aprsServer;
 }
 
 unsigned int CConf::getAPRSPort() const

@@ -48,7 +48,6 @@ public:
 private:
 	std::string            m_username;
 	std::string            m_password;
-	std::string	           m_ssid;
 	CTCPSocket             m_socket;
 	CRingBuffer<char*>     m_queue;
 	bool                   m_exit;
