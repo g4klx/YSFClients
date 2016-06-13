@@ -25,7 +25,7 @@
 
 class CGPS {
 public:
-	CGPS(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port);
+	CGPS(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port);
 	~CGPS();
 
 	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height);

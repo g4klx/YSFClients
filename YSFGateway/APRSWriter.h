@@ -26,7 +26,7 @@
 
 class CAPRSWriter {
 public:
-	CAPRSWriter(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port);
+	CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port);
 	~CAPRSWriter();
 
 	bool open();
@@ -44,6 +44,7 @@ private:
 	bool               m_enabled;
 	CTimer             m_idTimer;
 	std::string        m_callsign;
+	std::string        m_suffix;
 	unsigned int       m_txFrequency;
 	unsigned int       m_rxFrequency;
 	float              m_latitude;

@@ -25,11 +25,12 @@
 #include <cstring>
 #include <ctime>
 
-CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port) :
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
 m_thread(NULL),
 m_enabled(false),
 m_idTimer(1000U, 20U * 60U),		// 20 minutes
-m_callsign(),
+m_callsign(callsign),
+m_suffix(suffix),
 m_txFrequency(0U),
 m_rxFrequency(0U),
 m_latitude(0.0F),
@@ -255,8 +256,9 @@ void CAPRSWriter::sendIdFrames()
 		*p = '.';
 
 	char output[500U];
-	::sprintf(output, "%s-S>APDG03,TCPIP*,qAC,%s-NDS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0f%s %s",
-		m_callsign.c_str(), m_callsign.c_str(), m_callsign.c_str(), m_band.c_str(),
+	::sprintf(output, "%s-S>APDG03,TCPIP*,qAC,%s-%sS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0f%s %s",
+		m_callsign.c_str(), m_callsign.c_str(), m_suffix.c_str(),
+		m_callsign.c_str(), m_band.c_str(),
 		tm->tm_mday, tm->tm_hour, tm->tm_min,
 		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
 		lon, (m_longitude < 0.0F) ? 'W' : 'E',

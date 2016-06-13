@@ -30,8 +30,8 @@ const unsigned char NULL_GPS[] = {0x47U, 0x63U};
 const unsigned char SHRT_GPS[] = {0x22U, 0x62U};
 const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 
-CGPS::CGPS(const std::string& callsign, const std::string& password, const std::string& address, unsigned int port) :
-m_writer(callsign, password, address, port),
+CGPS::CGPS(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
+m_writer(callsign, suffix, password, address, port),
 m_buffer(NULL),
 m_dt1(false),
 m_dt2(false),

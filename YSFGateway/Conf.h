@@ -32,6 +32,7 @@ public:
 
   // The General section
   std::string  getCallsign() const;
+  std::string  getSuffix() const;
   std::string  getRptAddress() const;
   unsigned int getRptPort() const;
   std::string  getMyAddress() const;
@@ -70,6 +71,7 @@ public:
 private:
   std::string  m_file;
   std::string  m_callsign;
+  std::string  m_suffix;
   std::string  m_rptAddress;
   unsigned int m_rptPort;
   std::string  m_myAddress;

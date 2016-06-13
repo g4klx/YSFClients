@@ -36,6 +36,7 @@ public:
 
 private:
 	std::string m_callsign;
+	std::string m_suffix;
 	CConf       m_conf;
 	CGPS*       m_gps;
 	CWiresX*    m_wiresX;

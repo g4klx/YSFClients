@@ -42,7 +42,7 @@ const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL      ";
 
-CWiresX::CWiresX(const std::string& callsign, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
+CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
 m_callsign(callsign),
 m_node(),
 m_network(network),
@@ -68,7 +68,10 @@ m_search(NULL)
 	assert(statusPort > 0U);
 
 	m_node = callsign;
-	m_node.append("-ND");
+	if (suffix.size() > 0U) {
+		m_node.append("-");
+		m_node.append(suffix);
+	}
 	m_node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	m_callsign.resize(YSF_CALLSIGN_LENGTH, ' ');
