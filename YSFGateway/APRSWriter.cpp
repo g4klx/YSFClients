@@ -31,20 +31,23 @@ m_thread(NULL),
 m_enabled(false),
 m_idTimer(1000U, 20U * 60U),		// 20 minutes
 m_callsign(callsign),
-m_suffix(suffix),
 m_txFrequency(0U),
 m_rxFrequency(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
-m_height(0),
-m_band()
+m_height(0)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
 	assert(!address.empty());
 	assert(port > 0U);
 
-	m_thread = new CAPRSWriterThread(callsign, password, address, port);
+	if (!suffix.empty()) {
+		m_callsign.append("-");
+		m_callsign.append(suffix);
+	}
+
+	m_thread = new CAPRSWriterThread(m_callsign, password, address, port);
 }
 
 CAPRSWriter::~CAPRSWriter()
@@ -58,17 +61,6 @@ void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, fl
 	m_latitude    = latitude;
 	m_longitude   = longitude;
 	m_height      = height;
-
-	if (txFrequency >= 1200000000U)
-		m_band = "A";
-	else if (txFrequency >= 420000000U)
-		m_band = "B";
-	else if (txFrequency >= 144000000U)
-		m_band = "C";
-	else if (txFrequency >= 50000000U)
-		m_band = "D";
-	else if (txFrequency >= 28000000U)
-		m_band = "D";
 }
 
 bool CAPRSWriter::open()
@@ -152,8 +144,8 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	}
 
 	char output[300U];
-	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s-%s:!%s%c/%s%c%c %s via MMDVM",
-		callsign, m_callsign.c_str(), m_band.c_str(),
+	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s:!%s%c/%s%c%c %s via MMDVM",
+		callsign, m_callsign.c_str(),
 		lat, (fLatitude < 0.0F) ? 'S' : 'N',
 		lon, (fLongitude < 0.0F) ? 'W' : 'E',
 		symbol, type);
@@ -256,19 +248,16 @@ void CAPRSWriter::sendIdFrames()
 	if (p != NULL)
 		*p = '.';
 
+	std::string server = m_callsign;
+	int pos = server.find_first_of('-');
+	if (pos == std::string::npos)
+		server.append("-S");
+	else
+		server.append("S");
+
 	char output[500U];
-	::sprintf(output, "%s-S>APDG03,TCPIP*,qAC,%s-%sS:;%-7s%-2s*%02d%02d%02dz%s%cD%s%ca/A=%06.0f%s %s",
-		m_callsign.c_str(), m_callsign.c_str(), m_suffix.c_str(),
-		m_callsign.c_str(), m_band.c_str(),
-		tm->tm_mday, tm->tm_hour, tm->tm_min,
-		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
-		lon, (m_longitude < 0.0F) ? 'W' : 'E',
-		float(m_height) * 3.28F, band, desc);
-
-	m_thread->write(output);
-
-	::sprintf(output, "%s-%s>APDG04,TCPIP*,qAC,%s-%sS:!%s%cD%s%c&/A=%06.0f%s %s",
-		m_callsign.c_str(), m_band.c_str(), m_callsign.c_str(), m_band.c_str(),
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%cr/A=%06.0f%s %s",
+		m_callsign.c_str(), server.c_str(),
 		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
 		lon, (m_longitude < 0.0F) ? 'W' : 'E',
 		float(m_height) * 3.28F, band, desc);

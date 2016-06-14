@@ -44,13 +44,11 @@ private:
 	bool               m_enabled;
 	CTimer             m_idTimer;
 	std::string        m_callsign;
-	std::string        m_suffix;
 	unsigned int       m_txFrequency;
 	unsigned int       m_rxFrequency;
 	float              m_latitude;
 	float              m_longitude;
 	int                m_height;
-	std::string        m_band;
 
 	void sendIdFrames();
 };
