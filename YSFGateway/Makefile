@@ -1,7 +1,7 @@
 CC      = gcc
 CXX     = g++
 CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
-LIBS    = -lpthread
+LIBS    = -lm -lpthread
 LDFLAGS = -g
 
 OBJECTS = APRSWriterThread.o APRSWriter.o Conf.o CRC.o Golay24128.o GPS.o Hosts.o Log.o Network.o Reflectors.o StopWatch.o Sync.o TCPSocket.o Thread.o Timer.o \

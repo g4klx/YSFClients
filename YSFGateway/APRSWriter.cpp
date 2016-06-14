@@ -23,6 +23,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cstring>
+#include <cmath>
 #include <ctime>
 
 CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
@@ -199,7 +200,7 @@ void CAPRSWriter::sendIdFrames()
 		::strcpy(desc, "MMDVM Voice");
 	}
 
-	char* band;
+	const char* band;
 	if (m_txFrequency >= 1200000000U)
 		band = "1.2";
 	else if (m_txFrequency >= 420000000U)

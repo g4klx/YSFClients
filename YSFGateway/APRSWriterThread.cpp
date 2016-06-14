@@ -226,7 +226,6 @@ bool CAPRSWriterThread::connect()
 		m_socket.close();
 		return false;
 	}
-	
 
 	length = m_socket.readLine(serverResponse, APRS_TIMEOUT);
 	if (length == 0) {
@@ -234,6 +233,7 @@ bool CAPRSWriterThread::connect()
 		m_socket.close();
 		return false;
 	}
+
 	if (length < 0) {
 		LogError("Error when reading from the APRS server");
 		m_socket.close();
