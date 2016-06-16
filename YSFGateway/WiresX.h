@@ -37,8 +37,7 @@ enum WXSI_STATUS {
 	WXSI_CONNECT,
 	WXSI_DISCONNECT,
 	WXSI_ALL,
-	WXSI_SEARCH_FOUND,
-	WXSI_SEARCH_NOTFOUND
+	WXSI_SEARCH
 };
 
 class CWiresX {
@@ -75,7 +74,7 @@ private:
 	unsigned char* m_csd3;
 	WXSI_STATUS    m_status;
 	unsigned int   m_start;
-	CYSFReflector* m_search;
+	std::string    m_search;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
 	void processDisconnect(const unsigned char* source);
@@ -86,7 +85,7 @@ private:
 	void sendConnectReply();
 	void sendDisconnectReply();
 	void sendAllReply();
-	void sendSearchFoundReply();
+	void sendSearchReply();
 	void sendSearchNotFoundReply();
 
 	void createReply(const unsigned char* data, unsigned int length);

@@ -61,7 +61,7 @@ m_csd2(NULL),
 m_csd3(NULL),
 m_status(WXSI_NONE),
 m_start(0U),
-m_search(NULL)
+m_search()
 {
 	assert(network != NULL);
 	assert(statusPort > 0U);
@@ -248,11 +248,9 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 	} else if (data[0U] == '1' && data[1U] == '1') {
 		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, source);
 
-		std::string search = std::string((char*)(data + 5U), 16U);
+		m_search = std::string((char*)(data + 5U), 16U);
 
-		m_search = m_reflectors.find(search);
-
-		m_status = (m_search == NULL) ? WXSI_SEARCH_NOTFOUND : WXSI_SEARCH_FOUND;
+		m_status = WXSI_SEARCH;
 
 		m_timer.start();
 	}
@@ -295,11 +293,8 @@ void CWiresX::clock(unsigned int ms)
 		case WXSI_ALL:
 			sendAllReply();
 			break;
-		case WXSI_SEARCH_FOUND:
-			sendSearchFoundReply();
-			break;
-		case WXSI_SEARCH_NOTFOUND:
-			sendSearchNotFoundReply();
+		case WXSI_SEARCH:
+			sendSearchReply();
 			break;
 		case WXSI_CONNECT:
 			sendConnectReply();
@@ -611,13 +606,15 @@ void CWiresX::sendAllReply()
 	for (unsigned int i = 0U; i < 10U; i++)
 		data[i + 12U] = m_node.at(i);
 
+	data[22U] = '0';
+
 	unsigned int total = curr.size();
 	if (total > 999U) total = 999U;
 
 	unsigned int n = curr.size() - m_start;
 	if (n > 20U) n = 20U;
 
-	::sprintf((char*)(data + 22U), "%03u%03u", n, total);
+	::sprintf((char*)(data + 23U), "%02u%03u", n, total);
 
 	data[28U] = 0x0DU;
 
@@ -658,10 +655,21 @@ void CWiresX::sendAllReply()
 	m_seqNo++;
 }
 
-void CWiresX::sendSearchFoundReply()
+void CWiresX::sendSearchReply()
 {
-	unsigned char data[110U];
-	::memset(data, 0x00U, 110U);
+	if (m_search.size() == 0U) {
+		sendSearchNotFoundReply();
+		return;
+	}
+
+	std::vector<CYSFReflector*>& search = m_reflectors.search(m_search);
+	if (search.size() == 0U) {
+		sendSearchNotFoundReply();
+		return;
+	}
+
+	unsigned char data[1100U];
+	::memset(data, 0x00U, 1100U);
 
 	data[0U] = m_seqNo;
 
@@ -678,39 +686,50 @@ void CWiresX::sendSearchFoundReply()
 		data[i + 12U] = m_node.at(i);
 
 	data[22U] = '1';
-	data[23U] = '0';
-	data[24U] = '1';
-	data[25U] = '0';
-	data[26U] = '0';
-	data[27U] = '1';
+
+	unsigned int total = search.size();
+	if (total > 999U) total = 999U;
+
+	unsigned int n = search.size();
+	if (n > 20U) n = 20U;
+
+	::sprintf((char*)(data + 23U), "%02u%03u", n, total);
 
 	data[28U] = 0x0DU;
 
-	data[29U] = '1';
+	unsigned int offset = 29U;
+	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
+		CYSFReflector* refl = search.at(j);
 
-	for (unsigned int i = 0U; i < 5U; i++)
-		data[30U] = m_search->m_id.at(i);
+		data[offset + 0U] = '1';
 
-	for (unsigned int i = 0U; i < 16U; i++)
-		data[35U] = m_search->m_name.at(i);
+		for (unsigned int i = 0U; i < 5U; i++)
+			data[i + offset + 1U] = refl->m_id.at(i);
 
-	for (unsigned int i = 0U; i < 3U; i++)
-		data[51U] = m_search->m_count.at(i);
+		for (unsigned int i = 0U; i < 16U; i++)
+			data[i + offset + 6U] = refl->m_name.at(i);
 
-	for (unsigned int i = 0U; i < 10U; i++)
-		data[54U] = ' ';
+		for (unsigned int i = 0U; i < 3U; i++)
+			data[i + offset + 22U] = refl->m_count.at(i);
 
-	for (unsigned int i = 0U; i < 14U; i++)
-		data[64U] = m_search->m_desc.at(i);
+		for (unsigned int i = 0U; i < 10U; i++)
+			data[i + offset + 25U] = ' ';
 
-	data[78U] = 0x0DU;
+		for (unsigned int i = 0U; i < 14U; i++)
+			data[i + offset + 35U] = refl->m_desc.at(i);
 
-	data[79U] = 0x03U;			// End of data marker
-	data[80U] = CCRC::addCRC(data, 80U);
+		data[offset + 49U] = 0x0DU;
+	}
 
-	CUtils::dump(1U, "SEARCH Reply", data, 100U);
+	data[offset + 0U] = 0x03U;			// End of data marker
+	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
 
-	createReply(data, 100U);
+	unsigned int blocks = (offset + 1U) / 20U;
+	if ((blocks % 20U) > 0U) blocks++;
+
+	CUtils::dump(1U, "SEARCH Reply", data, blocks * 20U);
+
+	createReply(data, blocks * 20U);
 
 	m_seqNo++;
 }

@@ -58,6 +58,8 @@ public:
 
 	std::vector<CYSFReflector*>& current();
 
+	std::vector<CYSFReflector*>& search(const std::string& name);
+
 	void clock(unsigned int ms);
 
 private:
@@ -66,6 +68,7 @@ private:
 	std::vector<CYSFReflector*> m_reflectors;
 	std::vector <CYSFReflector*>::iterator m_it;
 	std::vector<CYSFReflector*> m_current;
+	std::vector<CYSFReflector*> m_search;
 	CTimer                      m_timer;
 };
 

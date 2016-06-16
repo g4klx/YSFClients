@@ -21,6 +21,7 @@
 #include "Log.h"
 
 #include <algorithm>
+#include <functional>
 #include <cstdio>
 #include <cassert>
 #include <cstring>
@@ -32,6 +33,7 @@ m_socket(statusPort),
 m_reflectors(),
 m_it(),
 m_current(),
+m_search(),
 m_timer(1000U, 15U)
 {
 	assert(statusPort > 0U);
@@ -115,6 +117,33 @@ std::vector<CYSFReflector*>& CReflectors::current()
 	std::sort(m_current.begin(), m_current.end(), refComparison);
 
 	return m_current;
+}
+
+std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
+{
+	m_search.clear();
+
+	std::string trimmed = name;
+	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), trimmed.end());
+	std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), ::toupper);
+
+	unsigned int len = trimmed.size();
+
+	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
+		if (!(*it)->m_seen)
+			continue;
+
+		std::string reflector = (*it)->m_name;
+		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
+		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
+
+		if (trimmed == reflector.substr(0U, len))
+			m_search.push_back(*it);
+	}
+
+	std::sort(m_search.begin(), m_search.end(), refComparison);
+
+	return m_search;
 }
 
 void CReflectors::clock(unsigned int ms)
