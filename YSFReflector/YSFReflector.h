@@ -64,10 +64,10 @@ public:
 
 private:
 	CConf                      m_conf;
-	std::string                m_file;
 	std::vector<CYSFRepeater*> m_repeaters;
 
 	CYSFRepeater* findRepeater(const std::string& callsign) const;
+	void dumpRepeaters() const;
 };
 
 #endif

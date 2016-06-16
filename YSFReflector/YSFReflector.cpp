@@ -25,6 +25,9 @@
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
 #else
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -164,6 +167,9 @@ void CYSFReflector::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
+	CTimer dumpTimer(1000U, 120U);
+	dumpTimer.start();
+
 	CTimer pollTimer(1000U, 5U);
 	pollTimer.start();
 
@@ -287,6 +293,12 @@ void CYSFReflector::run()
 			watchdogTimer.stop();
 		}
 
+		dumpTimer.clock(ms);
+		if (dumpTimer.hasExpired()) {
+			dumpRepeaters();
+			dumpTimer.start();
+		}
+
 		if (ms < 5U) {
 #if defined(_WIN32) || defined(_WIN64)
 			::Sleep(5UL);		// 5ms
@@ -309,4 +321,23 @@ CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
 	}
 
 	return NULL;
+}
+
+void CYSFReflector::dumpRepeaters() const
+{
+	if (m_repeaters.size() == 0U) {
+		LogMessage("No repeaters/gateways linked");
+		return;
+	}
+
+	LogMessage("Currently linked repeaters/gateways:");
+
+	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+		std::string callsign = (*it)->m_callsign;
+		in_addr address      = (*it)->m_address;
+		unsigned int port    = (*it)->m_port;
+		unsigned int timer   = (*it)->m_timer.getTimer();
+		unsigned int timeout = (*it)->m_timer.getTimeout();
+		LogMessage("    %s: %s:%u %u/%u", callsign.c_str(), ::inet_ntoa(address), port, timer, timeout);
+	}
 }
