@@ -14,7 +14,7 @@ ysfreflector.dvswitch.org	42000
 c4fm.from-ct.com		42000
 c4fm-it.selfip.com	42000
 c4fm-mi5.kb8zgl.net	42000
-ysf.darc-saar.de		42000
+ysf012.ysfreflector.de		42000
 m55.evxonline.net		42000
 bm-dmr.uk						42000
 sr8uwd.wiresx.pl    42000
