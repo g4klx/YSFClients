@@ -20,4 +20,5 @@ bm-dmr.uk						  42000
 sr8uwd.wiresx.pl      42000
 ysf-latino.ddns.net   42000
 ysf-fon.f1tzo.com     42000
+xrf906.radioclubveleta.es	42000
 127.0.0.1             42000
