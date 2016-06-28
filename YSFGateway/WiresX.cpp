@@ -319,10 +319,11 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	unsigned char ft = calculateFT(length);
 	unsigned char bt = length / 260U;
 
+	unsigned char seqNo = 0U;
+
 	// Write the header
 	unsigned char buffer[200U];
 	::memcpy(buffer, m_header, 34U);
-	buffer[34U] = 0x00U;
 
 	CSync::add(buffer + 35U);
 
@@ -336,6 +337,8 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	CYSFPayload payload;
 	payload.writeDataFRModeData1(m_csd1, buffer + 35U);
 	payload.writeDataFRModeData2(m_csd2, buffer + 35U);
+
+	buffer[34U] = seqNo++;
 
 	m_network->write(buffer);
 
@@ -382,6 +385,8 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 		fich.setBN(bn);
 		fich.encode(buffer + 35U);
 
+		buffer[34U] = seqNo++;
+
 		m_network->write(buffer);
 
 		fn++;
@@ -392,8 +397,6 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	}
 
 	// Write the trailer
-	buffer[34U] = 0x01U;
-
 	fich.setFI(YSF_FI_TERMINATOR);
 	fich.setFN(fn);
 	fich.setBN(bn);
@@ -401,6 +404,8 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	payload.writeDataFRModeData1(m_csd1, buffer + 35U);
 	payload.writeDataFRModeData2(m_csd2, buffer + 35U);
+
+	buffer[34U] = seqNo | 0x01U;
 
 	m_network->write(buffer);
 }
