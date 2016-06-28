@@ -24,7 +24,7 @@
 #
 ###############################################################################
 #
-# On a Linux based system, such as a Raspberry Pi, this script will perform all 
+# On a Linux based system, such as a Raspberry Pi, this script will perform all  
 # the steps required to maintain the YSFHosts.txt (or similar) file for you.
 #
 # It is designed to run from crontab and will download the YSFHosts from the 
