@@ -6,7 +6,7 @@
 #
 # Copyright (C) 2016 by Tony Corbett G0WFV
 # Adapted to YSFHosts by Paul Nannery KC2VRJ on 6/28/2016 with all crdeit 
-#TO G0VFV for the orignal script.
+# to G0WFV for the orignal script.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 #
 # ... and add the following line to the bottom of the file ...
 #
-#     0  0  *  *  *  /path/to/script/DMRIDUpdate.sh 1>/dev/null 2>&1
+#     0  0  *  *  *  /path/to/script/YSFHostsupdate.sh 1>/dev/null 2>&1
 #
 # ... where /path/to/script/ should be replaced by the path to this script.
 #
@@ -51,10 +51,8 @@
 #                              CONFIGURATION
 #
 # Full path to YSFHosts
-YSFHOSTS=/home/pi/YSFHosts1.txt
+YSFHOSTS=/path/to/YSFHosts.txt
 
-# How many DMR ID files do you want backed up (0 = do not keep backups)
-DMRFILEBACKUP=1
 # How many YSFHosts files do you want backed up (0 = do not keep backups) 
 YSFHOSTSFILEBACKUP=1
 
