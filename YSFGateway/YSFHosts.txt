@@ -59,9 +59,6 @@ ysf-latino.ddns.net 42000
 # FON-Gateway/Allmode-GW
 ysf-fon.f1tzo.com 42000
 
-# ------/LNDCisar_Italy
-xrf003.iw0red.it 42000
-
 # C4FM_CADIZ/SCSF-ED7ZAJ
 ed7zaj.ddns.net 42000
 
