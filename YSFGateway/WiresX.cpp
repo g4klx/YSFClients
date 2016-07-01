@@ -339,7 +339,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	payload.writeDataFRModeData2(m_csd2, buffer + 35U);
 
 	buffer[34U] = seqNo;
-	seqNo *= 2U;
+	seqNo += 2U;
 
 	m_network->write(buffer);
 
@@ -387,7 +387,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 		fich.encode(buffer + 35U);
 
 		buffer[34U] = seqNo;
-		seqNo *= 2U;
+		seqNo += 2U;
 
 		m_network->write(buffer);
 
