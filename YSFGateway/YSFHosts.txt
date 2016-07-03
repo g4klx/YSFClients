@@ -7,78 +7,85 @@
 # please register it at:
 # https://register.ysfreflector.de
 #
+# It is also possible to export this file by
+# yourself via wget, curl or something else:
+# https://register.ysfreflector.de/export.php
+#
 
-# Parrot/Parrot
-127.0.0.1 42000
-
-# YSF001/C4FM Reflector
-c4fm.duckdns.org 42000
-
-# YSF002-WIRESCAT/C4FM Catalunya
-c4fm.ea3hkb.com 42000
-
-# FUSIONBE2/FusionBelgium
-ysf.on4top.be 42000
-
-# YSF004-EDT/C4FM Reflector
-c4fm.sustrai.org 42000
-
-# ve2mrcfusion/Fusion Quebec
-ysf.ve2mrc.com 42000
-
-# YSF006 Norway/24299+XLX404D
-ysf.hamlabs.no 42000
-
-# BM-SPAIN/BM 2141
-c4fm.spain-dmr.es 42000
-
-# YSF008 USA/DVSwitch test
-ysfreflector.dvswitch.org 42000
-
-# -FUSION-PRT-/Fusion-Portuga
-c4fm.from-ct.com 42000
-
-# FUSION-ITALY/Italy YSFR
-c4fm-it.selfip.com 42000
-
-# Michigan-MI5/Michigan MI5
-c4fm-mi5.kb8zgl.net 42000
-
-# YSF-France/Fusion-France
-m55.evxonline.net 42000
-
-# UK_YFS_BM/UK_Reflector
-bm-dmr.uk 42000
-
-# YSF016-SR8UWD/WLODAWA
-sr8uwd.wiresx.pl 42000
-
-# -FUSION-SPAIN-/fusion-spain
-ysf-latino.ddns.net 42000
-
-# FON-Gateway/Allmode-GW
-ysf-fon.f1tzo.com 42000
-
-# C4FM_CADIZ/SCSF-ED7ZAJ
-ed7zaj.ddns.net 42000
-
-# YSF027/Zone_1_Italy
-194.116.29.78 42000
-
-# YRF003 CISAR-IT/www.cisar.it
-xrf003.iw0red.it 42000
-
-# YSF262-Germany/YSF262 Germany
-ysf262.ysfreflector.de 42000
-
-# YSF444/Dutch Refl.
-ysf444.pa3dfn.nl 42000
-
-# VKFUSION-2/VK-Reflector 2
+# YSF500 / AU VKFUSION-2 / VK-Reflector 2
 vkfusion2.ysfreflector.net 42000
 
-# Fusion - BRAZIL/DV Brazil
+# YSF001 / AU YSF001 / C4FM Reflector
+c4fm.duckdns.org 42000
+
+# YSF003 / BE FUSIONBE2 / FusionBelgium
+ysf.on4top.be 42000
+
+# YSF724 / BR Fusion-BRAZIL / DV Brazil
 ysf.dvbrazil.com.br 42000
 
-# YSF906/C4FM-EA7RKV
+# YSF005 / CA ve2mrcfusion / Fusion Quebec
+ysf.ve2mrc.com 42000
+
+# YSF262 / DE Germany / YSF262 Germany
+ysf262.ysfreflector.de 42000
+
+# YSF012 / DK DK-YSF012 / C4FM Reflector
+oz2ree.dk 42000
+
+# YSF007 / ES BM-SPAIN / BM 2141
+c4fm.spain-dmr.es 42000
+
+# YSF020 / ES C4FM_CADIZ / SCSF-ED7ZAJ
+ed7zaj.ddns.net 42000
+
+# YSF002 / ES YSF002-WIRES / C4FM Catalunya
+c4fm.ea3hkb.com 42000
+
+# YSF004 / ES YSF004-EDT / C4FM Reflector
+c4fm.sustrai.org 42000
+
+# YSF906 / ES YSF906 / C4FM-EA7RKV
 xrf906.radioclubveleta.es 42000
+
+# YSF018 / FR FON-Gateway / Allmode-GW
+ysf-fon.f1tzo.com 42000
+
+# YSF014 / FR YSF-France / Fusion-France
+m55.evxonline.net 42000
+
+# YSF015 / GB UK_YFS_BM / UK_Reflector
+bm-dmr.uk 42000
+
+# YSF010 / IT FUSION-ITALY / Italy YSFR
+c4fm-it.selfip.com 42000
+
+# YSF222 / IT YRF003 CISAR / www.cisar.it
+xrf003.iw0red.it 42000
+
+# YSF027 / IT YSF027 / Zone_1_Italy
+194.116.29.78 42000
+
+# YSF444 / NL YSF444 / Dutch Refl.
+ysf444.pa3dfn.nl 42000
+
+# YSF006 / NO YSF006 Norway / 24299+XLX404D
+ysf.hamlabs.no 42000
+
+# YSF016 / PL YSF016-SR8UWD / WLODAWA
+sr8uwd.wiresx.pl 42000
+
+# YSF009 / PT -FUSION-PRT- / Fusion-Portuga
+c4fm.from-ct.com 42000
+
+# YSF011 / US Michigan-MI5 / Michigan MI5
+c4fm-mi5.kb8zgl.net 42000
+
+# YSF008 / US YSF008 USA / DVSwitch test
+ysfreflector.dvswitch.org 42000
+
+# YSF017 / VE FUSION-SPAIN / fusion-spain
+ysf-latino.ddns.net 42000
+
+# YSF000 / ZZ Parrot / Parrot
+127.0.0.1 42000
