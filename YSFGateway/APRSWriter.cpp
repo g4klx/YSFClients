@@ -95,10 +95,10 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	::sprintf(lat, "%04.2lf", latitude);
+	::sprintf(lat, "%07.2lf", latitude);
 
 	char lon[20U];
-	::sprintf(lon, "%05.2lf", longitude);
+	::sprintf(lon, "%08.2lf", longitude);
 
 	char symbol;
 	switch (radio) {
