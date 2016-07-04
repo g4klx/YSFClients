@@ -66,6 +66,9 @@ xrf003.iw0red.it 42000
 # YSF027 / IT YSF027 / Zone_1_Italy
 194.116.29.78 42000
 
+# YSF031 / NL NL Central / C4FM NL
+c4fm.pa7lim.nl 42000
+
 # YSF444 / NL YSF444 / Dutch Refl.
 ysf444.pa3dfn.nl 42000
 
@@ -89,3 +92,4 @@ ysf-latino.ddns.net 42000
 
 # YSF000 / ZZ Parrot / Parrot
 127.0.0.1 42000
+
