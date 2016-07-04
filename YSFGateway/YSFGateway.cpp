@@ -97,6 +97,8 @@ int CYSFGateway::run()
 		return 1;
 	}
 
+	setlocale(LC_ALL, "C");
+
 	ret = ::LogInitialise(m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel());
 	if (!ret) {
 		::fprintf(stderr, "YSFGateway: unable to open the log file\n");

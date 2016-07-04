@@ -95,35 +95,10 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	if (latitude >= 1000.0F)
-		::sprintf(lat, "%.2lf", latitude);
-	else if (latitude >= 100.0F)
-		::sprintf(lat, "0%.2lf", latitude);
-	else if (latitude >= 10.0F)
-		::sprintf(lat, "00%.2lf", latitude);
-	else
-		::sprintf(lat, "000%.2lf", latitude);
+	::sprintf(lat, "%04.2lf", latitude);
 
 	char lon[20U];
-	if (longitude >= 10000.0F)
-		::sprintf(lon, "%.2lf", longitude);
-	else if (longitude >= 1000.0F)
-		::sprintf(lon, "0%.2lf", longitude);
-	else if (longitude >= 100.0F)
-		::sprintf(lon, "00%.2lf", longitude);
-	else if (longitude >= 10.0F)
-		::sprintf(lon, "000%.2lf", longitude);
-	else
-		::sprintf(lon, "0000%.2lf", longitude);
-
-	// Convert commas to periods in the latitude, longitude and frequencies
-	p = ::strchr(lat, ',');
-	if (p != NULL)
-		*p = '.';
-
-	p = ::strchr(lon, ',');
-	if (p != NULL)
-		*p = '.';
+	::sprintf(lon, "%05.2lf", longitude);
 
 	char symbol;
 	switch (radio) {
@@ -214,39 +189,10 @@ void CAPRSWriter::sendIdFrames()
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	if (latitude >= 1000.0F)
-		::sprintf(lat, "%.2lf", latitude);
-	else if (latitude >= 100.0F)
-		::sprintf(lat, "0%.2lf", latitude);
-	else if (latitude >= 10.0F)
-		::sprintf(lat, "00%.2lf", latitude);
-	else
-		::sprintf(lat, "000%.2lf", latitude);
+	::sprintf(lat, "%04.2lf", latitude);
 
 	char lon[20U];
-	if (longitude >= 10000.0F)
-		::sprintf(lon, "%.2lf", longitude);
-	else if (longitude >= 1000.0F)
-		::sprintf(lon, "0%.2lf", longitude);
-	else if (longitude >= 100.0F)
-		::sprintf(lon, "00%.2lf", longitude);
-	else if (longitude >= 10.0F)
-		::sprintf(lon, "000%.2lf", longitude);
-	else
-		::sprintf(lon, "0000%.2lf", longitude);
-
-	// Convert commas to periods in the latitude, longitude and frequencies
-	char* p = ::strchr(lat, ',');
-	if (p != NULL)
-		*p = '.';
-
-	p = ::strchr(lon, ',');
-	if (p != NULL)
-		*p = '.';
-
-	p = ::strchr(desc, ',');
-	if (p != NULL)
-		*p = '.';
+	::sprintf(lon, "%05.2lf", longitude);
 
 	std::string server = m_callsign;
 	int pos = server.find_first_of('-');
