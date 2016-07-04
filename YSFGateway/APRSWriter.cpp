@@ -44,7 +44,7 @@ m_height(0)
 
 	if (!suffix.empty()) {
 		m_callsign.append("-");
-		m_callsign.append(suffix);
+		m_callsign.append(suffix.substr(0U, 1U));
 	}
 
 	m_thread = new CAPRSWriterThread(m_callsign, password, address, port);
