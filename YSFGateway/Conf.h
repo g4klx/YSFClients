@@ -66,6 +66,7 @@ public:
   unsigned int getNetworkDataPort() const;
   unsigned int getNetworkStatusPort() const;
   std::string  getNetworkHosts() const;
+  std::string  getNetworkStartup() const;
   bool         getNetworkDebug() const;
 
 private:
@@ -101,6 +102,7 @@ private:
   unsigned int m_networkDataPort;
   unsigned int m_networkStatusPort;
   std::string  m_networkHosts;
+  std::string  m_networkStartup;
   bool         m_networkDebug;
 };
 

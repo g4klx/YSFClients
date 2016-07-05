@@ -81,7 +81,9 @@ m_gps(NULL),
 m_wiresX(NULL),
 m_netNetwork(NULL),
 m_linked(false),
-m_exclude(false)
+m_exclude(false),
+m_startupTimer(1000U, 30U),
+m_startup()
 {
 }
 
@@ -204,6 +206,10 @@ int CYSFGateway::run()
 		m_wiresX->setInfo(name, txFrequency, rxFrequency);
 
 		m_wiresX->start();
+
+		m_startup = m_conf.getNetworkStartup();
+		if (!m_startup.empty())
+			m_startupTimer.start();
 	}
 
 	CStopWatch stopWatch;
@@ -239,12 +245,14 @@ int CYSFGateway::run()
 							CYSFReflector* reflector = m_wiresX->getReflector();
 							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_startupTimer.stop();
 							m_linked = true;
 						}
 						break;
 					case WXS_DISCONNECT:
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 						m_netNetwork->setDestination();
+						m_startupTimer.stop();
 						m_linked = false;
 						break;
 					default:
@@ -289,6 +297,17 @@ int CYSFGateway::run()
 				m_gps->reset();
 			watchdogTimer.stop();
 			m_exclude = false;
+		}
+
+		m_startupTimer.clock(ms);
+		if (m_startupTimer.isRunning() && m_startupTimer.hasExpired()) {
+			CYSFReflector* reflector = m_wiresX->getReflector(m_startup);
+			if (reflector != NULL) {
+				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
+				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_startupTimer.stop();
+				m_linked = true;
+			}
 		}
 
 		if (ms < 5U)

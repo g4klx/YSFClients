@@ -52,6 +52,7 @@ public:
 	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 
 	CYSFReflector* getReflector() const;
+	CYSFReflector* getReflector(const std::string& id);
 
 	void clock(unsigned int ms);
 

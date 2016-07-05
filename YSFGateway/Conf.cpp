@@ -64,6 +64,7 @@ m_networkEnabled(false),
 m_networkDataPort(0U),
 m_networkStatusPort(0U),
 m_networkHosts(),
+m_networkStartup(),
 m_networkDebug(false)
 {
 }
@@ -174,6 +175,8 @@ bool CConf::read()
 			m_networkStatusPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Hosts") == 0)
 			m_networkHosts = value;
+		else if (::strcmp(key, "Startup") == 0)
+			m_networkStartup = value;
 		else if (::strcmp(key, "Debug") == 0)
 			m_networkDebug = ::atoi(value) == 1;
 	}
@@ -317,6 +320,11 @@ unsigned int CConf::getNetworkStatusPort() const
 std::string CConf::getNetworkHosts() const
 {
 	return m_networkHosts;
+}
+
+std::string CConf::getNetworkStartup() const
+{
+	return m_networkStartup;
 }
 
 bool CConf::getNetworkDebug() const

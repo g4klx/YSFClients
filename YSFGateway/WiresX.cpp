@@ -221,6 +221,13 @@ CYSFReflector* CWiresX::getReflector() const
 	return m_reflector;
 }
 
+CYSFReflector* CWiresX::getReflector(const std::string& id)
+{
+	m_reflector = m_reflectors.find(id);
+
+	return m_reflector;
+}
+
 void CWiresX::processDX(const unsigned char* source)
 {
 	::LogDebug("Received DX from %10.10s", source);
