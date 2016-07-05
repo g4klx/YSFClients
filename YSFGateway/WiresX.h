@@ -89,7 +89,7 @@ private:
 	void sendSearchNotFoundReply();
 
 	void createReply(const unsigned char* data, unsigned int length);
-	unsigned char calculateFT(unsigned int length) const;
+	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };
 
 #endif

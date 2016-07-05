@@ -316,8 +316,15 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	assert(data != NULL);
 	assert(length > 0U);
 
-	unsigned char ft = calculateFT(length);
 	unsigned char bt = length / 260U;
+
+	length += bt;
+
+	unsigned int blocks = (length - 10U) / 20U;
+	if ((length % 20U) > 0U) blocks++;
+	length = blocks * 20U + 10U;
+
+	unsigned char ft = calculateFT(length, 0U);
 
 	unsigned char seqNo = 0U;
 
@@ -352,8 +359,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	while (offset < length) {
 		switch (fn) {
 		case 0U: {
-				unsigned int len = length - offset;
-				ft = calculateFT(len);
+				ft = calculateFT(length, offset);
 				payload.writeDataFRModeData1(m_csd1, buffer + 35U);
 				payload.writeDataFRModeData2(m_csd2, buffer + 35U);
 			}
@@ -412,8 +418,10 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	m_network->write(buffer);
 }
 
-unsigned char CWiresX::calculateFT(unsigned int length) const
+unsigned char CWiresX::calculateFT(unsigned int length, unsigned int offset) const
 {
+	length -= offset;
+
 	if (length > 220U) return 7U;
 
 	if (length > 180U) return 6U;
@@ -495,9 +503,9 @@ void CWiresX::sendDXReply()
 	data[127U] = 0x03U;			// End of data marker
 	data[128U] = CCRC::addCRC(data, 128U);
 
-	CUtils::dump(1U, "DX Reply", data, 140U);
+	CUtils::dump(1U, "DX Reply", data, 129U);
 
-	createReply(data, 140U);
+	createReply(data, 129U);
 
 	m_seqNo++;
 }
@@ -548,9 +556,9 @@ void CWiresX::sendConnectReply()
 	data[89U] = 0x03U;			// End of data marker
 	data[90U] = CCRC::addCRC(data, 90U);
 
-	CUtils::dump(1U, "CONNECT Reply", data, 100U);
+	CUtils::dump(1U, "CONNECT Reply", data, 91U);
 
-	createReply(data, 100U);
+	createReply(data, 91U);
 
 	m_seqNo++;
 }
@@ -585,9 +593,9 @@ void CWiresX::sendDisconnectReply()
 	data[89U] = 0x03U;			// End of data marker
 	data[90U] = CCRC::addCRC(data, 90U);
 
-	CUtils::dump(1U, "DISCONNECT Reply", data, 100U);
+	CUtils::dump(1U, "DISCONNECT Reply", data, 91U);
 
-	createReply(data, 100U);
+	createReply(data, 91U);
 
 	m_seqNo++;
 }
@@ -652,12 +660,9 @@ void CWiresX::sendAllReply()
 	data[offset + 0U] = 0x03U;			// End of data marker
 	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
 
-	unsigned int blocks = (offset + 1U) / 20U;
-	if ((blocks % 20U) > 0U) blocks++;
+	CUtils::dump(1U, "ALL Reply", data, offset + 2U);
 
-	CUtils::dump(1U, "ALL Reply", data, blocks * 20U);
-
-	createReply(data, blocks * 20U);
+	createReply(data, offset + 2U);
 
 	m_seqNo++;
 }
@@ -731,12 +736,9 @@ void CWiresX::sendSearchReply()
 	data[offset + 0U] = 0x03U;			// End of data marker
 	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
 
-	unsigned int blocks = (offset + 1U) / 20U;
-	if ((blocks % 20U) > 0U) blocks++;
+	CUtils::dump(1U, "SEARCH Reply", data, offset + 2U);
 
-	CUtils::dump(1U, "SEARCH Reply", data, blocks * 20U);
-
-	createReply(data, blocks * 20U);
+	createReply(data, offset + 2U);
 
 	m_seqNo++;
 }
@@ -772,9 +774,9 @@ void CWiresX::sendSearchNotFoundReply()
 	data[29U] = 0x03U;			// End of data marker
 	data[30U] = CCRC::addCRC(data, 30U);
 
-	CUtils::dump(1U, "SEARCH Reply", data, 60U);
+	CUtils::dump(1U, "SEARCH Reply", data, 31U);
 
-	createReply(data, 60U);
+	createReply(data, 31U);
 
 	m_seqNo++;
 }
