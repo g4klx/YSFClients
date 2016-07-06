@@ -163,7 +163,9 @@ void CYSFReflector::run()
 	ret = network.open();
 	if (!ret)
 		return;
-
+	
+	network.setCount(0);
+	
 	CStopWatch stopWatch;
 	stopWatch.start();
 
