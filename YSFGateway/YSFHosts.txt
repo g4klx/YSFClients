@@ -30,7 +30,7 @@ ysf.ve2mrc.com 42000
 # YSF262 / DE Germany / YSF262 Germany
 ysf262.ysfreflector.de 42000
 
-# YSF012 / DK DK-YSF012 / C4FM Reflector
+# YSF012 / DK YSF012 / C4FM Reflector
 oz2ree.dk 42000
 
 # YSF007 / ES BM-SPAIN / BM 2141
@@ -66,7 +66,7 @@ xrf003.iw0red.it 42000
 # YSF027 / IT YSF027 / Zone_1_Italy
 194.116.29.78 42000
 
-# YSF031 / NL NL Central / C4FM NL
+# YSF031 / NL Central / C4FM NL
 c4fm.pa7lim.nl 42000
 
 # YSF444 / NL YSF444 / Dutch Refl.
@@ -75,10 +75,13 @@ ysf444.pa3dfn.nl 42000
 # YSF006 / NO YSF006 Norway / 24299+XLX404D
 ysf.hamlabs.no 42000
 
+# YSF260 / PL POLAND / Poland REF
+78.11.185.131 42000
+
 # YSF016 / PL YSF016-SR8UWD / WLODAWA
 sr8uwd.wiresx.pl 42000
 
-# YSF009 / PT -FUSION-PRT- / Fusion-Portuga
+# YSF009 / PT-FUSION-PRT--- / Fusion-Portuga
 c4fm.from-ct.com 42000
 
 # YSF011 / US Michigan-MI5 / Michigan MI5
