@@ -77,13 +77,8 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	::memcpy(callsign, source, YSF_CALLSIGN_LENGTH);
 	callsign[YSF_CALLSIGN_LENGTH] = 0x00U;
 
-	char* p = ::strchr(callsign, ' ');
-	if (p != NULL)
-		*p = 0x00U;
-
-	p = ::strchr(callsign, '/');
-	if (p != NULL)
-		*p = 0x00U;
+	size_t n = ::strspn(callsign, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+	callsign[n] = 0x00U;
 
 	double tempLat = ::fabs(fLatitude);
 	double tempLong = ::fabs(fLongitude);
