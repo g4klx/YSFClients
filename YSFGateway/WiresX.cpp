@@ -323,13 +323,22 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	assert(data != NULL);
 	assert(length > 0U);
 
-	unsigned char bt = length / 260U;
+	unsigned char bt = 0U;
 
-	length += bt;
+	if (length > 260U) {
+		bt = 1U;
+		bt += (length - 260U) / 259U;
 
-	unsigned int blocks = (length - 10U) / 20U;
-	if ((length % 20U) > 0U) blocks++;
-	length = blocks * 20U + 10U;
+		length += bt;
+	}
+
+	if (length > 20U) {
+		unsigned int blocks = (length - 20U) / 40U;
+		if ((length % 40U) > 0U) blocks++;
+		length = blocks * 40U + 20U;
+	} else {
+		length = 20U;
+	}
 
 	unsigned char ft = calculateFT(length, 0U);
 
