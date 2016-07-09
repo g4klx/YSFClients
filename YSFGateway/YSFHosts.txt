@@ -33,9 +33,6 @@ ysf262.ysfreflector.de 42000
 # YSF012 / DK YSF012 / C4FM Reflector
 oz2ree.dk 42000
 
-# YSF007 / ES BM-SPAIN / BM 2141
-c4fm.spain-dmr.es 42000
-
 # YSF020 / ES C4FM_CADIZ / SCSF-ED7ZAJ
 ed7zaj.ddns.net 42000
 
