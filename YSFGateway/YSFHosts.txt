@@ -12,11 +12,11 @@
 # https://register.ysfreflector.de/export.php
 #
 
+# YSF001 / AU AUYSF001 / C4FM Reflector
+c4fm.duckdns.org 42000
+
 # YSF500 / AU FUSION2 / VK-Reflector 2
 aufusion2.ysfreflector.net 42000
-
-# YSF001 / AU YSF001 / C4FM Reflector
-c4fm.duckdns.org 42000
 
 # YSF003 / BE FUSIONBE2 / FusionBelgium
 ysf.on4top.be 42000
