@@ -48,6 +48,9 @@ c4fm-it.selfip.com 42000
 # YSF003 / FUSIONBE2        / FusionBelgium 
 ysf.on4top.be 42000
 
+# YSF202 / GR YSF202        / Fusion Greece 
+ysf202.dv4gr.eu 42000
+
 # YSF222 / IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
 
@@ -88,7 +91,7 @@ ysf024.ham-dmr.pl 42024
 bm-dmr.uk 42000
 
 # YSF032 / US Arizona USA / MARA C4FM
-127.0.0.1 4200
+127.0.0.1 42000
 
 # YSF011 / US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
