@@ -96,6 +96,9 @@ bm-dmr.uk 42000
 # YSF011 / US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
 
+# YSF423 / US NETDA  / FusioNET
+ysf423.netda.us 42000
+
 # YSF008 / US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
 
