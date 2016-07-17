@@ -87,7 +87,7 @@ ysf023.ham-dmr.pl 42023
 # YSF024 / TechTalk24       / Engineers talk
 ysf024.ham-dmr.pl 42024
 
-# YSF015 / UK_YFS_BM        / UK_Reflector  
+# YSF015 / UK_YFS_BM_UK     / UK_Ref_DN_ONLY
 bm-dmr.uk 42000
 
 # YSF032 / US Arizona USA / MARA C4FM
@@ -112,7 +112,7 @@ c4fm.sustrai.org 42000
 ysf.hamlabs.no 42000
 
 # YSF016 / YSF016           / SR8UWD Wlodawa
-sr8uwd.wiresx.pl 42000
+ysf016.wiresx.pl 42000
 
 # YSF017 / YSF017           / YSFLatino TG-9
 ysf-latino.ddns.net 42000
