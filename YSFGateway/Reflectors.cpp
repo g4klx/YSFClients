@@ -34,7 +34,7 @@ m_reflectors(),
 m_it(),
 m_current(),
 m_search(),
-m_timer(1000U, 15U)
+m_timer(1000U, 30U)
 {
 	assert(statusPort > 0U);
 }
@@ -70,6 +70,18 @@ bool CReflectors::load()
 	}
 
 	m_it = m_reflectors.begin();
+
+	// Make the polling time based on the number of reflectors within limits
+	unsigned int nReflectors = m_reflectors.size();
+	if (nReflectors > 0U) {
+		unsigned int t = 600U / nReflectors;
+		if (t > 30U)
+			t = 30U;
+		else if (t < 15U)
+			t = 15U;
+
+		m_timer.setTimeout(t);
+	}
 
 	m_timer.start();
 
