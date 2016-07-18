@@ -18,9 +18,6 @@
 # YSF500 / AU FUSION2       / AU Reflector2 
 aufusion2.ysfreflector.net 42000
 
-# YSF724 / BR Fusion-BRAZIL / DV Brazil
-ysf.dvbrazil.com.br 42000
-
 # YSF005 / CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
 
@@ -30,14 +27,8 @@ c4fm.ea3hkb.com 42000
 # YSF262 / DE Germany       / YSF262 TG26208
 ysf262.ysfreflector.de 42000
 
-# YSF012 / DK YSF012 C4FM   / YSF012 Reflect
+# YSF012 / DK-YSF012 C4FM   / DK-YSF012 C4FM
 oz2ree.dk 42000
-
-# YSF007 / ES BM-SPAIN / BM 2141
-c4fm.spain-dmr.es 42000
-
-# YSF020 / ES C4FM_CADIZ / SCSF-ED7ZAJ
-ed7zaj.ddns.net 42000
 
 # YSF018 / FON-Gateway      / AllModes-GW   
 ysf-fon.f1tzo.com 42000
@@ -53,9 +44,6 @@ ysf202.dv4gr.eu 42000
 
 # YSF222 / IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
-
-# YSF027 / IT YSF027 / Zone_1_Italy
-194.116.29.78 42000
 
 # YSF860 / NJ EXP           / NJ EXP        
 xrf.njpaasterisk.org 42000
