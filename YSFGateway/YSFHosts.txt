@@ -42,6 +42,9 @@ ysf.on4top.be 42000
 # YSF202 / GR YSF202        / Fusion Greece 
 ysf202.dv4gr.eu 42000
 
+# YSF001 / IT BM - ITA / BRIDGE BM C4FM
+ysf.digitalham.it 42000
+
 # YSF222 / IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
 
