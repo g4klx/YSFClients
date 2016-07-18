@@ -15,9 +15,6 @@
 # YSF032 / Arizona USA      / MARA C4FM     
 99.196.226.130 42000
 
-# YSF001 / AU AUYSF001      / Alea iacta est
-c4fm.duckdns.org 42000
-
 # YSF500 / AU FUSION2       / AU Reflector2 
 aufusion2.ysfreflector.net 42000
 
