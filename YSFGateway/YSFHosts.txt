@@ -27,6 +27,9 @@ c4fm.ea3hkb.com 42000
 # YSF262 / DE Germany       / YSF262 TG26208
 ysf262.ysfreflector.de 42000
 
+# YSF013 / DE Germany2      / Germany 2     
+ysf262.ysfreflector.de 42001
+
 # YSF012 / DK-YSF012 C4FM   / DK-YSF012 C4FM
 oz2ree.dk 42000
 
@@ -42,9 +45,6 @@ ysf.on4top.be 42000
 # YSF202 / GR YSF202        / Fusion Greece 
 ysf202.dv4gr.eu 42000
 
-# YSF001 / IT BM - ITA / BRIDGE BM C4FM
-ysf.digitalham.it 42000
-
 # YSF222 / IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
 
@@ -57,7 +57,7 @@ c4fm.pa7lim.nl 42000
 # YSF444 / NL YSF444        / Dutch Refl.   
 ysf444.pa3dfn.nl 42000
 
-# YSF260 / PL POLAND        / DMR TG260044  
+# YSF260 / PL POLAND        / DMR 260042    
 ysf260.ham-dmr.pl 42026
 
 # YSF016 / PL YSF016        / SR8UWD Wlodawa
@@ -73,7 +73,7 @@ ysf022.ham-dmr.pl 42022
 c4fm.from-ct.com 42000
 
 # YSF226 / RO YSF226        / C4FM Romania  
-xrf226.hamnet.ro 42000
+77.81.108.136 42000
 
 # YSF023 / SP EmCom         / EmCom TG260023
 ysf023.ham-dmr.pl 42023
@@ -95,6 +95,9 @@ ysfreflector.dvswitch.org 42000
 
 # YSF014 / YSF-France       / Fusion-France 
 m55.evxonline.net 42000
+
+# YSF001 / YSF001           / BM ITALIA TG22
+ysf.digitalham.it 42000
 
 # YSF004 / YSF004-EDT       / C4FM Reflector
 c4fm.sustrai.org 42000
