@@ -99,9 +99,6 @@ ysfreflector.dvswitch.org 42000
 # YSF014 / YSF-France       / Fusion-France 
 m55.evxonline.net 42000
 
-# YSF001 / YSF001           / BM ITALIA TG22
-ysf.digitalham.it 42000
-
 # YSF004 / YSF004-EDT       / C4FM Reflector
 c4fm.sustrai.org 42000
 
