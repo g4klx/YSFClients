@@ -24,10 +24,13 @@ ysf.ve2mrc.com 42000
 # YSF002 / CT YSF002 wCAT   / C4FM Catalunya
 c4fm.ea3hkb.com 42000
 
+# YSF230 / CZ YSF CZ1 / Czech 1 
+80.250.3.114 42000
+
 # YSF262 / DE Germany       / YSF262 TG26208
 ysf262.ysfreflector.de 42000
 
-# YSF013 / DE Germany2      / Germany 2     
+# YSF013 / DE Germany2      / YSF013 no link
 ysf262.ysfreflector.de 42001
 
 # YSF012 / DK-YSF012 C4FM   / DK-YSF012 C4FM
