@@ -24,9 +24,6 @@ ysf.ve2mrc.com 42000
 # YSF002 / CT YSF002 wCAT   / C4FM Catalunya
 c4fm.ea3hkb.com 42000
 
-# YSF230 / CZ YSF CZ1 / Czech 1 
-80.250.3.114 42000
-
 # YSF262 / DE Germany       / YSF262 TG26208
 ysf262.ysfreflector.de 42000
 
@@ -50,6 +47,9 @@ ysf202.dv4gr.eu 42000
 
 # YSF222 / IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
+
+# YSF423 / NETDA            / FusioNET      
+ysf423.netda.us 42000
 
 # YSF860 / NJ EXP           / NJ EXP        
 xrf.njpaasterisk.org 42000
@@ -90,17 +90,14 @@ bm-dmr.uk 42000
 # YSF011 / US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
 
-# YSF423 / US NETDA  / FusioNET
-ysf423.netda.us 42000
-
 # YSF008 / US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
 
+# YSF230 / YSF CZ1          / Czech 1       
+80.250.3.114 42000
+
 # YSF014 / YSF-France       / Fusion-France 
 m55.evxonline.net 42000
-
-# YSF001 / YSF001           / BM ITALIA TG22
-ysf.digitalham.it 42000
 
 # YSF004 / YSF004-EDT       / C4FM Reflector
 c4fm.sustrai.org 42000
