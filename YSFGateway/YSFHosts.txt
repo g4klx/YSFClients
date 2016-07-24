@@ -78,6 +78,9 @@ c4fm.from-ct.com 42000
 # YSF226 / RO YSF226        / C4FM Romania  
 77.81.108.136 42000
 
+# YSF231 / SK OM0OUE / Slovakia
+88.212.32.147 42000
+
 # YSF023 / SP EmCom         / EmCom TG260023
 ysf023.ham-dmr.pl 42023
 
@@ -108,7 +111,7 @@ ysf.hamlabs.no 42000
 # YSF017 / YSF017           / YSFLatino TG-9
 ysf-latino.ddns.net 42000
 
-# YSF906 / YSF906           / EA7RKV        
+# YSF906 / YSF906           / ED7ZAK        
 xrf906.radioclubveleta.es 42000
 
 # YSF000 / ZZ Parrot / Parrot
