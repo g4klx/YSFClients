@@ -24,10 +24,13 @@ ysf.ve2mrc.com 42000
 # CT YSF002 wCAT   / C4FM Catalunya
 c4fm.ea3hkb.com 42000
 
-# DE Germany       / YSF262 TG26208
+# CZ Czech         / TG2300 DCS019V
+80.250.3.114 42000
+
+# DE Germany       / TG26208       
 ysf262.ysfreflector.de 42000
 
-# DE Germany2      / YSF013 no link
+# DE Germany2      / no bridge     
 ysf262.ysfreflector.de 42001
 
 # DK-YSF012 C4FM   / DK-YSF012 C4FM
@@ -63,6 +66,9 @@ ysf444.pa3dfn.nl 42000
 # PL POLAND        / DMR 260042    
 ysf260.ham-dmr.pl 42026
 
+# PL YSF088 / Bedzin
+83.142.218.188 42088
+
 # Poland 21        / DMR TG260021  
 ysf021.ham-dmr.pl 42021
 
@@ -92,9 +98,6 @@ c4fm-mi5.kb8zgl.net 42000
 
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
-
-# YSF CZ1          / Czech 1       
-80.250.3.114 42000
 
 # YSF-France       / Fusion-France 
 m55.evxonline.net 42000
