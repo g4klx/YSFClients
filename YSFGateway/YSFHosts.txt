@@ -28,10 +28,10 @@ c4fm.ea3hkb.com 42000
 80.250.3.114 42000
 
 # DE Germany       / TG26208       
-ysf262.ysfreflector.de 42000
+c4fm.ysfreflector.de 42000
 
 # DE Germany2      / no bridge     
-ysf262.ysfreflector.de 42001
+c4fm.ysfreflector.de 42001
 
 # DK Denmark       / YSF012 C4FM Re
 oz2ree.dk 42000
@@ -53,9 +53,6 @@ xrf003.iw0red.it 42000
 
 # NETDA            / FusioNET      
 ysf423.netda.us 42000
-
-# NJ EXP           / NJ EXP        
-xrf.njpaasterisk.org 42000
 
 # NL Central       / C4FM NL       
 c4fm.pa7lim.nl 42000
@@ -101,6 +98,9 @@ www.wb0yle.com 42000
 
 # US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
+
+# US NJ EXP        / US NJ EXP     
+ysf.njpaasterisk.org 42000
 
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
