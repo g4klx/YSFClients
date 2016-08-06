@@ -36,6 +36,9 @@ c4fm.ysfreflector.de 42001
 # DK Denmark       / YSF012 C4FM Re
 oz2ree.dk 42000
 
+# ES BM-SPAIN / YSFLatino TG-9
+c4fm.spain-dmr.es 42000
+
 # FON-Gateway      / AllModes-GW   
 ysf-fon.f1tzo.com 42000
 
