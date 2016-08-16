@@ -24,7 +24,7 @@ aufusion2.ysfreflector.net 42000
 # CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
 
-# CT YSF002 wCAT   / C4FM Catalunya
+# CT YSF002(21430) / C4FM Catalunya
 c4fm.ea3hkb.com 42000
 
 # CZ Czech         / TG2300 DCS019V
