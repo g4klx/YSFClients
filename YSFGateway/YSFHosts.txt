@@ -21,6 +21,9 @@
 # AU FUSION2       / AU Reflector2 
 aufusion2.ysfreflector.net 42000
 
+# BM TG-2148       / BM TG-2148    
+c4fm.ea3hkb.com 42108
+
 # CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
 
@@ -39,8 +42,8 @@ c4fm.ysfreflector.de 42001
 # DK Denmark       / YSF012 C4FM Re
 oz2ree.dk 42000
 
-# ES BM-SPAIN / YSFLatino TG-9
-c4fm.spain-dmr.es 42000
+# ES YSF004        / C4FM EDT      
+c4fm.sustrai.org 42000
 
 # ES YSF906        / ED7ZAK        
 xrf906.radioclubveleta.es 42000
@@ -116,9 +119,6 @@ ysfreflector.dvswitch.org 42000
 
 # YSF-France       / Fusion-France 
 m55.evxonline.net 42000
-
-# YSF004-EDT       / C4FM Reflector
-c4fm.sustrai.org 42000
 
 # YSF006 NORWAY    / 24299+XLX404D 
 ysf.hamlabs.no 42000
