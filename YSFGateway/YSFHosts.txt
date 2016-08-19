@@ -123,9 +123,6 @@ ysfreflector.dvswitch.org 42000
 # YSF-France       / Fusion-France 
 m55.evxonline.net 42000
 
-# YSF-France       / Fusion-France 
-m55.evxonline.net 42000
-
 # YSF006 NORWAY    / 24299+XLX404D 
 ysf.hamlabs.no 42000
 
