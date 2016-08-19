@@ -21,14 +21,14 @@
 # AU FUSION2       / AU Reflector2 
 aufusion2.ysfreflector.net 42000
 
+# BM TG-21430      / C4FM WIRESCAT 
+c4fm.ea3hkb.com 42000
+
 # BM TG-2148       / BM TG-2148    
 c4fm.ea3hkb.com 42108
 
 # CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
-
-# CT YSF002(21430) / C4FM Catalunya
-c4fm.ea3hkb.com 42000
 
 # CZ Czech         / TG2300 DCS019V
 80.250.3.114 42000
@@ -62,6 +62,9 @@ ysf202.dv4gr.eu 42000
 
 # IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
+
+# IT YSF027 / Zone_1_Italy
+194.116.29.78 42000
 
 # NETDA            / FusioNET      
 ysf423.netda.us 42000
@@ -116,6 +119,9 @@ ysf.njpaasterisk.org 42000
 
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
+
+# YSF-France       / Fusion-France 
+m55.evxonline.net 42000
 
 # YSF-France       / Fusion-France 
 m55.evxonline.net 42000
