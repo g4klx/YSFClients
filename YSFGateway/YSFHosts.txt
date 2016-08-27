@@ -21,14 +21,14 @@
 # AU FUSION2       / AU Reflector2 
 aufusion2.ysfreflector.net 42000
 
-# BM TG-21430      / C4FM WIRESCAT 
-c4fm.ea3hkb.com 42000
-
 # BM TG-2148       / BM TG-2148    
 c4fm.ea3hkb.com 42108
 
 # CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
+
+# CT CATALANA      / C4FM Catalunya
+c4fm.ea3hkb.com 42000
 
 # CZ Czech         / TG2300 DCS019V
 80.250.3.114 42000
@@ -50,6 +50,9 @@ xrf906.radioclubveleta.es 42000
 
 # FON-Gateway      / AllModes-GW   
 ysf-fon.f1tzo.com 42000
+
+# FR YSF-France    / Fusion France 
+m55.evxonline.net 42000
 
 # FUSION-ITALY     / Italy YSFR    
 c4fm-it.selfip.com 42000
@@ -94,7 +97,7 @@ ysf022.ham-dmr.pl 42022
 c4fm.from-ct.com 42000
 
 # RO YSF226        / C4FM Romania  
-77.81.108.136 42000
+xrf226.hamnet.ro 42000
 
 # SK OMO0OUE       / Slovakia      
 88.212.32.147 42000
@@ -114,14 +117,14 @@ www.wb0yle.com 42000
 # US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
 
-# US NJ EXP        / US NJ EXP     
+# US NJ PA Asteris / Link to BM 313
 ysf.njpaasterisk.org 42000
+
+# US US-YSFQNBM-AL / YSF-QBridge
+ysfqbridge.noip.us 42000
 
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
-
-# YSF-France       / Fusion-France 
-m55.evxonline.net 42000
 
 # YSF006 NORWAY    / 24299+XLX404D 
 ysf.hamlabs.no 42000
