@@ -78,6 +78,9 @@ c4fm.pa7lim.nl 42000
 # NL YSF444        / Dutch Refl.   
 ysf444.pa3dfn.nl 42000
 
+# PA Panama Link / Enlace Panama
+69.164.201.29  42000
+
 # PL POLAND        / DMR 260042    
 ysf260.ham-dmr.pl 42026
 
@@ -120,11 +123,11 @@ c4fm-mi5.kb8zgl.net 42000
 # US NJ PA Asteris / Link to BM 313
 ysf.njpaasterisk.org 42000
 
-# US US-YSFQNBM-AL / YSF-QBridge
-ysfqbridge.noip.us 42000
-
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
+
+# US-YSF587MiFL    / YSF-QNetBridge
+ysfqbridge.noip.us 42000
 
 # YSF006 NORWAY    / 24299+XLX404D 
 ysf.hamlabs.no 42000
