@@ -72,7 +72,7 @@ xrf003.iw0red.it 42000
 # NETDA            / FusioNET      
 ysf423.netda.us 42000
 
-# NL DVMEGA        / DVMEGA NL     
+# NL Central       / CENTRAL NL    
 c4fm.pa7lim.nl 42000
 
 # NL YSF444        / Dutch Refl.   
