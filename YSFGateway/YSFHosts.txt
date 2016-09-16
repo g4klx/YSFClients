@@ -72,7 +72,7 @@ xrf003.iw0red.it 42000
 # NETDA            / FusioNET      
 ysf423.netda.us 42000
 
-# NL Central       / C4FM NL       
+# NL DVMEGA        / DVMEGA NL     
 c4fm.pa7lim.nl 42000
 
 # NL YSF444        / Dutch Refl.   
@@ -110,6 +110,9 @@ ysf023.ham-dmr.pl 42023
 
 # TechTalk24       / Engineers talk
 ysf024.ham-dmr.pl 42024
+
+# UK DVMEGA        / DVMEGA CHAT   
+c4fm.pa7lim.nl 42001
 
 # UK_YFS_BM_UK     / UK_Ref_DN_ONLY
 bm-dmr.uk 42000
