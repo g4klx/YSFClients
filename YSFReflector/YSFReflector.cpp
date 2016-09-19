@@ -186,6 +186,30 @@ void CYSFReflector::run()
 	for (;;) {
 		unsigned char buffer[200U];
 
+		// Refresh/add repeaters based on their polls/simulated polls
+		in_addr address;
+		unsigned int port;
+		std::string callsign;
+		bool ret = network.readPoll(callsign, address, port);
+		if (ret) {
+			CYSFRepeater* rpt = findRepeater(callsign, address, port);
+			if (rpt == NULL) {
+				LogMessage("Adding %s", callsign.c_str());
+				rpt = new CYSFRepeater;
+				rpt->m_timer.start();
+				rpt->m_callsign = callsign;
+				rpt->m_address = address;
+				rpt->m_port = port;
+				m_repeaters.push_back(rpt);
+				network.setCount(m_repeaters.size());
+			} else {
+				rpt->m_timer.start();
+				rpt->m_callsign = callsign;
+				rpt->m_address = address;
+				rpt->m_port = port;
+			}
+		}
+
 		unsigned int len = network.readData(buffer);
 		if (len > 0U) {
 			if (!watchdogTimer.isRunning()) {
@@ -225,42 +249,15 @@ void CYSFReflector::run()
 			if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
 				watchdogTimer.start();
 
-				std::string callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
-				CYSFRepeater* rpt = findRepeater(callsign);
-				if (rpt != NULL) {
-					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-						if ((*it)->m_callsign != callsign)
-							network.writeData(buffer, (*it)->m_address, (*it)->m_port);
-					}
+				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+					if ((*it)->m_callsign != callsign)
+						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
 				}
 
 				if ((buffer[34U] & 0x01U) == 0x01U) {
 					LogMessage("Received end of transmission");
 					watchdogTimer.stop();
 				}
-			}
-		}
-
-		// Refresh/add repeaters based on their polls
-		std::string callsign;
-		in_addr address;
-		unsigned int port;
-		bool ret = network.readPoll(callsign, address, port);
-		if (ret) {
-			CYSFRepeater* rpt = findRepeater(callsign);
-			if (rpt == NULL) {
-				LogMessage("Adding %s", callsign.c_str());
-				rpt = new CYSFRepeater;
-				rpt->m_timer.start();
-				rpt->m_callsign = callsign;
-				rpt->m_address  = address;
-				rpt->m_port     = port;
-				m_repeaters.push_back(rpt);
-				network.setCount(m_repeaters.size());
-			} else {
-				rpt->m_timer.start();
-				rpt->m_address = address;
-				rpt->m_port    = port;
 			}
 		}
 
@@ -315,10 +312,10 @@ void CYSFReflector::run()
 	::LogFinalise();
 }
 
-CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
+CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign, const in_addr& address, unsigned int port) const
 {
 	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-		if ((*it)->m_callsign == callsign)
+		if ((*it)->m_callsign == callsign || (address.s_addr == (*it)->m_address.s_addr && (*it)->m_port == port))
 			return *it;
 	}
 
