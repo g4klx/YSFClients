@@ -61,7 +61,7 @@ c4fm-it.selfip.com 42000
 ysf.on4top.be 42000
 
 # GB Fusion Kernow / Fusion SW UK  
-mb6cc.dyndns.org 42000
+mb6cc.dyndns.org 43000
 
 # GR YSF202        / Fusion Greece 
 ysf202.dv4gr.eu 42000
@@ -104,6 +104,9 @@ c4fm.from-ct.com 42000
 
 # RO YSF226        / C4FM Romania  
 xrf226.hamnet.ro 42000
+
+# SE YSF699        / Tekniksnack   
+ysf.tekniksnack.se 42000
 
 # SK OMO0OUE       / Slovakia      
 88.212.32.147 42000
