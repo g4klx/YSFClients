@@ -27,30 +27,59 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(const std::string& address, unsigned int port, bool debug) :
+CNetwork::CNetwork(const std::string& address, unsigned int port, const std::string& callsign, const std::string& suffix, bool debug) :
 m_socket(address, port),
 m_debug(debug),
 m_address(),
 m_port(0U),
+m_poll(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_timer(1000U, 5U)
 {
 	assert(port > 0U);
+
+	m_poll = new unsigned char[14U];
+	::memcpy(m_poll + 0U, "YSFP", 4U);
+
+	std::string node = callsign;
+	if (suffix.size() > 0U) {
+		node.append("-");
+		node.append(suffix);
+	}
+	node.resize(YSF_CALLSIGN_LENGTH, ' ');
+
+	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
+		m_poll[i + 4U] = node.at(i);
 }
 
-CNetwork::CNetwork(unsigned int port, bool debug) :
+CNetwork::CNetwork(unsigned int port, const std::string& callsign, const std::string& suffix, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
 m_port(0U),
+m_poll(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_timer(1000U, 5U)
 {
 	assert(port > 0U);
+
+	m_poll = new unsigned char[14U];
+	::memcpy(m_poll + 0U, "YSFP", 4U);
+
+	std::string node = callsign;
+	if (suffix.size() > 0U) {
+		node.append("-");
+		node.append(suffix);
+	}
+	node.resize(YSF_CALLSIGN_LENGTH, ' ');
+
+	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
+		m_poll[i + 4U] = node.at(i);
 }
 
 CNetwork::~CNetwork()
 {
+	delete[] m_poll;
 }
 
 bool CNetwork::open()
@@ -94,25 +123,7 @@ bool CNetwork::writePoll()
 	if (m_port == 0U)
 		return true;
 
-	unsigned char buffer[20U];
-
-	buffer[0] = 'Y';
-	buffer[1] = 'S';
-	buffer[2] = 'F';
-	buffer[3] = 'P';
-
-	buffer[4U]  = 'G';
-	buffer[5U]  = 'A';
-	buffer[6U]  = 'T';
-	buffer[7U]  = 'E';
-	buffer[8U]  = 'W';
-	buffer[9U]  = 'A';
-	buffer[10U] = 'Y';
-	buffer[11U] = ' ';
-	buffer[12U] = ' ';
-	buffer[13U] = ' ';
-
-	return m_socket.write(buffer, 14U, m_address, m_port);
+	return m_socket.write(m_poll, 14U, m_address, m_port);
 }
 
 void CNetwork::clock(unsigned int ms)

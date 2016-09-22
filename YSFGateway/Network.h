@@ -29,8 +29,8 @@
 
 class CNetwork {
 public:
-	CNetwork(const std::string& address, unsigned int port, bool debug);
-	CNetwork(unsigned int port, bool debug);
+	CNetwork(const std::string& address, unsigned int port, const std::string& callsign, const std::string& suffix, bool debug);
+	CNetwork(unsigned int port, const std::string& callsign, const std::string& suffix, bool debug);
 	~CNetwork();
 
 	bool open();
@@ -51,6 +51,7 @@ private:
 	bool                       m_debug;
 	in_addr                    m_address;
 	unsigned int               m_port;
+	unsigned char*             m_poll;
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_timer;
 

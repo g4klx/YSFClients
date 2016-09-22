@@ -40,7 +40,7 @@ const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
-const unsigned char NET_HEADER[] = "YSFDGATEWAY             ALL      ";
+const unsigned char NET_HEADER[] = "YSFD                    ALL      ";
 
 CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CNetwork* network, const std::string& hostsFile, unsigned int statusPort) :
 m_callsign(callsign),
@@ -141,8 +141,10 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 	for (unsigned int i = 0U; i < 34U; i++)
 		m_header[i] = NET_HEADER[i];
 
-	for (unsigned int i = 0U; i < 10U; i++)
+	for (unsigned int i = 0U; i < 10U; i++) {
+		m_header[i + 4U] = m_node.at(i);
 		m_header[i + 14U] = m_node.at(i);
+	}
 }
 
 bool CWiresX::start()
