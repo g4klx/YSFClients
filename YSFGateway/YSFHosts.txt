@@ -27,7 +27,7 @@ c4fm.ea3hkb.com 42108
 # CA YSF005        / QC Fusion     
 ysf.ve2mrc.com 42000
 
-# CT CATALANA      / C4FM Catalunya
+# CT WIRESCAT      / C4FM Catalunya
 c4fm.ea3hkb.com 42000
 
 # CZ Czech         / TG2300 DCS019V
@@ -65,6 +65,9 @@ mb6cc.dyndns.org 43000
 
 # GR YSF202        / Fusion Greece 
 ysf202.dv4gr.eu 42000
+
+# IT Roma          / Roma YSF Ref  
+romaroom.ddns.net 42000
 
 # IT YRF003 CISAR  / www.cisar.it  
 xrf003.iw0red.it 42000
@@ -131,6 +134,9 @@ c4fm-mi5.kb8zgl.net 42000
 
 # US NJ PA Asteris / Link to BM 313
 ysf.njpaasterisk.org 42000
+
+# US WMTG / West Michigan
+ysf.wmtg.me 42000
 
 # US YSF008 USA    / DVSwitch Test 
 ysfreflector.dvswitch.org 42000
