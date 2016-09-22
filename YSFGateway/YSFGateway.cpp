@@ -174,7 +174,7 @@ int CYSFGateway::run()
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();
 
-	CNetwork rptNetwork(myAddress, myPort, m_callsign, m_suffix, debug);
+	CNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
 	rptNetwork.setDestination(rptAddress, rptPort);
 
 	ret = rptNetwork.open();
@@ -185,7 +185,7 @@ int CYSFGateway::run()
 
 	unsigned int netPort = m_conf.getNetworkDataPort();
 
-	m_netNetwork = new CNetwork(netPort, m_callsign, m_suffix, debug);
+	m_netNetwork = new CNetwork(netPort, m_callsign, debug);
 	ret = m_netNetwork->open();
 	if (!ret) {
 		::LogError("Cannot open the reflector network port");

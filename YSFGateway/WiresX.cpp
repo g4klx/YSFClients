@@ -141,10 +141,11 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 	for (unsigned int i = 0U; i < 34U; i++)
 		m_header[i] = NET_HEADER[i];
 
-	for (unsigned int i = 0U; i < 10U; i++) {
-		m_header[i + 4U] = m_node.at(i);
+	for (unsigned int i = 0U; i < 10U; i++)
+		m_header[i + 4U] = m_callsign.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
 		m_header[i + 14U] = m_node.at(i);
-	}
 }
 
 bool CWiresX::start()

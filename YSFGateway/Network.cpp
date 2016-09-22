@@ -27,7 +27,7 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(const std::string& address, unsigned int port, const std::string& callsign, const std::string& suffix, bool debug) :
+CNetwork::CNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
 m_address(),
@@ -42,17 +42,13 @@ m_timer(1000U, 5U)
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
 	std::string node = callsign;
-	if (suffix.size() > 0U) {
-		node.append("-");
-		node.append(suffix);
-	}
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
 		m_poll[i + 4U] = node.at(i);
 }
 
-CNetwork::CNetwork(unsigned int port, const std::string& callsign, const std::string& suffix, bool debug) :
+CNetwork::CNetwork(unsigned int port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
@@ -67,10 +63,6 @@ m_timer(1000U, 5U)
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
 	std::string node = callsign;
-	if (suffix.size() > 0U) {
-		node.append("-");
-		node.append(suffix);
-	}
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
