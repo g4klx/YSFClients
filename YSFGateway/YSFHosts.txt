@@ -120,6 +120,9 @@ ysf023.ham-dmr.pl 42023
 # TechTalk24       / Engineers talk
 ysf024.ham-dmr.pl 42024
 
+# TH nakhonthai / C4FM
+office.nakhonthai.net 42000
+
 # UK DVMEGA        / DVMEGA CHAT   
 c4fm.pa7lim.nl 42001
 
@@ -135,7 +138,7 @@ c4fm-mi5.kb8zgl.net 42000
 # US NJ PA Asteris / Link to BM 313
 ysf.njpaasterisk.org 42000
 
-# US WMTG / West Michigan
+# US WMTG          / WMTG Fusion   
 ysf.wmtg.me 42000
 
 # US YSF008 USA    / DVSwitch Test 
