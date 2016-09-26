@@ -45,7 +45,7 @@ c4fm.ysfreflector.de 42001
 # DK Denmark       / YSF012 C4FM Re
 oz2ree.dk 42000
 
-# ES YSF004        / C4FM EDT      
+# ES YSF004 EDT    / C4FM Reflector
 c4fm.sustrai.org 42000
 
 # ES YSF906        / ED7ZAK        
@@ -66,7 +66,7 @@ ysf.on4top.be 42000
 # GB Fusion Kernow / Fusion SW UK  
 mb6cc.dyndns.org 43000
 
-# GB UK Scotland / Scottish YSF
+# GB Scotland      / Scottish YSF  
 xrf600.gb7de.co.uk 42000
 
 # GR YSF202        / Fusion Greece 
@@ -140,6 +140,9 @@ www.wb0yle.com 42000
 
 # US Michigan-MI5 / Michigan MI5
 c4fm-mi5.kb8zgl.net 42000
+
+# US Nationwide    / United States 
+174.36.222.36 42000
 
 # US NJ PA Asteris / Link to BM 313
 ysf.njpaasterisk.org 42000
