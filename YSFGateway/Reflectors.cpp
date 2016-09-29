@@ -60,12 +60,12 @@ bool CReflectors::load()
 		if (buffer[0U] == '#')
 			continue;
 
-		char* p1 = ::strtok(buffer, " \t\r\n");
-		char* p2 = ::strtok(NULL, " \t\r\n");
-		char* p3 = ::strtok(NULL, " \t\r\n");
-		char* p4 = ::strtok(NULL, " \t\r\n");
-		char* p5 = ::strtok(NULL, " \t\r\n");
-		char* p6 = ::strtok(NULL, " \t\r\n");
+		char* p1 = ::strtok(buffer, ";\r\n");
+		char* p2 = ::strtok(NULL, ";\r\n");
+		char* p3 = ::strtok(NULL, ";\r\n");
+		char* p4 = ::strtok(NULL, ";\r\n");
+		char* p5 = ::strtok(NULL, ";\r\n");
+		char* p6 = ::strtok(NULL, "\r\n");
 
 		if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
 			std::string host = std::string(p4);
