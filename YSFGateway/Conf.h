@@ -64,8 +64,8 @@ public:
   // The Network section
   bool         getNetworkEnabled() const;
   unsigned int getNetworkDataPort() const;
-  unsigned int getNetworkStatusPort() const;
   std::string  getNetworkHosts() const;
+  unsigned int getNetworkReloadTime() const;
   std::string  getNetworkStartup() const;
   bool         getNetworkDebug() const;
 
@@ -100,8 +100,8 @@ private:
 
   bool         m_networkEnabled;
   unsigned int m_networkDataPort;
-  unsigned int m_networkStatusPort;
   std::string  m_networkHosts;
+  unsigned int m_networkReloadTime;
   std::string  m_networkStartup;
   bool         m_networkDebug;
 };

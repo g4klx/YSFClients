@@ -195,9 +195,9 @@ int CYSFGateway::run()
 	bool networkEnabled = m_conf.getNetworkEnabled();
 	if (networkEnabled) {
 		std::string fileName = m_conf.getNetworkHosts();
-		unsigned int port    = m_conf.getNetworkStatusPort();
+		unsigned int reloadTime = m_conf.getNetworkReloadTime();
 
-		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, port);
+		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
 
 		std::string name         = m_conf.getName();
 		unsigned int txFrequency = m_conf.getTxFrequency();

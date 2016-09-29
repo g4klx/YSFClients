@@ -38,9 +38,6 @@
     <ClInclude Include="YSFGateway.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Hosts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Conf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -104,9 +101,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="YSFGateway.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Hosts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Conf.cpp">

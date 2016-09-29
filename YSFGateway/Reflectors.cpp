@@ -17,7 +17,6 @@
 */
 
 #include "Reflectors.h"
-#include "Hosts.h"
 #include "Log.h"
 
 #include <algorithm>
@@ -27,16 +26,15 @@
 #include <cstring>
 #include <cctype>
 
-CReflectors::CReflectors(const std::string& hostsFile, unsigned int statusPort) :
+CReflectors::CReflectors(const std::string& hostsFile, unsigned int reloadTime) :
 m_hostsFile(hostsFile),
-m_socket(statusPort),
 m_reflectors(),
-m_it(),
 m_current(),
 m_search(),
-m_timer(1000U, 30U)
+m_timer(1000U, reloadTime * 60U)
 {
-	assert(statusPort > 0U);
+	if (reloadTime > 0U)
+		m_timer.start();
 }
 
 CReflectors::~CReflectors()
@@ -47,43 +45,53 @@ CReflectors::~CReflectors()
 
 bool CReflectors::load()
 {
-	bool ret = m_socket.open();
-	if (!ret)
+	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
+	if (fp == NULL) {
+		LogWarning("Cannot open the YSF Hosts file - %s", m_hostsFile.c_str());
 		return false;
+	}
 
-	CHosts hosts(m_hostsFile);
-	ret = hosts.read();
-	if (!ret)
-		return false;
+	// Clear out the old reflector list
+	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
+		delete *it;
 
-	std::vector<CYSFHost*>& hostList = hosts.list();
+	char buffer[100U];
+	while (::fgets(buffer, 100U, fp) != NULL) {
+		if (buffer[0U] == '#')
+			continue;
 
-	for (std::vector<CYSFHost*>::const_iterator it = hostList.begin(); it != hostList.end(); ++it) {
-		in_addr address = CUDPSocket::lookup((*it)->m_address);
+		char* p1 = ::strtok(buffer, " \t\r\n");
+		char* p2 = ::strtok(NULL, " \t\r\n");
+		char* p3 = ::strtok(NULL, " \t\r\n");
+		char* p4 = ::strtok(NULL, " \t\r\n");
+		char* p5 = ::strtok(NULL, " \t\r\n");
+		char* p6 = ::strtok(NULL, " \t\r\n");
 
-		if (address.s_addr != INADDR_NONE) {
-			CYSFReflector* reflector = new CYSFReflector;
-			reflector->m_address = address;
-			reflector->m_port    = (*it)->m_port;
-			m_reflectors.push_back(reflector);
+		if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
+			std::string host = std::string(p4);
+
+			in_addr address = CUDPSocket::lookup(host);
+			if (address.s_addr != INADDR_NONE) {
+				CYSFReflector* refl = new CYSFReflector;
+				refl->m_id    = std::string(p1);
+				refl->m_name  = std::string(p2);
+				refl->m_desc  = std::string(p3);
+				refl->m_address = address;
+				refl->m_port  = (unsigned int)::atoi(p5);
+				refl->m_count = std::string(p6);;
+
+				m_reflectors.push_back(refl);
+			}
 		}
 	}
 
-	m_it = m_reflectors.begin();
+	::fclose(fp);
 
-	// Make the polling time based on the number of reflectors within limits
-	unsigned int nReflectors = m_reflectors.size();
-	if (nReflectors > 0U) {
-		unsigned int t = 600U / nReflectors;
-		if (t > 30U)
-			t = 30U;
-		else if (t < 15U)
-			t = 15U;
+	size_t size = m_reflectors.size();
+	if (size == 0U)
+		return false;
 
-		m_timer.setTimeout(t);
-	}
-
-	m_timer.start();
+	LogInfo("Loaded %u YSF reflectors", size);
 
 	return true;
 }
@@ -121,10 +129,8 @@ std::vector<CYSFReflector*>& CReflectors::current()
 {
 	m_current.clear();
 
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
-		if ((*it)->m_seen)
-			m_current.push_back(*it);
-	}
+	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
+		m_current.push_back(*it);
 
 	std::sort(m_current.begin(), m_current.end(), refComparison);
 
@@ -142,9 +148,6 @@ std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
 	unsigned int len = trimmed.size();
 
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
-		if (!(*it)->m_seen)
-			continue;
-
 		std::string reflector = (*it)->m_name;
 		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
@@ -160,50 +163,10 @@ std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
 
 void CReflectors::clock(unsigned int ms)
 {
-	// Nothing to do, avoid crashes
-	if (m_reflectors.size() == 0U)
-		return;
-
 	m_timer.clock(ms);
+
 	if (m_timer.isRunning() && m_timer.hasExpired()) {
-		m_socket.write((unsigned char*)"YSFS", 4U, (*m_it)->m_address, (*m_it)->m_port);
-
-		++m_it;
-		if (m_it == m_reflectors.end())
-			m_it = m_reflectors.begin();
-
+		load();
 		m_timer.start();
-	}
-
-	in_addr address;
-	unsigned int port;
-	unsigned char buffer[200U];
-	int ret = m_socket.read(buffer, 200U, address, port);
-
-	if (ret > 0) {
-		if (::memcmp(buffer + 0U, "YSFS", 4U) == 0) {
-			buffer[42U] = 0x00U;
-
-			std::string id   = std::string((char*)(buffer + 4U), 5U);
-			std::string name = std::string((char*)(buffer + 9U), 16U);
-			std::string desc = std::string((char*)(buffer + 25U), 14U);
-			std::string cnt  = std::string((char*)(buffer + 39U), 3U);
-
-			LogDebug("Have reflector status reply from %s/%s/%s/%s", id.c_str(), name.c_str(), desc.c_str(), cnt.c_str());
-
-			for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
-				in_addr      itAddr = (*it)->m_address;
-				unsigned int itPort = (*it)->m_port;
-
-				if (itAddr.s_addr == address.s_addr && itPort == port) {
-					(*it)->m_id    = id;
-					(*it)->m_name  = name;
-					(*it)->m_desc  = desc;
-					(*it)->m_count = cnt;
-					(*it)->m_seen  = true;
-					break;
-				}
-			}
-		}
 	}
 }

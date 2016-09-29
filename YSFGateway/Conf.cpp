@@ -62,8 +62,8 @@ m_aprsPort(0U),
 m_aprsPassword(),
 m_networkEnabled(false),
 m_networkDataPort(0U),
-m_networkStatusPort(0U),
 m_networkHosts(),
+m_networkReloadTime(0U),
 m_networkStartup(),
 m_networkDebug(false)
 {
@@ -171,10 +171,10 @@ bool CConf::read()
 			m_networkEnabled = ::atoi(value) == 1;
 		else if (::strcmp(key, "DataPort") == 0)
 			m_networkDataPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "StatusPort") == 0)
-			m_networkStatusPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Hosts") == 0)
 			m_networkHosts = value;
+		else if (::strcmp(key, "ReloadTime") == 0)
+			m_networkReloadTime = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
 		else if (::strcmp(key, "Debug") == 0)
@@ -312,14 +312,14 @@ unsigned int CConf::getNetworkDataPort() const
   return m_networkDataPort;
 }
 
-unsigned int CConf::getNetworkStatusPort() const
-{
-	return m_networkStatusPort;
-}
-
 std::string CConf::getNetworkHosts() const
 {
 	return m_networkHosts;
+}
+
+unsigned int CConf::getNetworkReloadTime() const
+{
+	return m_networkReloadTime;
 }
 
 std::string CConf::getNetworkStartup() const

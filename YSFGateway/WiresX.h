@@ -42,7 +42,7 @@ enum WXSI_STATUS {
 
 class CWiresX {
 public:
-	CWiresX(const std::string& callsign, const std::string& suffix, CNetwork* network, const std::string& hostsFile, unsigned int statusPort);
+	CWiresX(const std::string& callsign, const std::string& suffix, CNetwork* network, const std::string& hostsFile, unsigned int reloadTime);
 	~CWiresX();
 
 	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);

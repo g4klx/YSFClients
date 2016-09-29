@@ -152,7 +152,6 @@
     <ClInclude Include="CRC.h" />
     <ClInclude Include="Golay24128.h" />
     <ClInclude Include="GPS.h" />
-    <ClInclude Include="Hosts.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Reflectors.h" />
@@ -179,7 +178,6 @@
     <ClCompile Include="CRC.cpp" />
     <ClCompile Include="Golay24128.cpp" />
     <ClCompile Include="GPS.cpp" />
-    <ClCompile Include="Hosts.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Reflectors.cpp" />

@@ -21,8 +21,8 @@
 
 #include "UDPSocket.h"
 #include "Timer.h"
-#include "Hosts.h"
 
+#include <vector>
 #include <string>
 
 class CYSFReflector {
@@ -33,8 +33,7 @@ public:
 	m_desc(),
 	m_count("000"),
 	m_address(),
-	m_port(0U),
-	m_seen(false)
+	m_port(0U)
 	{
 	}
 
@@ -44,12 +43,11 @@ public:
 	std::string  m_count;
 	in_addr      m_address;
 	unsigned int m_port;
-	bool         m_seen;
 };
 
 class CReflectors {
 public:
-	CReflectors(const std::string& hostsFile, unsigned int statusPort);
+	CReflectors(const std::string& hostsFile, unsigned int reloadTime);
 	~CReflectors();
 
 	bool load();
@@ -64,9 +62,7 @@ public:
 
 private:
 	std::string                 m_hostsFile;
-	CUDPSocket                  m_socket;
 	std::vector<CYSFReflector*> m_reflectors;
-	std::vector <CYSFReflector*>::iterator m_it;
 	std::vector<CYSFReflector*> m_current;
 	std::vector<CYSFReflector*> m_search;
 	CTimer                      m_timer;
