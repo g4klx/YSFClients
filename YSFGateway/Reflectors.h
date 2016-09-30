@@ -63,7 +63,6 @@ public:
 private:
 	std::string                 m_hostsFile;
 	std::vector<CYSFReflector*> m_reflectors;
-	std::vector<CYSFReflector*> m_current;
 	std::vector<CYSFReflector*> m_search;
 	CTimer                      m_timer;
 };
