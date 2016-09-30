@@ -40,6 +40,8 @@ CReflectors::~CReflectors()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
 		delete *it;
+
+	m_reflectors.clear();
 }
 
 static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
@@ -70,6 +72,8 @@ bool CReflectors::load()
 	// Clear out the old reflector list
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
 		delete *it;
+
+	m_reflectors.clear();
 
 	char buffer[100U];
 	while (::fgets(buffer, 100U, fp) != NULL) {
