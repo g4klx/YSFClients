@@ -100,6 +100,9 @@ bool CReflectors::load()
 				refl->m_port  = (unsigned int)::atoi(p5);
 				refl->m_count = std::string(p6);;
 
+				refl->m_name.resize(16U, ' ');
+				refl->m_desc.resize(14U, ' ');
+
 				m_reflectors.push_back(refl);
 			}
 		}
