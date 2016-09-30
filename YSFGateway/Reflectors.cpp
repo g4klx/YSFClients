@@ -29,7 +29,6 @@
 CReflectors::CReflectors(const std::string& hostsFile, unsigned int reloadTime) :
 m_hostsFile(hostsFile),
 m_reflectors(),
-m_current(),
 m_search(),
 m_timer(1000U, reloadTime * 60U)
 {
@@ -41,6 +40,23 @@ CReflectors::~CReflectors()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
 		delete *it;
+}
+
+static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
+{
+	assert(r1 != NULL);
+	assert(r2 != NULL);
+
+	std::string name1 = r1->m_name;
+	std::string name2 = r2->m_name;
+
+	for (unsigned int i = 0U; i < 16U; i++) {
+		int c = ::toupper(name1.at(i)) - ::toupper(name2.at(i));
+		if (c != 0)
+			return c < 0;
+	}
+
+	return false;
 }
 
 bool CReflectors::load()
@@ -91,6 +107,8 @@ bool CReflectors::load()
 	if (size == 0U)
 		return false;
 
+	std::sort(m_reflectors.begin(), m_reflectors.end(), refComparison);
+
 	LogInfo("Loaded %u YSF reflectors", size);
 
 	return true;
@@ -108,33 +126,9 @@ CYSFReflector* CReflectors::find(const std::string& id)
 	return NULL;
 }
 
-static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
-{
-	assert(r1 != NULL);
-	assert(r2 != NULL);
-
-	std::string name1 = r1->m_name;
-	std::string name2 = r2->m_name;
-
-	for (unsigned int i = 0U; i < 16U; i++) {
-		int c = ::toupper(name1.at(i)) - ::toupper(name2.at(i));
-		if (c != 0)
-			return c < 0;
-	}
-
-	return false;
-}
-
 std::vector<CYSFReflector*>& CReflectors::current()
 {
-	m_current.clear();
-
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
-		m_current.push_back(*it);
-
-	std::sort(m_current.begin(), m_current.end(), refComparison);
-
-	return m_current;
+	return m_reflectors;
 }
 
 std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
