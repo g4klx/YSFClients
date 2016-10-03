@@ -28,6 +28,8 @@
 
 CReflectors::CReflectors(const std::string& hostsFile, unsigned int reloadTime) :
 m_hostsFile(hostsFile),
+m_parrotAddress(),
+m_parrotPort(0U),
 m_reflectors(),
 m_search(),
 m_timer(1000U, reloadTime * 60U)
@@ -61,54 +63,69 @@ static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 	return false;
 }
 
+void CReflectors::setParrot(const std::string& address, unsigned int port)
+{
+	m_parrotAddress = address;
+	m_parrotPort    = port;
+}
+
 bool CReflectors::load()
 {
-	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
-	if (fp == NULL) {
-		LogWarning("Cannot open the YSF Hosts file - %s", m_hostsFile.c_str());
-		return false;
-	}
-
 	// Clear out the old reflector list
 	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
 		delete *it;
 
 	m_reflectors.clear();
 
-	char buffer[100U];
-	while (::fgets(buffer, 100U, fp) != NULL) {
-		if (buffer[0U] == '#')
-			continue;
+	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
+	if (fp != NULL) {
+		char buffer[100U];
+		while (::fgets(buffer, 100U, fp) != NULL) {
+			if (buffer[0U] == '#')
+				continue;
 
-		char* p1 = ::strtok(buffer, ";\r\n");
-		char* p2 = ::strtok(NULL, ";\r\n");
-		char* p3 = ::strtok(NULL, ";\r\n");
-		char* p4 = ::strtok(NULL, ";\r\n");
-		char* p5 = ::strtok(NULL, ";\r\n");
-		char* p6 = ::strtok(NULL, "\r\n");
+			char* p1 = ::strtok(buffer, ";\r\n");
+			char* p2 = ::strtok(NULL, ";\r\n");
+			char* p3 = ::strtok(NULL, ";\r\n");
+			char* p4 = ::strtok(NULL, ";\r\n");
+			char* p5 = ::strtok(NULL, ";\r\n");
+			char* p6 = ::strtok(NULL, "\r\n");
 
-		if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
-			std::string host = std::string(p4);
+			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
+				std::string host = std::string(p4);
 
-			in_addr address = CUDPSocket::lookup(host);
-			if (address.s_addr != INADDR_NONE) {
-				CYSFReflector* refl = new CYSFReflector;
-				refl->m_id    = std::string(p1);
-				refl->m_name  = std::string(p2);
-				refl->m_desc  = std::string(p3);
-				refl->m_address = address;
-				refl->m_port  = (unsigned int)::atoi(p5);
-				refl->m_count = std::string(p6);;
+				in_addr address = CUDPSocket::lookup(host);
+				if (address.s_addr != INADDR_NONE) {
+					CYSFReflector* refl = new CYSFReflector;
+					refl->m_id = std::string(p1);
+					refl->m_name = std::string(p2);
+					refl->m_desc = std::string(p3);
+					refl->m_address = address;
+					refl->m_port = (unsigned int)::atoi(p5);
+					refl->m_count = std::string(p6);;
 
-				refl->m_name.resize(16U, ' ');
-				refl->m_desc.resize(14U, ' ');
+					refl->m_name.resize(16U, ' ');
+					refl->m_desc.resize(14U, ' ');
 
-				m_reflectors.push_back(refl);
+					m_reflectors.push_back(refl);
+				}
 			}
 		}
+
+		::fclose(fp);
 	}
 
-	::fclose(fp);
+	// Add the Parrot entry
+	if (m_parrotPort > 0U) {
+		CYSFReflector* refl = new CYSFReflector;
+		refl->m_id      = "00001";
+		refl->m_name    = "ZZ Parrot       ";
+		refl->m_desc    = "Parrot        ";
+		refl->m_address = CUDPSocket::lookup(m_parrotAddress);
+		refl->m_port    = m_parrotPort;
+		refl->m_count   = "000";
+		m_reflectors.push_back(refl);
+	}
 
 	size_t size = m_reflectors.size();
 	if (size == 0U)

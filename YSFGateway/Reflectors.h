@@ -50,6 +50,8 @@ public:
 	CReflectors(const std::string& hostsFile, unsigned int reloadTime);
 	~CReflectors();
 
+	void setParrot(const std::string& address, unsigned int port);
+
 	bool load();
 
 	CYSFReflector* find(const std::string& id);
@@ -62,6 +64,8 @@ public:
 
 private:
 	std::string                 m_hostsFile;
+	std::string                 m_parrotAddress;
+	unsigned int                m_parrotPort;
 	std::vector<CYSFReflector*> m_reflectors;
 	std::vector<CYSFReflector*> m_search;
 	CTimer                      m_timer;

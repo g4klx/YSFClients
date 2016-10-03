@@ -64,6 +64,8 @@ m_networkEnabled(false),
 m_networkDataPort(0U),
 m_networkHosts(),
 m_networkReloadTime(0U),
+m_networkParrotAddress("127.0.0.1"),
+m_networkParrotPort(0U),
 m_networkStartup(),
 m_networkDebug(false)
 {
@@ -175,6 +177,10 @@ bool CConf::read()
 			m_networkHosts = value;
 		else if (::strcmp(key, "ReloadTime") == 0)
 			m_networkReloadTime = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "ParrotAddress") == 0)
+			m_networkParrotAddress = value;
+		else if (::strcmp(key, "ParrotPort") == 0)
+			m_networkParrotPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
 		else if (::strcmp(key, "Debug") == 0)
@@ -320,6 +326,16 @@ std::string CConf::getNetworkHosts() const
 unsigned int CConf::getNetworkReloadTime() const
 {
 	return m_networkReloadTime;
+}
+
+std::string CConf::getNetworkParrotAddress() const
+{
+	return m_networkParrotAddress;
+}
+
+unsigned int CConf::getNetworkParrotPort() const
+{
+	return m_networkParrotPort;
 }
 
 std::string CConf::getNetworkStartup() const

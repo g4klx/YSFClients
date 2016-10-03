@@ -205,6 +205,12 @@ int CYSFGateway::run()
 
 		m_wiresX->setInfo(name, txFrequency, rxFrequency);
 
+		std::string address = m_conf.getNetworkParrotAddress();
+		unsigned int port = m_conf.getNetworkParrotPort();
+
+		if (port > 0U)
+			m_wiresX->setParrot(address, port);
+
 		m_wiresX->start();
 
 		m_startup = m_conf.getNetworkStartup();

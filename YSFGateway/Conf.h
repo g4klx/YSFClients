@@ -66,6 +66,8 @@ public:
   unsigned int getNetworkDataPort() const;
   std::string  getNetworkHosts() const;
   unsigned int getNetworkReloadTime() const;
+  std::string  getNetworkParrotAddress() const;
+  unsigned int getNetworkParrotPort() const;
   std::string  getNetworkStartup() const;
   bool         getNetworkDebug() const;
 
@@ -102,6 +104,8 @@ private:
   unsigned int m_networkDataPort;
   std::string  m_networkHosts;
   unsigned int m_networkReloadTime;
+  std::string  m_networkParrotAddress;
+  unsigned int m_networkParrotPort;
   std::string  m_networkStartup;
   bool         m_networkDebug;
 };

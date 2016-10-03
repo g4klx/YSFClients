@@ -147,6 +147,11 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 		m_header[i + 14U] = m_node.at(i);
 }
 
+void CWiresX::setParrot(const std::string& address, unsigned int port)
+{
+	m_reflectors.setParrot(address, port);
+}
+
 bool CWiresX::start()
 {
 	return m_reflectors.load();

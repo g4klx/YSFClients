@@ -46,6 +46,7 @@ public:
 	~CWiresX();
 
 	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);
+	void setParrot(const std::string& address, unsigned int port);
 
 	bool start();
 
