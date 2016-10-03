@@ -34,8 +34,6 @@
 # It will also prune the number of backup files according to a value specified
 # by you in the configuration below.
 #
-# When done, it will restart YSFGateway to make the Hosts changes take effect.
-#
 # To install in root's crontab use the command ...
 #
 #     sudo crontab -e
@@ -55,10 +53,6 @@ YSFHOSTS=/path/to/YSFHosts.txt
 
 # How many YSFHosts files do you want backed up (0 = do not keep backups) 
 YSFHOSTSFILEBACKUP=1
-
-# Command line to restart YSFGatway
-YSFRESTARTCOMMAND="systemctl restart ysfgateway.service"
-# YSFRESTARTCOMMAND="killall YSFGateway ; /path/to/YSFGateway/executable/YSFGateway /path/toYSFGateway/ini/file/YSFGateway.ini"
 
 ###############################################################################
 #
@@ -87,14 +81,11 @@ if [ ${BACKUPCOUNT} -gt ${YSFHOSTSFILEBACKUP} ]
 then
 	for f in $(ls -tr ${YSFHOSTS}.* | head -${BACKUPSTODELETE})
 	do
-		rm $f
+		rm -f $f
 	done
 fi
 
 # Generate YSFHosts.txt file
-curl https://register.ysfreflector.de/export.php > ${YSFHOSTS}
-
-# Restart YSFgateway
-eval ${YSFRESTARTCOMMAND}
+curl https://register.ysfreflector.de/export_csv.php > ${YSFHOSTS}
 
 exit 0
