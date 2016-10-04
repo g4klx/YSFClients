@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Log.h" />
     <ClInclude Include="StopWatch.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="YSFParrot.h" />
@@ -153,11 +154,11 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="Utils.h" />
-    <ClInclude Include="YSFDefines.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Parrot.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="StopWatch.cpp" />
     <ClCompile Include="YSFParrot.cpp" />
     <ClCompile Include="Timer.cpp" />

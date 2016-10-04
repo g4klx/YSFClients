@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,39 +16,21 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef	Network_H
-#define	Network_H
+#if !defined(LOG_H)
+#define	LOG_H
 
-#include "RingBuffer.h"
-#include "UDPSocket.h"
-
-#include <cstdint>
 #include <string>
 
-class CNetwork {
-public:
-	CNetwork(unsigned int port);
-	~CNetwork();
+#define	LogDebug(fmt, ...)	Log(1U, fmt, ##__VA_ARGS__)
+#define	LogMessage(fmt, ...)	Log(2U, fmt, ##__VA_ARGS__)
+#define	LogInfo(fmt, ...)	Log(3U, fmt, ##__VA_ARGS__)
+#define	LogWarning(fmt, ...)	Log(4U, fmt, ##__VA_ARGS__)
+#define	LogError(fmt, ...)	Log(5U, fmt, ##__VA_ARGS__)
+#define	LogFatal(fmt, ...)	Log(6U, fmt, ##__VA_ARGS__)
 
-	bool open();
+extern void Log(unsigned int level, const char* fmt, ...);
 
-	bool write(const unsigned char* data);
-
-	unsigned int read(unsigned char* data);
-
-	void end();
-
-	void close();
-
-	void clock(unsigned int ms);
-
-private:
-	CUDPSocket   m_socket;
-	in_addr      m_address;
-	unsigned int m_port;
-	CRingBuffer<unsigned char> m_buffer;
-
-	bool writePoll(const in_addr& address, unsigned int port);
-};
+extern bool LogInitialise(const std::string& filePath, const std::string& fileRoot, unsigned int fileLevel, unsigned int displayLevel);
+extern void LogFinalise();
 
 #endif

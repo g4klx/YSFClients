@@ -17,7 +17,6 @@
 */
 
 #include "Parrot.h"
-#include "YSFDefines.h"
 
 #include <cstdio>
 #include <cassert>

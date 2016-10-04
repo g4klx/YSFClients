@@ -22,31 +22,42 @@
 #include "Network.h"
 #include "Version.h"
 #include "Timer.h"
+#include "Log.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 int main(int argc, char** argv)
 {
 	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFParrot <port>\n");
+		::fprintf(stderr, "Usage: YSFParrot [-d] <port>\n");
 		return 1;
 	}
 
-	unsigned int port = ::atoi(argv[1]);
+	unsigned int n = 1U;
+
+	bool debug = false;
+	if (::strcmp(argv[1], "-d") == 0) {
+		debug = true;
+		n = 2U;
+	}
+
+	unsigned int port = ::atoi(argv[n]);
 	if (port == 0U) {
-		::fprintf(stderr, "YSFParrot: invalid port number\n");
+		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[n]);
 		return 1;
 	}
 
-	CYSFParrot parrot(port);
+	CYSFParrot parrot(port, debug);
 	parrot.run();
 
 	return 0;
 }
 
-CYSFParrot::CYSFParrot(unsigned int port) :
-m_port(port)
+CYSFParrot::CYSFParrot(unsigned int port, bool debug) :
+m_port(port),
+m_debug(debug)
 {
 }
 
@@ -56,12 +67,16 @@ CYSFParrot::~CYSFParrot()
 
 void CYSFParrot::run()
 {
+	::LogInitialise(".", "YSFParrot", m_debug ? 1U : 2U, m_debug ? 1U : 2U);
+
 	CParrot parrot(180U);
-	CNetwork network(m_port, false);
+	CNetwork network(m_port);
 
 	bool ret = network.open();
-	if (!ret)
+	if (!ret) {
+		::LogFinalise();
 		return;
+	}
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -73,7 +88,7 @@ void CYSFParrot::run()
 	unsigned int count = 0U;
 	bool playing = false;
 
-	::fprintf(stdout, "Starting YSFParrot-%s\n", VERSION);
+	LogInfo("Starting YSFParrot-%s", VERSION);
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -84,7 +99,7 @@ void CYSFParrot::run()
 			watchdogTimer.start();
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
-				::fprintf(stdout, "Received end of transmission\n");
+				LogDebug("Received end of transmission");
 				turnaroundTimer.start();
 				watchdogTimer.stop();
 				parrot.end();
@@ -123,7 +138,7 @@ void CYSFParrot::run()
 		turnaroundTimer.clock(ms);
 
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			::fprintf(stdout, "Network watchdog has expired\n");
+			LogDebug("Network watchdog has expired");
 			turnaroundTimer.start();
 			watchdogTimer.stop();
 			parrot.end();
@@ -139,4 +154,6 @@ void CYSFParrot::run()
 	}
 
 	network.close();
+
+	::LogFinalise();
 }
