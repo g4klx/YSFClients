@@ -19,6 +19,8 @@
 #ifndef RingBuffer_H
 #define RingBuffer_H
 
+#include "Log.h"
+
 #include <cstdio>
 #include <cassert>
 #include <cstring>
@@ -48,7 +50,7 @@ public:
 	bool addData(const T* buffer, unsigned int nSamples)
 	{
 		if (nSamples >= freeSpace()) {
-			::fprintf(stderr, "**** Overflow in %s ring buffer, %u >= %u\n", m_name, nSamples, freeSpace());
+			LogError("**** Overflow in %s ring buffer, %u >= %u", m_name, nSamples, freeSpace());
 			return false;
 		}
 
@@ -65,7 +67,7 @@ public:
 	bool getData(T* buffer, unsigned int nSamples)
 	{
 		if (dataSize() < nSamples) {
-			::fprintf(stderr, "**** Underflow in %s ring buffer, %u < %u\n", m_name, dataSize(), nSamples);
+			LogError("**** Underflow in %s ring buffer, %u < %u", m_name, dataSize(), nSamples);
 			return false;
 		}
 
@@ -82,7 +84,7 @@ public:
 	bool peek(T* buffer, unsigned int nSamples)
 	{
 		if (dataSize() < nSamples) {
-			::fprintf(stderr, "**** Underflow peek in %s ring buffer, %u < %u\n", m_name, dataSize(), nSamples);
+			LogError("**** Underflow peek in %s ring buffer, %u < %u", m_name, dataSize(), nSamples);
 			return false;
 		}
 
