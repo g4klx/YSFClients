@@ -180,6 +180,7 @@ int CYSFGateway::run()
 	ret = rptNetwork.open();
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
+		::LogFinalise();
 		return 1;
 	}
 
@@ -189,6 +190,7 @@ int CYSFGateway::run()
 	ret = m_netNetwork->open();
 	if (!ret) {
 		::LogError("Cannot open the reflector network port");
+		::LogFinalise();
 		return 1;
 	}
 

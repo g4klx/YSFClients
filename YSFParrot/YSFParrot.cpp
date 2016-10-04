@@ -31,14 +31,14 @@
 int main(int argc, char** argv)
 {
 	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFParrot [-d] <port>\n");
+		::fprintf(stderr, "Usage: YSFParrot [-d|--debug] <port>\n");
 		return 1;
 	}
 
 	unsigned int n = 1U;
 
 	bool debug = false;
-	if (::strcmp(argv[1], "-d") == 0) {
+	if (::strcmp(argv[1], "-d") == 0 || ::strcmp(argv[1], "--debug") == 0) {
 		debug = true;
 		n = 2U;
 	}
@@ -67,12 +67,16 @@ CYSFParrot::~CYSFParrot()
 
 void CYSFParrot::run()
 {
-	::LogInitialise(".", "YSFParrot", m_debug ? 1U : 2U, m_debug ? 1U : 2U);
+	bool ret = ::LogInitialise(".", "YSFParrot", m_debug ? 1U : 2U, m_debug ? 1U : 2U);
+	if (!ret) {
+		::fprintf(stderr, "YSFParrot: unable to open the log file\n");
+		return;
+	}
 
 	CParrot parrot(180U);
 	CNetwork network(m_port);
 
-	bool ret = network.open();
+	ret = network.open();
 	if (!ret) {
 		::LogFinalise();
 		return;

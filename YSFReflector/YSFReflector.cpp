@@ -57,12 +57,10 @@ int main(int argc, char** argv)
 			if ((arg == "-v") || (arg == "--version")) {
 				::fprintf(stdout, "YSFReflector version %s\n", VERSION);
 				return 0;
-			}
-			else if (arg.substr(0, 1) == "-") {
+			} else if (arg.substr(0, 1) == "-") {
 				::fprintf(stderr, "Usage: YSFReflector [-v|--version] [filename]\n");
 				return 1;
-			}
-			else {
+			} else {
 				iniFile = argv[currentArg];
 			}
 		}
@@ -161,8 +159,10 @@ void CYSFReflector::run()
 	CNetwork network(m_conf.getNetworkPort(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
 
 	ret = network.open();
-	if (!ret)
+	if (!ret) {
+		::LogFinalise();
 		return;
+	}
 	
 	network.setCount(0);
 	
