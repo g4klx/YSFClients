@@ -22,7 +22,6 @@
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
-#include "Timer.h"
 
 #include <cstdint>
 #include <string>
@@ -40,6 +39,9 @@ public:
 
 	bool write(const unsigned char* data);
 
+	bool writePoll();
+	bool writeUnlink();
+
 	unsigned int read(unsigned char* data);
 
 	void clock(unsigned int ms);
@@ -52,10 +54,8 @@ private:
 	in_addr                    m_address;
 	unsigned int               m_port;
 	unsigned char*             m_poll;
+	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
-	CTimer                     m_timer;
-
-	bool writePoll();
 };
 
 #endif

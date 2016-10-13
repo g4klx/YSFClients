@@ -81,9 +81,7 @@ m_gps(NULL),
 m_wiresX(NULL),
 m_netNetwork(NULL),
 m_linked(false),
-m_exclude(false),
-m_startupTimer(1000U, 30U),
-m_startup()
+m_exclude(false)
 {
 }
 
@@ -194,6 +192,10 @@ int CYSFGateway::run()
 		return 1;
 	}
 
+	CTimer watchdogTimer(1000U, 0U, 500U);
+	CTimer lostTimer(1000U, 120U);
+	CTimer pollTimer(1000U, 5U);
+
 	bool networkEnabled = m_conf.getNetworkEnabled();
 	if (networkEnabled) {
 		std::string fileName = m_conf.getNetworkHosts();
@@ -215,9 +217,20 @@ int CYSFGateway::run()
 
 		m_wiresX->start();
 
-		m_startup = m_conf.getNetworkStartup();
-		if (!m_startup.empty())
-			m_startupTimer.start();
+		std::string startup = m_conf.getNetworkStartup();
+		if (!startup.empty()) {
+			CYSFReflector* reflector = m_wiresX->getReflector(startup);
+			if (reflector != NULL) {
+				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
+				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_netNetwork->writePoll();
+				m_netNetwork->writePoll();
+				m_netNetwork->writePoll();
+				lostTimer.start();
+				pollTimer.start();
+				m_linked = true;
+			}
+		}
 	}
 
 	CStopWatch stopWatch;
@@ -226,8 +239,6 @@ int CYSFGateway::run()
 	LogMessage("Starting YSFGateway-%s", VERSION);
 
 	createGPS();
-
-	CTimer watchdogTimer(1000U, 0U, 500U);
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -253,14 +264,22 @@ int CYSFGateway::run()
 							CYSFReflector* reflector = m_wiresX->getReflector();
 							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-							m_startupTimer.stop();
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
+							lostTimer.start();
+							pollTimer.start();
 							m_linked = true;
 						}
 						break;
 					case WXS_DISCONNECT:
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
 						m_netNetwork->setDestination();
-						m_startupTimer.stop();
+						lostTimer.stop();
+						pollTimer.stop();
 						m_linked = false;
 						break;
 					default:
@@ -284,8 +303,13 @@ int CYSFGateway::run()
 		}
 
 		while (m_netNetwork->read(buffer) > 0U) {
-			if (networkEnabled && m_linked)
-				rptNetwork.write(buffer);
+			if (networkEnabled && m_linked) {
+				// Only pass through YSF data packets
+				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+					rptNetwork.write(buffer);
+
+				lostTimer.start();
+			}
 		}
 
 		unsigned int ms = stopWatch.elapsed();
@@ -298,6 +322,21 @@ int CYSFGateway::run()
 		if (m_wiresX != NULL)
 			m_wiresX->clock(ms);
 
+		lostTimer.clock(ms);
+		if (lostTimer.isRunning() && lostTimer.hasExpired()) {
+			LogWarning("Link has failed, polls lost");
+			m_netNetwork->setDestination();
+			lostTimer.stop();
+			pollTimer.stop();
+			m_linked = false;
+		}
+
+		pollTimer.clock(ms);
+		if (pollTimer.isRunning() && pollTimer.hasExpired()) {
+			m_netNetwork->writePoll();
+			pollTimer.start();
+		}
+
 		watchdogTimer.clock(ms);
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
 			LogMessage("Network watchdog has expired");
@@ -305,17 +344,6 @@ int CYSFGateway::run()
 				m_gps->reset();
 			watchdogTimer.stop();
 			m_exclude = false;
-		}
-
-		m_startupTimer.clock(ms);
-		if (m_startupTimer.isRunning() && m_startupTimer.hasExpired()) {
-			CYSFReflector* reflector = m_wiresX->getReflector(m_startup);
-			if (reflector != NULL) {
-				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
-				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_startupTimer.stop();
-				m_linked = true;
-			}
 		}
 
 		if (ms < 5U)

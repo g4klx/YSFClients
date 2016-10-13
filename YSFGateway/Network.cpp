@@ -33,19 +33,24 @@ m_debug(debug),
 m_address(),
 m_port(0U),
 m_poll(NULL),
-m_buffer(1000U, "YSF Network Buffer"),
-m_timer(1000U, 5U)
+m_unlink(NULL),
+m_buffer(1000U, "YSF Network Buffer")
 {
 	assert(port > 0U);
 
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
+	m_unlink = new unsigned char[14U];
+	::memcpy(m_unlink + 0U, "YSFU", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
-	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
+	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
 		m_poll[i + 4U] = node.at(i);
+		m_unlink[i + 4U] = node.at(i);
+	}
 }
 
 CNetwork::CNetwork(unsigned int port, const std::string& callsign, bool debug) :
@@ -54,19 +59,24 @@ m_debug(debug),
 m_address(),
 m_port(0U),
 m_poll(NULL),
-m_buffer(1000U, "YSF Network Buffer"),
-m_timer(1000U, 5U)
+m_unlink(NULL),
+m_buffer(1000U, "YSF Network Buffer")
 {
 	assert(port > 0U);
 
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
+	m_unlink = new unsigned char[14U];
+	::memcpy(m_unlink + 0U, "YSFU", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
-	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
-		m_poll[i + 4U] = node.at(i);
+	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
+		m_poll[i + 4U]   = node.at(i);
+		m_unlink[i + 4U] = node.at(i);
+	}
 }
 
 CNetwork::~CNetwork()
@@ -85,16 +95,12 @@ void CNetwork::setDestination(const in_addr& address, unsigned int port)
 {
 	m_address = address;
 	m_port    = port;
-
-	m_timer.start();
 }
 
 void CNetwork::setDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;
-
-	m_timer.stop();
 }
 
 bool CNetwork::write(const unsigned char* data)
@@ -118,14 +124,16 @@ bool CNetwork::writePoll()
 	return m_socket.write(m_poll, 14U, m_address, m_port);
 }
 
+bool CNetwork::writeUnlink()
+{
+	if (m_port == 0U)
+		return true;
+
+	return m_socket.write(m_unlink, 14U, m_address, m_port);
+}
+
 void CNetwork::clock(unsigned int ms)
 {
-	m_timer.clock(ms);
-	if (m_timer.isRunning() && m_timer.hasExpired()) {
-		writePoll();
-		m_timer.start();
-	}
-
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
@@ -137,20 +145,13 @@ void CNetwork::clock(unsigned int ms)
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
 
-	// Handle incoming polls
-	if (::memcmp(buffer, "YSFP", 4U) == 0) {
-		// How do we handle a loss of polls?
-		return;
-	}
-
-	// Invalid packet type?
-	if (::memcmp(buffer, "YSFD", 4U) != 0)
-		return;
-
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
 
-	m_buffer.addData(buffer, 155U);
+	unsigned char len = length;
+	m_buffer.addData(&len, 1U);
+
+	m_buffer.addData(buffer, length);
 }
 
 unsigned int CNetwork::read(unsigned char* data)
@@ -160,9 +161,12 @@ unsigned int CNetwork::read(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
-	m_buffer.getData(data, 155U);
+	unsigned char len = 0U;
+	m_buffer.getData(&len, 1U);
 
-	return 155U;
+	m_buffer.getData(data, len);
+
+	return len;
 }
 
 void CNetwork::close()

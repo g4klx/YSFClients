@@ -43,8 +43,6 @@ private:
 	CNetwork*   m_netNetwork;
 	bool        m_linked;
 	bool        m_exclude;
-	CTimer      m_startupTimer;
-	std::string m_startup;
 
 	void createGPS();
 };
