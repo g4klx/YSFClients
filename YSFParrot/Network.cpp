@@ -96,6 +96,10 @@ void CNetwork::clock(unsigned int ms)
 		return;
 	}
 
+	// Handle incoming unlinks
+	if (::memcmp(buffer, "YSFU", 4U) == 0)
+		return;
+
 	// Handle the status command
 	if (::memcmp(buffer, "YSFS", 4U) == 0) {
 		unsigned char status[50U];
