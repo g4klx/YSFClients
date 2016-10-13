@@ -87,7 +87,7 @@ void CYSFReflector::run()
 {
 	bool ret = m_conf.read();
 	if (!ret) {
-		::fprintf(stderr, "YSFRefector: cannot read the .ini file\n");
+		::fprintf(stderr, "YSFReflector: cannot read the .ini file\n");
 		return;
 	}
 
