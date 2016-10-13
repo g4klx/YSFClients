@@ -192,7 +192,6 @@ int CYSFGateway::run()
 		return 1;
 	}
 
-	CTimer watchdogTimer(1000U, 0U, 500U);
 	CTimer lostTimer(1000U, 120U);
 	CTimer pollTimer(1000U, 5U);
 
@@ -244,8 +243,6 @@ int CYSFGateway::run()
 		unsigned char buffer[200U];
 
 		while (rptNetwork.read(buffer) > 0U) {
-			watchdogTimer.start();
-
 			CYSFFICH fich;
 			bool valid = fich.decode(buffer + 35U);
 			if (valid) {
@@ -297,7 +294,6 @@ int CYSFGateway::run()
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
-				watchdogTimer.stop();
 				m_exclude = false;
 			}
 		}
@@ -335,15 +331,6 @@ int CYSFGateway::run()
 		if (pollTimer.isRunning() && pollTimer.hasExpired()) {
 			m_netNetwork->writePoll();
 			pollTimer.start();
-		}
-
-		watchdogTimer.clock(ms);
-		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			LogMessage("Network watchdog has expired");
-			if (m_gps != NULL)
-				m_gps->reset();
-			watchdogTimer.stop();
-			m_exclude = false;
 		}
 
 		if (ms < 5U)
