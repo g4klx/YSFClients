@@ -115,19 +115,13 @@ void CNetwork::clock(unsigned int ms)
 		return;
 	}
 
-	// Invalid packet type?
-	if (::memcmp(buffer, "YSFD", 4U) != 0)
-		return;
-
-	// Simulate a poll with the data
-	m_callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
-	m_address  = address;
-	m_port     = port;
-
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
 
-	m_buffer.addData(buffer, 155U);
+	unsigned char len = length;
+	m_buffer.addData(&len, 1U);
+
+	m_buffer.addData(buffer, length);
 }
 
 unsigned int CNetwork::readData(unsigned char* data)
@@ -137,9 +131,12 @@ unsigned int CNetwork::readData(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
-	m_buffer.getData(data, 155U);
+	unsigned char len = 0U;
+	m_buffer.getData(&len, 1U);
 
-	return 155U;
+	m_buffer.getData(data, len);
+
+	return len;
 }
 
 bool CNetwork::readPoll(std::string& callsign, in_addr& address, unsigned int& port)
