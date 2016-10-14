@@ -24,7 +24,6 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
-#include <ctime>
 
 CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
 m_thread(NULL),
@@ -143,10 +142,6 @@ void CAPRSWriter::sendIdFrames()
 	if (!m_thread->isConnected())
 		return;
 
-	time_t now;
-	::time(&now);
-	struct tm* tm = ::gmtime(&now);
-
 	// Default values aren't passed on
 	if (m_latitude == 0.0F && m_longitude == 0.0F)
 		return;
@@ -162,7 +157,7 @@ void CAPRSWriter::sendIdFrames()
 		::strcpy(desc, "MMDVM Voice");
 	}
 
-	const char* band;
+	const char* band = "4m";
 	if (m_txFrequency >= 1200000000U)
 		band = "1.2";
 	else if (m_txFrequency >= 420000000U)
@@ -190,7 +185,7 @@ void CAPRSWriter::sendIdFrames()
 	::sprintf(lon, "%05.2lf", longitude);
 
 	std::string server = m_callsign;
-	int pos = server.find_first_of('-');
+	size_t pos = server.find_first_of('-');
 	if (pos == std::string::npos)
 		server.append("-S");
 	else
