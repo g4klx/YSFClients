@@ -201,10 +201,10 @@ void CYSFReflector::run()
 					m_repeaters.push_back(rpt);
 					network.setCount(m_repeaters.size());
 					LogMessage("Adding %s", rpt->m_callsign.c_str());
-				} 
+				}
 				rpt->m_timer.start();
+				network.writePoll(address, port);
 			} else if (::memcmp(buffer + 0U, "YSFU", 4U) == 0) {
-				std::string callsign = std::string((char*)(buffer + 4U), 10U);
 				CYSFRepeater* rpt = findRepeater(address, port);
 				if (rpt != NULL) {
 					LogMessage("Removing %s (unlinked)", rpt->m_callsign.c_str());
@@ -214,41 +214,41 @@ void CYSFReflector::run()
 					network.setCount(m_repeaters.size());
 				}
 			} else if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
-				if (!watchdogTimer.isRunning()) {
-					::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
+				CYSFRepeater* rpt = findRepeater(address, port);
+				if (rpt != NULL) {
+					if (!watchdogTimer.isRunning()) {
+						::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
 
-					if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-						::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-					else
-						::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
-
-					if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-						::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-					else
-						::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
-
-					LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
-				} else {
-					if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
-						bool changed = false;
-
-						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
 							::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-							changed = true;
-						}
+						else
+							::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
 
-						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
 							::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-							changed = true;
+						else
+							::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
+
+						LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+					} else {
+						if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
+							bool changed = false;
+
+							if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+								::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
+								changed = true;
+							}
+
+							if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+								::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
+								changed = true;
+							}
+
+							if (changed)
+								LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 						}
-
-						if (changed)
-							LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
 					}
-				}
 
-				// Only accept transmission from an already accepted repeater
-				if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
 					watchdogTimer.start();
 
 					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
