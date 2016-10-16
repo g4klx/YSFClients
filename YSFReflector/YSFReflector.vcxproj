@@ -149,7 +149,6 @@
     <ClInclude Include="Conf.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Network.h" />
-    <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="StopWatch.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />

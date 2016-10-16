@@ -24,17 +24,12 @@
 #include <cassert>
 #include <cstring>
 
-const unsigned int BUFFER_LENGTH = 200U;
-
 CNetwork::CNetwork(unsigned int port, const std::string& name, const std::string& description, bool debug) :
 m_socket(port),
 m_name(name),
 m_description(description),
-m_address(),
-m_port(0U),
 m_callsign(),
 m_debug(debug),
-m_buffer(1000U, "YSF Network"),
 m_status(NULL)
 {
 	m_name.resize(16U, ' ');
@@ -91,66 +86,25 @@ bool CNetwork::writePoll(const in_addr& address, unsigned int port)
 	return m_socket.write(buffer, 14U, address, port);
 }
 
-void CNetwork::clock(unsigned int ms)
+unsigned int CNetwork::readData(unsigned char* data, unsigned int length, in_addr& address, unsigned int& port)
 {
-	unsigned char buffer[BUFFER_LENGTH];
+	assert(data != NULL);
+	assert(length > 0U);
 
-	in_addr address;
-	unsigned int port;
-	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
-	if (length <= 0)
-		return;
-
-	// Handle incoming polls
-	if (::memcmp(buffer, "YSFP", 4U) == 0) {
-		m_callsign = std::string((char*)(buffer + 4U), YSF_CALLSIGN_LENGTH);
-		m_address  = address;
-		m_port     = port;
-		return;
-	}
+	int len = m_socket.read(data, length, address, port);
+	if (len <= 0)
+		return 0U;
 
 	// Handle incoming status requests
-	if (::memcmp(buffer, "YSFS", 4U) == 0) {
+	if (::memcmp(data, "YSFS", 4U) == 0) {
 		m_socket.write(m_status, 42U, address, port);
-		return;
+		return 0U;
 	}
 
 	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
-
-	unsigned char len = length;
-	m_buffer.addData(&len, 1U);
-
-	m_buffer.addData(buffer, length);
-}
-
-unsigned int CNetwork::readData(unsigned char* data)
-{
-	assert(data != NULL);
-
-	if (m_buffer.isEmpty())
-		return 0U;
-
-	unsigned char len = 0U;
-	m_buffer.getData(&len, 1U);
-
-	m_buffer.getData(data, len);
+		CUtils::dump(1U, "YSF Network Data Received", data, len);
 
 	return len;
-}
-
-bool CNetwork::readPoll(std::string& callsign, in_addr& address, unsigned int& port)
-{
-	if (m_port == 0U)
-		return false;
-
-	callsign = m_callsign;
-	address  = m_address;
-	port     = m_port;
-
-	m_port = 0U;
-
-	return true;
 }
 
 void CNetwork::setCount(unsigned int count)

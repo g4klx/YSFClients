@@ -20,7 +20,6 @@
 #define	Network_H
 
 #include "YSFDefines.h"
-#include "RingBuffer.h"
 #include "UDPSocket.h"
 #include "Timer.h"
 
@@ -37,12 +36,9 @@ public:
 	bool writeData(const unsigned char* data, const in_addr& address, unsigned int port);
 	bool writePoll(const in_addr& address, unsigned int port);
 
-	unsigned int readData(unsigned char* data);
-	bool readPoll(std::string& callsign, in_addr& address, unsigned int& port);
+	unsigned int readData(unsigned char* data, unsigned int length, in_addr& address, unsigned int& port);
 
 	void close();
-
-	void clock(unsigned int ms);
 
 	void setCount(unsigned int count);
 
@@ -50,11 +46,8 @@ private:
 	CUDPSocket   m_socket;
 	std::string  m_name;
 	std::string  m_description;
-	in_addr      m_address;
-	unsigned int m_port;
 	std::string  m_callsign;
 	bool         m_debug;
-	CRingBuffer<unsigned char> m_buffer;
 	unsigned char* m_status;
 };
 

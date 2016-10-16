@@ -186,38 +186,28 @@ void CYSFReflector::run()
 
 	for (;;) {
 		unsigned char buffer[200U];
-
-		// Refresh/add repeaters based on their polls
 		in_addr address;
 		unsigned int port;
-		std::string callsign;
-		bool ret = network.readPoll(callsign, address, port);
-		if (ret) {
-			CYSFRepeater* rpt = findRepeater(callsign, address, port);
-			if (rpt == NULL) {
-				LogMessage("Adding %s", callsign.c_str());
-				rpt = new CYSFRepeater;
-				rpt->m_timer.start();
-				rpt->m_callsign = callsign;
-				rpt->m_address = address;
-				rpt->m_port = port;
-				m_repeaters.push_back(rpt);
-				network.setCount(m_repeaters.size());
-			} else {
-				rpt->m_timer.start();
-				rpt->m_callsign = callsign;
-				rpt->m_address = address;
-				rpt->m_port = port;
-			}
-		}
 
-		unsigned int len = network.readData(buffer);
+		unsigned int len = network.readData(buffer, 200U, address, port);
 		if (len > 0U) {
-			if (::memcmp(buffer + 0U, "YSFU", 4U) == 0) {
+			if (::memcmp(buffer, "YSFP", 4U) == 0) {
+				CYSFRepeater* rpt = findRepeater(address, port);
+				if (rpt == NULL) {
+					rpt = new CYSFRepeater;
+					rpt->m_callsign = std::string((char*)(buffer + 4U), 10U);
+					rpt->m_address  = address;
+					rpt->m_port     = port;
+					m_repeaters.push_back(rpt);
+					network.setCount(m_repeaters.size());
+					LogMessage("Adding %s", rpt->m_callsign.c_str());
+				} 
+				rpt->m_timer.start();
+			} else if (::memcmp(buffer + 0U, "YSFU", 4U) == 0) {
 				std::string callsign = std::string((char*)(buffer + 4U), 10U);
-				CYSFRepeater* rpt = findRepeater(callsign);
+				CYSFRepeater* rpt = findRepeater(address, port);
 				if (rpt != NULL) {
-					LogMessage("Removing %s (unlinked)", callsign.c_str());
+					LogMessage("Removing %s (unlinked)", rpt->m_callsign.c_str());
 					std::vector<CYSFRepeater*>::iterator it = std::find(m_repeaters.begin(), m_repeaters.end(), rpt);
 					if (it != m_repeaters.end())
 						m_repeaters.erase(it);
@@ -262,7 +252,7 @@ void CYSFReflector::run()
 					watchdogTimer.start();
 
 					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-						if ((*it)->m_callsign != callsign)
+						if ((*it)->m_address.s_addr != address.s_addr && (*it)->m_port != port)
 							network.writeData(buffer, (*it)->m_address, (*it)->m_port);
 					}
 
@@ -276,8 +266,6 @@ void CYSFReflector::run()
 
 		unsigned int ms = stopWatch.elapsed();
 		stopWatch.start();
-
-		network.clock(ms);
 
 		pollTimer.clock(ms);
 		if (pollTimer.hasExpired()) {
@@ -325,20 +313,10 @@ void CYSFReflector::run()
 	::LogFinalise();
 }
 
-CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign, const in_addr& address, unsigned int port) const
+CYSFRepeater* CYSFReflector::findRepeater(const in_addr& address, unsigned int port) const
 {
 	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-		if ((*it)->m_callsign == callsign || (address.s_addr == (*it)->m_address.s_addr && (*it)->m_port == port))
-			return *it;
-	}
-
-	return NULL;
-}
-
-CYSFRepeater* CYSFReflector::findRepeater(const std::string& callsign) const
-{
-	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-		if ((*it)->m_callsign == callsign)
+		if (address.s_addr == (*it)->m_address.s_addr && (*it)->m_port == port)
 			return *it;
 	}
 

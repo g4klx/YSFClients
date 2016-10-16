@@ -66,8 +66,7 @@ private:
 	CConf                      m_conf;
 	std::vector<CYSFRepeater*> m_repeaters;
 
-	CYSFRepeater* findRepeater(const std::string& callsign, const in_addr& address, unsigned int port) const;
-	CYSFRepeater* findRepeater(const std::string& callsign) const;
+	CYSFRepeater* findRepeater(const in_addr& address, unsigned int port) const;
 	void dumpRepeaters() const;
 };
 
