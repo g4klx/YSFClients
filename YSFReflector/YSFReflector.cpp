@@ -200,12 +200,12 @@ void CYSFReflector::run()
 					rpt->m_port     = port;
 					m_repeaters.push_back(rpt);
 					network.setCount(m_repeaters.size());
-					LogMessage("Adding %s", rpt->m_callsign.c_str());
+					LogMessage("Adding %s (%s:%u)", rpt->m_callsign.c_str(), ::inet_ntoa(address), port);
 				}
 				rpt->m_timer.start();
 				network.writePoll(address, port);
 			} else if (::memcmp(buffer + 0U, "YSFU", 4U) == 0 && rpt != NULL) {
-				LogMessage("Removing %s (unlinked)", rpt->m_callsign.c_str());
+				LogMessage("Removing %s (%s:%u) unlinked", rpt->m_callsign.c_str(), ::inet_ntoa(address), port);
 				for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 					CYSFRepeater* itRpt = *it;
 					if (itRpt->m_address.s_addr == rpt->m_address.s_addr && itRpt->m_port == rpt->m_port) {
@@ -280,7 +280,7 @@ void CYSFReflector::run()
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			CYSFRepeater* itRpt = *it;
 			if (itRpt->m_timer.hasExpired()) {
-				LogMessage("Removing %s (polls lost)", itRpt->m_callsign.c_str());
+				LogMessage("Removing %s (%s:%u) disappeared", itRpt->m_callsign.c_str(), ::inet_ntoa(address), port);
 				m_repeaters.erase(it);
 				delete itRpt;
 				network.setCount(m_repeaters.size());
