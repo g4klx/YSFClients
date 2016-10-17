@@ -36,8 +36,6 @@ m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer")
 {
-	assert(port > 0U);
-
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
@@ -62,8 +60,6 @@ m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer")
 {
-	assert(port > 0U);
-
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
