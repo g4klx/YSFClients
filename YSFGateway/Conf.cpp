@@ -61,7 +61,7 @@ m_aprsServer(),
 m_aprsPort(0U),
 m_aprsPassword(),
 m_networkEnabled(false),
-m_networkDataPort(0U),
+m_networkPort(0U),
 m_networkHosts(),
 m_networkReloadTime(0U),
 m_networkParrotAddress("127.0.0.1"),
@@ -171,8 +171,8 @@ bool CConf::read()
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_networkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "DataPort") == 0)
-			m_networkDataPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Port") == 0)
+			m_networkPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Hosts") == 0)
 			m_networkHosts = value;
 		else if (::strcmp(key, "ReloadTime") == 0)
@@ -313,9 +313,9 @@ bool CConf::getNetworkEnabled() const
 	return m_networkEnabled;
 }
 
-unsigned int CConf::getNetworkDataPort() const
+unsigned int CConf::getNetworkPort() const
 {
-  return m_networkDataPort;
+  return m_networkPort;
 }
 
 std::string CConf::getNetworkHosts() const

@@ -63,7 +63,7 @@ public:
 
   // The Network section
   bool         getNetworkEnabled() const;
-  unsigned int getNetworkDataPort() const;
+  unsigned int getNetworkPort() const;
   std::string  getNetworkHosts() const;
   unsigned int getNetworkReloadTime() const;
   std::string  getNetworkParrotAddress() const;
@@ -101,7 +101,7 @@ private:
   std::string  m_aprsPassword;
 
   bool         m_networkEnabled;
-  unsigned int m_networkDataPort;
+  unsigned int m_networkPort;
   std::string  m_networkHosts;
   unsigned int m_networkReloadTime;
   std::string  m_networkParrotAddress;

@@ -182,7 +182,7 @@ int CYSFGateway::run()
 		return 1;
 	}
 
-	unsigned int netPort = m_conf.getNetworkDataPort();
+	unsigned int netPort = m_conf.getNetworkPort();
 
 	m_netNetwork = new CNetwork(netPort, m_callsign, debug);
 	ret = m_netNetwork->open();
