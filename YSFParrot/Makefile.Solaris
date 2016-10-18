@@ -4,7 +4,7 @@ CFLAGS  = -g -O3 -Wall -std=c++0x
 LIBS    = -lsocket
 LDFLAGS = -g
 
-OBJECTS = Log.o Network.o Parrot.o StopWatch.o Timer.o UDPSocket.o Utils.o YSFParrot.o
+OBJECTS = Log.o Network.o Parrot.o StopWatch.o Thread.o Timer.o UDPSocket.o Utils.o YSFParrot.o
 
 all:		YSFParrot
 

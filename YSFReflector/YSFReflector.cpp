@@ -20,6 +20,7 @@
 #include "StopWatch.h"
 #include "Network.h"
 #include "Version.h"
+#include "Thread.h"
 #include "Log.h"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -300,13 +301,8 @@ void CYSFReflector::run()
 			dumpTimer.start();
 		}
 
-		if (ms < 5U) {
-#if defined(_WIN32) || defined(_WIN64)
-			::Sleep(5UL);		// 5ms
-#else
-			::usleep(5000);		// 5ms
-#endif
-		}
+		if (ms < 5U)
+			CThread::sleep(5U);
 	}
 
 	network.close();
