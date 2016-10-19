@@ -115,6 +115,9 @@ bool CReflectors::load()
 		::fclose(fp);
 	}
 
+	size_t size = m_reflectors.size();
+	LogInfo("Loaded %u YSF reflectors", size);
+
 	// Add the Parrot entry
 	if (m_parrotPort > 0U) {
 		CYSFReflector* refl = new CYSFReflector;
@@ -125,15 +128,14 @@ bool CReflectors::load()
 		refl->m_port    = m_parrotPort;
 		refl->m_count   = "000";
 		m_reflectors.push_back(refl);
+		LogInfo("Loaded YSF parrot");
 	}
 
-	size_t size = m_reflectors.size();
+	size = m_reflectors.size();
 	if (size == 0U)
 		return false;
 
 	std::sort(m_reflectors.begin(), m_reflectors.end(), refComparison);
-
-	LogInfo("Loaded %u YSF reflectors", size);
 
 	return true;
 }
