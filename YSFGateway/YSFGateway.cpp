@@ -221,12 +221,15 @@ int CYSFGateway::run()
 			CYSFReflector* reflector = m_wiresX->getReflector(startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
+
 				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
+
 				lostTimer.start();
 				pollTimer.start();
+
 				m_linked = true;
 			}
 		}
@@ -258,25 +261,35 @@ int CYSFGateway::run()
 					WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 					switch (status) {
 					case WXS_CONNECT: {
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+
 							CYSFReflector* reflector = m_wiresX->getReflector();
 							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_netNetwork->writePoll();
 							m_netNetwork->writePoll();
 							m_netNetwork->writePoll();
+
 							lostTimer.start();
 							pollTimer.start();
+
 							m_linked = true;
 						}
 						break;
 					case WXS_DISCONNECT:
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
 						m_netNetwork->setDestination();
+
 						lostTimer.stop();
 						pollTimer.stop();
+
 						m_linked = false;
 						break;
 					default:
