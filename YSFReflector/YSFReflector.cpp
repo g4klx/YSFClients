@@ -253,7 +253,7 @@ void CYSFReflector::run()
 				watchdogTimer.start();
 
 				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-					if ((*it)->m_address.s_addr != address.s_addr && (*it)->m_port != port)
+					if ((*it)->m_address.s_addr != address.s_addr || (*it)->m_port != port)
 						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
 				}
 
