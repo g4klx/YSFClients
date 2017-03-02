@@ -644,15 +644,13 @@ void CWiresX::sendAllReply()
 	for (unsigned int i = 0U; i < 10U; i++)
 		data[i + 12U] = m_node.at(i);
 
-	data[22U] = '0';
-
 	unsigned int total = curr.size();
 	if (total > 999U) total = 999U;
 
 	unsigned int n = curr.size() - m_start;
 	if (n > 20U) n = 20U;
 
-	::sprintf((char*)(data + 23U), "%02u%03u", n, total);
+	::sprintf((char*)(data + 22U), "%03u%03u", n, total);
 
 	data[28U] = 0x0DU;
 
