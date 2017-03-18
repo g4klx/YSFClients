@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -494,13 +494,13 @@ void CWiresX::sendDXReply()
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + 36U] = m_reflector->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U; i++)
+		for (unsigned int i = 0U; i < 16U && i < m_reflector->m_name.size(); i++)
 			data[i + 41U] = m_reflector->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + 57U] = m_reflector->m_count.at(i);
 
-		for (unsigned int i = 0U; i < 14U; i++)
+		for (unsigned int i = 0U; i < 14U && i < m_reflector->m_desc.size(); i++)
 			data[i + 70U] = m_reflector->m_desc.at(i);
 	}
 
@@ -561,13 +561,13 @@ void CWiresX::sendConnectReply()
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 36U] = m_reflector->m_id.at(i);
 
-	for (unsigned int i = 0U; i < 16U; i++)
+	for (unsigned int i = 0U; i < 16U && i < m_reflector->m_name.size(); i++)
 		data[i + 41U] = m_reflector->m_name.at(i);
 
 	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 57U] = m_reflector->m_count.at(i);
 
-	for (unsigned int i = 0U; i < 14U; i++)
+	for (unsigned int i = 0U; i < 14U && i < m_reflector->m_desc.size(); i++)
 		data[i + 70U] = m_reflector->m_desc.at(i);
 
 	data[84U] = '0';
@@ -658,12 +658,14 @@ void CWiresX::sendAllReply()
 	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
 		CYSFReflector* refl = curr.at(j + m_start);
 
+		::memset(data + offset, ' ', 50U);
+
 		data[offset + 0U] = '5';
 
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + offset + 1U] = refl->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U; i++)
+		for (unsigned int i = 0U; i < 16U && i < refl->m_name.size(); i++)
 			data[i + offset + 6U] = refl->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
@@ -672,7 +674,7 @@ void CWiresX::sendAllReply()
 		for (unsigned int i = 0U; i < 10U; i++)
 			data[i + offset + 25U] = ' ';
 
-		for (unsigned int i = 0U; i < 14U; i++)
+		for (unsigned int i = 0U; i < 14U && i < refl->m_desc.size(); i++)
 			data[i + offset + 35U] = refl->m_desc.at(i);
 
 		data[offset + 49U] = 0x0DU;
@@ -734,12 +736,14 @@ void CWiresX::sendSearchReply()
 	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
 		CYSFReflector* refl = search.at(j);
 
+		::memset(data + offset, ' ', 50U);
+
 		data[offset + 0U] = '1';
 
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + offset + 1U] = refl->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U; i++)
+		for (unsigned int i = 0U; i < 16U && i < refl->m_name.size(); i++)
 			data[i + offset + 6U] = refl->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
@@ -748,7 +752,7 @@ void CWiresX::sendSearchReply()
 		for (unsigned int i = 0U; i < 10U; i++)
 			data[i + offset + 25U] = ' ';
 
-		for (unsigned int i = 0U; i < 14U; i++)
+		for (unsigned int i = 0U; i < 14U && i < refl->m_desc.size(); i++)
 			data[i + offset + 35U] = refl->m_desc.at(i);
 
 		data[offset + 49U] = 0x0DU;
