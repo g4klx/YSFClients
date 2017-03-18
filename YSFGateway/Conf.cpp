@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -67,6 +67,7 @@ m_networkReloadTime(0U),
 m_networkParrotAddress("127.0.0.1"),
 m_networkParrotPort(0U),
 m_networkStartup(),
+m_networkInactivityTimeout(0U),
 m_networkDebug(false)
 {
 }
@@ -183,6 +184,8 @@ bool CConf::read()
 			m_networkParrotPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
+		else if (::strcmp(key, "InactivityTimeout") == 0)
+			m_networkInactivityTimeout = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Debug") == 0)
 			m_networkDebug = ::atoi(value) == 1;
 	}
@@ -341,6 +344,11 @@ unsigned int CConf::getNetworkParrotPort() const
 std::string CConf::getNetworkStartup() const
 {
 	return m_networkStartup;
+}
+
+unsigned int CConf::getNetworkInactivityTimeout() const
+{
+	return m_networkInactivityTimeout;
 }
 
 bool CConf::getNetworkDebug() const

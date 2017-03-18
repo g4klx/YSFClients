@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -192,6 +192,7 @@ int CYSFGateway::run()
 		return 1;
 	}
 
+	CTimer inactivityTimer(1000U, m_conf.getNetworkInactivityTimeout() * 60U);
 	CTimer lostTimer(1000U, 120U);
 	CTimer pollTimer(1000U, 5U);
 
@@ -227,6 +228,7 @@ int CYSFGateway::run()
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
 
+				inactivityTimer.start();
 				lostTimer.start();
 				pollTimer.start();
 
@@ -273,6 +275,7 @@ int CYSFGateway::run()
 							m_netNetwork->writePoll();
 							m_netNetwork->writePoll();
 
+							inactivityTimer.start();
 							lostTimer.start();
 							pollTimer.start();
 
@@ -287,6 +290,7 @@ int CYSFGateway::run()
 						m_netNetwork->writeUnlink();
 						m_netNetwork->setDestination();
 
+						inactivityTimer.stop();
 						lostTimer.stop();
 						pollTimer.stop();
 
@@ -301,8 +305,10 @@ int CYSFGateway::run()
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
 			}
 
-			if (networkEnabled && m_linked && !m_exclude)
+			if (networkEnabled && m_linked && !m_exclude) {
 				m_netNetwork->write(buffer);
+				inactivityTimer.start();
+			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
@@ -331,10 +337,30 @@ int CYSFGateway::run()
 		if (m_wiresX != NULL)
 			m_wiresX->clock(ms);
 
+		inactivityTimer.clock(ms);
+		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
+			if (m_linked) {
+				LogMessage("Disconnecting due to inactivity");
+
+				m_netNetwork->writeUnlink();
+				m_netNetwork->writeUnlink();
+				m_netNetwork->writeUnlink();
+				m_netNetwork->setDestination();
+
+				lostTimer.stop();
+				pollTimer.stop();
+
+				m_linked = false;
+			}
+
+			inactivityTimer.stop();
+		}
+
 		lostTimer.clock(ms);
 		if (lostTimer.isRunning() && lostTimer.hasExpired()) {
 			LogWarning("Link has failed, polls lost");
 			m_netNetwork->setDestination();
+			inactivityTimer.stop();
 			lostTimer.stop();
 			pollTimer.stop();
 			m_linked = false;
