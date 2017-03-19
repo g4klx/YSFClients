@@ -307,7 +307,8 @@ int CYSFGateway::run()
 
 			if (networkEnabled && m_linked && !m_exclude) {
 				m_netNetwork->write(buffer);
-				inactivityTimer.start();
+				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+					inactivityTimer.start();
 			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
