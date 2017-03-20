@@ -290,6 +290,8 @@ void CWiresX::processDisconnect(const unsigned char* source)
 {
 	::LogDebug("Received Disconect from %10.10s", source);
 
+	m_reflector = NULL;
+
 	m_status = WXSI_DISCONNECT;
 	m_timer.start();
 }
