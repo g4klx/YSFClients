@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -130,6 +130,9 @@ bool CNetwork::writeUnlink()
 
 void CNetwork::clock(unsigned int ms)
 {
+	if (m_port == 0U)
+		return;
+
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
