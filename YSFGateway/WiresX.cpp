@@ -288,7 +288,8 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 void CWiresX::processDisconnect(const unsigned char* source)
 {
-	::LogDebug("Received Disconect from %10.10s", source);
+	if (source != NULL)
+		::LogDebug("Received Disconect from %10.10s", source);
 
 	m_reflector = NULL;
 

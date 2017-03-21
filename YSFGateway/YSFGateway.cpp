@@ -289,7 +289,7 @@ int CYSFGateway::run()
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
-						m_netNetwork->setDestination();
+						m_netNetwork->clearDestination();
 
 						inactivityTimer.stop();
 						lostTimer.stop();
@@ -344,10 +344,13 @@ int CYSFGateway::run()
 			if (m_linked) {
 				LogMessage("Disconnecting due to inactivity");
 
+				if (m_wiresX != NULL)
+					m_wiresX->processDisconnect();
+
 				m_netNetwork->writeUnlink();
 				m_netNetwork->writeUnlink();
 				m_netNetwork->writeUnlink();
-				m_netNetwork->setDestination();
+				m_netNetwork->clearDestination();
 
 				lostTimer.stop();
 				pollTimer.stop();
@@ -361,10 +364,16 @@ int CYSFGateway::run()
 		lostTimer.clock(ms);
 		if (lostTimer.isRunning() && lostTimer.hasExpired()) {
 			LogWarning("Link has failed, polls lost");
-			m_netNetwork->setDestination();
+
+			if (m_wiresX != NULL)
+				m_wiresX->processDisconnect();
+
+			m_netNetwork->clearDestination();
+
 			inactivityTimer.stop();
 			lostTimer.stop();
 			pollTimer.stop();
+
 			m_linked = false;
 		}
 
