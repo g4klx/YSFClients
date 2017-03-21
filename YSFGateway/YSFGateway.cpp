@@ -45,6 +45,7 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <clocale>
 
 int main(int argc, char** argv)
 {
