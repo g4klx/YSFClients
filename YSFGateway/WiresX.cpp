@@ -682,6 +682,12 @@ void CWiresX::sendAllReply()
 		data[offset + 49U] = 0x0DU;
 	}
 
+	unsigned int k = 1029U - offset;
+	for(unsigned int i = 0U; i < k; i++)
+		data[i + offset] = 0x20U;
+	
+	offset += k;
+    
 	data[offset + 0U] = 0x03U;			// End of data marker
 	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
 
