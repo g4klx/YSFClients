@@ -179,10 +179,10 @@ void CGPS::transmitGPS(const unsigned char* source)
 		return;                                // error/unknown
 
 	int lat_dir;
-	unsigned char b = m_buffer[6U] & 0xF0U;                            // currently a guess
-	if (b == 0x30U)
+	unsigned char b = m_buffer[8U] & 0xF0U;                            // currently a guess
+	if (b == 0x50U)
 		lat_dir = 1;                           // N
-	else if (b == 0x50U)
+	else if (b == 0x30U)
 		lat_dir = -1;                          // S
 	else
 		return;                                // error/unknown
