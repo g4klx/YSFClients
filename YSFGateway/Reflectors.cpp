@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@ CReflectors::CReflectors(const std::string& hostsFile, unsigned int reloadTime) 
 m_hostsFile(hostsFile),
 m_parrotAddress(),
 m_parrotPort(0U),
-m_reflectors(),
+m_newReflectors(),
+m_currReflectors(),
 m_search(),
 m_timer(1000U, reloadTime * 60U)
 {
@@ -40,10 +41,14 @@ m_timer(1000U, reloadTime * 60U)
 
 CReflectors::~CReflectors()
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
+	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
 		delete *it;
 
-	m_reflectors.clear();
+	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it)
+		delete *it;
+
+	m_newReflectors.clear();
+	m_currReflectors.clear();
 }
 
 static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
@@ -71,11 +76,7 @@ void CReflectors::setParrot(const std::string& address, unsigned int port)
 
 bool CReflectors::load()
 {
-	// Clear out the old reflector list
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
-		delete *it;
-
-	m_reflectors.clear();
+	m_newReflectors.clear();
 
 	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
 	if (fp != NULL) {
@@ -107,7 +108,7 @@ bool CReflectors::load()
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
 
-					m_reflectors.push_back(refl);
+					m_newReflectors.push_back(refl);
 				}
 			}
 		}
@@ -115,7 +116,7 @@ bool CReflectors::load()
 		::fclose(fp);
 	}
 
-	size_t size = m_reflectors.size();
+	size_t size = m_newReflectors.size();
 	LogInfo("Loaded %u YSF reflectors", size);
 
 	// Add the Parrot entry
@@ -127,22 +128,22 @@ bool CReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_parrotAddress);
 		refl->m_port    = m_parrotPort;
 		refl->m_count   = "000";
-		m_reflectors.push_back(refl);
+		m_newReflectors.push_back(refl);
 		LogInfo("Loaded YSF parrot");
 	}
 
-	size = m_reflectors.size();
+	size = m_newReflectors.size();
 	if (size == 0U)
 		return false;
 
-	std::sort(m_reflectors.begin(), m_reflectors.end(), refComparison);
+	std::sort(m_newReflectors.begin(), m_newReflectors.end(), refComparison);
 
 	return true;
 }
 
 CYSFReflector* CReflectors::find(const std::string& id)
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
+	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
 		if (id == (*it)->m_id)
 			return *it;
 	}
@@ -154,7 +155,7 @@ CYSFReflector* CReflectors::find(const std::string& id)
 
 std::vector<CYSFReflector*>& CReflectors::current()
 {
-	return m_reflectors;
+	return m_currReflectors;
 }
 
 std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
@@ -167,7 +168,7 @@ std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
 
 	unsigned int len = trimmed.size();
 
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it) {
+	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
 		std::string reflector = (*it)->m_name;
 		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
@@ -179,6 +180,23 @@ std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
 	std::sort(m_search.begin(), m_search.end(), refComparison);
 
 	return m_search;
+}
+
+bool CReflectors::reload()
+{
+	if (m_newReflectors.empty())
+		return false;
+
+	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it)
+		delete *it;
+
+	m_currReflectors.clear();
+
+	m_currReflectors = m_newReflectors;
+
+	m_newReflectors.clear();
+
+	return true;
 }
 
 void CReflectors::clock(unsigned int ms)
