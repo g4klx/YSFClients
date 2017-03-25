@@ -76,6 +76,9 @@ void CReflectors::setParrot(const std::string& address, unsigned int port)
 
 bool CReflectors::load()
 {
+	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
+		delete *it;
+
 	m_newReflectors.clear();
 
 	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
