@@ -154,7 +154,13 @@ void CWiresX::setParrot(const std::string& address, unsigned int port)
 
 bool CWiresX::start()
 {
-	return m_reflectors.load();
+	bool ret = m_reflectors.load();
+	if (!ret)
+		return false;
+
+	m_reflectors.reload();
+
+	return true;
 }
 
 WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
