@@ -55,7 +55,8 @@ public:
 	CYSFReflector* getReflector() const;
 	CYSFReflector* getReflector(const std::string& id);
 
-  void processDisconnect(const unsigned char* source = NULL);
+	void processConnect(CYSFReflector* reflector);
+	void processDisconnect(const unsigned char* source = NULL);
 
 	void clock(unsigned int ms);
 

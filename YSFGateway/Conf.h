@@ -70,6 +70,7 @@ public:
   unsigned int getNetworkParrotPort() const;
   std::string  getNetworkStartup() const;
   unsigned int getNetworkInactivityTimeout() const;
+  bool         getNetworkRevert() const;
   bool         getNetworkDebug() const;
 
 private:
@@ -109,6 +110,7 @@ private:
   unsigned int m_networkParrotPort;
   std::string  m_networkStartup;
   unsigned int m_networkInactivityTimeout;
+  bool         m_networkRevert;
   bool         m_networkDebug;
 };
 

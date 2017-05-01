@@ -197,6 +197,9 @@ int CYSFGateway::run()
 	CTimer lostTimer(1000U, 120U);
 	CTimer pollTimer(1000U, 5U);
 
+	bool revert = m_conf.getNetworkRevert();
+	std::string startup = m_conf.getNetworkStartup();
+
 	bool networkEnabled = m_conf.getNetworkEnabled();
 	if (networkEnabled) {
 		std::string fileName = m_conf.getNetworkHosts();
@@ -218,7 +221,6 @@ int CYSFGateway::run()
 
 		m_wiresX->start();
 
-		std::string startup = m_conf.getNetworkStartup();
 		if (!startup.empty()) {
 			CYSFReflector* reflector = m_wiresX->getReflector(startup);
 			if (reflector != NULL) {
@@ -342,20 +344,57 @@ int CYSFGateway::run()
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
 			if (m_linked) {
-				LogMessage("Disconnecting due to inactivity");
+				if (revert) {
+					CYSFReflector* reflector = m_wiresX->getReflector(startup);
+					if (reflector != NULL) {
+						LogMessage("Reverting connection to %s", reflector->m_id.c_str());
 
-				if (m_wiresX != NULL)
-					m_wiresX->processDisconnect();
+						if (m_wiresX != NULL)
+							m_wiresX->processConnect(reflector);
 
-				m_netNetwork->writeUnlink();
-				m_netNetwork->writeUnlink();
-				m_netNetwork->writeUnlink();
-				m_netNetwork->clearDestination();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
 
-				lostTimer.stop();
-				pollTimer.stop();
+						m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+						m_netNetwork->writePoll();
+						m_netNetwork->writePoll();
+						m_netNetwork->writePoll();
 
-				m_linked = false;
+						lostTimer.start();
+						pollTimer.start();
+					} else {
+						LogMessage("Disconnecting due to inactivity");
+
+						if (m_wiresX != NULL)
+							m_wiresX->processDisconnect();
+
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->clearDestination();
+
+						lostTimer.stop();
+						pollTimer.stop();
+
+						m_linked = false;
+					}
+				} else {
+					LogMessage("Disconnecting due to inactivity");
+
+					if (m_wiresX != NULL)
+						m_wiresX->processDisconnect();
+
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->clearDestination();
+
+					lostTimer.stop();
+					pollTimer.stop();
+
+					m_linked = false;
+				}
 			}
 
 			inactivityTimer.stop();

@@ -68,6 +68,7 @@ m_networkParrotAddress("127.0.0.1"),
 m_networkParrotPort(0U),
 m_networkStartup(),
 m_networkInactivityTimeout(0U),
+m_networkRevert(false),
 m_networkDebug(false)
 {
 }
@@ -186,6 +187,8 @@ bool CConf::read()
 			m_networkStartup = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Revert") == 0)
+			m_networkRevert = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
 			m_networkDebug = ::atoi(value) == 1;
 	}
@@ -349,6 +352,11 @@ std::string CConf::getNetworkStartup() const
 unsigned int CConf::getNetworkInactivityTimeout() const
 {
 	return m_networkInactivityTimeout;
+}
+
+bool CConf::getNetworkRevert() const
+{
+	return m_networkRevert;
 }
 
 bool CConf::getNetworkDebug() const
