@@ -231,7 +231,9 @@ int CYSFGateway::run()
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
 
-				inactivityTimer.start();
+				if (!revert)
+					inactivityTimer.start();
+
 				lostTimer.start();
 				pollTimer.start();
 
