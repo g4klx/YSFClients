@@ -346,41 +346,26 @@ int CYSFGateway::run()
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
 			if (m_linked) {
-				if (revert) {
-					CYSFReflector* reflector = m_wiresX->getReflector(startup);
-					if (reflector != NULL) {
-						LogMessage("Reverting connection to %s", reflector->m_id.c_str());
+				CYSFReflector* reflector = NULL;
+				if (revert && !startup.empty() && m_wiresX != NULL)
+					reflector = m_wiresX->getReflector(startup);
 
-						if (m_wiresX != NULL)
-							m_wiresX->processConnect(reflector);
+				if (reflector != NULL) {
+					LogMessage("Reverting connection to %5.5s", reflector->m_id.c_str());
 
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
+					m_wiresX->processConnect(reflector);
 
-						m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-						m_netNetwork->writePoll();
-						m_netNetwork->writePoll();
-						m_netNetwork->writePoll();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
 
-						lostTimer.start();
-						pollTimer.start();
-					} else {
-						LogMessage("Disconnecting due to inactivity");
+					m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+					m_netNetwork->writePoll();
+					m_netNetwork->writePoll();
+					m_netNetwork->writePoll();
 
-						if (m_wiresX != NULL)
-							m_wiresX->processDisconnect();
-
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->clearDestination();
-
-						lostTimer.stop();
-						pollTimer.stop();
-
-						m_linked = false;
-					}
+					lostTimer.start();
+					pollTimer.start();
 				} else {
 					LogMessage("Disconnecting due to inactivity");
 
