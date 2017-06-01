@@ -64,6 +64,7 @@ void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, fl
 
 bool CAPRSWriter::open()
 {
+	m_idTimer.start();
 	return m_thread->start();
 }
 
@@ -179,10 +180,10 @@ void CAPRSWriter::sendIdFrames()
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	::sprintf(lat, "%04.2lf", latitude);
+	::sprintf(lat, "%07.2lf", latitude);
 
 	char lon[20U];
-	::sprintf(lon, "%05.2lf", longitude);
+	::sprintf(lon, "%08.2lf", longitude);
 
 	std::string server = m_callsign;
 	size_t pos = server.find_first_of('-');
