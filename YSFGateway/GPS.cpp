@@ -51,7 +51,7 @@ CGPS::~CGPS()
 
 void CGPS::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
 {
-	m_writer.setInfo(rxFrequency, rxFrequency, latitude, longitude, height);
+	m_writer.setInfo(txFrequency, rxFrequency, latitude, longitude, height);
 }
 
 bool CGPS::open()
