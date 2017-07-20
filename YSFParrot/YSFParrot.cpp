@@ -85,8 +85,8 @@ void CYSFParrot::run()
 		return;
 	}
 
-	LogInfo("Debug: %s", m_debug ? "Enabled" : "Disabled");
-	LogInfo("Logging to file: %s", m_log ? "Enabled" : "Disabled");
+	LogInfo("Debug: %s", m_debug ? "enabled" : "disabled");
+	LogInfo("Logging to file: %s", m_log ? "enabled" : "disabled");
 
 	CParrot parrot(180U);
 	CNetwork network(m_port);
