@@ -19,6 +19,8 @@
 #ifndef DTMF_H
 #define	DTMF_H
 
+#include "WiresX.h"
+
 #include <string>
 
 class CDTMF {
@@ -26,11 +28,11 @@ public:
 	CDTMF();
 	~CDTMF();
 
-	bool decode(const unsigned char* ambe, bool end);
+	WX_STATUS decodeVW(const unsigned char* ambe);
+	WX_STATUS decodeDN1(const unsigned char* ambe);
+	WX_STATUS decodeDN2(const unsigned char* ambe);
 
-	bool hasCommand() const;
-
-	std::string translate();
+	unsigned int getReflector();
 
 	void reset();
 
@@ -41,6 +43,8 @@ private:
 	unsigned int m_releaseCount;
 	unsigned int m_pressCount;
 	char         m_lastChar;
+
+	WX_STATUS validate() const;
 };
 
 #endif

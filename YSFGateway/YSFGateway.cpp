@@ -80,6 +80,7 @@ m_suffix(),
 m_conf(configFile),
 m_gps(NULL),
 m_wiresX(NULL),
+m_dtmf(NULL),
 m_netNetwork(NULL),
 m_linked(false),
 m_exclude(false)
@@ -206,6 +207,7 @@ int CYSFGateway::run()
 		unsigned int reloadTime = m_conf.getNetworkReloadTime();
 
 		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
+		m_dtmf   = new CDTMF;
 
 		std::string name         = m_conf.getName();
 		unsigned int txFrequency = m_conf.getTxFrequency();
@@ -288,6 +290,66 @@ int CYSFGateway::run()
 						}
 						break;
 					case WXS_DISCONNECT:
+						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->clearDestination();
+
+						inactivityTimer.stop();
+						lostTimer.stop();
+						pollTimer.stop();
+
+						m_linked = false;
+						break;
+					default:
+						break;
+					}
+
+					status = WXS_NONE;
+					switch (dt) {
+					case YSF_DT_VOICE_FR_MODE:
+						status = m_dtmf->decodeVW(buffer + 35U);
+						break;
+					case YSF_DT_VD_MODE1:
+						status = m_dtmf->decodeDN1(buffer + 35U);
+						break;
+					case YSF_DT_VD_MODE2:
+						status = m_dtmf->decodeDN2(buffer + 35U);
+						break;
+					default:
+						break;
+					}
+
+					// XXX call reset() on end of transmission.
+
+					switch (status) {
+					case WXS_CONNECT: {
+						unsigned int refl = m_dtmf->getReflector();
+						// XXX validate reflector
+						// XXX Inform Wires-X
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+						m_netNetwork->writeUnlink();
+
+						CYSFReflector* reflector = m_wiresX->getReflector();
+						LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+
+						m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+						m_netNetwork->writePoll();
+						m_netNetwork->writePoll();
+						m_netNetwork->writePoll();
+
+						inactivityTimer.start();
+						lostTimer.start();
+						pollTimer.start();
+
+						m_linked = true;
+					}
+					break;
+					case WXS_DISCONNECT:
+						// XXX Inform Wires-X
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
 						m_netNetwork->writeUnlink();
@@ -423,6 +485,7 @@ int CYSFGateway::run()
 
 	delete m_netNetwork;
 	delete m_wiresX;
+	delete m_dtmf;
 
 	::LogFinalise();
 
