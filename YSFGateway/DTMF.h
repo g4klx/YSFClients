@@ -32,7 +32,7 @@ public:
 	WX_STATUS decodeDN1(const unsigned char* ambe);
 	WX_STATUS decodeDN2(const unsigned char* ambe);
 
-	unsigned int getReflector();
+	std::string getReflector();
 
 	void reset();
 

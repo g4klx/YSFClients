@@ -307,13 +307,12 @@ WX_STATUS CDTMF::validate() const
 	return WXS_CONNECT;
 }
 
-unsigned int CDTMF::getReflector()
+std::string CDTMF::getReflector()
 {
 	std::string command = m_command;
 	reset();
 
-	// XXX FIXME
-	return 0U;
+	return command.substr(1U);
 }
 
 void CDTMF::reset()

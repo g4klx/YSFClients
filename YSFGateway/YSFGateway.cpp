@@ -322,46 +322,51 @@ int CYSFGateway::run()
 						break;
 					}
 
-					// XXX call reset() on end of transmission.
-
 					switch (status) {
 					case WXS_CONNECT: {
-						unsigned int refl = m_dtmf->getReflector();
-						// XXX validate reflector
-						// XXX Inform Wires-X
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
+						std::string refl = m_dtmf->getReflector();
+						CYSFReflector* reflector = m_wiresX->getReflector(refl);
+						if (reflector != NULL) {
+							m_wiresX->processConnect(reflector);
 
-						CYSFReflector* reflector = m_wiresX->getReflector();
-						LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+							if (m_linked) {
+								m_netNetwork->writeUnlink();
+								m_netNetwork->writeUnlink();
+								m_netNetwork->writeUnlink();
+							}
 
-						m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-						m_netNetwork->writePoll();
-						m_netNetwork->writePoll();
-						m_netNetwork->writePoll();
+							LogMessage("Connect via DTMF to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
 
-						inactivityTimer.start();
-						lostTimer.start();
-						pollTimer.start();
+							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
 
-						m_linked = true;
+							inactivityTimer.start();
+							lostTimer.start();
+							pollTimer.start();
+
+							m_linked = true;
+						}
 					}
 					break;
 					case WXS_DISCONNECT:
-						// XXX Inform Wires-X
-						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+						if (m_linked) {
+							m_wiresX->processDisconnect();
 
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->clearDestination();
+							LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
 
-						inactivityTimer.stop();
-						lostTimer.stop();
-						pollTimer.stop();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->clearDestination();
 
-						m_linked = false;
+							inactivityTimer.stop();
+							lostTimer.stop();
+							pollTimer.stop();
+
+							m_linked = false;
+						}
 						break;
 					default:
 						break;
@@ -381,6 +386,8 @@ int CYSFGateway::run()
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
+				if (m_dtmf != NULL)
+					m_dtmf->reset();
 				m_exclude = false;
 			}
 		}
