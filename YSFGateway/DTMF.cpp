@@ -54,7 +54,52 @@ CDTMF::~CDTMF()
 {
 }
 
-WX_STATUS CDTMF::decodeVW(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeVW(const unsigned char* payload)
+{
+	assert(payload != NULL);
+
+	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	for (unsigned int offset = 0U; offset < 90U; offset += 18U) {
+		WX_STATUS status = decodeVWSlice(payload + offset);
+		if (status != WXS_NONE)
+			return status;
+	}
+
+	return WXS_NONE;
+}
+
+WX_STATUS CDTMF::decodeDN1(const unsigned char* payload)
+{
+	assert(payload != NULL);
+
+	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	for (unsigned int offset = 5U; offset < 90U; offset += 18U) {
+		WX_STATUS status = decodeDN1Slice(payload + offset);
+		if (status != WXS_NONE)
+			return status;
+	}
+
+	return WXS_NONE;
+}
+
+WX_STATUS CDTMF::decodeDN2(const unsigned char* payload)
+{
+	assert(payload != NULL);
+
+	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	for (unsigned int offset = 9U; offset < 90U; offset += 18U) {
+		WX_STATUS status = decodeDN2Slice(payload + offset);
+		if (status != WXS_NONE)
+			return status;
+	}
+
+	return WXS_NONE;
+}
+
+WX_STATUS CDTMF::decodeVWSlice(const unsigned char* ambe)
 {
 	// DTMF begins with these byte values
 	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
@@ -132,7 +177,7 @@ WX_STATUS CDTMF::decodeVW(const unsigned char* ambe)
 	}
 }
 
-WX_STATUS CDTMF::decodeDN1(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeDN1Slice(const unsigned char* ambe)
 {
 	// DTMF begins with these byte values
 	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
@@ -210,7 +255,7 @@ WX_STATUS CDTMF::decodeDN1(const unsigned char* ambe)
 	}
 }
 
-WX_STATUS CDTMF::decodeDN2(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeDN2Slice(const unsigned char* ambe)
 {
 	// DTMF begins with these byte values
 	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
