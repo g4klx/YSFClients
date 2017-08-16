@@ -310,13 +310,13 @@ int CYSFGateway::run()
 					status = WXS_NONE;
 					switch (dt) {
 					case YSF_DT_VOICE_FR_MODE:
-						status = m_dtmf->decodeVW(buffer + 35U);
+						status = m_dtmf->decodeVoiceFRMode(buffer + 35U);
 						break;
 					case YSF_DT_VD_MODE1:
-						status = m_dtmf->decodeDN1(buffer + 35U);
+						status = m_dtmf->decodeVDMode1(buffer + 35U);
 						break;
 					case YSF_DT_VD_MODE2:
-						status = m_dtmf->decodeDN2(buffer + 35U);
+						status = m_dtmf->decodeVDMode2(buffer + 35U);
 						break;
 					default:
 						break;
@@ -324,8 +324,8 @@ int CYSFGateway::run()
 
 					switch (status) {
 					case WXS_CONNECT: {
-						std::string refl = m_dtmf->getReflector();
-						CYSFReflector* reflector = m_wiresX->getReflector(refl);
+						std::string id = m_dtmf->getReflector();
+						CYSFReflector* reflector = m_wiresX->getReflector(id);
 						if (reflector != NULL) {
 							m_wiresX->processConnect(reflector);
 

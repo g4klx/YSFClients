@@ -28,9 +28,9 @@ public:
 	CDTMF();
 	~CDTMF();
 
-	WX_STATUS decodeVW(const unsigned char* payload);
-	WX_STATUS decodeDN1(const unsigned char* payload);
-	WX_STATUS decodeDN2(const unsigned char* payload);
+	WX_STATUS decodeVoiceFRMode(const unsigned char* payload);
+	WX_STATUS decodeVDMode1(const unsigned char* payload);
+	WX_STATUS decodeVDMode2(const unsigned char* payload);
 
 	std::string getReflector();
 
@@ -44,9 +44,9 @@ private:
 	unsigned int m_pressCount;
 	char         m_lastChar;
 
-	WX_STATUS decodeVWSlice(const unsigned char* ambe);
-	WX_STATUS decodeDN1Slice(const unsigned char* ambe);
-	WX_STATUS decodeDN2Slice(const unsigned char* ambe);
+	WX_STATUS decodeVoiceFRModeSlice(const unsigned char* ambe);
+	WX_STATUS decodeVDMode1Slice(const unsigned char* ambe);
+	WX_STATUS decodeVDMode2Slice(const unsigned char* ambe);
 	WX_STATUS validate() const;
 };
 
