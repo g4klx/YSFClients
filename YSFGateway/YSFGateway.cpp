@@ -312,9 +312,6 @@ int CYSFGateway::run()
 					case YSF_DT_VOICE_FR_MODE:
 						status = m_dtmf->decodeVoiceFRMode(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
 						break;
-					case YSF_DT_VD_MODE1:
-						status = m_dtmf->decodeVDMode1(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
-						break;
 					case YSF_DT_VD_MODE2:
 						status = m_dtmf->decodeVDMode2(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
 						break;
