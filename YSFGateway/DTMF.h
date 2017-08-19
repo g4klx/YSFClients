@@ -28,7 +28,6 @@ public:
 	CDTMF();
 	~CDTMF();
 
-	WX_STATUS decodeVoiceFRMode(const unsigned char* payload, bool end);
 	WX_STATUS decodeVDMode2(const unsigned char* payload, bool end);
 
 	std::string getReflector();
@@ -43,7 +42,6 @@ private:
 	unsigned int m_pressCount;
 	char         m_lastChar;
 
-	WX_STATUS decodeVoiceFRModeSlice(const unsigned char* ambe, bool end);
 	WX_STATUS decodeVDMode2Slice(const unsigned char* ambe, bool end);
 	WX_STATUS validate() const;
 };

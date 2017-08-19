@@ -21,27 +21,6 @@
 
 #include "Utils.h"
 
-const unsigned char DTMF_FR_MASK[] = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x82U, 0x00U, 0x00U};
-const unsigned char DTMF_FR_SIG[]  = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U};
-
-const unsigned char DTMF_FR_SYM_MASK[] = {0x10U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_FR_SYM0[]     = {0x00U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_FR_SYM1[]     = {0x00U, 0x00U, 0x00U, 0x00U};
-const unsigned char DTMF_FR_SYM2[]     = {0x00U, 0x40U, 0x00U, 0x00U};
-const unsigned char DTMF_FR_SYM3[]     = {0x10U, 0x00U, 0x00U, 0x00U};
-const unsigned char DTMF_FR_SYM4[]     = {0x00U, 0x00U, 0x00U, 0x20U};
-const unsigned char DTMF_FR_SYM5[]     = {0x00U, 0x40U, 0x00U, 0x20U};
-const unsigned char DTMF_FR_SYM6[]     = {0x10U, 0x00U, 0x00U, 0x20U};
-const unsigned char DTMF_FR_SYM7[]     = {0x00U, 0x00U, 0x08U, 0x00U};
-const unsigned char DTMF_FR_SYM8[]     = {0x00U, 0x40U, 0x08U, 0x00U};
-const unsigned char DTMF_FR_SYM9[]     = {0x10U, 0x00U, 0x08U, 0x00U};
-const unsigned char DTMF_FR_SYMA[]     = {0x10U, 0x40U, 0x00U, 0x00U};
-const unsigned char DTMF_FR_SYMB[]     = {0x10U, 0x40U, 0x00U, 0x20U};
-const unsigned char DTMF_FR_SYMC[]     = {0x10U, 0x40U, 0x08U, 0x00U};
-const unsigned char DTMF_FR_SYMD[]     = {0x10U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_FR_SYMS[]     = {0x00U, 0x00U, 0x08U, 0x20U};
-const unsigned char DTMF_FR_SYMH[]     = {0x10U, 0x00U, 0x08U, 0x20U};
-
 const unsigned char DTMF_VD2_MASK[] = { 0xCCU, 0xCCU, 0xDDU, 0xDDU, 0xEEU, 0xEEU, 0xFFU, 0xFFU, 0xEEU, 0xEEU, 0xDDU, 0x99U, 0x98U };
 const unsigned char DTMF_VD2_SIG[]  = { 0x08U, 0x80U, 0xC9U, 0x10U, 0x26U, 0xA0U, 0xE3U, 0x31U, 0xE2U, 0xE6U, 0xD5U, 0x08U, 0x88U };
 
@@ -77,21 +56,6 @@ CDTMF::~CDTMF()
 {
 }
 
-WX_STATUS CDTMF::decodeVoiceFRMode(const unsigned char* payload, bool end)
-{
-	assert(payload != NULL);
-
-	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
-
-	for (unsigned int offset = 0U; offset < 90U; offset += 18U) {
-		WX_STATUS status = decodeVoiceFRModeSlice(payload + offset, end);
-		if (status != WXS_NONE)
-			return status;
-	}
-
-	return WXS_NONE;
-}
-
 WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload, bool end)
 {
 	assert(payload != NULL);
@@ -105,86 +69,6 @@ WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload, bool end)
 	}
 
 	return WXS_NONE;
-}
-
-WX_STATUS CDTMF::decodeVoiceFRModeSlice(const unsigned char* ambe, bool end)
-{
-	CUtils::dump(3U, "Voice FR Mode", ambe, 18U);
-
-	// DTMF begins with these byte values
-	if (!end && (ambe[0] & DTMF_FR_MASK[0]) == DTMF_FR_SIG[0] && (ambe[1] & DTMF_FR_MASK[1]) == DTMF_FR_SIG[1] &&
-		(ambe[2] & DTMF_FR_MASK[2]) == DTMF_FR_SIG[2] && (ambe[3] & DTMF_FR_MASK[3]) == DTMF_FR_SIG[3] &&
-		(ambe[4] & DTMF_FR_MASK[4]) == DTMF_FR_SIG[4] && (ambe[5] & DTMF_FR_MASK[5]) == DTMF_FR_SIG[5] &&
-		(ambe[6] & DTMF_FR_MASK[6]) == DTMF_FR_SIG[6] && (ambe[7] & DTMF_FR_MASK[7]) == DTMF_FR_SIG[7] &&
-		(ambe[8] & DTMF_FR_MASK[8]) == DTMF_FR_SIG[8]) {
-		unsigned char sym0 = ambe[4] & DTMF_FR_SYM_MASK[0];
-		unsigned char sym1 = ambe[5] & DTMF_FR_SYM_MASK[1];
-		unsigned char sym2 = ambe[7] & DTMF_FR_SYM_MASK[2];
-		unsigned char sym3 = ambe[8] & DTMF_FR_SYM_MASK[3];
-
-		char c = ' ';
-		if (sym0 == DTMF_FR_SYM0[0] && sym1 == DTMF_FR_SYM0[1] && sym2 == DTMF_FR_SYM0[2] && sym3 == DTMF_FR_SYM0[3])
-			c = '0';
-		else if (sym0 == DTMF_FR_SYM1[0] && sym1 == DTMF_FR_SYM1[1] && sym2 == DTMF_FR_SYM1[2] && sym3 == DTMF_FR_SYM1[3])
-			c = '1';
-		else if (sym0 == DTMF_FR_SYM2[0] && sym1 == DTMF_FR_SYM2[1] && sym2 == DTMF_FR_SYM2[2] && sym3 == DTMF_FR_SYM2[3])
-			c = '2';
-		else if (sym0 == DTMF_FR_SYM3[0] && sym1 == DTMF_FR_SYM3[1] && sym2 == DTMF_FR_SYM3[2] && sym3 == DTMF_FR_SYM3[3])
-			c = '3';
-		else if (sym0 == DTMF_FR_SYM4[0] && sym1 == DTMF_FR_SYM4[1] && sym2 == DTMF_FR_SYM4[2] && sym3 == DTMF_FR_SYM4[3])
-			c = '4';
-		else if (sym0 == DTMF_FR_SYM5[0] && sym1 == DTMF_FR_SYM5[1] && sym2 == DTMF_FR_SYM5[2] && sym3 == DTMF_FR_SYM5[3])
-			c = '5';
-		else if (sym0 == DTMF_FR_SYM6[0] && sym1 == DTMF_FR_SYM6[1] && sym2 == DTMF_FR_SYM6[2] && sym3 == DTMF_FR_SYM6[3])
-			c = '6';
-		else if (sym0 == DTMF_FR_SYM7[0] && sym1 == DTMF_FR_SYM7[1] && sym2 == DTMF_FR_SYM7[2] && sym3 == DTMF_FR_SYM7[3])
-			c = '7';
-		else if (sym0 == DTMF_FR_SYM8[0] && sym1 == DTMF_FR_SYM8[1] && sym2 == DTMF_FR_SYM8[2] && sym3 == DTMF_FR_SYM8[3])
-			c = '8';
-		else if (sym0 == DTMF_FR_SYM9[0] && sym1 == DTMF_FR_SYM9[1] && sym2 == DTMF_FR_SYM9[2] && sym3 == DTMF_FR_SYM9[3])
-			c = '9';
-		else if (sym0 == DTMF_FR_SYMA[0] && sym1 == DTMF_FR_SYMA[1] && sym2 == DTMF_FR_SYMA[2] && sym3 == DTMF_FR_SYMA[3])
-			c = 'A';
-		else if (sym0 == DTMF_FR_SYMB[0] && sym1 == DTMF_FR_SYMB[1] && sym2 == DTMF_FR_SYMB[2] && sym3 == DTMF_FR_SYMB[3])
-			c = 'B';
-		else if (sym0 == DTMF_FR_SYMC[0] && sym1 == DTMF_FR_SYMC[1] && sym2 == DTMF_FR_SYMC[2] && sym3 == DTMF_FR_SYMC[3])
-			c = 'C';
-		else if (sym0 == DTMF_FR_SYMD[0] && sym1 == DTMF_FR_SYMD[1] && sym2 == DTMF_FR_SYMD[2] && sym3 == DTMF_FR_SYMD[3])
-			c = 'D';
-		else if (sym0 == DTMF_FR_SYMS[0] && sym1 == DTMF_FR_SYMS[1] && sym2 == DTMF_FR_SYMS[2] && sym3 == DTMF_FR_SYMS[3])
-			c = '*';
-		else if (sym0 == DTMF_FR_SYMH[0] && sym1 == DTMF_FR_SYMH[1] && sym2 == DTMF_FR_SYMH[2] && sym3 == DTMF_FR_SYMH[3])
-			c = '#';
-
-		if (c == m_lastChar) {
-			m_pressCount++;
-		} else {
-			m_lastChar = c;
-			m_pressCount = 0U;
-		}
-
-		if (c != ' ' && !m_pressed && m_pressCount >= 3U) {
-			m_data += c;
-			m_releaseCount = 0U;
-			m_pressed = true;
-		}
-
-		return validate();
-	} else {
-		// If it is not a DTMF Code
-		if ((end || m_releaseCount >= 100U) && m_data.length() > 0U) {
-			m_command = m_data;
-			m_data.clear();
-			m_releaseCount = 0U;
-		}
-
-		m_pressed = false;
-		m_releaseCount++;
-		m_pressCount = 0U;
-		m_lastChar = ' ';
-
-		return WXS_NONE;
-	}
 }
 
 WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
