@@ -19,26 +19,70 @@
 
 #include "DTMF.h"
 
-const unsigned char DTMF_MASK[] = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x82U, 0x00U, 0x00U};
-const unsigned char DTMF_SIG[]  = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U};
+#include "Utils.h"
 
-const unsigned char DTMF_SYM_MASK[] = {0x10U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_SYM0[]     = {0x00U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_SYM1[]     = {0x00U, 0x00U, 0x00U, 0x00U};
-const unsigned char DTMF_SYM2[]     = {0x00U, 0x40U, 0x00U, 0x00U};
-const unsigned char DTMF_SYM3[]     = {0x10U, 0x00U, 0x00U, 0x00U};
-const unsigned char DTMF_SYM4[]     = {0x00U, 0x00U, 0x00U, 0x20U};
-const unsigned char DTMF_SYM5[]     = {0x00U, 0x40U, 0x00U, 0x20U};
-const unsigned char DTMF_SYM6[]     = {0x10U, 0x00U, 0x00U, 0x20U};
-const unsigned char DTMF_SYM7[]     = {0x00U, 0x00U, 0x08U, 0x00U};
-const unsigned char DTMF_SYM8[]     = {0x00U, 0x40U, 0x08U, 0x00U};
-const unsigned char DTMF_SYM9[]     = {0x10U, 0x00U, 0x08U, 0x00U};
-const unsigned char DTMF_SYMA[]     = {0x10U, 0x40U, 0x00U, 0x00U};
-const unsigned char DTMF_SYMB[]     = {0x10U, 0x40U, 0x00U, 0x20U};
-const unsigned char DTMF_SYMC[]     = {0x10U, 0x40U, 0x08U, 0x00U};
-const unsigned char DTMF_SYMD[]     = {0x10U, 0x40U, 0x08U, 0x20U};
-const unsigned char DTMF_SYMS[]     = {0x00U, 0x00U, 0x08U, 0x20U};
-const unsigned char DTMF_SYMH[]     = {0x10U, 0x00U, 0x08U, 0x20U};
+const unsigned char DTMF_FR_MASK[] = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x82U, 0x00U, 0x00U};
+const unsigned char DTMF_FR_SIG[]  = {0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U};
+
+const unsigned char DTMF_FR_SYM_MASK[] = {0x10U, 0x40U, 0x08U, 0x20U};
+const unsigned char DTMF_FR_SYM0[]     = {0x00U, 0x40U, 0x08U, 0x20U};
+const unsigned char DTMF_FR_SYM1[]     = {0x00U, 0x00U, 0x00U, 0x00U};
+const unsigned char DTMF_FR_SYM2[]     = {0x00U, 0x40U, 0x00U, 0x00U};
+const unsigned char DTMF_FR_SYM3[]     = {0x10U, 0x00U, 0x00U, 0x00U};
+const unsigned char DTMF_FR_SYM4[]     = {0x00U, 0x00U, 0x00U, 0x20U};
+const unsigned char DTMF_FR_SYM5[]     = {0x00U, 0x40U, 0x00U, 0x20U};
+const unsigned char DTMF_FR_SYM6[]     = {0x10U, 0x00U, 0x00U, 0x20U};
+const unsigned char DTMF_FR_SYM7[]     = {0x00U, 0x00U, 0x08U, 0x00U};
+const unsigned char DTMF_FR_SYM8[]     = {0x00U, 0x40U, 0x08U, 0x00U};
+const unsigned char DTMF_FR_SYM9[]     = {0x10U, 0x00U, 0x08U, 0x00U};
+const unsigned char DTMF_FR_SYMA[]     = {0x10U, 0x40U, 0x00U, 0x00U};
+const unsigned char DTMF_FR_SYMB[]     = {0x10U, 0x40U, 0x00U, 0x20U};
+const unsigned char DTMF_FR_SYMC[]     = {0x10U, 0x40U, 0x08U, 0x00U};
+const unsigned char DTMF_FR_SYMD[]     = {0x10U, 0x40U, 0x08U, 0x20U};
+const unsigned char DTMF_FR_SYMS[]     = {0x00U, 0x00U, 0x08U, 0x20U};
+const unsigned char DTMF_FR_SYMH[]     = {0x10U, 0x00U, 0x08U, 0x20U};
+
+const unsigned char DTMF_VD1_MASK[] = { 0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x82U, 0x00U, 0x00U };
+const unsigned char DTMF_VD1_SIG[] = { 0x82U, 0x08U, 0x20U, 0x82U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U };
+
+const unsigned char DTMF_VD1_SYM_MASK[] = { 0x10U, 0x40U, 0x08U, 0x20U };
+const unsigned char DTMF_VD1_SYM0[] = { 0x00U, 0x40U, 0x08U, 0x20U };
+const unsigned char DTMF_VD1_SYM1[] = { 0x00U, 0x00U, 0x00U, 0x00U };
+const unsigned char DTMF_VD1_SYM2[] = { 0x00U, 0x40U, 0x00U, 0x00U };
+const unsigned char DTMF_VD1_SYM3[] = { 0x10U, 0x00U, 0x00U, 0x00U };
+const unsigned char DTMF_VD1_SYM4[] = { 0x00U, 0x00U, 0x00U, 0x20U };
+const unsigned char DTMF_VD1_SYM5[] = { 0x00U, 0x40U, 0x00U, 0x20U };
+const unsigned char DTMF_VD1_SYM6[] = { 0x10U, 0x00U, 0x00U, 0x20U };
+const unsigned char DTMF_VD1_SYM7[] = { 0x00U, 0x00U, 0x08U, 0x00U };
+const unsigned char DTMF_VD1_SYM8[] = { 0x00U, 0x40U, 0x08U, 0x00U };
+const unsigned char DTMF_VD1_SYM9[] = { 0x10U, 0x00U, 0x08U, 0x00U };
+const unsigned char DTMF_VD1_SYMA[] = { 0x10U, 0x40U, 0x00U, 0x00U };
+const unsigned char DTMF_VD1_SYMB[] = { 0x10U, 0x40U, 0x00U, 0x20U };
+const unsigned char DTMF_VD1_SYMC[] = { 0x10U, 0x40U, 0x08U, 0x00U };
+const unsigned char DTMF_VD1_SYMD[] = { 0x10U, 0x40U, 0x08U, 0x20U };
+const unsigned char DTMF_VD1_SYMS[] = { 0x00U, 0x00U, 0x08U, 0x20U };
+const unsigned char DTMF_VD1_SYMH[] = { 0x10U, 0x00U, 0x08U, 0x20U };
+
+const unsigned char DTMF_VD2_MASK[] = { 0xCCU, 0xCCU, 0xDDU, 0xDDU, 0xEEU, 0xEEU, 0xFFU, 0xFFU, 0xEEU, 0xEEU, 0xDDU, 0x99U, 0x98U };
+const unsigned char DTMF_VD2_SIG[]  = { 0x08U, 0x80U, 0xC9U, 0x10U, 0x26U, 0xA0U, 0xE3U, 0x31U, 0xE2U, 0xE6U, 0xD5U, 0x08U, 0x88U };
+
+const unsigned char DTMF_VD2_SYM_MASK[] = { 0x33U, 0x33U, 0x22U, 0x22U, 0x11U, 0x11U, 0x11U, 0x11U, 0x22U, 0x66U, 0x66U };
+const unsigned char DTMF_VD2_SYM0[] = { 0x33U, 0x11U, 0x22U, 0x02U, 0x00U, 0x00U, 0x01U, 0x11U, 0x00U, 0x04U, 0x62U };
+const unsigned char DTMF_VD2_SYM1[] = { 0x33U, 0x10U, 0x20U, 0x20U, 0x00U, 0x01U, 0x01U, 0x10U, 0x00U, 0x04U, 0x62U };
+const unsigned char DTMF_VD2_SYM2[] = { 0x22U, 0x23U, 0x02U, 0x02U, 0x00U, 0x10U, 0x01U, 0x01U, 0x00U, 0x04U, 0x62U };
+const unsigned char DTMF_VD2_SYM3[] = { 0x22U, 0x22U, 0x00U, 0x20U, 0x00U, 0x11U, 0x01U, 0x00U, 0x00U, 0x04U, 0x62U };
+const unsigned char DTMF_VD2_SYM4[] = { 0x11U, 0x11U, 0x22U, 0x02U, 0x01U, 0x00U, 0x00U, 0x11U, 0x00U, 0x06U, 0x44U };
+const unsigned char DTMF_VD2_SYM5[] = { 0x11U, 0x10U, 0x20U, 0x20U, 0x01U, 0x01U, 0x00U, 0x10U, 0x00U, 0x06U, 0x44U };
+const unsigned char DTMF_VD2_SYM6[] = { 0x00U, 0x23U, 0x02U, 0x02U, 0x01U, 0x10U, 0x00U, 0x01U, 0x00U, 0x06U, 0x44U };
+const unsigned char DTMF_VD2_SYM7[] = { 0x00U, 0x22U, 0x00U, 0x20U, 0x01U, 0x11U, 0x00U, 0x00U, 0x00U, 0x06U, 0x44U };
+const unsigned char DTMF_VD2_SYM8[] = { 0x33U, 0x11U, 0x22U, 0x02U, 0x10U, 0x00U, 0x11U, 0x11U, 0x22U, 0x60U, 0x22U };
+const unsigned char DTMF_VD2_SYM9[] = { 0x33U, 0x10U, 0x20U, 0x20U, 0x10U, 0x01U, 0x11U, 0x10U, 0x22U, 0x60U, 0x22U };
+const unsigned char DTMF_VD2_SYMA[] = { 0x22U, 0x23U, 0x02U, 0x02U, 0x10U, 0x10U, 0x11U, 0x01U, 0x22U, 0x60U, 0x22U };
+const unsigned char DTMF_VD2_SYMB[] = { 0x22U, 0x22U, 0x00U, 0x20U, 0x10U, 0x11U, 0x11U, 0x00U, 0x22U, 0x60U, 0x22U };
+const unsigned char DTMF_VD2_SYMC[] = { 0x11U, 0x11U, 0x22U, 0x02U, 0x11U, 0x00U, 0x10U, 0x11U, 0x22U, 0x62U, 0x04U };
+const unsigned char DTMF_VD2_SYMD[] = { 0x11U, 0x10U, 0x20U, 0x20U, 0x11U, 0x01U, 0x10U, 0x10U, 0x22U, 0x62U, 0x04U };
+const unsigned char DTMF_VD2_SYMS[] = { 0x00U, 0x23U, 0x02U, 0x02U, 0x11U, 0x10U, 0x10U, 0x01U, 0x22U, 0x62U, 0x04U };
+const unsigned char DTMF_VD2_SYMH[] = { 0x00U, 0x22U, 0x00U, 0x20U, 0x11U, 0x11U, 0x10U, 0x00U, 0x22U, 0x62U, 0x04U };
 
 CDTMF::CDTMF() :
 m_data(),
@@ -54,14 +98,14 @@ CDTMF::~CDTMF()
 {
 }
 
-WX_STATUS CDTMF::decodeVoiceFRMode(const unsigned char* payload)
+WX_STATUS CDTMF::decodeVoiceFRMode(const unsigned char* payload, bool end)
 {
 	assert(payload != NULL);
 
 	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
 	for (unsigned int offset = 0U; offset < 90U; offset += 18U) {
-		WX_STATUS status = decodeVoiceFRModeSlice(payload + offset);
+		WX_STATUS status = decodeVoiceFRModeSlice(payload + offset, end);
 		if (status != WXS_NONE)
 			return status;
 	}
@@ -69,14 +113,14 @@ WX_STATUS CDTMF::decodeVoiceFRMode(const unsigned char* payload)
 	return WXS_NONE;
 }
 
-WX_STATUS CDTMF::decodeVDMode1(const unsigned char* payload)
+WX_STATUS CDTMF::decodeVDMode1(const unsigned char* payload, bool end)
 {
 	assert(payload != NULL);
 
 	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
 	for (unsigned int offset = 9U; offset < 90U; offset += 18U) {
-		WX_STATUS status = decodeVDMode1Slice(payload + offset);
+		WX_STATUS status = decodeVDMode1Slice(payload + offset, end);
 		if (status != WXS_NONE)
 			return status;
 	}
@@ -84,14 +128,14 @@ WX_STATUS CDTMF::decodeVDMode1(const unsigned char* payload)
 	return WXS_NONE;
 }
 
-WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload)
+WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload, bool end)
 {
 	assert(payload != NULL);
 
 	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
 	for (unsigned int offset = 5U; offset < 90U; offset += 18U) {
-		WX_STATUS status = decodeVDMode2Slice(payload + offset);
+		WX_STATUS status = decodeVDMode2Slice(payload + offset, end);
 		if (status != WXS_NONE)
 			return status;
 	}
@@ -99,51 +143,53 @@ WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload)
 	return WXS_NONE;
 }
 
-WX_STATUS CDTMF::decodeVoiceFRModeSlice(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeVoiceFRModeSlice(const unsigned char* ambe, bool end)
 {
+	CUtils::dump(3U, "Voice FR Mode", ambe, 18U);
+
 	// DTMF begins with these byte values
-	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
-		(ambe[2] & DTMF_MASK[2]) == DTMF_SIG[2] && (ambe[3] & DTMF_MASK[3]) == DTMF_SIG[3] &&
-		(ambe[4] & DTMF_MASK[4]) == DTMF_SIG[4] && (ambe[5] & DTMF_MASK[5]) == DTMF_SIG[5] &&
-		(ambe[6] & DTMF_MASK[6]) == DTMF_SIG[6] && (ambe[7] & DTMF_MASK[7]) == DTMF_SIG[7] &&
-		(ambe[8] & DTMF_MASK[8]) == DTMF_SIG[8]) {
-		unsigned char sym0 = ambe[4] & DTMF_SYM_MASK[0];
-		unsigned char sym1 = ambe[5] & DTMF_SYM_MASK[1];
-		unsigned char sym2 = ambe[7] & DTMF_SYM_MASK[2];
-		unsigned char sym3 = ambe[8] & DTMF_SYM_MASK[3];
+	if (!end && (ambe[0] & DTMF_FR_MASK[0]) == DTMF_FR_SIG[0] && (ambe[1] & DTMF_FR_MASK[1]) == DTMF_FR_SIG[1] &&
+		(ambe[2] & DTMF_FR_MASK[2]) == DTMF_FR_SIG[2] && (ambe[3] & DTMF_FR_MASK[3]) == DTMF_FR_SIG[3] &&
+		(ambe[4] & DTMF_FR_MASK[4]) == DTMF_FR_SIG[4] && (ambe[5] & DTMF_FR_MASK[5]) == DTMF_FR_SIG[5] &&
+		(ambe[6] & DTMF_FR_MASK[6]) == DTMF_FR_SIG[6] && (ambe[7] & DTMF_FR_MASK[7]) == DTMF_FR_SIG[7] &&
+		(ambe[8] & DTMF_FR_MASK[8]) == DTMF_FR_SIG[8]) {
+		unsigned char sym0 = ambe[4] & DTMF_FR_SYM_MASK[0];
+		unsigned char sym1 = ambe[5] & DTMF_FR_SYM_MASK[1];
+		unsigned char sym2 = ambe[7] & DTMF_FR_SYM_MASK[2];
+		unsigned char sym3 = ambe[8] & DTMF_FR_SYM_MASK[3];
 
 		char c = ' ';
-		if (sym0 == DTMF_SYM0[0] && sym1 == DTMF_SYM0[1] && sym2 == DTMF_SYM0[2] && sym3 == DTMF_SYM0[3])
+		if (sym0 == DTMF_FR_SYM0[0] && sym1 == DTMF_FR_SYM0[1] && sym2 == DTMF_FR_SYM0[2] && sym3 == DTMF_FR_SYM0[3])
 			c = '0';
-		else if (sym0 == DTMF_SYM1[0] && sym1 == DTMF_SYM1[1] && sym2 == DTMF_SYM1[2] && sym3 == DTMF_SYM1[3])
+		else if (sym0 == DTMF_FR_SYM1[0] && sym1 == DTMF_FR_SYM1[1] && sym2 == DTMF_FR_SYM1[2] && sym3 == DTMF_FR_SYM1[3])
 			c = '1';
-		else if (sym0 == DTMF_SYM2[0] && sym1 == DTMF_SYM2[1] && sym2 == DTMF_SYM2[2] && sym3 == DTMF_SYM2[3])
+		else if (sym0 == DTMF_FR_SYM2[0] && sym1 == DTMF_FR_SYM2[1] && sym2 == DTMF_FR_SYM2[2] && sym3 == DTMF_FR_SYM2[3])
 			c = '2';
-		else if (sym0 == DTMF_SYM3[0] && sym1 == DTMF_SYM3[1] && sym2 == DTMF_SYM3[2] && sym3 == DTMF_SYM3[3])
+		else if (sym0 == DTMF_FR_SYM3[0] && sym1 == DTMF_FR_SYM3[1] && sym2 == DTMF_FR_SYM3[2] && sym3 == DTMF_FR_SYM3[3])
 			c = '3';
-		else if (sym0 == DTMF_SYM4[0] && sym1 == DTMF_SYM4[1] && sym2 == DTMF_SYM4[2] && sym3 == DTMF_SYM4[3])
+		else if (sym0 == DTMF_FR_SYM4[0] && sym1 == DTMF_FR_SYM4[1] && sym2 == DTMF_FR_SYM4[2] && sym3 == DTMF_FR_SYM4[3])
 			c = '4';
-		else if (sym0 == DTMF_SYM5[0] && sym1 == DTMF_SYM5[1] && sym2 == DTMF_SYM5[2] && sym3 == DTMF_SYM5[3])
+		else if (sym0 == DTMF_FR_SYM5[0] && sym1 == DTMF_FR_SYM5[1] && sym2 == DTMF_FR_SYM5[2] && sym3 == DTMF_FR_SYM5[3])
 			c = '5';
-		else if (sym0 == DTMF_SYM6[0] && sym1 == DTMF_SYM6[1] && sym2 == DTMF_SYM6[2] && sym3 == DTMF_SYM6[3])
+		else if (sym0 == DTMF_FR_SYM6[0] && sym1 == DTMF_FR_SYM6[1] && sym2 == DTMF_FR_SYM6[2] && sym3 == DTMF_FR_SYM6[3])
 			c = '6';
-		else if (sym0 == DTMF_SYM7[0] && sym1 == DTMF_SYM7[1] && sym2 == DTMF_SYM7[2] && sym3 == DTMF_SYM7[3])
+		else if (sym0 == DTMF_FR_SYM7[0] && sym1 == DTMF_FR_SYM7[1] && sym2 == DTMF_FR_SYM7[2] && sym3 == DTMF_FR_SYM7[3])
 			c = '7';
-		else if (sym0 == DTMF_SYM8[0] && sym1 == DTMF_SYM8[1] && sym2 == DTMF_SYM8[2] && sym3 == DTMF_SYM8[3])
+		else if (sym0 == DTMF_FR_SYM8[0] && sym1 == DTMF_FR_SYM8[1] && sym2 == DTMF_FR_SYM8[2] && sym3 == DTMF_FR_SYM8[3])
 			c = '8';
-		else if (sym0 == DTMF_SYM9[0] && sym1 == DTMF_SYM9[1] && sym2 == DTMF_SYM9[2] && sym3 == DTMF_SYM9[3])
+		else if (sym0 == DTMF_FR_SYM9[0] && sym1 == DTMF_FR_SYM9[1] && sym2 == DTMF_FR_SYM9[2] && sym3 == DTMF_FR_SYM9[3])
 			c = '9';
-		else if (sym0 == DTMF_SYMA[0] && sym1 == DTMF_SYMA[1] && sym2 == DTMF_SYMA[2] && sym3 == DTMF_SYMA[3])
+		else if (sym0 == DTMF_FR_SYMA[0] && sym1 == DTMF_FR_SYMA[1] && sym2 == DTMF_FR_SYMA[2] && sym3 == DTMF_FR_SYMA[3])
 			c = 'A';
-		else if (sym0 == DTMF_SYMB[0] && sym1 == DTMF_SYMB[1] && sym2 == DTMF_SYMB[2] && sym3 == DTMF_SYMB[3])
+		else if (sym0 == DTMF_FR_SYMB[0] && sym1 == DTMF_FR_SYMB[1] && sym2 == DTMF_FR_SYMB[2] && sym3 == DTMF_FR_SYMB[3])
 			c = 'B';
-		else if (sym0 == DTMF_SYMC[0] && sym1 == DTMF_SYMC[1] && sym2 == DTMF_SYMC[2] && sym3 == DTMF_SYMC[3])
+		else if (sym0 == DTMF_FR_SYMC[0] && sym1 == DTMF_FR_SYMC[1] && sym2 == DTMF_FR_SYMC[2] && sym3 == DTMF_FR_SYMC[3])
 			c = 'C';
-		else if (sym0 == DTMF_SYMD[0] && sym1 == DTMF_SYMD[1] && sym2 == DTMF_SYMD[2] && sym3 == DTMF_SYMD[3])
+		else if (sym0 == DTMF_FR_SYMD[0] && sym1 == DTMF_FR_SYMD[1] && sym2 == DTMF_FR_SYMD[2] && sym3 == DTMF_FR_SYMD[3])
 			c = 'D';
-		else if (sym0 == DTMF_SYMS[0] && sym1 == DTMF_SYMS[1] && sym2 == DTMF_SYMS[2] && sym3 == DTMF_SYMS[3])
+		else if (sym0 == DTMF_FR_SYMS[0] && sym1 == DTMF_FR_SYMS[1] && sym2 == DTMF_FR_SYMS[2] && sym3 == DTMF_FR_SYMS[3])
 			c = '*';
-		else if (sym0 == DTMF_SYMH[0] && sym1 == DTMF_SYMH[1] && sym2 == DTMF_SYMH[2] && sym3 == DTMF_SYMH[3])
+		else if (sym0 == DTMF_FR_SYMH[0] && sym1 == DTMF_FR_SYMH[1] && sym2 == DTMF_FR_SYMH[2] && sym3 == DTMF_FR_SYMH[3])
 			c = '#';
 
 		if (c == m_lastChar) {
@@ -162,7 +208,7 @@ WX_STATUS CDTMF::decodeVoiceFRModeSlice(const unsigned char* ambe)
 		return validate();
 	} else {
 		// If it is not a DTMF Code
-		if (m_releaseCount >= 100U && m_data.length() > 0U) {
+		if ((end || m_releaseCount >= 100U) && m_data.length() > 0U) {
 			m_command = m_data;
 			m_data.clear();
 			m_releaseCount = 0U;
@@ -177,51 +223,53 @@ WX_STATUS CDTMF::decodeVoiceFRModeSlice(const unsigned char* ambe)
 	}
 }
 
-WX_STATUS CDTMF::decodeVDMode1Slice(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeVDMode1Slice(const unsigned char* ambe, bool end)
 {
+	CUtils::dump(3U, "Voice VD Mode 1", ambe, 9U);
+
 	// DTMF begins with these byte values
-	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
-		(ambe[2] & DTMF_MASK[2]) == DTMF_SIG[2] && (ambe[3] & DTMF_MASK[3]) == DTMF_SIG[3] &&
-		(ambe[4] & DTMF_MASK[4]) == DTMF_SIG[4] && (ambe[5] & DTMF_MASK[5]) == DTMF_SIG[5] &&
-		(ambe[6] & DTMF_MASK[6]) == DTMF_SIG[6] && (ambe[7] & DTMF_MASK[7]) == DTMF_SIG[7] &&
-		(ambe[8] & DTMF_MASK[8]) == DTMF_SIG[8]) {
-		unsigned char sym0 = ambe[4] & DTMF_SYM_MASK[0];
-		unsigned char sym1 = ambe[5] & DTMF_SYM_MASK[1];
-		unsigned char sym2 = ambe[7] & DTMF_SYM_MASK[2];
-		unsigned char sym3 = ambe[8] & DTMF_SYM_MASK[3];
+	if (!end && (ambe[0] & DTMF_VD1_MASK[0]) == DTMF_VD1_SIG[0] && (ambe[1] & DTMF_VD1_MASK[1]) == DTMF_VD1_SIG[1] &&
+		(ambe[2] & DTMF_VD1_MASK[2]) == DTMF_VD1_SIG[2] && (ambe[3] & DTMF_VD1_MASK[3]) == DTMF_VD1_SIG[3] &&
+		(ambe[4] & DTMF_VD1_MASK[4]) == DTMF_VD1_SIG[4] && (ambe[5] & DTMF_VD1_MASK[5]) == DTMF_VD1_SIG[5] &&
+		(ambe[6] & DTMF_VD1_MASK[6]) == DTMF_VD1_SIG[6] && (ambe[7] & DTMF_VD1_MASK[7]) == DTMF_VD1_SIG[7] &&
+		(ambe[8] & DTMF_VD1_MASK[8]) == DTMF_VD1_SIG[8]) {
+		unsigned char sym0 = ambe[4] & DTMF_VD1_SYM_MASK[0];
+		unsigned char sym1 = ambe[5] & DTMF_VD1_SYM_MASK[1];
+		unsigned char sym2 = ambe[7] & DTMF_VD1_SYM_MASK[2];
+		unsigned char sym3 = ambe[8] & DTMF_VD1_SYM_MASK[3];
 
 		char c = ' ';
-		if (sym0 == DTMF_SYM0[0] && sym1 == DTMF_SYM0[1] && sym2 == DTMF_SYM0[2] && sym3 == DTMF_SYM0[3])
+		if (sym0 == DTMF_VD1_SYM0[0] && sym1 == DTMF_VD1_SYM0[1] && sym2 == DTMF_VD1_SYM0[2] && sym3 == DTMF_VD1_SYM0[3])
 			c = '0';
-		else if (sym0 == DTMF_SYM1[0] && sym1 == DTMF_SYM1[1] && sym2 == DTMF_SYM1[2] && sym3 == DTMF_SYM1[3])
+		else if (sym0 == DTMF_VD1_SYM1[0] && sym1 == DTMF_VD1_SYM1[1] && sym2 == DTMF_VD1_SYM1[2] && sym3 == DTMF_VD1_SYM1[3])
 			c = '1';
-		else if (sym0 == DTMF_SYM2[0] && sym1 == DTMF_SYM2[1] && sym2 == DTMF_SYM2[2] && sym3 == DTMF_SYM2[3])
+		else if (sym0 == DTMF_VD1_SYM2[0] && sym1 == DTMF_VD1_SYM2[1] && sym2 == DTMF_VD1_SYM2[2] && sym3 == DTMF_VD1_SYM2[3])
 			c = '2';
-		else if (sym0 == DTMF_SYM3[0] && sym1 == DTMF_SYM3[1] && sym2 == DTMF_SYM3[2] && sym3 == DTMF_SYM3[3])
+		else if (sym0 == DTMF_VD1_SYM3[0] && sym1 == DTMF_VD1_SYM3[1] && sym2 == DTMF_VD1_SYM3[2] && sym3 == DTMF_VD1_SYM3[3])
 			c = '3';
-		else if (sym0 == DTMF_SYM4[0] && sym1 == DTMF_SYM4[1] && sym2 == DTMF_SYM4[2] && sym3 == DTMF_SYM4[3])
+		else if (sym0 == DTMF_VD1_SYM4[0] && sym1 == DTMF_VD1_SYM4[1] && sym2 == DTMF_VD1_SYM4[2] && sym3 == DTMF_VD1_SYM4[3])
 			c = '4';
-		else if (sym0 == DTMF_SYM5[0] && sym1 == DTMF_SYM5[1] && sym2 == DTMF_SYM5[2] && sym3 == DTMF_SYM5[3])
+		else if (sym0 == DTMF_VD1_SYM5[0] && sym1 == DTMF_VD1_SYM5[1] && sym2 == DTMF_VD1_SYM5[2] && sym3 == DTMF_VD1_SYM5[3])
 			c = '5';
-		else if (sym0 == DTMF_SYM6[0] && sym1 == DTMF_SYM6[1] && sym2 == DTMF_SYM6[2] && sym3 == DTMF_SYM6[3])
+		else if (sym0 == DTMF_VD1_SYM6[0] && sym1 == DTMF_VD1_SYM6[1] && sym2 == DTMF_VD1_SYM6[2] && sym3 == DTMF_VD1_SYM6[3])
 			c = '6';
-		else if (sym0 == DTMF_SYM7[0] && sym1 == DTMF_SYM7[1] && sym2 == DTMF_SYM7[2] && sym3 == DTMF_SYM7[3])
+		else if (sym0 == DTMF_VD1_SYM7[0] && sym1 == DTMF_VD1_SYM7[1] && sym2 == DTMF_VD1_SYM7[2] && sym3 == DTMF_VD1_SYM7[3])
 			c = '7';
-		else if (sym0 == DTMF_SYM8[0] && sym1 == DTMF_SYM8[1] && sym2 == DTMF_SYM8[2] && sym3 == DTMF_SYM8[3])
+		else if (sym0 == DTMF_VD1_SYM8[0] && sym1 == DTMF_VD1_SYM8[1] && sym2 == DTMF_VD1_SYM8[2] && sym3 == DTMF_VD1_SYM8[3])
 			c = '8';
-		else if (sym0 == DTMF_SYM9[0] && sym1 == DTMF_SYM9[1] && sym2 == DTMF_SYM9[2] && sym3 == DTMF_SYM9[3])
+		else if (sym0 == DTMF_VD1_SYM9[0] && sym1 == DTMF_VD1_SYM9[1] && sym2 == DTMF_VD1_SYM9[2] && sym3 == DTMF_VD1_SYM9[3])
 			c = '9';
-		else if (sym0 == DTMF_SYMA[0] && sym1 == DTMF_SYMA[1] && sym2 == DTMF_SYMA[2] && sym3 == DTMF_SYMA[3])
+		else if (sym0 == DTMF_VD1_SYMA[0] && sym1 == DTMF_VD1_SYMA[1] && sym2 == DTMF_VD1_SYMA[2] && sym3 == DTMF_VD1_SYMA[3])
 			c = 'A';
-		else if (sym0 == DTMF_SYMB[0] && sym1 == DTMF_SYMB[1] && sym2 == DTMF_SYMB[2] && sym3 == DTMF_SYMB[3])
+		else if (sym0 == DTMF_VD1_SYMB[0] && sym1 == DTMF_VD1_SYMB[1] && sym2 == DTMF_VD1_SYMB[2] && sym3 == DTMF_VD1_SYMB[3])
 			c = 'B';
-		else if (sym0 == DTMF_SYMC[0] && sym1 == DTMF_SYMC[1] && sym2 == DTMF_SYMC[2] && sym3 == DTMF_SYMC[3])
+		else if (sym0 == DTMF_VD1_SYMC[0] && sym1 == DTMF_VD1_SYMC[1] && sym2 == DTMF_VD1_SYMC[2] && sym3 == DTMF_VD1_SYMC[3])
 			c = 'C';
-		else if (sym0 == DTMF_SYMD[0] && sym1 == DTMF_SYMD[1] && sym2 == DTMF_SYMD[2] && sym3 == DTMF_SYMD[3])
+		else if (sym0 == DTMF_VD1_SYMD[0] && sym1 == DTMF_VD1_SYMD[1] && sym2 == DTMF_VD1_SYMD[2] && sym3 == DTMF_VD1_SYMD[3])
 			c = 'D';
-		else if (sym0 == DTMF_SYMS[0] && sym1 == DTMF_SYMS[1] && sym2 == DTMF_SYMS[2] && sym3 == DTMF_SYMS[3])
+		else if (sym0 == DTMF_VD1_SYMS[0] && sym1 == DTMF_VD1_SYMS[1] && sym2 == DTMF_VD1_SYMS[2] && sym3 == DTMF_VD1_SYMS[3])
 			c = '*';
-		else if (sym0 == DTMF_SYMH[0] && sym1 == DTMF_SYMH[1] && sym2 == DTMF_SYMH[2] && sym3 == DTMF_SYMH[3])
+		else if (sym0 == DTMF_VD1_SYMH[0] && sym1 == DTMF_VD1_SYMH[1] && sym2 == DTMF_VD1_SYMH[2] && sym3 == DTMF_VD1_SYMH[3])
 			c = '#';
 
 		if (c == m_lastChar) {
@@ -240,7 +288,7 @@ WX_STATUS CDTMF::decodeVDMode1Slice(const unsigned char* ambe)
 		return validate();
 	} else {
 		// If it is not a DTMF Code
-		if (m_releaseCount >= 100U && m_data.length() > 0U) {
+		if ((end || m_releaseCount >= 100U) && m_data.length() > 0U) {
 			m_command = m_data;
 			m_data.clear();
 			m_releaseCount = 0U;
@@ -255,51 +303,60 @@ WX_STATUS CDTMF::decodeVDMode1Slice(const unsigned char* ambe)
 	}
 }
 
-WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe)
+WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
 {
 	// DTMF begins with these byte values
-	if ((ambe[0] & DTMF_MASK[0]) == DTMF_SIG[0] && (ambe[1] & DTMF_MASK[1]) == DTMF_SIG[1] &&
-		(ambe[2] & DTMF_MASK[2]) == DTMF_SIG[2] && (ambe[3] & DTMF_MASK[3]) == DTMF_SIG[3] &&
-		(ambe[4] & DTMF_MASK[4]) == DTMF_SIG[4] && (ambe[5] & DTMF_MASK[5]) == DTMF_SIG[5] &&
-		(ambe[6] & DTMF_MASK[6]) == DTMF_SIG[6] && (ambe[7] & DTMF_MASK[7]) == DTMF_SIG[7] &&
-		(ambe[8] & DTMF_MASK[8]) == DTMF_SIG[8]) {
-		unsigned char sym0 = ambe[4] & DTMF_SYM_MASK[0];
-		unsigned char sym1 = ambe[5] & DTMF_SYM_MASK[1];
-		unsigned char sym2 = ambe[7] & DTMF_SYM_MASK[2];
-		unsigned char sym3 = ambe[8] & DTMF_SYM_MASK[3];
+	if (!end && (ambe[0] & DTMF_VD2_MASK[0])   == DTMF_VD2_SIG[0]  && (ambe[1] & DTMF_VD2_MASK[1])   == DTMF_VD2_SIG[1] &&
+		(ambe[2] & DTMF_VD2_MASK[2])   == DTMF_VD2_SIG[2]  && (ambe[3] & DTMF_VD2_MASK[3])   == DTMF_VD2_SIG[3] &&
+		(ambe[4] & DTMF_VD2_MASK[4])   == DTMF_VD2_SIG[4]  && (ambe[5] & DTMF_VD2_MASK[5])   == DTMF_VD2_SIG[5] &&
+		(ambe[6] & DTMF_VD2_MASK[6])   == DTMF_VD2_SIG[6]  && (ambe[7] & DTMF_VD2_MASK[7])   == DTMF_VD2_SIG[7] &&
+		(ambe[8] & DTMF_VD2_MASK[8])   == DTMF_VD2_SIG[8]  && (ambe[9] & DTMF_VD2_MASK[9])   == DTMF_VD2_SIG[9] &&
+		(ambe[10] & DTMF_VD2_MASK[10]) == DTMF_VD2_SIG[10] && (ambe[11] & DTMF_VD2_MASK[11]) == DTMF_VD2_SIG[11] &&
+		(ambe[12] & DTMF_VD2_MASK[12]) == DTMF_VD2_SIG[12]) {
+		unsigned char sym0  = ambe[0]  & DTMF_VD2_SYM_MASK[0];
+		unsigned char sym1  = ambe[1]  & DTMF_VD2_SYM_MASK[1];
+		unsigned char sym2  = ambe[2]  & DTMF_VD2_SYM_MASK[2];
+		unsigned char sym3  = ambe[3]  & DTMF_VD2_SYM_MASK[3];
+		unsigned char sym4  = ambe[4]  & DTMF_VD2_SYM_MASK[4];
+		unsigned char sym5  = ambe[5]  & DTMF_VD2_SYM_MASK[5];
+		unsigned char sym6  = ambe[8]  & DTMF_VD2_SYM_MASK[6];
+		unsigned char sym7  = ambe[9]  & DTMF_VD2_SYM_MASK[7];
+		unsigned char sym8  = ambe[10] & DTMF_VD2_SYM_MASK[8];
+		unsigned char sym9  = ambe[11] & DTMF_VD2_SYM_MASK[9];
+		unsigned char sym10 = ambe[12] & DTMF_VD2_SYM_MASK[10];
 
 		char c = ' ';
-		if (sym0 == DTMF_SYM0[0] && sym1 == DTMF_SYM0[1] && sym2 == DTMF_SYM0[2] && sym3 == DTMF_SYM0[3])
+		if (sym0 == DTMF_VD2_SYM0[0] && sym1 == DTMF_VD2_SYM0[1] && sym2 == DTMF_VD2_SYM0[2] && sym3 == DTMF_VD2_SYM0[3] && sym4 == DTMF_VD2_SYM0[4] && sym5 == DTMF_VD2_SYM0[5] && sym6 == DTMF_VD2_SYM0[6] && sym7 == DTMF_VD2_SYM0[7] && sym8 == DTMF_VD2_SYM0[8] && sym9 == DTMF_VD2_SYM0[9] && sym10 == DTMF_VD2_SYM0[10])
 			c = '0';
-		else if (sym0 == DTMF_SYM1[0] && sym1 == DTMF_SYM1[1] && sym2 == DTMF_SYM1[2] && sym3 == DTMF_SYM1[3])
+		else if (sym0 == DTMF_VD2_SYM1[0] && sym1 == DTMF_VD2_SYM1[1] && sym2 == DTMF_VD2_SYM1[2] && sym3 == DTMF_VD2_SYM1[3] && sym4 == DTMF_VD2_SYM1[4] && sym5 == DTMF_VD2_SYM1[5] && sym6 == DTMF_VD2_SYM1[6] && sym7 == DTMF_VD2_SYM1[7] && sym8 == DTMF_VD2_SYM1[8] && sym9 == DTMF_VD2_SYM1[9] && sym10 == DTMF_VD2_SYM1[10])
 			c = '1';
-		else if (sym0 == DTMF_SYM2[0] && sym1 == DTMF_SYM2[1] && sym2 == DTMF_SYM2[2] && sym3 == DTMF_SYM2[3])
+		else if (sym0 == DTMF_VD2_SYM2[0] && sym1 == DTMF_VD2_SYM2[1] && sym2 == DTMF_VD2_SYM2[2] && sym3 == DTMF_VD2_SYM2[3] && sym4 == DTMF_VD2_SYM2[4] && sym5 == DTMF_VD2_SYM2[5] && sym6 == DTMF_VD2_SYM2[6] && sym7 == DTMF_VD2_SYM2[7] && sym8 == DTMF_VD2_SYM2[8] && sym9 == DTMF_VD2_SYM2[9] && sym10 == DTMF_VD2_SYM2[10])
 			c = '2';
-		else if (sym0 == DTMF_SYM3[0] && sym1 == DTMF_SYM3[1] && sym2 == DTMF_SYM3[2] && sym3 == DTMF_SYM3[3])
+		else if (sym0 == DTMF_VD2_SYM3[0] && sym1 == DTMF_VD2_SYM3[1] && sym2 == DTMF_VD2_SYM3[2] && sym3 == DTMF_VD2_SYM3[3] && sym4 == DTMF_VD2_SYM3[4] && sym5 == DTMF_VD2_SYM3[5] && sym6 == DTMF_VD2_SYM3[6] && sym7 == DTMF_VD2_SYM3[7] && sym8 == DTMF_VD2_SYM3[8] && sym9 == DTMF_VD2_SYM3[9] && sym10 == DTMF_VD2_SYM3[10])
 			c = '3';
-		else if (sym0 == DTMF_SYM4[0] && sym1 == DTMF_SYM4[1] && sym2 == DTMF_SYM4[2] && sym3 == DTMF_SYM4[3])
+		else if (sym0 == DTMF_VD2_SYM4[0] && sym1 == DTMF_VD2_SYM4[1] && sym2 == DTMF_VD2_SYM4[2] && sym3 == DTMF_VD2_SYM4[3] && sym4 == DTMF_VD2_SYM4[4] && sym5 == DTMF_VD2_SYM4[5] && sym6 == DTMF_VD2_SYM4[6] && sym7 == DTMF_VD2_SYM4[7] && sym8 == DTMF_VD2_SYM4[8] && sym9 == DTMF_VD2_SYM4[9] && sym10 == DTMF_VD2_SYM4[10])
 			c = '4';
-		else if (sym0 == DTMF_SYM5[0] && sym1 == DTMF_SYM5[1] && sym2 == DTMF_SYM5[2] && sym3 == DTMF_SYM5[3])
+		else if (sym0 == DTMF_VD2_SYM5[0] && sym1 == DTMF_VD2_SYM5[1] && sym2 == DTMF_VD2_SYM5[2] && sym3 == DTMF_VD2_SYM5[3] && sym4 == DTMF_VD2_SYM5[4] && sym5 == DTMF_VD2_SYM5[5] && sym6 == DTMF_VD2_SYM5[6] && sym7 == DTMF_VD2_SYM5[7] && sym8 == DTMF_VD2_SYM5[8] && sym9 == DTMF_VD2_SYM5[9] && sym10 == DTMF_VD2_SYM5[10])
 			c = '5';
-		else if (sym0 == DTMF_SYM6[0] && sym1 == DTMF_SYM6[1] && sym2 == DTMF_SYM6[2] && sym3 == DTMF_SYM6[3])
+		else if (sym0 == DTMF_VD2_SYM6[0] && sym1 == DTMF_VD2_SYM6[1] && sym2 == DTMF_VD2_SYM6[2] && sym3 == DTMF_VD2_SYM6[3] && sym4 == DTMF_VD2_SYM6[4] && sym5 == DTMF_VD2_SYM6[5] && sym6 == DTMF_VD2_SYM6[6] && sym7 == DTMF_VD2_SYM6[7] && sym8 == DTMF_VD2_SYM6[8] && sym9 == DTMF_VD2_SYM6[9] && sym10 == DTMF_VD2_SYM6[10])
 			c = '6';
-		else if (sym0 == DTMF_SYM7[0] && sym1 == DTMF_SYM7[1] && sym2 == DTMF_SYM7[2] && sym3 == DTMF_SYM7[3])
+		else if (sym0 == DTMF_VD2_SYM7[0] && sym1 == DTMF_VD2_SYM7[1] && sym2 == DTMF_VD2_SYM7[2] && sym3 == DTMF_VD2_SYM7[3] && sym4 == DTMF_VD2_SYM7[4] && sym5 == DTMF_VD2_SYM7[5] && sym6 == DTMF_VD2_SYM7[6] && sym7 == DTMF_VD2_SYM7[7] && sym8 == DTMF_VD2_SYM7[8] && sym9 == DTMF_VD2_SYM7[9] && sym10 == DTMF_VD2_SYM7[10])
 			c = '7';
-		else if (sym0 == DTMF_SYM8[0] && sym1 == DTMF_SYM8[1] && sym2 == DTMF_SYM8[2] && sym3 == DTMF_SYM8[3])
+		else if (sym0 == DTMF_VD2_SYM8[0] && sym1 == DTMF_VD2_SYM8[1] && sym2 == DTMF_VD2_SYM8[2] && sym3 == DTMF_VD2_SYM8[3] && sym4 == DTMF_VD2_SYM8[4] && sym5 == DTMF_VD2_SYM8[5] && sym6 == DTMF_VD2_SYM8[6] && sym7 == DTMF_VD2_SYM8[7] && sym8 == DTMF_VD2_SYM8[8] && sym9 == DTMF_VD2_SYM8[9] && sym10 == DTMF_VD2_SYM8[10])
 			c = '8';
-		else if (sym0 == DTMF_SYM9[0] && sym1 == DTMF_SYM9[1] && sym2 == DTMF_SYM9[2] && sym3 == DTMF_SYM9[3])
+		else if (sym0 == DTMF_VD2_SYM9[0] && sym1 == DTMF_VD2_SYM9[1] && sym2 == DTMF_VD2_SYM9[2] && sym3 == DTMF_VD2_SYM9[3] && sym4 == DTMF_VD2_SYM9[4] && sym5 == DTMF_VD2_SYM9[5] && sym6 == DTMF_VD2_SYM9[6] && sym7 == DTMF_VD2_SYM9[7] && sym8 == DTMF_VD2_SYM9[8] && sym9 == DTMF_VD2_SYM9[9] && sym10 == DTMF_VD2_SYM9[10])
 			c = '9';
-		else if (sym0 == DTMF_SYMA[0] && sym1 == DTMF_SYMA[1] && sym2 == DTMF_SYMA[2] && sym3 == DTMF_SYMA[3])
+		else if (sym0 == DTMF_VD2_SYMA[0] && sym1 == DTMF_VD2_SYMA[1] && sym2 == DTMF_VD2_SYMA[2] && sym3 == DTMF_VD2_SYMA[3] && sym4 == DTMF_VD2_SYMA[4] && sym5 == DTMF_VD2_SYMA[5] && sym6 == DTMF_VD2_SYMA[6] && sym7 == DTMF_VD2_SYMA[7] && sym8 == DTMF_VD2_SYMA[8] && sym9 == DTMF_VD2_SYMA[9] && sym10 == DTMF_VD2_SYMA[10])
 			c = 'A';
-		else if (sym0 == DTMF_SYMB[0] && sym1 == DTMF_SYMB[1] && sym2 == DTMF_SYMB[2] && sym3 == DTMF_SYMB[3])
+		else if (sym0 == DTMF_VD2_SYMB[0] && sym1 == DTMF_VD2_SYMB[1] && sym2 == DTMF_VD2_SYMB[2] && sym3 == DTMF_VD2_SYMB[3] && sym4 == DTMF_VD2_SYMB[4] && sym5 == DTMF_VD2_SYMB[5] && sym6 == DTMF_VD2_SYMB[6] && sym7 == DTMF_VD2_SYMB[7] && sym8 == DTMF_VD2_SYMB[8] && sym9 == DTMF_VD2_SYMB[9] && sym10 == DTMF_VD2_SYMB[10])
 			c = 'B';
-		else if (sym0 == DTMF_SYMC[0] && sym1 == DTMF_SYMC[1] && sym2 == DTMF_SYMC[2] && sym3 == DTMF_SYMC[3])
+		else if (sym0 == DTMF_VD2_SYMC[0] && sym1 == DTMF_VD2_SYMC[1] && sym2 == DTMF_VD2_SYMC[2] && sym3 == DTMF_VD2_SYMC[3] && sym4 == DTMF_VD2_SYMC[4] && sym5 == DTMF_VD2_SYMC[5] && sym6 == DTMF_VD2_SYMC[6] && sym7 == DTMF_VD2_SYMC[7] && sym8 == DTMF_VD2_SYMC[8] && sym9 == DTMF_VD2_SYMC[9] && sym10 == DTMF_VD2_SYMC[10])
 			c = 'C';
-		else if (sym0 == DTMF_SYMD[0] && sym1 == DTMF_SYMD[1] && sym2 == DTMF_SYMD[2] && sym3 == DTMF_SYMD[3])
+		else if (sym0 == DTMF_VD2_SYMD[0] && sym1 == DTMF_VD2_SYMD[1] && sym2 == DTMF_VD2_SYMD[2] && sym3 == DTMF_VD2_SYMD[3] && sym4 == DTMF_VD2_SYMD[4] && sym5 == DTMF_VD2_SYMD[5] && sym6 == DTMF_VD2_SYMD[6] && sym7 == DTMF_VD2_SYMD[7] && sym8 == DTMF_VD2_SYMD[8] && sym9 == DTMF_VD2_SYMD[9] && sym10 == DTMF_VD2_SYMD[10])
 			c = 'D';
-		else if (sym0 == DTMF_SYMS[0] && sym1 == DTMF_SYMS[1] && sym2 == DTMF_SYMS[2] && sym3 == DTMF_SYMS[3])
+		else if (sym0 == DTMF_VD2_SYMS[0] && sym1 == DTMF_VD2_SYMS[1] && sym2 == DTMF_VD2_SYMS[2] && sym3 == DTMF_VD2_SYMS[3] && sym4 == DTMF_VD2_SYMS[4] && sym5 == DTMF_VD2_SYMS[5] && sym6 == DTMF_VD2_SYMS[6] && sym7 == DTMF_VD2_SYMS[7] && sym8 == DTMF_VD2_SYMS[8] && sym9 == DTMF_VD2_SYMS[9] && sym10 == DTMF_VD2_SYMS[10])
 			c = '*';
-		else if (sym0 == DTMF_SYMH[0] && sym1 == DTMF_SYMH[1] && sym2 == DTMF_SYMH[2] && sym3 == DTMF_SYMH[3])
+		else if (sym0 == DTMF_VD2_SYMH[0] && sym1 == DTMF_VD2_SYMH[1] && sym2 == DTMF_VD2_SYMH[2] && sym3 == DTMF_VD2_SYMH[3] && sym4 == DTMF_VD2_SYMH[4] && sym5 == DTMF_VD2_SYMH[5] && sym6 == DTMF_VD2_SYMH[6] && sym7 == DTMF_VD2_SYMH[7] && sym8 == DTMF_VD2_SYMH[8] && sym9 == DTMF_VD2_SYMH[9] && sym10 == DTMF_VD2_SYMH[10])
 			c = '#';
 
 		if (c == m_lastChar) {
@@ -318,7 +375,7 @@ WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe)
 		return validate();
 	} else {
 		// If it is not a DTMF Code
-		if (m_releaseCount >= 100U && m_data.length() > 0U) {
+		if ((end || m_releaseCount >= 100U) && m_data.length() > 0U) {
 			m_command = m_data;
 			m_data.clear();
 			m_releaseCount = 0U;
@@ -329,7 +386,7 @@ WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe)
 		m_pressCount = 0U;
 		m_lastChar = ' ';
 
-		return WXS_NONE;
+		return validate();
 	}
 }
 
