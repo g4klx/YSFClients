@@ -226,7 +226,7 @@ int CYSFGateway::run()
 		if (!startup.empty()) {
 			CYSFReflector* reflector = m_wiresX->getReflector(startup);
 			if (reflector != NULL) {
-				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
+				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 				m_netNetwork->writePoll();
@@ -275,7 +275,7 @@ int CYSFGateway::run()
 							m_netNetwork->writeUnlink();
 
 							CYSFReflector* reflector = m_wiresX->getReflector();
-							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+							LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_netNetwork->writePoll();
@@ -329,7 +329,7 @@ int CYSFGateway::run()
 								m_netNetwork->writeUnlink();
 							}
 
-							LogMessage("Connect via DTMF to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+							LogMessage("Connect via DTMF to %5.5s - \"%s\"has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_netNetwork->writePoll();
@@ -414,7 +414,7 @@ int CYSFGateway::run()
 					reflector = m_wiresX->getReflector(startup);
 
 				if (reflector != NULL) {
-					LogMessage("Reverting connection to %5.5s", reflector->m_id.c_str());
+					LogMessage("Reverting connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 					m_wiresX->processConnect(reflector);
 
