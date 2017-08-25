@@ -329,7 +329,7 @@ int CYSFGateway::run()
 								m_netNetwork->writeUnlink();
 							}
 
-							LogMessage("Connect via DTMF to %5.5s - \"%s\"has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+							LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_netNetwork->writePoll();
