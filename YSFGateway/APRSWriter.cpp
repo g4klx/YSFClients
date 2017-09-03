@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010-2014,2016,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,7 +34,8 @@ m_txFrequency(0U),
 m_rxFrequency(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
-m_height(0)
+m_height(0),
+m_desc()
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -53,13 +54,14 @@ CAPRSWriter::~CAPRSWriter()
 {
 }
 
-void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
+void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc)
 {
 	m_txFrequency = txFrequency;
 	m_rxFrequency = rxFrequency;
 	m_latitude    = latitude;
 	m_longitude   = longitude;
 	m_height      = height;
+	m_desc        = desc;
 }
 
 bool CAPRSWriter::open()
@@ -147,15 +149,15 @@ void CAPRSWriter::sendIdFrames()
 	if (m_latitude == 0.0F && m_longitude == 0.0F)
 		return;
 
-	char desc[100U];
+	char desc[200U];
 	if (m_txFrequency != 0U) {
 		float offset = float(int(m_rxFrequency) - int(m_txFrequency)) / 1000000.0F;
-		::sprintf(desc, "MMDVM Voice %.5LfMHz %c%.4lfMHz",
+		::sprintf(desc, "MMDVM Voice %.5LfMHz %c%.4lfMHz%s%s",
 			(long double)(m_txFrequency) / 1000000.0F,
 			offset < 0.0F ? '-' : '+',
-			::fabs(offset));
+			::fabs(offset), m_desc.empty() ? "" : ", ", m_desc.c_str());
 	} else {
-		::strcpy(desc, "MMDVM Voice");
+		::sprintf(desc, "MMDVM Voice%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
 	}
 
 	const char* band = "4m";

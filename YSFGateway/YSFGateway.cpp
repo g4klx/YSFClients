@@ -509,8 +509,9 @@ void CYSFGateway::createGPS()
 	float latitude           = m_conf.getLatitude();
 	float longitude          = m_conf.getLongitude();
 	int height               = m_conf.getHeight();
+	std::string desc         = m_conf.getDescription();
 
-	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height);
+	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
 
 	bool ret = m_gps->open();
 	if (!ret) {

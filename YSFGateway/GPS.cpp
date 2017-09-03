@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -49,9 +49,9 @@ CGPS::~CGPS()
 	delete[] m_buffer;
 }
 
-void CGPS::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
+void CGPS::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc)
 {
-	m_writer.setInfo(txFrequency, rxFrequency, latitude, longitude, height);
+	m_writer.setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
 }
 
 bool CGPS::open()
