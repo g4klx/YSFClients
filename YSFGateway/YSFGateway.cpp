@@ -501,6 +501,7 @@ void CYSFGateway::createGPS()
 	std::string hostname = m_conf.getAPRSServer();
 	unsigned int port    = m_conf.getAPRSPort();
 	std::string password = m_conf.getAPRSPassword();
+	std::string desc     = m_conf.getAPRSDescription();
 
 	m_gps = new CGPS(m_callsign, m_suffix, password, hostname, port);
 
@@ -509,7 +510,6 @@ void CYSFGateway::createGPS()
 	float latitude           = m_conf.getLatitude();
 	float longitude          = m_conf.getLongitude();
 	int height               = m_conf.getHeight();
-	std::string desc         = m_conf.getDescription();
 
 	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
 

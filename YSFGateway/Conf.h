@@ -60,6 +60,7 @@ public:
   std::string  getAPRSServer() const;
   unsigned int getAPRSPort() const;
   std::string  getAPRSPassword() const;
+  std::string  getAPRSDescription() const;
 
   // The Network section
   bool         getNetworkEnabled() const;
@@ -101,6 +102,7 @@ private:
   std::string  m_aprsServer;
   unsigned int m_aprsPort;
   std::string  m_aprsPassword;
+  std::string  m_aprsDescription;
 
   bool         m_networkEnabled;
   unsigned int m_networkPort;

@@ -60,6 +60,7 @@ m_aprsEnabled(false),
 m_aprsServer(),
 m_aprsPort(0U),
 m_aprsPassword(),
+m_aprsDescription(),
 m_networkEnabled(false),
 m_networkPort(0U),
 m_networkHosts(),
@@ -170,6 +171,8 @@ bool CConf::read()
 			m_aprsPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Password") == 0)
 			m_aprsPassword = value;
+		else if (::strcmp(key, "Description") == 0)
+			m_aprsDescription = value;
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_networkEnabled = ::atoi(value) == 1;
@@ -312,6 +315,11 @@ unsigned int CConf::getAPRSPort() const
 std::string CConf::getAPRSPassword() const
 {
 	return m_aprsPassword;
+}
+
+std::string CConf::getAPRSDescription() const
+{
+	return m_aprsDescription;
 }
 
 bool CConf::getNetworkEnabled() const
