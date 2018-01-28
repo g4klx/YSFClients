@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -60,13 +60,16 @@ public:
 
 	std::vector<CYSFReflector*>& search(const std::string& name);
 
+	bool reload();
+
 	void clock(unsigned int ms);
 
 private:
 	std::string                 m_hostsFile;
 	std::string                 m_parrotAddress;
 	unsigned int                m_parrotPort;
-	std::vector<CYSFReflector*> m_reflectors;
+	std::vector<CYSFReflector*> m_newReflectors;
+	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;
 	CTimer                      m_timer;
 };

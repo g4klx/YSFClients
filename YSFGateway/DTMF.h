@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,9 +16,34 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if !defined(VERSION_H)
-#define	VERSION_H
+#ifndef DTMF_H
+#define	DTMF_H
 
-const char* VERSION = "20170719";
+#include "WiresX.h"
+
+#include <string>
+
+class CDTMF {
+public:
+	CDTMF();
+	~CDTMF();
+
+	WX_STATUS decodeVDMode2(const unsigned char* payload, bool end);
+
+	std::string getReflector();
+
+	void reset();
+
+private:
+	std::string  m_data;
+	std::string  m_command;
+	bool         m_pressed;
+	unsigned int m_releaseCount;
+	unsigned int m_pressCount;
+	char         m_lastChar;
+
+	WX_STATUS decodeVDMode2Slice(const unsigned char* ambe, bool end);
+	WX_STATUS validate() const;
+};
 
 #endif

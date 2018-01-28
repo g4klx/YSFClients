@@ -60,6 +60,7 @@ m_aprsEnabled(false),
 m_aprsServer(),
 m_aprsPort(0U),
 m_aprsPassword(),
+m_aprsDescription(),
 m_networkEnabled(false),
 m_networkPort(0U),
 m_networkHosts(),
@@ -68,6 +69,7 @@ m_networkParrotAddress("127.0.0.1"),
 m_networkParrotPort(0U),
 m_networkStartup(),
 m_networkInactivityTimeout(0U),
+m_networkRevert(false),
 m_networkDebug(false)
 {
 }
@@ -169,6 +171,8 @@ bool CConf::read()
 			m_aprsPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Password") == 0)
 			m_aprsPassword = value;
+		else if (::strcmp(key, "Description") == 0)
+			m_aprsDescription = value;
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_networkEnabled = ::atoi(value) == 1;
@@ -186,6 +190,8 @@ bool CConf::read()
 			m_networkStartup = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Revert") == 0)
+			m_networkRevert = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
 			m_networkDebug = ::atoi(value) == 1;
 	}
@@ -311,6 +317,11 @@ std::string CConf::getAPRSPassword() const
 	return m_aprsPassword;
 }
 
+std::string CConf::getAPRSDescription() const
+{
+	return m_aprsDescription;
+}
+
 bool CConf::getNetworkEnabled() const
 {
 	return m_networkEnabled;
@@ -349,6 +360,11 @@ std::string CConf::getNetworkStartup() const
 unsigned int CConf::getNetworkInactivityTimeout() const
 {
 	return m_networkInactivityTimeout;
+}
+
+bool CConf::getNetworkRevert() const
+{
+	return m_networkRevert;
 }
 
 bool CConf::getNetworkDebug() const

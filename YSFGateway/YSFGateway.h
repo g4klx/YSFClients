@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "Network.h"
 #include "WiresX.h"
 #include "Conf.h"
+#include "DTMF.h"
 #include "GPS.h"
 
 #include <string>
@@ -40,6 +41,7 @@ private:
 	CConf       m_conf;
 	CGPS*       m_gps;
 	CWiresX*    m_wiresX;
+	CDTMF*      m_dtmf;
 	CNetwork*   m_netNetwork;
 	bool        m_linked;
 	bool        m_exclude;

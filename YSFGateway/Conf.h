@@ -60,6 +60,7 @@ public:
   std::string  getAPRSServer() const;
   unsigned int getAPRSPort() const;
   std::string  getAPRSPassword() const;
+  std::string  getAPRSDescription() const;
 
   // The Network section
   bool         getNetworkEnabled() const;
@@ -70,6 +71,7 @@ public:
   unsigned int getNetworkParrotPort() const;
   std::string  getNetworkStartup() const;
   unsigned int getNetworkInactivityTimeout() const;
+  bool         getNetworkRevert() const;
   bool         getNetworkDebug() const;
 
 private:
@@ -100,6 +102,7 @@ private:
   std::string  m_aprsServer;
   unsigned int m_aprsPort;
   std::string  m_aprsPassword;
+  std::string  m_aprsDescription;
 
   bool         m_networkEnabled;
   unsigned int m_networkPort;
@@ -109,6 +112,7 @@ private:
   unsigned int m_networkParrotPort;
   std::string  m_networkStartup;
   unsigned int m_networkInactivityTimeout;
+  bool         m_networkRevert;
   bool         m_networkDebug;
 };
 

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010-2014,2016,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,7 +34,8 @@ m_txFrequency(0U),
 m_rxFrequency(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
-m_height(0)
+m_height(0),
+m_desc()
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
@@ -53,17 +54,19 @@ CAPRSWriter::~CAPRSWriter()
 {
 }
 
-void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height)
+void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc)
 {
 	m_txFrequency = txFrequency;
 	m_rxFrequency = rxFrequency;
 	m_latitude    = latitude;
 	m_longitude   = longitude;
 	m_height      = height;
+	m_desc        = desc;
 }
 
 bool CAPRSWriter::open()
 {
+	m_idTimer.start();
 	return m_thread->start();
 }
 
@@ -146,15 +149,15 @@ void CAPRSWriter::sendIdFrames()
 	if (m_latitude == 0.0F && m_longitude == 0.0F)
 		return;
 
-	char desc[100U];
+	char desc[200U];
 	if (m_txFrequency != 0U) {
 		float offset = float(int(m_rxFrequency) - int(m_txFrequency)) / 1000000.0F;
-		::sprintf(desc, "MMDVM Voice %.5lfMHz %c%.4lfMHz",
-			float(m_txFrequency) / 1000000.0F,
+		::sprintf(desc, "MMDVM Voice %.5LfMHz %c%.4lfMHz%s%s",
+			(long double)(m_txFrequency) / 1000000.0F,
 			offset < 0.0F ? '-' : '+',
-			::fabs(offset));
+			::fabs(offset), m_desc.empty() ? "" : ", ", m_desc.c_str());
 	} else {
-		::strcpy(desc, "MMDVM Voice");
+		::sprintf(desc, "MMDVM Voice%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
 	}
 
 	const char* band = "4m";
@@ -179,10 +182,10 @@ void CAPRSWriter::sendIdFrames()
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	::sprintf(lat, "%04.2lf", latitude);
+	::sprintf(lat, "%07.2lf", latitude);
 
 	char lon[20U];
-	::sprintf(lon, "%05.2lf", longitude);
+	::sprintf(lon, "%08.2lf", longitude);
 
 	std::string server = m_callsign;
 	size_t pos = server.find_first_of('-');

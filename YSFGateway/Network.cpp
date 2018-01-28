@@ -93,7 +93,7 @@ void CNetwork::setDestination(const in_addr& address, unsigned int port)
 	m_port    = port;
 }
 
-void CNetwork::setDestination()
+void CNetwork::clearDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;

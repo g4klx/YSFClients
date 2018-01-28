@@ -22,7 +22,7 @@
 class CYSFParrot
 {
 public:
-	CYSFParrot(unsigned int port, bool debug);
+	CYSFParrot(unsigned int port, bool debug, bool log);
 	~CYSFParrot();
 
 	void run();
@@ -30,6 +30,7 @@ public:
 private:
 	unsigned int m_port;
 	bool         m_debug;
+	bool         m_log;
 };
 
 #endif

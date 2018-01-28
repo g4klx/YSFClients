@@ -53,7 +53,7 @@ m_name(),
 m_command(NULL),
 m_txFrequency(0U),
 m_rxFrequency(0U),
-m_timer(1000U, 2U),
+m_timer(1000U, 1U),
 m_seqNo(0U),
 m_header(NULL),
 m_csd1(NULL),
@@ -154,7 +154,13 @@ void CWiresX::setParrot(const std::string& address, unsigned int port)
 
 bool CWiresX::start()
 {
-	return m_reflectors.load();
+	bool ret = m_reflectors.load();
+	if (!ret)
+		return false;
+
+	m_reflectors.reload();
+
+	return true;
 }
 
 WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
@@ -286,9 +292,18 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	return WXS_CONNECT;
 }
 
+void CWiresX::processConnect(CYSFReflector* reflector)
+{
+	m_reflector = reflector;
+
+	m_status = WXSI_CONNECT;
+	m_timer.start();
+}
+
 void CWiresX::processDisconnect(const unsigned char* source)
 {
-	::LogDebug("Received Disconect from %10.10s", source);
+	if (source != NULL)
+		::LogDebug("Received Disconect from %10.10s", source);
 
 	m_reflector = NULL;
 
@@ -496,13 +511,13 @@ void CWiresX::sendDXReply()
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + 36U] = m_reflector->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U && i < m_reflector->m_name.size(); i++)
+		for (unsigned int i = 0U; i < 16U; i++)
 			data[i + 41U] = m_reflector->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + 57U] = m_reflector->m_count.at(i);
 
-		for (unsigned int i = 0U; i < 14U && i < m_reflector->m_desc.size(); i++)
+		for (unsigned int i = 0U; i < 14U; i++)
 			data[i + 70U] = m_reflector->m_desc.at(i);
 	}
 
@@ -563,13 +578,13 @@ void CWiresX::sendConnectReply()
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 36U] = m_reflector->m_id.at(i);
 
-	for (unsigned int i = 0U; i < 16U && i < m_reflector->m_name.size(); i++)
+	for (unsigned int i = 0U; i < 16U; i++)
 		data[i + 41U] = m_reflector->m_name.at(i);
 
 	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 57U] = m_reflector->m_count.at(i);
 
-	for (unsigned int i = 0U; i < 14U && i < m_reflector->m_desc.size(); i++)
+	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 70U] = m_reflector->m_desc.at(i);
 
 	data[84U] = '0';
@@ -627,6 +642,9 @@ void CWiresX::sendDisconnectReply()
 
 void CWiresX::sendAllReply()
 {
+	if (m_start == 0U)
+		m_reflectors.reload();
+
 	std::vector<CYSFReflector*>& curr = m_reflectors.current();
 
 	unsigned char data[1100U];
@@ -667,7 +685,7 @@ void CWiresX::sendAllReply()
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + offset + 1U] = refl->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U && i < refl->m_name.size(); i++)
+		for (unsigned int i = 0U; i < 16U; i++)
 			data[i + offset + 6U] = refl->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
@@ -676,7 +694,7 @@ void CWiresX::sendAllReply()
 		for (unsigned int i = 0U; i < 10U; i++)
 			data[i + offset + 25U] = ' ';
 
-		for (unsigned int i = 0U; i < 14U && i < refl->m_desc.size(); i++)
+		for (unsigned int i = 0U; i < 14U; i++)
 			data[i + offset + 35U] = refl->m_desc.at(i);
 
 		data[offset + 49U] = 0x0DU;
@@ -751,7 +769,7 @@ void CWiresX::sendSearchReply()
 		for (unsigned int i = 0U; i < 5U; i++)
 			data[i + offset + 1U] = refl->m_id.at(i);
 
-		for (unsigned int i = 0U; i < 16U && i < refl->m_name.size(); i++)
+		for (unsigned int i = 0U; i < 16U; i++)
 			data[i + offset + 6U] = refl->m_name.at(i);
 
 		for (unsigned int i = 0U; i < 3U; i++)
@@ -760,7 +778,7 @@ void CWiresX::sendSearchReply()
 		for (unsigned int i = 0U; i < 10U; i++)
 			data[i + offset + 25U] = ' ';
 
-		for (unsigned int i = 0U; i < 14U && i < refl->m_desc.size(); i++)
+		for (unsigned int i = 0U; i < 14U; i++)
 			data[i + offset + 35U] = refl->m_desc.at(i);
 
 		data[offset + 49U] = 0x0DU;

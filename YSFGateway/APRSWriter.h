@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010,2011,2012,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010,2011,2012,2016,2017 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public:
 
 	bool open();
 
-	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height);
+	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc);
 
 	void write(const unsigned char* source, const char* type, unsigned char radio, float latitude, float longitude);
 
@@ -49,6 +49,7 @@ private:
 	float              m_latitude;
 	float              m_longitude;
 	int                m_height;
+	std::string        m_desc;
 
 	void sendIdFrames();
 };

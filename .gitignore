@@ -1,7 +1,6 @@
 Debug
 Release
 x64
-MMDVMHost
 *.o
 *.opendb
 *.bak
@@ -14,3 +13,6 @@ MMDVMHost
 *.user
 *.VC.db
 .vs
+YSFGateway/YSFGateway
+YSFParrot/YSFParrot
+YSFReflector/YSFReflector

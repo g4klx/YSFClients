@@ -80,6 +80,7 @@ m_suffix(),
 m_conf(configFile),
 m_gps(NULL),
 m_wiresX(NULL),
+m_dtmf(NULL),
 m_netNetwork(NULL),
 m_linked(false),
 m_exclude(false)
@@ -197,12 +198,16 @@ int CYSFGateway::run()
 	CTimer lostTimer(1000U, 120U);
 	CTimer pollTimer(1000U, 5U);
 
+	bool revert = m_conf.getNetworkRevert();
+	std::string startup = m_conf.getNetworkStartup();
+
 	bool networkEnabled = m_conf.getNetworkEnabled();
 	if (networkEnabled) {
 		std::string fileName = m_conf.getNetworkHosts();
 		unsigned int reloadTime = m_conf.getNetworkReloadTime();
 
 		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
+		m_dtmf   = new CDTMF;
 
 		std::string name         = m_conf.getName();
 		unsigned int txFrequency = m_conf.getTxFrequency();
@@ -218,18 +223,19 @@ int CYSFGateway::run()
 
 		m_wiresX->start();
 
-		std::string startup = m_conf.getNetworkStartup();
 		if (!startup.empty()) {
 			CYSFReflector* reflector = m_wiresX->getReflector(startup);
 			if (reflector != NULL) {
-				LogMessage("Automatic connection to %5.5s", reflector->m_id.c_str());
+				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
 				m_netNetwork->writePoll();
 
-				inactivityTimer.start();
+				if (!revert)
+					inactivityTimer.start();
+
 				lostTimer.start();
 				pollTimer.start();
 
@@ -269,7 +275,7 @@ int CYSFGateway::run()
 							m_netNetwork->writeUnlink();
 
 							CYSFReflector* reflector = m_wiresX->getReflector();
-							LogMessage("Connect to %5.5s has been requested by %10.10s", reflector->m_id.c_str(), buffer + 14U);
+							LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
 							m_netNetwork->writePoll();
@@ -289,13 +295,72 @@ int CYSFGateway::run()
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
 						m_netNetwork->writeUnlink();
-						m_netNetwork->setDestination();
+						m_netNetwork->clearDestination();
 
 						inactivityTimer.stop();
 						lostTimer.stop();
 						pollTimer.stop();
 
 						m_linked = false;
+						break;
+					default:
+						break;
+					}
+
+					status = WXS_NONE;
+					switch (dt) {
+					case YSF_DT_VD_MODE2:
+						status = m_dtmf->decodeVDMode2(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
+						break;
+					default:
+						break;
+					}
+
+					switch (status) {
+					case WXS_CONNECT: {
+						std::string id = m_dtmf->getReflector();
+						CYSFReflector* reflector = m_wiresX->getReflector(id);
+						if (reflector != NULL) {
+							m_wiresX->processConnect(reflector);
+
+							if (m_linked) {
+								m_netNetwork->writeUnlink();
+								m_netNetwork->writeUnlink();
+								m_netNetwork->writeUnlink();
+							}
+
+							LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+
+							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
+							m_netNetwork->writePoll();
+
+							inactivityTimer.start();
+							lostTimer.start();
+							pollTimer.start();
+
+							m_linked = true;
+						}
+					}
+					break;
+					case WXS_DISCONNECT:
+						if (m_linked) {
+							m_wiresX->processDisconnect();
+
+							LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->writeUnlink();
+							m_netNetwork->clearDestination();
+
+							inactivityTimer.stop();
+							lostTimer.stop();
+							pollTimer.stop();
+
+							m_linked = false;
+						}
 						break;
 					default:
 						break;
@@ -315,6 +380,8 @@ int CYSFGateway::run()
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
+				if (m_dtmf != NULL)
+					m_dtmf->reset();
 				m_exclude = false;
 			}
 		}
@@ -342,17 +409,42 @@ int CYSFGateway::run()
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
 			if (m_linked) {
-				LogMessage("Disconnecting due to inactivity");
+				CYSFReflector* reflector = NULL;
+				if (revert && !startup.empty() && m_wiresX != NULL)
+					reflector = m_wiresX->getReflector(startup);
 
-				m_netNetwork->writeUnlink();
-				m_netNetwork->writeUnlink();
-				m_netNetwork->writeUnlink();
-				m_netNetwork->setDestination();
+				if (reflector != NULL) {
+					LogMessage("Reverting connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
-				lostTimer.stop();
-				pollTimer.stop();
+					m_wiresX->processConnect(reflector);
 
-				m_linked = false;
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+
+					m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
+					m_netNetwork->writePoll();
+					m_netNetwork->writePoll();
+					m_netNetwork->writePoll();
+
+					lostTimer.start();
+					pollTimer.start();
+				} else {
+					LogMessage("Disconnecting due to inactivity");
+
+					if (m_wiresX != NULL)
+						m_wiresX->processDisconnect();
+
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->writeUnlink();
+					m_netNetwork->clearDestination();
+
+					lostTimer.stop();
+					pollTimer.stop();
+
+					m_linked = false;
+				}
 			}
 
 			inactivityTimer.stop();
@@ -361,10 +453,16 @@ int CYSFGateway::run()
 		lostTimer.clock(ms);
 		if (lostTimer.isRunning() && lostTimer.hasExpired()) {
 			LogWarning("Link has failed, polls lost");
-			m_netNetwork->setDestination();
+
+			if (m_wiresX != NULL)
+				m_wiresX->processDisconnect();
+
+			m_netNetwork->clearDestination();
+
 			inactivityTimer.stop();
 			lostTimer.stop();
 			pollTimer.stop();
+
 			m_linked = false;
 		}
 
@@ -388,6 +486,7 @@ int CYSFGateway::run()
 
 	delete m_netNetwork;
 	delete m_wiresX;
+	delete m_dtmf;
 
 	::LogFinalise();
 
@@ -402,6 +501,7 @@ void CYSFGateway::createGPS()
 	std::string hostname = m_conf.getAPRSServer();
 	unsigned int port    = m_conf.getAPRSPort();
 	std::string password = m_conf.getAPRSPassword();
+	std::string desc     = m_conf.getAPRSDescription();
 
 	m_gps = new CGPS(m_callsign, m_suffix, password, hostname, port);
 
@@ -411,7 +511,7 @@ void CYSFGateway::createGPS()
 	float longitude          = m_conf.getLongitude();
 	int height               = m_conf.getHeight();
 
-	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height);
+	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
 
 	bool ret = m_gps->open();
 	if (!ret) {

@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -55,6 +55,9 @@ public:
 	CYSFReflector* getReflector() const;
 	CYSFReflector* getReflector(const std::string& id);
 
+	void processConnect(CYSFReflector* reflector);
+	void processDisconnect(const unsigned char* source = NULL);
+
 	void clock(unsigned int ms);
 
 private:
@@ -79,7 +82,6 @@ private:
 	std::string    m_search;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
-	void processDisconnect(const unsigned char* source);
 	void processDX(const unsigned char* source);
 	void processAll(const unsigned char* source, const unsigned char* data);
 
