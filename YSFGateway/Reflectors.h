@@ -50,7 +50,8 @@ public:
 	CReflectors(const std::string& hostsFile, unsigned int reloadTime);
 	~CReflectors();
 
-	void setParrot(const std::string& address, unsigned int port);
+	void setParrot(const std::string& address, unsigned int port);	
+	void setYSF2DMR(const std::string& address, unsigned int port);
 
 	bool load();
 
@@ -68,6 +69,8 @@ private:
 	std::string                 m_hostsFile;
 	std::string                 m_parrotAddress;
 	unsigned int                m_parrotPort;
+	std::string                 m_YSF2DMRAddress;
+	unsigned int                m_YSF2DMRPort;
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;

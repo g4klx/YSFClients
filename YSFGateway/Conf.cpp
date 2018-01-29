@@ -67,6 +67,8 @@ m_networkHosts(),
 m_networkReloadTime(0U),
 m_networkParrotAddress("127.0.0.1"),
 m_networkParrotPort(0U),
+m_networkYSF2DMRAddress("127.0.0.1"),
+m_networkYSF2DMRPort(0U),
 m_networkStartup(),
 m_networkInactivityTimeout(0U),
 m_networkRevert(false),
@@ -186,6 +188,10 @@ bool CConf::read()
 			m_networkParrotAddress = value;
 		else if (::strcmp(key, "ParrotPort") == 0)
 			m_networkParrotPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "YSF2DMRAddress") == 0)
+			m_networkYSF2DMRAddress = value;
+		else if (::strcmp(key, "YSF2DMRPort") == 0)
+			m_networkYSF2DMRPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
@@ -350,6 +356,16 @@ std::string CConf::getNetworkParrotAddress() const
 unsigned int CConf::getNetworkParrotPort() const
 {
 	return m_networkParrotPort;
+}
+
+std::string CConf::getNetworkYSF2DMRAddress() const
+{
+	return m_networkYSF2DMRAddress;
+}
+
+unsigned int CConf::getNetworkYSF2DMRPort() const
+{
+	return m_networkYSF2DMRPort;
 }
 
 std::string CConf::getNetworkStartup() const

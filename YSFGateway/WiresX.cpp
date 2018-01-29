@@ -152,6 +152,11 @@ void CWiresX::setParrot(const std::string& address, unsigned int port)
 	m_reflectors.setParrot(address, port);
 }
 
+void CWiresX::setYSF2DMR(const std::string& address, unsigned int port)
+{
+	m_reflectors.setYSF2DMR(address, port);
+}
+
 bool CWiresX::start()
 {
 	bool ret = m_reflectors.load();

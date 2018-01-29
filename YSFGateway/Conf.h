@@ -69,6 +69,8 @@ public:
   unsigned int getNetworkReloadTime() const;
   std::string  getNetworkParrotAddress() const;
   unsigned int getNetworkParrotPort() const;
+  std::string  getNetworkYSF2DMRAddress() const;
+  unsigned int getNetworkYSF2DMRPort() const;
   std::string  getNetworkStartup() const;
   unsigned int getNetworkInactivityTimeout() const;
   bool         getNetworkRevert() const;
@@ -110,6 +112,8 @@ private:
   unsigned int m_networkReloadTime;
   std::string  m_networkParrotAddress;
   unsigned int m_networkParrotPort;
+  std::string  m_networkYSF2DMRAddress;
+  unsigned int m_networkYSF2DMRPort;
   std::string  m_networkStartup;
   unsigned int m_networkInactivityTimeout;
   bool         m_networkRevert;
