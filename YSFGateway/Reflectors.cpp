@@ -74,6 +74,12 @@ void CReflectors::setParrot(const std::string& address, unsigned int port)
 	m_parrotPort    = port;
 }
 
+void CReflectors::setYSF2DMR(const std::string& address, unsigned int port)
+{
+	m_YSF2DMRAddress = address;
+	m_YSF2DMRPort    = port;
+}
+
 bool CReflectors::load()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
@@ -133,6 +139,19 @@ bool CReflectors::load()
 		refl->m_count   = "000";
 		m_newReflectors.push_back(refl);
 		LogInfo("Loaded YSF parrot");
+	}
+
+	// Add the YSF2DMR entry
+	if (m_YSF2DMRPort > 0U) {
+		CYSFReflector* refl = new CYSFReflector;
+		refl->m_id      = "00002";
+		refl->m_name    = "YSF2DMR         ";
+		refl->m_desc    = "Link YSF2DMR  ";
+		refl->m_address = CUDPSocket::lookup(m_YSF2DMRAddress);
+		refl->m_port    = m_YSF2DMRPort;
+		refl->m_count   = "000";
+		m_newReflectors.push_back(refl);
+		LogInfo("Loaded YSF2DMR");
 	}
 
 	size = m_newReflectors.size();

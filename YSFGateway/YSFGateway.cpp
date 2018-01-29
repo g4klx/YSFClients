@@ -221,6 +221,12 @@ int CYSFGateway::run()
 		if (port > 0U)
 			m_wiresX->setParrot(address, port);
 
+		address = m_conf.getNetworkYSF2DMRAddress();
+		port = m_conf.getNetworkYSF2DMRPort();
+
+		if (port > 0U)
+			m_wiresX->setYSF2DMR(address, port);
+
 		m_wiresX->start();
 
 		if (!startup.empty()) {
