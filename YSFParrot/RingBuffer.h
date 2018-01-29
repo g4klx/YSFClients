@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006-2009,2012,2013,2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2006-2009,2012,2013,2015,2016,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 
 #ifndef RingBuffer_H
 #define RingBuffer_H
-
-#include "Log.h"
 
 #include <cstdio>
 #include <cassert>
@@ -50,7 +48,7 @@ public:
 	bool addData(const T* buffer, unsigned int nSamples)
 	{
 		if (nSamples >= freeSpace()) {
-			LogError("**** Overflow in %s ring buffer, %u >= %u", m_name, nSamples, freeSpace());
+			::fprintf(stderr, "**** Overflow in %s ring buffer, %u >= %u\n", m_name, nSamples, freeSpace());
 			return false;
 		}
 
@@ -67,7 +65,7 @@ public:
 	bool getData(T* buffer, unsigned int nSamples)
 	{
 		if (dataSize() < nSamples) {
-			LogError("**** Underflow in %s ring buffer, %u < %u", m_name, dataSize(), nSamples);
+			::fprintf(stderr, "**** Underflow in %s ring buffer, %u < %u\n", m_name, dataSize(), nSamples);
 			return false;
 		}
 
@@ -84,7 +82,7 @@ public:
 	bool peek(T* buffer, unsigned int nSamples)
 	{
 		if (dataSize() < nSamples) {
-			LogError("**** Underflow peek in %s ring buffer, %u < %u", m_name, dataSize(), nSamples);
+			::fprintf(stderr, "**** Underflow peek in %s ring buffer, %u < %u\n", m_name, dataSize(), nSamples);
 			return false;
 		}
 

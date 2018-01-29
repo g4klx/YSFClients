@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
  */
 
 #include "Network.h"
-#include "Utils.h"
-#include "Log.h"
 
 #include <cstdio>
 #include <cassert>
@@ -40,7 +38,7 @@ CNetwork::~CNetwork()
 
 bool CNetwork::open()
 {
-	LogInfo("Opening YSF network connection");
+	::fprintf(stdout, "Opening YSF network connection\n");
 
 	return m_socket.open();
 }
@@ -51,8 +49,6 @@ bool CNetwork::write(const unsigned char* data)
 		return true;
 
 	assert(data != NULL);
-
-	CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
 	return m_socket.write(data, 155U, m_address, m_port);
 }
@@ -115,8 +111,6 @@ void CNetwork::clock(unsigned int ms)
 	m_address.s_addr = address.s_addr;
 	m_port = port;
 
-	CUtils::dump(1U, "YSF Network Data Received", buffer, length);
-
 	m_buffer.addData(buffer, 155U);
 }
 
@@ -141,5 +135,5 @@ void CNetwork::close()
 {
 	m_socket.close();
 
-	LogInfo("Closing YSF network connection");
+	::fprintf(stdout, "Closing YSF network connection\n");
 }
