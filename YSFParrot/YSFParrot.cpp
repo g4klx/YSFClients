@@ -35,31 +35,20 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	int n = 1U;
-
-	bool debug = false;
-
-	for (; n < argc-1; n++) {
-		if (::strcmp(argv[n], "-d") == 0 || ::strcmp(argv[n], "--debug") == 0) {
-			debug = true;
-		}
-	}
-
-	unsigned int port = ::atoi(argv[n]);
+	unsigned int port = ::atoi(argv[1U]);
 	if (port == 0U) {
-		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[n]);
+		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[1U]);
 		return 1;
 	}
 
-	CYSFParrot parrot(port, debug);
+	CYSFParrot parrot(port);
 	parrot.run();
 
 	return 0;
 }
 
-CYSFParrot::CYSFParrot(unsigned int port, bool debug) :
-m_port(port),
-m_debug(debug)
+CYSFParrot::CYSFParrot(unsigned int port) :
+m_port(port)
 {
 }
 
