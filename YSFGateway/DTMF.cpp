@@ -173,6 +173,8 @@ WX_STATUS CDTMF::validate() const
 			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
 				return WXS_NONE;
 		}
+
+		return WXS_CONNECT_FCS;
 	} else {
 		for (unsigned int i = 1U; i <= 6U; i++) {
 			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
@@ -181,9 +183,9 @@ WX_STATUS CDTMF::validate() const
 
 		if (m_command == "#99999")
 			return WXS_DISCONNECT;
-	}
 
-	return WXS_CONNECT;
+		return WXS_CONNECT_YSF;
+	}
 }
 
 std::string CDTMF::getReflector()

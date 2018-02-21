@@ -294,7 +294,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	m_status = WXSI_CONNECT;
 	m_timer.start();
 
-	return WXS_CONNECT;
+	return WXS_CONNECT_YSF;
 }
 
 void CWiresX::processConnect(CYSFReflector* reflector)
