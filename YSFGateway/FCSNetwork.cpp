@@ -25,59 +25,31 @@
 #include <cassert>
 #include <cstring>
 
+const char* FCS_VERSION = "MMDVM v.01";
+
 const unsigned int BUFFER_LENGTH = 200U;
 
-CFCSNetwork::CFCSNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
-m_socket(address, port),
-m_debug(debug),
-m_address(),
-m_port(0U),
-m_poll(NULL),
-m_unlink(NULL),
-m_buffer(1000U, "FCS Network Buffer")
-{
-	m_poll = new unsigned char[14U];
-	::memcpy(m_poll + 0U, "YSFP", 4U);
-
-	m_unlink = new unsigned char[14U];
-	::memcpy(m_unlink + 0U, "YSFU", 4U);
-
-	std::string node = callsign;
-	node.resize(YSF_CALLSIGN_LENGTH, ' ');
-
-	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U] = node.at(i);
-		m_unlink[i + 4U] = node.at(i);
-	}
-}
-
-CFCSNetwork::CFCSNetwork(unsigned int port, const std::string& callsign, bool debug) :
+CFCSNetwork::CFCSNetwork(unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
 m_port(0U),
-m_poll(NULL),
-m_unlink(NULL),
+m_info(NULL),
+m_callsign(callsign),
+m_reflector(),
 m_buffer(1000U, "FCS Network Buffer")
 {
-	m_poll = new unsigned char[14U];
-	::memcpy(m_poll + 0U, "YSFP", 4U);
+	m_info = new unsigned char[100U];
+	::memset(m_info, ' ', 100U);
 
-	m_unlink = new unsigned char[14U];
-	::memcpy(m_unlink + 0U, "YSFU", 4U);
+	m_callsign.resize(6U, ' ');
 
-	std::string node = callsign;
-	node.resize(YSF_CALLSIGN_LENGTH, ' ');
-
-	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U]   = node.at(i);
-		m_unlink[i + 4U] = node.at(i);
-	}
+	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
 }
 
 CFCSNetwork::~CFCSNetwork()
 {
-	delete[] m_poll;
+	delete[] m_info;
 }
 
 bool CFCSNetwork::open()
@@ -106,18 +78,35 @@ bool CFCSNetwork::write(const unsigned char* data)
 	if (m_port == 0U)
 		return true;
 
-	if (m_debug)
-		CUtils::dump(1U, "FCS Network Data Sent", data, 155U);
+	unsigned char buffer[130U];
+	::memset(buffer + 0U, ' ', 130U);
+	::memcpy(buffer + 0U, data + 35U, 120U);
+	::memcpy(buffer + 121U, m_reflector.c_str(), 8U);
 
-	return m_socket.write(data, 155U, m_address, m_port);
+	if (m_debug)
+		CUtils::dump(1U, "FCS Network Data Sent", buffer, 130U);
+
+	return m_socket.write(buffer, 130U, m_address, m_port);
 }
 
-bool CFCSNetwork::writePoll()
+bool CFCSNetwork::writeLink(const std::string& reflector)
 {
 	if (m_port == 0U)
 		return true;
 
-	return m_socket.write(m_poll, 14U, m_address, m_port);
+	m_reflector = reflector;
+	m_reflector.resize(8U, ' ');
+
+	unsigned char buffer[25U];
+	::memset(buffer + 0U, ' ', 25U);
+	::memcpy(buffer + 0U, "PING", 4U);
+	::memcpy(buffer + 4U, m_callsign.c_str(), 6U);
+	::memcpy(buffer + 10U, m_reflector.c_str(), 6U);
+
+	if (m_debug)
+		CUtils::dump(1U, "FCS Network Data Sent", buffer, 25U);
+
+	return m_socket.write(buffer, 25U, m_address, m_port);
 }
 
 bool CFCSNetwork::writeUnlink()
@@ -125,7 +114,7 @@ bool CFCSNetwork::writeUnlink()
 	if (m_port == 0U)
 		return true;
 
-	return m_socket.write(m_unlink, 14U, m_address, m_port);
+	return m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, m_port);
 }
 
 void CFCSNetwork::clock(unsigned int ms)
@@ -147,10 +136,11 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
-	unsigned char len = length;
-	m_buffer.addData(&len, 1U);
+	if (length == 7 || length == 10)
+		writeInfo();
 
-	m_buffer.addData(buffer, length);
+	if (length == 130)
+		m_buffer.addData(buffer, 130U);
 }
 
 unsigned int CFCSNetwork::read(unsigned char* data)
@@ -160,12 +150,9 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
-	unsigned char len = 0U;
-	m_buffer.getData(&len, 1U);
+	m_buffer.getData(data, 130U);
 
-	m_buffer.getData(data, len);
-
-	return len;
+	return 155U;
 }
 
 void CFCSNetwork::close()
@@ -173,4 +160,15 @@ void CFCSNetwork::close()
 	m_socket.close();
 
 	LogMessage("Closing FCS network connection");
+}
+
+void CFCSNetwork::writeInfo()
+{
+	if (m_port == 0U)
+		return;
+
+	if (m_debug)
+		CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
+
+	m_socket.write(m_info, 100U, m_address, m_port);
 }

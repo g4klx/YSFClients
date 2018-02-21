@@ -198,9 +198,14 @@ int CYSFGateway::run()
 		return 1;
 	}
 
+	unsigned int txFrequency = m_conf.getTxFrequency();
+	unsigned int rxFrequency = m_conf.getRxFrequency();
+	std::string locator      = m_conf.getLocator();
+	unsigned int id          = m_conf.getId();
+
 	unsigned int fcsPort = m_conf.getFCSNetworkPort();
 
-	m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, debug);
+	m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, rxFrequency, txFrequency, locator, id, debug);
 	ret = m_fcsNetwork->open();
 	if (!ret) {
 		::LogError("Cannot open the FCS reflector network port");
@@ -222,8 +227,6 @@ int CYSFGateway::run()
 		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
 
 		std::string name         = m_conf.getName();
-		unsigned int txFrequency = m_conf.getTxFrequency();
-		unsigned int rxFrequency = m_conf.getRxFrequency();
 
 		m_wiresX->setInfo(name, txFrequency, rxFrequency);
 
@@ -300,9 +303,10 @@ int CYSFGateway::run()
 			}
 
 			if (fcsNetworkEnabled && m_linkType == LINK_FCS && !m_exclude) {
-				m_fcsNetwork->write(buffer);
-				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
+					m_fcsNetwork->write(buffer);
 					m_inactivityTimer.start();
+				}
 			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
@@ -325,10 +329,7 @@ int CYSFGateway::run()
 
 		while (m_fcsNetwork->read(buffer) > 0U) {
 			if (fcsNetworkEnabled && m_linkType == LINK_FCS) {
-				// Only pass through YSF data packets
-				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
-					rptNetwork.write(buffer);
-
+				rptNetwork.write(buffer);
 				m_lostTimer.start();
 			}
 		}
@@ -468,9 +469,17 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
+			if (m_linkType == LINK_YSF) {
+				m_ysfNetwork->writeUnlink();
+				m_ysfNetwork->writeUnlink();
+				m_ysfNetwork->writeUnlink();
+			}
+			if (m_linkType == LINK_FCS) {
+				m_fcsNetwork->writeUnlink();
+				m_fcsNetwork->writeUnlink();
+				m_fcsNetwork->writeUnlink();
+				m_fcsNetwork->clearDestination();
+			}
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
@@ -488,18 +497,33 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 		}
 		break;
 	case WXS_DISCONNECT:
-		LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+		if (m_linkType == LINK_YSF) {
+			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
-		m_ysfNetwork->writeUnlink();
-		m_ysfNetwork->writeUnlink();
-		m_ysfNetwork->writeUnlink();
-		m_ysfNetwork->clearDestination();
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->clearDestination();
 
-		m_inactivityTimer.stop();
-		m_lostTimer.stop();
-		m_ysfPollTimer.stop();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_ysfPollTimer.stop();
 
-		m_linkType = LINK_NONE;
+			m_linkType = LINK_NONE;
+		}
+		if (m_linkType == LINK_FCS) {
+			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->clearDestination();
+
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+
+			m_linkType = LINK_NONE;
+		}
 		break;
 	default:
 		break;
@@ -563,6 +587,19 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
 			m_ysfPollTimer.stop();
+
+			m_linkType = LINK_NONE;
+		}
+		if (m_linkType == LINK_FCS) {
+			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->clearDestination();
+
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
 
 			m_linkType = LINK_NONE;
 		}

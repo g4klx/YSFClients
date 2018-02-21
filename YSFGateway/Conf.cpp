@@ -40,6 +40,7 @@ CConf::CConf(const std::string& file) :
 m_file(file),
 m_callsign(),
 m_suffix(),
+m_id(0U),
 m_rptAddress(),
 m_rptPort(0U),
 m_myAddress(),
@@ -50,6 +51,7 @@ m_txFrequency(0U),
 m_power(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
+m_locator(),
 m_height(0),
 m_name(),
 m_description(),
@@ -134,7 +136,9 @@ bool CConf::read()
 			for (unsigned int i = 0U; value[i] != 0; i++)
 				value[i] = ::toupper(value[i]);
 			m_suffix = value;
-		} else if (::strcmp(key, "RptAddress") == 0)
+		} else if (::strcmp(key, "Id") == 0)
+			m_id = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "RptAddress") == 0)
 			m_rptAddress = value;
 		else if (::strcmp(key, "RptPort") == 0)
 			m_rptPort = (unsigned int)::atoi(value);
@@ -155,6 +159,8 @@ bool CConf::read()
 			m_latitude = float(::atof(value));
 		else if (::strcmp(key, "Longitude") == 0)
 			m_longitude = float(::atof(value));
+		else if (::strcmp(key, "Locator") == 0)
+			m_locator = value;
 		else if (::strcmp(key, "Height") == 0)
 			m_height = ::atoi(value);
 		else if (::strcmp(key, "Name") == 0)
@@ -231,6 +237,11 @@ std::string CConf::getSuffix() const
 	return m_suffix;
 }
 
+unsigned int CConf::getId() const
+{
+	return m_id;
+}
+
 std::string CConf::getRptAddress() const
 {
 	return m_rptAddress;
@@ -279,6 +290,11 @@ float CConf::getLatitude() const
 float CConf::getLongitude() const
 {
 	return m_longitude;
+}
+
+std::string CConf::getLocator() const
+{
+	return m_locator;
 }
 
 int CConf::getHeight() const

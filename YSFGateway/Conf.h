@@ -33,6 +33,7 @@ public:
   // The General section
   std::string  getCallsign() const;
   std::string  getSuffix() const;
+  unsigned int getId() const;
   std::string  getRptAddress() const;
   unsigned int getRptPort() const;
   std::string  getMyAddress() const;
@@ -45,6 +46,7 @@ public:
   unsigned int getPower() const;
   float        getLatitude() const;
   float        getLongitude() const;
+  std::string  getLocator() const;
   int          getHeight() const;
   std::string  getName() const;
   std::string  getDescription() const;
@@ -85,6 +87,7 @@ private:
   std::string  m_file;
   std::string  m_callsign;
   std::string  m_suffix;
+  unsigned int m_id;
   std::string  m_rptAddress;
   unsigned int m_rptPort;
   std::string  m_myAddress;
@@ -96,6 +99,7 @@ private:
   unsigned int m_power;
   float        m_latitude;
   float        m_longitude;
+  std::string  m_locator;
   int          m_height;
   std::string  m_name;
   std::string  m_description;

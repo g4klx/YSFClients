@@ -28,8 +28,7 @@
 
 class CFCSNetwork {
 public:
-	CFCSNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug);
-	CFCSNetwork(unsigned int port, const std::string& callsign, bool debug);
+	CFCSNetwork(unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
 	~CFCSNetwork();
 
 	bool open();
@@ -39,7 +38,8 @@ public:
 
 	bool write(const unsigned char* data);
 
-	bool writePoll();
+	bool writeLink(const std::string& reflector);
+
 	bool writeUnlink();
 
 	unsigned int read(unsigned char* data);
@@ -53,9 +53,12 @@ private:
 	bool                       m_debug;
 	in_addr                    m_address;
 	unsigned int               m_port;
-	unsigned char*             m_poll;
-	unsigned char*             m_unlink;
+	unsigned char*             m_info;
+	std::string                m_callsign;
+	std::string                m_reflector;
 	CRingBuffer<unsigned char> m_buffer;
+
+	void writeInfo();
 };
 
 #endif

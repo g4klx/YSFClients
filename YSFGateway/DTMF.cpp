@@ -161,14 +161,21 @@ WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
 WX_STATUS CDTMF::validate() const
 {
 	size_t length = m_command.length();
-	if (length != 4U && length != 6U)
+	if (length != 3U && length != 4U && length != 6U)
 		return WXS_NONE;
 
 	char first = m_command.at(0U);
 	if (first != '#' && first != 'A')
 		return WXS_NONE;
 
-	if (length == 4U) {
+	if (length == 3U) {
+		for (unsigned int i = 1U; i <= 3U; i++) {
+			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+				return WXS_NONE;
+		}
+
+		return WXS_CONNECT_FCS;
+	} else if (length == 4U) {
 		for (unsigned int i = 1U; i <= 4U; i++) {
 			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
 				return WXS_NONE;
