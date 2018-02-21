@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 #include "YSFDefines.h"
-#include "Network.h"
+#include "YSFNetwork.h"
 #include "Utils.h"
 #include "Log.h"
 
@@ -27,7 +27,7 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
 m_address(),
@@ -51,7 +51,7 @@ m_buffer(1000U, "YSF Network Buffer")
 	}
 }
 
-CNetwork::CNetwork(unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned int port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
@@ -75,31 +75,31 @@ m_buffer(1000U, "YSF Network Buffer")
 	}
 }
 
-CNetwork::~CNetwork()
+CYSFNetwork::~CYSFNetwork()
 {
 	delete[] m_poll;
 }
 
-bool CNetwork::open()
+bool CYSFNetwork::open()
 {
 	LogMessage("Opening YSF network connection");
 
 	return m_socket.open();
 }
 
-void CNetwork::setDestination(const in_addr& address, unsigned int port)
+void CYSFNetwork::setDestination(const in_addr& address, unsigned int port)
 {
 	m_address = address;
 	m_port    = port;
 }
 
-void CNetwork::clearDestination()
+void CYSFNetwork::clearDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;
 }
 
-bool CNetwork::write(const unsigned char* data)
+bool CYSFNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -112,7 +112,7 @@ bool CNetwork::write(const unsigned char* data)
 	return m_socket.write(data, 155U, m_address, m_port);
 }
 
-bool CNetwork::writePoll()
+bool CYSFNetwork::writePoll()
 {
 	if (m_port == 0U)
 		return true;
@@ -120,7 +120,7 @@ bool CNetwork::writePoll()
 	return m_socket.write(m_poll, 14U, m_address, m_port);
 }
 
-bool CNetwork::writeUnlink()
+bool CYSFNetwork::writeUnlink()
 {
 	if (m_port == 0U)
 		return true;
@@ -128,7 +128,7 @@ bool CNetwork::writeUnlink()
 	return m_socket.write(m_unlink, 14U, m_address, m_port);
 }
 
-void CNetwork::clock(unsigned int ms)
+void CYSFNetwork::clock(unsigned int ms)
 {
 	if (m_port == 0U)
 		return;
@@ -153,7 +153,7 @@ void CNetwork::clock(unsigned int ms)
 	m_buffer.addData(buffer, length);
 }
 
-unsigned int CNetwork::read(unsigned char* data)
+unsigned int CYSFNetwork::read(unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -168,7 +168,7 @@ unsigned int CNetwork::read(unsigned char* data)
 	return len;
 }
 
-void CNetwork::close()
+void CYSFNetwork::close()
 {
 	m_socket.close();
 

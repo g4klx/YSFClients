@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 */
 
 #include "YSFGateway.h"
-#include "Reflectors.h"
+#include "YSFReflectors.h"
 #include "UDPSocket.h"
 #include "StopWatch.h"
 #include "Version.h"
@@ -81,7 +81,7 @@ m_conf(configFile),
 m_gps(NULL),
 m_wiresX(NULL),
 m_dtmf(NULL),
-m_netNetwork(NULL),
+m_ysfNetwork(NULL),
 m_linked(false),
 m_exclude(false)
 {
@@ -174,7 +174,7 @@ int CYSFGateway::run()
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();
 
-	CNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
+	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
 	rptNetwork.setDestination(rptAddress, rptPort);
 
 	ret = rptNetwork.open();
@@ -186,10 +186,10 @@ int CYSFGateway::run()
 
 	unsigned int netPort = m_conf.getNetworkPort();
 
-	m_netNetwork = new CNetwork(netPort, m_callsign, debug);
-	ret = m_netNetwork->open();
+	m_ysfNetwork = new CYSFNetwork(netPort, m_callsign, debug);
+	ret = m_ysfNetwork->open();
 	if (!ret) {
-		::LogError("Cannot open the reflector network port");
+		::LogError("Cannot open the YSF reflector network port");
 		::LogFinalise();
 		return 1;
 	}
@@ -234,10 +234,10 @@ int CYSFGateway::run()
 			if (reflector != NULL) {
 				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
-				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_netNetwork->writePoll();
-				m_netNetwork->writePoll();
-				m_netNetwork->writePoll();
+				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_ysfNetwork->writePoll();
+				m_ysfNetwork->writePoll();
+				m_ysfNetwork->writePoll();
 
 				if (!revert)
 					inactivityTimer.start();
@@ -276,17 +276,17 @@ int CYSFGateway::run()
 					WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 					switch (status) {
 					case WXS_CONNECT: {
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
+							m_ysfNetwork->writeUnlink();
+							m_ysfNetwork->writeUnlink();
+							m_ysfNetwork->writeUnlink();
 
 							CYSFReflector* reflector = m_wiresX->getReflector();
 							LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
+							m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_ysfNetwork->writePoll();
+							m_ysfNetwork->writePoll();
+							m_ysfNetwork->writePoll();
 
 							inactivityTimer.start();
 							lostTimer.start();
@@ -298,10 +298,10 @@ int CYSFGateway::run()
 					case WXS_DISCONNECT:
 						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->clearDestination();
+						m_ysfNetwork->writeUnlink();
+						m_ysfNetwork->writeUnlink();
+						m_ysfNetwork->writeUnlink();
+						m_ysfNetwork->clearDestination();
 
 						inactivityTimer.stop();
 						lostTimer.stop();
@@ -330,17 +330,17 @@ int CYSFGateway::run()
 							m_wiresX->processConnect(reflector);
 
 							if (m_linked) {
-								m_netNetwork->writeUnlink();
-								m_netNetwork->writeUnlink();
-								m_netNetwork->writeUnlink();
+								m_ysfNetwork->writeUnlink();
+								m_ysfNetwork->writeUnlink();
+								m_ysfNetwork->writeUnlink();
 							}
 
 							LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
+							m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+							m_ysfNetwork->writePoll();
+							m_ysfNetwork->writePoll();
+							m_ysfNetwork->writePoll();
 
 							inactivityTimer.start();
 							lostTimer.start();
@@ -356,10 +356,10 @@ int CYSFGateway::run()
 
 							LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
 
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->clearDestination();
+							m_ysfNetwork->writeUnlink();
+							m_ysfNetwork->writeUnlink();
+							m_ysfNetwork->writeUnlink();
+							m_ysfNetwork->clearDestination();
 
 							inactivityTimer.stop();
 							lostTimer.stop();
@@ -378,7 +378,7 @@ int CYSFGateway::run()
 			}
 
 			if (networkEnabled && m_linked && !m_exclude) {
-				m_netNetwork->write(buffer);
+				m_ysfNetwork->write(buffer);
 				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
 					inactivityTimer.start();
 			}
@@ -392,7 +392,7 @@ int CYSFGateway::run()
 			}
 		}
 
-		while (m_netNetwork->read(buffer) > 0U) {
+		while (m_ysfNetwork->read(buffer) > 0U) {
 			if (networkEnabled && m_linked) {
 				// Only pass through YSF data packets
 				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
@@ -406,7 +406,7 @@ int CYSFGateway::run()
 		stopWatch.start();
 
 		rptNetwork.clock(ms);
-		m_netNetwork->clock(ms);
+		m_ysfNetwork->clock(ms);
 		if (m_gps != NULL)
 			m_gps->clock(ms);
 		if (m_wiresX != NULL)
@@ -424,14 +424,14 @@ int CYSFGateway::run()
 
 					m_wiresX->processConnect(reflector);
 
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink();
 
-					m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-					m_netNetwork->writePoll();
-					m_netNetwork->writePoll();
-					m_netNetwork->writePoll();
+					m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+					m_ysfNetwork->writePoll();
+					m_ysfNetwork->writePoll();
+					m_ysfNetwork->writePoll();
 
 					lostTimer.start();
 					pollTimer.start();
@@ -441,10 +441,10 @@ int CYSFGateway::run()
 					if (m_wiresX != NULL)
 						m_wiresX->processDisconnect();
 
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->clearDestination();
+					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->clearDestination();
 
 					lostTimer.stop();
 					pollTimer.stop();
@@ -463,7 +463,7 @@ int CYSFGateway::run()
 			if (m_wiresX != NULL)
 				m_wiresX->processDisconnect();
 
-			m_netNetwork->clearDestination();
+			m_ysfNetwork->clearDestination();
 
 			inactivityTimer.stop();
 			lostTimer.stop();
@@ -474,7 +474,7 @@ int CYSFGateway::run()
 
 		pollTimer.clock(ms);
 		if (pollTimer.isRunning() && pollTimer.hasExpired()) {
-			m_netNetwork->writePoll();
+			m_ysfNetwork->writePoll();
 			pollTimer.start();
 		}
 
@@ -483,14 +483,14 @@ int CYSFGateway::run()
 	}
 
 	rptNetwork.close();
-	m_netNetwork->close();
+	m_ysfNetwork->close();
 
 	if (m_gps != NULL) {
 		m_gps->close();
 		delete m_gps;
 	}
 
-	delete m_netNetwork;
+	delete m_ysfNetwork;
 	delete m_wiresX;
 	delete m_dtmf;
 

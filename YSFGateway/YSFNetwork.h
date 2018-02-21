@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef	Network_H
-#define	Network_H
+#ifndef	YSFNetwork_H
+#define	YSFNetwork_H
 
 #include "YSFDefines.h"
 #include "UDPSocket.h"
@@ -26,11 +26,11 @@
 #include <cstdint>
 #include <string>
 
-class CNetwork {
+class CYSFNetwork {
 public:
-	CNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug);
-	CNetwork(unsigned int port, const std::string& callsign, bool debug);
-	~CNetwork();
+	CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug);
+	CYSFNetwork(unsigned int port, const std::string& callsign, bool debug);
+	~CYSFNetwork();
 
 	bool open();
 

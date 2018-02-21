@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #if !defined(YSFGateway_H)
 #define	YSFGateway_H
 
-#include "Network.h"
+#include "YSFNetwork.h"
 #include "WiresX.h"
 #include "Conf.h"
 #include "DTMF.h"
@@ -36,15 +36,15 @@ public:
 	int run();
 
 private:
-	std::string m_callsign;
-	std::string m_suffix;
-	CConf       m_conf;
-	CGPS*       m_gps;
-	CWiresX*    m_wiresX;
-	CDTMF*      m_dtmf;
-	CNetwork*   m_netNetwork;
-	bool        m_linked;
-	bool        m_exclude;
+	std::string  m_callsign;
+	std::string  m_suffix;
+	CConf        m_conf;
+	CGPS*        m_gps;
+	CWiresX*     m_wiresX;
+	CDTMF*       m_dtmf;
+	CYSFNetwork* m_ysfNetwork;
+	bool         m_linked;
+	bool         m_exclude;
 
 	void createGPS();
 };

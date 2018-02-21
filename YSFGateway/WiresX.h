@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 #if !defined(WIRESX_H)
 #define	WIRESX_H
 
-#include "Reflectors.h"
-#include "Network.h"
+#include "YSFReflectors.h"
+#include "YSFNetwork.h"
 #include "Timer.h"
 
 #include <string>
@@ -42,7 +42,7 @@ enum WXSI_STATUS {
 
 class CWiresX {
 public:
-	CWiresX(const std::string& callsign, const std::string& suffix, CNetwork* network, const std::string& hostsFile, unsigned int reloadTime);
+	CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, const std::string& hostsFile, unsigned int reloadTime);
 	~CWiresX();
 
 	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);
@@ -64,8 +64,8 @@ public:
 private:
 	std::string    m_callsign;
 	std::string    m_node;
-	CNetwork*      m_network;
-	CReflectors    m_reflectors;
+	CYSFNetwork*   m_network;
+	CYSFReflectors m_reflectors;
 	CYSFReflector* m_reflector;
 	std::string    m_id;
 	std::string    m_name;
