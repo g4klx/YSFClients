@@ -20,6 +20,7 @@
 #define	YSFGateway_H
 
 #include "YSFNetwork.h"
+#include "FCSNetwork.h"
 #include "WiresX.h"
 #include "Conf.h"
 #include "DTMF.h"
@@ -43,6 +44,7 @@ private:
 	CWiresX*     m_wiresX;
 	CDTMF*       m_dtmf;
 	CYSFNetwork* m_ysfNetwork;
+	CFCSNetwork* m_fcsNetwork;
 	bool         m_linked;
 	bool         m_exclude;
 

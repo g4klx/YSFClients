@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2012,2013,2015,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013,2015,2017,2018 by Jonathan Naylor G4KLX
  *   Copyright (C) 2011 by DV Developer Group. DJ0ABR
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -160,19 +160,28 @@ WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
 
 WX_STATUS CDTMF::validate() const
 {
-	if (m_command.length() != 6U)
+	size_t length = m_command.length();
+	if (length != 4U && length != 6U)
 		return WXS_NONE;
 
-	if (m_command.at(0U) != '#')
+	char first = m_command.at(0U);
+	if (first != '#' && first != 'A')
 		return WXS_NONE;
 
-	for (unsigned int i = 1U; i <= 6U; i++) {
-		if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
-			return WXS_NONE;
+	if (length == 4U) {
+		for (unsigned int i = 1U; i <= 4U; i++) {
+			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+				return WXS_NONE;
+		}
+	} else {
+		for (unsigned int i = 1U; i <= 6U; i++) {
+			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+				return WXS_NONE;
+		}
+
+		if (m_command == "#99999")
+			return WXS_DISCONNECT;
 	}
-
-	if (m_command == "#99999")
-		return WXS_DISCONNECT;
 
 	return WXS_CONNECT;
 }

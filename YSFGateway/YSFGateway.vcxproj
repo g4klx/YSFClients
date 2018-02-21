@@ -151,6 +151,7 @@
     <ClInclude Include="Conf.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="DTMF.h" />
+    <ClInclude Include="FCSNetwork.h" />
     <ClInclude Include="Golay24128.h" />
     <ClInclude Include="GPS.h" />
     <ClInclude Include="Log.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="CRC.cpp" />
     <ClCompile Include="DTMF.cpp" />
+    <ClCompile Include="FCSNetwork.cpp" />
     <ClCompile Include="Golay24128.cpp" />
     <ClCompile Include="GPS.cpp" />
     <ClCompile Include="Log.cpp" />

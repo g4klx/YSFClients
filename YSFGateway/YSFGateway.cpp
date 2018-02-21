@@ -82,6 +82,7 @@ m_gps(NULL),
 m_wiresX(NULL),
 m_dtmf(NULL),
 m_ysfNetwork(NULL),
+m_fcsNetwork(NULL),
 m_linked(false),
 m_exclude(false)
 {
@@ -168,7 +169,7 @@ int CYSFGateway::run()
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
-	bool debug            = m_conf.getNetworkDebug();
+	bool debug            = m_conf.getYSFNetworkDebug();
 	in_addr rptAddress    = CUDPSocket::lookup(m_conf.getRptAddress());
 	unsigned int rptPort  = m_conf.getRptPort();
 	std::string myAddress = m_conf.getMyAddress();
@@ -184,9 +185,9 @@ int CYSFGateway::run()
 		return 1;
 	}
 
-	unsigned int netPort = m_conf.getNetworkPort();
+	unsigned int ysfPort = m_conf.getYSFNetworkPort();
 
-	m_ysfNetwork = new CYSFNetwork(netPort, m_callsign, debug);
+	m_ysfNetwork = new CYSFNetwork(ysfPort, m_callsign, debug);
 	ret = m_ysfNetwork->open();
 	if (!ret) {
 		::LogError("Cannot open the YSF reflector network port");
@@ -194,17 +195,27 @@ int CYSFGateway::run()
 		return 1;
 	}
 
-	CTimer inactivityTimer(1000U, m_conf.getNetworkInactivityTimeout() * 60U);
+	unsigned int fcsPort = m_conf.getFCSNetworkPort();
+
+	m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, debug);
+	ret = m_fcsNetwork->open();
+	if (!ret) {
+		::LogError("Cannot open the FCS reflector network port");
+		::LogFinalise();
+		return 1;
+	}
+
+	CTimer inactivityTimer(1000U, m_conf.getYSFNetworkInactivityTimeout() * 60U);
 	CTimer lostTimer(1000U, 120U);
 	CTimer pollTimer(1000U, 5U);
 
-	bool revert = m_conf.getNetworkRevert();
-	std::string startup = m_conf.getNetworkStartup();
+	bool revert = m_conf.getYSFNetworkRevert();
+	std::string startup = m_conf.getYSFNetworkStartup();
 
-	bool networkEnabled = m_conf.getNetworkEnabled();
-	if (networkEnabled) {
-		std::string fileName = m_conf.getNetworkHosts();
-		unsigned int reloadTime = m_conf.getNetworkReloadTime();
+	bool ysfNetworkEnabled = m_conf.getYSFNetworkEnabled();
+	if (ysfNetworkEnabled) {
+		std::string fileName    = m_conf.getYSFNetworkHosts();
+		unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
 
 		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
 		m_dtmf   = new CDTMF;
@@ -215,14 +226,14 @@ int CYSFGateway::run()
 
 		m_wiresX->setInfo(name, txFrequency, rxFrequency);
 
-		std::string address = m_conf.getNetworkParrotAddress();
-		unsigned int port = m_conf.getNetworkParrotPort();
+		std::string address = m_conf.getYSFNetworkParrotAddress();
+		unsigned int port = m_conf.getYSFNetworkParrotPort();
 
 		if (port > 0U)
 			m_wiresX->setParrot(address, port);
 
-		address = m_conf.getNetworkYSF2DMRAddress();
-		port = m_conf.getNetworkYSF2DMRPort();
+		address = m_conf.getYSFNetworkYSF2DMRAddress();
+		port = m_conf.getYSFNetworkYSF2DMRPort();
 
 		if (port > 0U)
 			m_wiresX->setYSF2DMR(address, port);
@@ -377,7 +388,7 @@ int CYSFGateway::run()
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
 			}
 
-			if (networkEnabled && m_linked && !m_exclude) {
+			if (ysfNetworkEnabled && m_linked && !m_exclude) {
 				m_ysfNetwork->write(buffer);
 				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
 					inactivityTimer.start();
@@ -393,7 +404,7 @@ int CYSFGateway::run()
 		}
 
 		while (m_ysfNetwork->read(buffer) > 0U) {
-			if (networkEnabled && m_linked) {
+			if (ysfNetworkEnabled && m_linked) {
 				// Only pass through YSF data packets
 				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
 					rptNetwork.write(buffer);
@@ -407,6 +418,7 @@ int CYSFGateway::run()
 
 		rptNetwork.clock(ms);
 		m_ysfNetwork->clock(ms);
+		m_fcsNetwork->clock(ms);
 		if (m_gps != NULL)
 			m_gps->clock(ms);
 		if (m_wiresX != NULL)
@@ -484,6 +496,7 @@ int CYSFGateway::run()
 
 	rptNetwork.close();
 	m_ysfNetwork->close();
+	m_fcsNetwork->close();
 
 	if (m_gps != NULL) {
 		m_gps->close();
@@ -491,6 +504,7 @@ int CYSFGateway::run()
 	}
 
 	delete m_ysfNetwork;
+	delete m_fcsNetwork;
 	delete m_wiresX;
 	delete m_dtmf;
 

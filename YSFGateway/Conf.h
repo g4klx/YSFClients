@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -62,19 +62,24 @@ public:
   std::string  getAPRSPassword() const;
   std::string  getAPRSDescription() const;
 
-  // The Network section
-  bool         getNetworkEnabled() const;
-  unsigned int getNetworkPort() const;
-  std::string  getNetworkHosts() const;
-  unsigned int getNetworkReloadTime() const;
-  std::string  getNetworkParrotAddress() const;
-  unsigned int getNetworkParrotPort() const;
-  std::string  getNetworkYSF2DMRAddress() const;
-  unsigned int getNetworkYSF2DMRPort() const;
-  std::string  getNetworkStartup() const;
-  unsigned int getNetworkInactivityTimeout() const;
-  bool         getNetworkRevert() const;
-  bool         getNetworkDebug() const;
+  // The YSF Network section
+  bool         getYSFNetworkEnabled() const;
+  unsigned int getYSFNetworkPort() const;
+  std::string  getYSFNetworkHosts() const;
+  unsigned int getYSFNetworkReloadTime() const;
+  std::string  getYSFNetworkParrotAddress() const;
+  unsigned int getYSFNetworkParrotPort() const;
+  std::string  getYSFNetworkYSF2DMRAddress() const;
+  unsigned int getYSFNetworkYSF2DMRPort() const;
+  std::string  getYSFNetworkStartup() const;
+  unsigned int getYSFNetworkInactivityTimeout() const;
+  bool         getYSFNetworkRevert() const;
+  bool         getYSFNetworkDebug() const;
+
+  // The FCS Network section
+  bool         getFCSNetworkEnabled() const;
+  unsigned int getFCSNetworkPort() const;
+  bool         getFCSNetworkDebug() const;
 
 private:
   std::string  m_file;
@@ -106,18 +111,22 @@ private:
   std::string  m_aprsPassword;
   std::string  m_aprsDescription;
 
-  bool         m_networkEnabled;
-  unsigned int m_networkPort;
-  std::string  m_networkHosts;
-  unsigned int m_networkReloadTime;
-  std::string  m_networkParrotAddress;
-  unsigned int m_networkParrotPort;
-  std::string  m_networkYSF2DMRAddress;
-  unsigned int m_networkYSF2DMRPort;
-  std::string  m_networkStartup;
-  unsigned int m_networkInactivityTimeout;
-  bool         m_networkRevert;
-  bool         m_networkDebug;
+  bool         m_ysfNetworkEnabled;
+  unsigned int m_ysfNetworkPort;
+  std::string  m_ysfNetworkHosts;
+  unsigned int m_ysfNetworkReloadTime;
+  std::string  m_ysfNetworkParrotAddress;
+  unsigned int m_ysfNetworkParrotPort;
+  std::string  m_ysfNetworkYSF2DMRAddress;
+  unsigned int m_ysfNetworkYSF2DMRPort;
+  std::string  m_ysfNetworkStartup;
+  unsigned int m_ysfNetworkInactivityTimeout;
+  bool         m_ysfNetworkRevert;
+  bool         m_ysfNetworkDebug;
+
+  bool         m_fcsNetworkEnabled;
+  unsigned int m_fcsNetworkPort;
+  bool         m_fcsNetworkDebug;
 };
 
 #endif
