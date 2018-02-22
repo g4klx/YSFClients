@@ -46,6 +46,7 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cstdlib>
 #include <cstring>
 #include <clocale>
+#include <cmath>
 
 int main(int argc, char** argv)
 {
@@ -86,8 +87,7 @@ m_fcsNetwork(NULL),
 m_linkType(LINK_NONE),
 m_exclude(false),
 m_inactivityTimer(1000U),
-m_lostTimer(1000U, 120U),
-m_ysfPollTimer(1000U, 5U)
+m_lostTimer(1000U, 120U)
 {
 }
 
@@ -200,7 +200,7 @@ int CYSFGateway::run()
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
-	std::string locator      = m_conf.getLocator();
+	std::string locator      = calculateLocator();
 	unsigned int id          = m_conf.getId();
 
 	unsigned int fcsPort = m_conf.getFCSNetworkPort();
@@ -250,15 +250,12 @@ int CYSFGateway::run()
 				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_ysfNetwork->writePoll();
-				m_ysfNetwork->writePoll();
-				m_ysfNetwork->writePoll();
+				m_ysfNetwork->writePoll(3U);
 
 				if (!revert)
 					m_inactivityTimer.start();
 
 				m_lostTimer.start();
-				m_ysfPollTimer.start();
 
 				m_linkType = LINK_YSF;
 			}
@@ -358,30 +355,22 @@ int CYSFGateway::run()
 					if (m_wiresX != NULL)
 						m_wiresX->processConnect(reflector);
 
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink(3U);
 
 					m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-					m_ysfNetwork->writePoll();
-					m_ysfNetwork->writePoll();
-					m_ysfNetwork->writePoll();
+					m_ysfNetwork->writePoll(3U);
 
 					m_lostTimer.start();
-					m_ysfPollTimer.start();
 				} else {
 					LogMessage("Disconnecting due to inactivity");
 
 					if (m_wiresX != NULL)
 						m_wiresX->processDisconnect();
 
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
+					m_ysfNetwork->writeUnlink(3U);
 					m_ysfNetwork->clearDestination();
 
 					m_lostTimer.stop();
-					m_ysfPollTimer.stop();
 
 					m_linkType = LINK_NONE;
 				}
@@ -405,15 +394,8 @@ int CYSFGateway::run()
 
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
-			m_ysfPollTimer.stop();
 
 			m_linkType = LINK_NONE;
-		}
-
-		m_ysfPollTimer.clock(ms);
-		if (m_ysfPollTimer.isRunning() && m_ysfPollTimer.hasExpired()) {
-			m_ysfNetwork->writePoll();
-			m_ysfPollTimer.start();
 		}
 
 		if (ms < 5U)
@@ -472,15 +454,11 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
-			if (m_linkType == LINK_YSF) {
-				m_ysfNetwork->writeUnlink();
-				m_ysfNetwork->writeUnlink();
-				m_ysfNetwork->writeUnlink();
-			}
+			if (m_linkType == LINK_YSF)
+				m_ysfNetwork->writeUnlink(3U);
+
 			if (m_linkType == LINK_FCS) {
-				m_fcsNetwork->writeUnlink();
-				m_fcsNetwork->writeUnlink();
-				m_fcsNetwork->writeUnlink();
+				m_fcsNetwork->writeUnlink(3U);
 				m_fcsNetwork->clearDestination();
 			}
 
@@ -488,13 +466,10 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 			m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-			m_ysfNetwork->writePoll();
-			m_ysfNetwork->writePoll();
-			m_ysfNetwork->writePoll();
+			m_ysfNetwork->writePoll(3U);
 
 			m_inactivityTimer.start();
 			m_lostTimer.start();
-			m_ysfPollTimer.start();
 
 			m_linkType = LINK_YSF;
 		}
@@ -503,23 +478,18 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 		if (m_linkType == LINK_YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
 
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
-			m_ysfPollTimer.stop();
 
 			m_linkType = LINK_NONE;
 		}
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink(3U);
 			m_fcsNetwork->clearDestination();
 
 			m_inactivityTimer.stop();
@@ -554,28 +524,21 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 				if (m_wiresX != NULL)
 					m_wiresX->processConnect(reflector);
 
-				if (m_linkType == LINK_YSF) {
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
-					m_ysfNetwork->writeUnlink();
-				}
+				if (m_linkType == LINK_YSF)
+					m_ysfNetwork->writeUnlink(3U);
+
 				if (m_linkType == LINK_FCS) {
-					m_fcsNetwork->writeUnlink();
-					m_fcsNetwork->writeUnlink();
-					m_fcsNetwork->writeUnlink();
+					m_fcsNetwork->writeUnlink(3U);
 					m_fcsNetwork->clearDestination();
 				}
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_ysfNetwork->writePoll();
-				m_ysfNetwork->writePoll();
-				m_ysfNetwork->writePoll();
+				m_ysfNetwork->writePoll(3U);
 
 				m_inactivityTimer.start();
 				m_lostTimer.start();
-				m_ysfPollTimer.start();
 
 				m_linkType = LINK_YSF;
 			}
@@ -589,22 +552,14 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 			id = "FCS00" + id.at(0U) + id.at(1U) + id.at(2U);
 
 		if (m_linkType == LINK_YSF) {
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
-			m_ysfPollTimer.stop();
 		}
-		if (m_linkType == LINK_FCS) {
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
-		}
+		if (m_linkType == LINK_FCS)
+			m_fcsNetwork->writeUnlink(3U);
 
 		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
 
-		m_fcsNetwork->writeLink(id);
-		m_fcsNetwork->writeLink(id);
 		m_fcsNetwork->writeLink(id);
 
 		m_inactivityTimer.start();
@@ -620,23 +575,18 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 
 			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
 
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
-			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
 
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
-			m_ysfPollTimer.stop();
 
 			m_linkType = LINK_NONE;
 		}
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
 
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
-			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink(3U);
 			m_fcsNetwork->clearDestination();
 
 			m_inactivityTimer.stop();
@@ -648,4 +598,54 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 	default:
 		break;
 	}
+}
+
+std::string CYSFGateway::calculateLocator()
+{
+	std::string locator;
+
+	float latitude  = m_conf.getLatitude();
+	float longitude = m_conf.getLongitude();
+
+	if (latitude < -90.0F || latitude > 90.0F)
+		return "AA00AA";
+
+	if (longitude < -360.0F || longitude > 360.0F)
+		return "AA00AA";
+
+	latitude += 90.0F;
+
+	if (longitude > 180.0F)
+		longitude -= 360.0F;
+
+	if (longitude < -180.0F)
+		longitude += 360.0F;
+
+	longitude += 180.0F;
+
+	float lon = ::floor(longitude / 20.0F);
+	float lat = ::floor(latitude  / 10.0F);
+
+	locator += 'A' + (unsigned int)lon;
+	locator += 'A' + (unsigned int)lat;
+
+	longitude -= lon * 20.0F;
+	latitude  -= lat * 10.0F;
+
+	lon = ::floor(longitude / 2.0F);
+	lat = ::floor(latitude  / 1.0F);
+
+	locator += '0' + (unsigned int)lon;
+	locator += '0' + (unsigned int)lat;
+
+	longitude -= lon * 2.0F;
+	latitude  -= lat * 1.0F;
+
+	lon = ::floor(longitude / (2.0F / 24.0F));
+	lat = ::floor(latitude  / (1.0F / 24.0F));
+
+	locator += 'A' + (unsigned int)lon;
+	locator += 'A' + (unsigned int)lat;
+
+	return locator;
 }

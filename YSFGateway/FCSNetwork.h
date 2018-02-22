@@ -36,11 +36,11 @@ public:
 
 	void clearDestination();
 
-	bool write(const unsigned char* data);
+	void write(const unsigned char* data);
 
-	bool writeLink(const std::string& reflector);
+	void writeLink(const std::string& reflector);
 
-	bool writeUnlink();
+	void writeUnlink(unsigned int count = 1U);
 
 	unsigned int read(unsigned char* data);
 
@@ -53,14 +53,15 @@ private:
 	bool                           m_debug;
 	in_addr                        m_address;
 	unsigned int                   m_port;
+	unsigned char*                 m_ping;
 	unsigned char*                 m_info;
-	std::string                    m_callsign;
 	std::string                    m_reflector;
 	CRingBuffer<unsigned char>     m_buffer;
 	std::map<std::string, in_addr> m_addresses;
 	unsigned char                  m_n;
 
 	void writeInfo();
+	void writePing();
 };
 
 #endif

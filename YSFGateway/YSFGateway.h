@@ -56,8 +56,8 @@ private:
 	bool         m_exclude;
 	CTimer       m_inactivityTimer;
 	CTimer       m_lostTimer;
-	CTimer       m_ysfPollTimer;
 
+	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 	void processDTMF(const unsigned char* buffer, unsigned char dt);
 	void createGPS();

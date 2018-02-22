@@ -51,7 +51,6 @@ m_txFrequency(0U),
 m_power(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
-m_locator(),
 m_height(0),
 m_name(),
 m_description(),
@@ -159,8 +158,6 @@ bool CConf::read()
 			m_latitude = float(::atof(value));
 		else if (::strcmp(key, "Longitude") == 0)
 			m_longitude = float(::atof(value));
-		else if (::strcmp(key, "Locator") == 0)
-			m_locator = value;
 		else if (::strcmp(key, "Height") == 0)
 			m_height = ::atoi(value);
 		else if (::strcmp(key, "Name") == 0)
@@ -290,11 +287,6 @@ float CConf::getLatitude() const
 float CConf::getLongitude() const
 {
 	return m_longitude;
-}
-
-std::string CConf::getLocator() const
-{
-	return m_locator;
 }
 
 int CConf::getHeight() const

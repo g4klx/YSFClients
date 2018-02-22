@@ -46,7 +46,6 @@ public:
   unsigned int getPower() const;
   float        getLatitude() const;
   float        getLongitude() const;
-  std::string  getLocator() const;
   int          getHeight() const;
   std::string  getName() const;
   std::string  getDescription() const;
@@ -99,7 +98,6 @@ private:
   unsigned int m_power;
   float        m_latitude;
   float        m_longitude;
-  std::string  m_locator;
   int          m_height;
   std::string  m_name;
   std::string  m_description;

@@ -34,7 +34,8 @@ m_address(),
 m_port(0U),
 m_poll(NULL),
 m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer")
+m_buffer(1000U, "YSF Network Buffer"),
+m_pollTimer(1000U, 5U)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -58,7 +59,8 @@ m_address(),
 m_port(0U),
 m_poll(NULL),
 m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer")
+m_buffer(1000U, "YSF Network Buffer"),
+m_pollTimer(1000U, 5U)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -97,42 +99,47 @@ void CYSFNetwork::clearDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;
+
+	m_pollTimer.stop();
 }
 
-bool CYSFNetwork::write(const unsigned char* data)
+void CYSFNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
 
 	if (m_port == 0U)
-		return true;
+		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	return m_socket.write(data, 155U, m_address, m_port);
+	m_socket.write(data, 155U, m_address, m_port);
 }
 
-bool CYSFNetwork::writePoll()
-{
-	if (m_port == 0U)
-		return true;
-
-	return m_socket.write(m_poll, 14U, m_address, m_port);
-}
-
-bool CYSFNetwork::writeUnlink()
-{
-	if (m_port == 0U)
-		return true;
-
-	return m_socket.write(m_unlink, 14U, m_address, m_port);
-}
-
-void CYSFNetwork::clock(unsigned int ms)
+void CYSFNetwork::writePoll(unsigned int count)
 {
 	if (m_port == 0U)
 		return;
 
+	m_pollTimer.start();
+
+	for (unsigned int i = 0U; i < count; i++)
+		m_socket.write(m_poll, 14U, m_address, m_port);
+}
+
+void CYSFNetwork::writeUnlink(unsigned int count)
+{
+	m_pollTimer.stop();
+
+	if (m_port == 0U)
+		return;
+
+	for (unsigned int i = 0U; i < count; i++)
+		m_socket.write(m_unlink, 14U, m_address, m_port);
+}
+
+void CYSFNetwork::clock(unsigned int ms)
+{
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
@@ -140,6 +147,13 @@ void CYSFNetwork::clock(unsigned int ms)
 	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
 	if (length <= 0)
 		return;
+
+	if (m_port == 0U)
+		return;
+
+	m_pollTimer.clock(ms);
+	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
+		writePoll();
 
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;

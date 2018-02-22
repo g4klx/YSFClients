@@ -34,23 +34,23 @@ m_socket(port),
 m_debug(debug),
 m_address(),
 m_port(0U),
+m_ping(NULL),
 m_info(NULL),
-m_callsign(callsign),
 m_reflector(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U)
 {
 	m_info = new unsigned char[100U];
-	::memset(m_info, ' ', 100U);
-
-	m_callsign.resize(6U, ' ');
-
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
+
+	m_ping = new unsigned char[25U];
+	::sprintf((char*)m_ping, "PING%6.6s        ", callsign.c_str());
 }
 
 CFCSNetwork::~CFCSNetwork()
 {
 	delete[] m_info;
+	delete[] m_ping;
 }
 
 bool CFCSNetwork::open()
@@ -73,12 +73,12 @@ void CFCSNetwork::clearDestination()
 	m_port           = 0U;
 }
 
-bool CFCSNetwork::write(const unsigned char* data)
+void CFCSNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
 
 	if (m_port == 0U)
-		return true;
+		return;
 
 	unsigned char buffer[130U];
 	::memset(buffer + 0U, ' ', 130U);
@@ -88,61 +88,54 @@ bool CFCSNetwork::write(const unsigned char* data)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", buffer, 130U);
 
-	return m_socket.write(buffer, 130U, m_address, m_port);
+	m_socket.write(buffer, 130U, m_address, m_port);
 }
 
-bool CFCSNetwork::writeLink(const std::string& reflector)
+void CFCSNetwork::writeLink(const std::string& reflector)
 {
 	if (m_port == 0U) {
 		std::string name = reflector.substr(0U, 6U);
 		if (m_addresses.count(name) == 0U) {
 			LogError("Unknown FCS reflector - %s", name.c_str());
-			return false;
+			return;
 		}
 
 		m_address = m_addresses[name];
 		if (m_address.s_addr == INADDR_NONE) {
 			LogError("FCS reflector %s has no address", name.c_str());
-			return false;
+			return;
 		}
 	}
 
 	m_port = FCS_PORT;
 
 	m_reflector = reflector;
-	m_reflector.resize(8U, ' ');
 
-	unsigned char buffer[25U];
-	::memset(buffer + 0U, ' ', 25U);
-	::memcpy(buffer + 0U, "PING", 4U);
-	::memcpy(buffer + 4U, m_callsign.c_str(), 6U);
-	::memcpy(buffer + 10U, m_reflector.c_str(), 6U);
+	::memcpy(m_ping + 10U, m_reflector.c_str(), 8U);
 
-	if (m_debug)
-		CUtils::dump(1U, "FCS Network Data Sent", buffer, 25U);
-
-	return m_socket.write(buffer, 25U, m_address, m_port);
+	writePing();
 }
 
-bool CFCSNetwork::writeUnlink()
-{
-	if (m_port == 0U)
-		return true;
-
-	return m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, m_port);
-}
-
-void CFCSNetwork::clock(unsigned int ms)
+void CFCSNetwork::writeUnlink(unsigned int count)
 {
 	if (m_port == 0U)
 		return;
 
+	for (unsigned int i = 0U; i < count; i++)
+		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, m_port);
+}
+
+void CFCSNetwork::clock(unsigned int ms)
+{
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
 	unsigned int port;
 	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
 	if (length <= 0)
+		return;
+
+	if (m_port == 0U)
 		return;
 
 	if (address.s_addr != m_address.s_addr || port != m_port)
@@ -155,7 +148,7 @@ void CFCSNetwork::clock(unsigned int ms)
 		writeInfo();
 
 	if (length == 130)
-		m_buffer.addData(buffer, 120U);
+		m_buffer.addData(buffer, 130U);
 }
 
 unsigned int CFCSNetwork::read(unsigned char* data)
@@ -165,9 +158,14 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
-	::memcpy(data + 0U, "YSFDDB0SAT    DB0SAT-RPTALL        ", 35U);
+	unsigned char buffer[130U];
+	m_buffer.getData(buffer, 130U);
 
-	m_buffer.getData(data + 35U, 120U);
+	::memcpy(data + 0U, "YSFDDB0SAT    DB0SAT-RPTALL        ", 35U);
+	::memcpy(data + 35U, buffer, 120U);
+
+	// Put the reflector name as the via callsign.
+	::memcpy(data + 4U, buffer + 121U, 8U);
 
 	data[34U] = m_n;
 	m_n += 2U;
@@ -191,4 +189,15 @@ void CFCSNetwork::writeInfo()
 		CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
 
 	m_socket.write(m_info, 100U, m_address, m_port);
+}
+
+void CFCSNetwork::writePing()
+{
+	if (m_port == 0U)
+		return;
+
+	if (m_debug)
+		CUtils::dump(1U, "FCS Network Data Sent", m_ping, 25U);
+
+	m_socket.write(m_ping, 25U, m_address, m_port);
 }

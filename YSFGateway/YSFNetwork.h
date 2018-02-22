@@ -22,6 +22,7 @@
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
+#include "Timer.h"
 
 #include <cstdint>
 #include <string>
@@ -37,10 +38,10 @@ public:
 	void setDestination(const in_addr& address, unsigned int port);
 	void clearDestination();
 
-	bool write(const unsigned char* data);
+	void write(const unsigned char* data);
 
-	bool writePoll();
-	bool writeUnlink();
+	void writePoll(unsigned int count = 1U);
+	void writeUnlink(unsigned int count = 1U);
 
 	unsigned int read(unsigned char* data);
 
@@ -56,6 +57,7 @@ private:
 	unsigned char*             m_poll;
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
+	CTimer                     m_pollTimer;
 };
 
 #endif
