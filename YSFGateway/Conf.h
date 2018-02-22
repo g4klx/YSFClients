@@ -63,6 +63,12 @@ public:
   std::string  getAPRSPassword() const;
   std::string  getAPRSDescription() const;
 
+  // The Network section
+  std::string  getNetworkStartup() const;
+  unsigned int getNetworkInactivityTimeout() const;
+  bool         getNetworkRevert() const;
+  bool         getNetworkDebug() const;
+
   // The YSF Network section
   bool         getYSFNetworkEnabled() const;
   unsigned int getYSFNetworkPort() const;
@@ -72,15 +78,10 @@ public:
   unsigned int getYSFNetworkParrotPort() const;
   std::string  getYSFNetworkYSF2DMRAddress() const;
   unsigned int getYSFNetworkYSF2DMRPort() const;
-  std::string  getYSFNetworkStartup() const;
-  unsigned int getYSFNetworkInactivityTimeout() const;
-  bool         getYSFNetworkRevert() const;
-  bool         getYSFNetworkDebug() const;
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
   unsigned int getFCSNetworkPort() const;
-  bool         getFCSNetworkDebug() const;
 
 private:
   std::string  m_file;
@@ -113,6 +114,11 @@ private:
   std::string  m_aprsPassword;
   std::string  m_aprsDescription;
 
+  std::string  m_networkStartup;
+  unsigned int m_networkInactivityTimeout;
+  bool         m_networkRevert;
+  bool         m_networkDebug;
+
   bool         m_ysfNetworkEnabled;
   unsigned int m_ysfNetworkPort;
   std::string  m_ysfNetworkHosts;
@@ -121,14 +127,9 @@ private:
   unsigned int m_ysfNetworkParrotPort;
   std::string  m_ysfNetworkYSF2DMRAddress;
   unsigned int m_ysfNetworkYSF2DMRPort;
-  std::string  m_ysfNetworkStartup;
-  unsigned int m_ysfNetworkInactivityTimeout;
-  bool         m_ysfNetworkRevert;
-  bool         m_ysfNetworkDebug;
 
   bool         m_fcsNetworkEnabled;
   unsigned int m_fcsNetworkPort;
-  bool         m_fcsNetworkDebug;
 };
 
 #endif
