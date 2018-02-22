@@ -45,7 +45,7 @@ public:
 
 	void write(const unsigned char* data);
 
-	void writeLink(const std::string& reflector);
+	bool writeLink(const std::string& reflector);
 
 	void writeUnlink(unsigned int count = 1U);
 

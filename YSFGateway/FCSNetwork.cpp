@@ -100,19 +100,19 @@ void CFCSNetwork::write(const unsigned char* data)
 	m_socket.write(buffer, 130U, m_address, m_port);
 }
 
-void CFCSNetwork::writeLink(const std::string& reflector)
+bool CFCSNetwork::writeLink(const std::string& reflector)
 {
 	if (m_port == 0U) {
 		std::string name = reflector.substr(0U, 6U);
 		if (m_addresses.count(name) == 0U) {
 			LogError("Unknown FCS reflector - %s", name.c_str());
-			return;
+			return false;
 		}
 
 		m_address = m_addresses[name];
 		if (m_address.s_addr == INADDR_NONE) {
 			LogError("FCS reflector %s has no address", name.c_str());
-			return;
+			return false;
 		}
 	}
 
@@ -127,6 +127,8 @@ void CFCSNetwork::writeLink(const std::string& reflector)
 	m_pingTimer.start();
 
 	m_state = FCS_LINKING;
+
+	return true;
 }
 
 void CFCSNetwork::writeUnlink(unsigned int count)

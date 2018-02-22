@@ -552,14 +552,20 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 		if (m_linkType == LINK_FCS)
 			m_fcsNetwork->writeUnlink(3U);
 
+		m_inactivityTimer.stop();
+		m_lostTimer.stop();
+		m_linkType = LINK_NONE;
+
 		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
 
-		m_fcsNetwork->writeLink(id);
-
-		m_inactivityTimer.start();
-		m_lostTimer.start();
-
-		m_linkType = LINK_FCS;
+		bool ok = m_fcsNetwork->writeLink(id);
+		if (ok) {
+			m_inactivityTimer.start();
+			m_lostTimer.start();
+			m_linkType = LINK_FCS;
+		} else {
+			LogMessage("Unknown reflector - %s", id.c_str());
+		}
 	}
     break;
 	case WXS_DISCONNECT:
@@ -652,14 +658,19 @@ void CYSFGateway::startupLinking()
 		if (startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
 			LogMessage("Automatic (re-)connection to %s", startup.c_str());
 
-			m_fcsNetwork->writeLink(startup);
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
 
-			if (!revert)
-				m_inactivityTimer.start();
-
-			m_lostTimer.start();
-
-			m_linkType = LINK_FCS;
+			bool ok = m_fcsNetwork->writeLink(startup);
+			if (ok) {
+				if (!revert)
+					m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_FCS;
+			} else {
+				LogMessage("Unknown reflector - %s", startup.c_str());
+			}
 		} else if (m_ysfNetwork != NULL) {
 			CYSFReflector* reflector = m_wiresX->getReflector(startup);
 			if (reflector != NULL) {
