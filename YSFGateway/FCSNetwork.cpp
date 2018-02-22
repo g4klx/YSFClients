@@ -37,7 +37,8 @@ m_port(0U),
 m_info(NULL),
 m_callsign(callsign),
 m_reflector(),
-m_buffer(1000U, "FCS Network Buffer")
+m_buffer(1000U, "FCS Network Buffer"),
+m_n(0U)
 {
 	m_info = new unsigned char[100U];
 	::memset(m_info, ' ', 100U);
@@ -54,6 +55,8 @@ CFCSNetwork::~CFCSNetwork()
 
 bool CFCSNetwork::open()
 {
+	LogMessage("Resolving FCS00x addresses");
+
 	m_addresses["FCS001"] = CUDPSocket::lookup("fcs001.xreflector.net");
 	m_addresses["FCS002"] = CUDPSocket::lookup("fcs002.xreflector.net");
 	m_addresses["FCS003"] = CUDPSocket::lookup("fcs003.xreflector.net");
@@ -90,15 +93,19 @@ bool CFCSNetwork::write(const unsigned char* data)
 
 bool CFCSNetwork::writeLink(const std::string& reflector)
 {
-	m_port = 0U;
+	if (m_port == 0U) {
+		std::string name = reflector.substr(0U, 6U);
+		if (m_addresses.count(name) == 0U) {
+			LogError("Unknown FCS reflector - %s", name.c_str());
+			return false;
+		}
 
-	if (m_addresses.count(reflector) == 0U)
-		return false;
-
-	m_address = m_addresses[reflector];
-
-	if (m_address.s_addr == INADDR_NONE)
-		return false;
+		m_address = m_addresses[name];
+		if (m_address.s_addr == INADDR_NONE) {
+			LogError("FCS reflector %s has no address", name.c_str());
+			return false;
+		}
+	}
 
 	m_port = FCS_PORT;
 
@@ -148,7 +155,7 @@ void CFCSNetwork::clock(unsigned int ms)
 		writeInfo();
 
 	if (length == 130)
-		m_buffer.addData(buffer, 130U);
+		m_buffer.addData(buffer, 120U);
 }
 
 unsigned int CFCSNetwork::read(unsigned char* data)
@@ -158,7 +165,12 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
-	m_buffer.getData(data, 130U);
+	::memcpy(data + 0U, "YSFDDB0SAT    DB0SAT-RPTALL        ", 35U);
+
+	m_buffer.getData(data + 35U, 120U);
+
+	data[34U] = m_n;
+	m_n += 2U;
 
 	return 155U;
 }

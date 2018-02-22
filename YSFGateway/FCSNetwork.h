@@ -58,6 +58,7 @@ private:
 	std::string                    m_reflector;
 	CRingBuffer<unsigned char>     m_buffer;
 	std::map<std::string, in_addr> m_addresses;
+	unsigned char                  m_n;
 
 	void writeInfo();
 };
