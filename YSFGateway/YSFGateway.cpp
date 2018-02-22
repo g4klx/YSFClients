@@ -397,6 +397,9 @@ int CYSFGateway::run()
 			if (m_wiresX != NULL)
 				m_wiresX->processDisconnect();
 
+			if (m_fcsNetwork != NULL)
+				m_fcsNetwork->clearDestination();
+
 			if (m_ysfNetwork != NULL)
 				m_ysfNetwork->clearDestination();
 
@@ -556,6 +559,12 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 					m_ysfNetwork->writeUnlink();
 					m_ysfNetwork->writeUnlink();
 				}
+				if (m_linkType == LINK_FCS) {
+					m_fcsNetwork->writeUnlink();
+					m_fcsNetwork->writeUnlink();
+					m_fcsNetwork->writeUnlink();
+					m_fcsNetwork->clearDestination();
+				}
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
@@ -572,6 +581,38 @@ void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
 			}
 		}
 		break;
+	case WXS_CONNECT_FCS: {
+		std::string id = m_dtmf.getReflector();
+		if (id.length() == 2U)
+			id = "FCS00" + id.at(0U) + std::string("0") + id.at(1U);
+		else
+			id = "FCS00" + id.at(0U) + id.at(1U) + id.at(2U);
+
+		if (m_linkType == LINK_YSF) {
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->writeUnlink();
+			m_ysfNetwork->clearDestination();
+			m_ysfPollTimer.stop();
+		}
+		if (m_linkType == LINK_FCS) {
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+			m_fcsNetwork->writeUnlink();
+		}
+
+		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
+
+		m_fcsNetwork->writeLink(id);
+		m_fcsNetwork->writeLink(id);
+		m_fcsNetwork->writeLink(id);
+
+		m_inactivityTimer.start();
+		m_lostTimer.start();
+
+		m_linkType = LINK_FCS;
+	}
+    break;
 	case WXS_DISCONNECT:
 		if (m_linkType == LINK_YSF) {
 			if (m_wiresX != NULL)

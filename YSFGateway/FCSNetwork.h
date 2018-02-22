@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <string>
+#include <map>
 
 class CFCSNetwork {
 public:
@@ -33,7 +34,6 @@ public:
 
 	bool open();
 
-	void setDestination(const in_addr& address, unsigned int port);
 	void clearDestination();
 
 	bool write(const unsigned char* data);
@@ -49,14 +49,15 @@ public:
 	void close();
 
 private:
-	CUDPSocket                 m_socket;
-	bool                       m_debug;
-	in_addr                    m_address;
-	unsigned int               m_port;
-	unsigned char*             m_info;
-	std::string                m_callsign;
-	std::string                m_reflector;
-	CRingBuffer<unsigned char> m_buffer;
+	CUDPSocket                     m_socket;
+	bool                           m_debug;
+	in_addr                        m_address;
+	unsigned int                   m_port;
+	unsigned char*                 m_info;
+	std::string                    m_callsign;
+	std::string                    m_reflector;
+	CRingBuffer<unsigned char>     m_buffer;
+	std::map<std::string, in_addr> m_addresses;
 
 	void writeInfo();
 };

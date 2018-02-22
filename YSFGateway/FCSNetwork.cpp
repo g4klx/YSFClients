@@ -54,15 +54,14 @@ CFCSNetwork::~CFCSNetwork()
 
 bool CFCSNetwork::open()
 {
+	m_addresses["FCS001"] = CUDPSocket::lookup("fcs001.xreflector.net");
+	m_addresses["FCS002"] = CUDPSocket::lookup("fcs002.xreflector.net");
+	m_addresses["FCS003"] = CUDPSocket::lookup("fcs003.xreflector.net");
+	m_addresses["FCS004"] = CUDPSocket::lookup("fcs004.xreflector.net");
+
 	LogMessage("Opening FCS network connection");
 
 	return m_socket.open();
-}
-
-void CFCSNetwork::setDestination(const in_addr& address, unsigned int port)
-{
-	m_address = address;
-	m_port    = port;
 }
 
 void CFCSNetwork::clearDestination()
@@ -91,8 +90,17 @@ bool CFCSNetwork::write(const unsigned char* data)
 
 bool CFCSNetwork::writeLink(const std::string& reflector)
 {
-	if (m_port == 0U)
-		return true;
+	m_port = 0U;
+
+	if (m_addresses.count(reflector) == 0U)
+		return false;
+
+	m_address = m_addresses[reflector];
+
+	if (m_address.s_addr == INADDR_NONE)
+		return false;
+
+	m_port = FCS_PORT;
 
 	m_reflector = reflector;
 	m_reflector.resize(8U, ' ');
