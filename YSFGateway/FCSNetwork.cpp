@@ -38,7 +38,9 @@ m_ping(NULL),
 m_info(NULL),
 m_reflector(),
 m_buffer(1000U, "FCS Network Buffer"),
-m_n(0U)
+m_n(0U),
+m_pingTimer(1000U, 5U),
+m_state(FCS_UNLINKED)
 {
 	m_info = new unsigned char[100U];
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
@@ -71,6 +73,10 @@ void CFCSNetwork::clearDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;
+
+	m_pingTimer.stop();
+
+	m_state = FCS_UNLINKED;
 }
 
 void CFCSNetwork::write(const unsigned char* data)
@@ -78,6 +84,9 @@ void CFCSNetwork::write(const unsigned char* data)
 	assert(data != NULL);
 
 	if (m_port == 0U)
+		return;
+
+	if (m_state != FCS_LINKED)
 		return;
 
 	unsigned char buffer[130U];
@@ -114,6 +123,10 @@ void CFCSNetwork::writeLink(const std::string& reflector)
 	::memcpy(m_ping + 10U, m_reflector.c_str(), 8U);
 
 	writePing();
+
+	m_pingTimer.start();
+
+	m_state = FCS_LINKING;
 }
 
 void CFCSNetwork::writeUnlink(unsigned int count)
@@ -123,6 +136,10 @@ void CFCSNetwork::writeUnlink(unsigned int count)
 
 	for (unsigned int i = 0U; i < count; i++)
 		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, m_port);
+
+	m_pingTimer.stop();
+
+	m_state = FCS_UNLINKED;
 }
 
 void CFCSNetwork::clock(unsigned int ms)
@@ -138,17 +155,33 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (m_port == 0U)
 		return;
 
+	m_pingTimer.clock(ms);
+	if (m_pingTimer.isRunning() && m_pingTimer.hasExpired()) {
+		writePing();
+		m_pingTimer.start();
+	}
+
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
-	if (length == 7 || length == 10)
+	if (length == 7) {
+		m_state = FCS_LINKED;
 		writeInfo();
+	}
 
-	if (length == 130)
-		m_buffer.addData(buffer, 130U);
+	if (length == 10 && m_state == FCS_LINKING) {
+		m_state = FCS_LINKED;
+		writeInfo();
+	}
+
+	if (length == 10 || length == 130) {
+		unsigned char len = length;
+		m_buffer.addData(&len, 1U);
+		m_buffer.addData(buffer, len);
+	}
 }
 
 unsigned int CFCSNetwork::read(unsigned char* data)
@@ -158,8 +191,17 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	if (m_buffer.isEmpty())
 		return 0U;
 
+	unsigned char len = 0U;
+	m_buffer.getData(&len, 1U);
+
+	// Pass pings up to the gateway to reset the lost timer.
+	if (len == 10U) {
+		m_buffer.getData(data, len);
+		return 10U;
+	}
+
 	unsigned char buffer[130U];
-	m_buffer.getData(buffer, 130U);
+	m_buffer.getData(buffer, len);
 
 	::memcpy(data + 0U, "YSFDDB0SAT    DB0SAT-RPTALL        ", 35U);
 	::memcpy(data + 35U, buffer, 120U);

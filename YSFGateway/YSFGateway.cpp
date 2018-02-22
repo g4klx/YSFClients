@@ -223,37 +223,8 @@ int CYSFGateway::run()
 	m_inactivityTimer.setTimeout(m_conf.getNetworkInactivityTimeout() * 60U);
 
 	bool revert = m_conf.getNetworkRevert();
-	std::string startup = m_conf.getNetworkStartup();
 
-	if (!startup.empty()) {
-		if (startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
-			LogMessage("Automatic connection to %s", startup.c_str());
-
-			m_fcsNetwork->writeLink(startup);
-
-			if (!revert)
-				m_inactivityTimer.start();
-
-			m_lostTimer.start();
-
-			m_linkType = LINK_FCS;
-		} else if (m_ysfNetwork != NULL) {
-			CYSFReflector* reflector = m_wiresX->getReflector(startup);
-			if (reflector != NULL) {
-				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
-
-				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_ysfNetwork->writePoll(3U);
-
-				if (!revert)
-					m_inactivityTimer.start();
-
-				m_lostTimer.start();
-
-				m_linkType = LINK_YSF;
-			}
-		}
-	}
+	startupLinking();
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -347,50 +318,38 @@ int CYSFGateway::run()
 		m_inactivityTimer.clock(ms);
 		if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {
 			if (m_linkType == LINK_YSF) {
-				CYSFReflector* reflector = NULL;
-				if (revert && !startup.empty())
-					reflector = m_wiresX->getReflector(startup);
+				LogMessage("Disconnecting due to inactivity");
+				m_wiresX->processDisconnect();
+				m_ysfNetwork->writeUnlink(3U);
+				m_ysfNetwork->clearDestination();
+			}
 
-				if (reflector != NULL) {
-					LogMessage("Reverting connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
-
-					m_wiresX->processConnect(reflector);
-
-					m_ysfNetwork->writeUnlink(3U);
-
-					m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
-					m_ysfNetwork->writePoll(3U);
-
-					m_lostTimer.start();
-				} else {
-					LogMessage("Disconnecting due to inactivity");
-
-					m_wiresX->processDisconnect();
-
-					m_ysfNetwork->writeUnlink(3U);
-					m_ysfNetwork->clearDestination();
-
-					m_lostTimer.stop();
-
-					m_linkType = LINK_NONE;
-				}
+			if (m_linkType == LINK_FCS) {
+				LogMessage("Disconnecting due to inactivity");
+				m_fcsNetwork->writeUnlink(3U);
+				m_fcsNetwork->clearDestination();
 			}
 
 			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+
+			m_linkType = LINK_NONE;
+
+			startupLinking();
 		}
 
 		m_lostTimer.clock(ms);
 		if (m_lostTimer.isRunning() && m_lostTimer.hasExpired()) {
-			LogWarning("Link has failed, polls lost");
-
-			if (m_linkType == LINK_YSF)
+			if (m_linkType == LINK_YSF) {
+				LogWarning("Link has failed, polls lost");
 				m_wiresX->processDisconnect();
-
-			if (m_fcsNetwork != NULL)
-				m_fcsNetwork->clearDestination();
-
-			if (m_ysfNetwork != NULL)
 				m_ysfNetwork->clearDestination();
+			}
+
+			if (m_fcsNetwork != NULL) {
+				LogWarning("Link has failed, polls lost");
+				m_fcsNetwork->clearDestination();
+			}
 
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
@@ -682,4 +641,40 @@ std::string CYSFGateway::calculateLocator()
 	locator += 'A' + (unsigned int)lat;
 
 	return locator;
+}
+
+void CYSFGateway::startupLinking()
+{
+	std::string startup = m_conf.getNetworkStartup();
+	bool revert = m_conf.getNetworkRevert();
+
+	if (!startup.empty()) {
+		if (startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
+			LogMessage("Automatic (re-)connection to %s", startup.c_str());
+
+			m_fcsNetwork->writeLink(startup);
+
+			if (!revert)
+				m_inactivityTimer.start();
+
+			m_lostTimer.start();
+
+			m_linkType = LINK_FCS;
+		} else if (m_ysfNetwork != NULL) {
+			CYSFReflector* reflector = m_wiresX->getReflector(startup);
+			if (reflector != NULL) {
+				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+
+				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_ysfNetwork->writePoll(3U);
+
+				if (!revert)
+					m_inactivityTimer.start();
+
+				m_lostTimer.start();
+
+				m_linkType = LINK_YSF;
+			}
+		}
+	}
 }

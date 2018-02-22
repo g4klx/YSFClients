@@ -22,10 +22,17 @@
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
+#include "Timer.h"
 
 #include <cstdint>
 #include <string>
 #include <map>
+
+enum FCS_STATE {
+	FCS_UNLINKED,
+	FCS_LINKING,
+	FCS_LINKED
+};
 
 class CFCSNetwork {
 public:
@@ -59,6 +66,8 @@ private:
 	CRingBuffer<unsigned char>     m_buffer;
 	std::map<std::string, in_addr> m_addresses;
 	unsigned char                  m_n;
+	CTimer                         m_pingTimer;
+	FCS_STATE                      m_state;
 
 	void writeInfo();
 	void writePing();

@@ -57,6 +57,7 @@ private:
 	CTimer       m_inactivityTimer;
 	CTimer       m_lostTimer;
 
+	void startupLinking();
 	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 	void processDTMF(const unsigned char* buffer, unsigned char dt);
