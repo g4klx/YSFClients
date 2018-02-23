@@ -523,7 +523,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 	}
 }
 
-void CYSFGateway::processDTMF(const unsigned char* buffer, unsigned char dt)
+void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 {
 	assert(buffer != NULL);
 

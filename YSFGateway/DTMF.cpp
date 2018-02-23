@@ -42,6 +42,8 @@ const unsigned char DTMF_VD2_SYMD[] = { 0x11U, 0x10U, 0x20U, 0x20U, 0x11U, 0x01U
 const unsigned char DTMF_VD2_SYMS[] = { 0x00U, 0x23U, 0x02U, 0x02U, 0x11U, 0x10U, 0x10U, 0x01U, 0x22U, 0x62U, 0x04U };
 const unsigned char DTMF_VD2_SYMH[] = { 0x00U, 0x22U, 0x00U, 0x20U, 0x11U, 0x11U, 0x10U, 0x00U, 0x22U, 0x62U, 0x04U };
 
+const unsigned char VD2_SILENCE[] = { 0x7BU, 0xB2U, 0x8EU, 0x43U, 0x36U, 0xE4U, 0xA2U, 0x39U, 0x78U, 0x49U, 0x33U, 0x68U, 0x33U };
+
 CDTMF::CDTMF() :
 m_data(),
 m_command(),
@@ -56,7 +58,7 @@ CDTMF::~CDTMF()
 {
 }
 
-WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload, bool end)
+WX_STATUS CDTMF::decodeVDMode2(unsigned char* payload, bool end)
 {
 	assert(payload != NULL);
 
@@ -71,7 +73,7 @@ WX_STATUS CDTMF::decodeVDMode2(const unsigned char* payload, bool end)
 	return WXS_NONE;
 }
 
-WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
+WX_STATUS CDTMF::decodeVDMode2Slice(unsigned char* ambe, bool end)
 {
 	// DTMF begins with these byte values
 	if (!end && (ambe[0] & DTMF_VD2_MASK[0]) == DTMF_VD2_SIG[0] && (ambe[1] & DTMF_VD2_MASK[1]) == DTMF_VD2_SIG[1] &&
@@ -126,6 +128,10 @@ WX_STATUS CDTMF::decodeVDMode2Slice(const unsigned char* ambe, bool end)
 			c = '*';
 		else if (sym0 == DTMF_VD2_SYMH[0] && sym1 == DTMF_VD2_SYMH[1] && sym2 == DTMF_VD2_SYMH[2] && sym3 == DTMF_VD2_SYMH[3] && sym4 == DTMF_VD2_SYMH[4] && sym5 == DTMF_VD2_SYMH[5] && sym6 == DTMF_VD2_SYMH[6] && sym7 == DTMF_VD2_SYMH[7] && sym8 == DTMF_VD2_SYMH[8] && sym9 == DTMF_VD2_SYMH[9] && sym10 == DTMF_VD2_SYMH[10])
 			c = '#';
+
+		// Blank out the DTMF tones.
+		if (c != ' ')
+			::memcpy(ambe, VD2_SILENCE, 13U);
 
 		if (c == m_lastChar) {
 			m_pressCount++;

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2012,2013,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public:
 	CDTMF();
 	~CDTMF();
 
-	WX_STATUS decodeVDMode2(const unsigned char* payload, bool end);
+	WX_STATUS decodeVDMode2(unsigned char* payload, bool end);
 
 	std::string getReflector();
 
@@ -42,7 +42,7 @@ private:
 	unsigned int m_pressCount;
 	char         m_lastChar;
 
-	WX_STATUS decodeVDMode2Slice(const unsigned char* ambe, bool end);
+	WX_STATUS decodeVDMode2Slice(unsigned char* ambe, bool end);
 	WX_STATUS validate() const;
 };
 
