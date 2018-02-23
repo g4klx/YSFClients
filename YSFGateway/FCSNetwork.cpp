@@ -25,7 +25,7 @@
 #include <cassert>
 #include <cstring>
 
-const char* FCS_VERSION = "MMDVM v.01";
+const char* FCS_VERSION = "MMDVM";
 
 const unsigned int BUFFER_LENGTH = 200U;
 
@@ -44,9 +44,11 @@ m_state(FCS_UNLINKED)
 {
 	m_info = new unsigned char[100U];
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
+	::memset(m_info + 43U, ' ', 57U);
 
 	m_ping = new unsigned char[25U];
-	::sprintf((char*)m_ping, "PING%6.6s        ", callsign.c_str());
+	::sprintf((char*)m_ping, "PING%6.6s", callsign.c_str());
+	::memset(m_ping + 10U, ' ', 15U);
 }
 
 CFCSNetwork::~CFCSNetwork()

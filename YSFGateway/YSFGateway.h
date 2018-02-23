@@ -53,6 +53,8 @@ private:
 	CYSFNetwork* m_ysfNetwork;
 	CFCSNetwork* m_fcsNetwork;
 	LINK_TYPE    m_linkType;
+	std::string  m_current;
+	std::string  m_startup;
 	bool         m_exclude;
 	CTimer       m_inactivityTimer;
 	CTimer       m_lostTimer;
