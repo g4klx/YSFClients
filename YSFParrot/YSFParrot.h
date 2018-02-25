@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -22,15 +22,13 @@
 class CYSFParrot
 {
 public:
-	CYSFParrot(unsigned int port, bool debug, bool log);
+	CYSFParrot(unsigned int port);
 	~CYSFParrot();
 
 	void run();
 
 private:
 	unsigned int m_port;
-	bool         m_debug;
-	bool         m_log;
 };
 
 #endif

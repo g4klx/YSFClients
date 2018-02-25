@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006-2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2006-2016,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
  */
 
 #include "UDPSocket.h"
-#include "Log.h"
 
 #include <cassert>
 
@@ -38,7 +37,7 @@ m_fd(-1)
 	WSAData data;
 	int wsaRet = ::WSAStartup(MAKEWORD(2, 2), &data);
 	if (wsaRet != 0)
-		LogError("Error from WSAStartup");
+		::fprintf(stderr, "Error from WSAStartup\n");
 #endif
 }
 
@@ -51,7 +50,7 @@ m_fd(-1)
 	WSAData data;
 	int wsaRet = ::WSAStartup(MAKEWORD(2, 2), &data);
 	if (wsaRet != 0)
-		LogError("Error from WSAStartup");
+		::fprintf(stderr, "Error from WSAStartup\n");
 #endif
 }
 
@@ -78,7 +77,7 @@ in_addr CUDPSocket::lookup(const std::string& hostname)
 		return addr;
 	}
 
-	LogError("Cannot find address for host %s", hostname.c_str());
+	::fprintf(stderr, "Cannot find address for host %s\n", hostname.c_str());
 
 	addr.s_addr = INADDR_NONE;
 	return addr;
@@ -95,7 +94,7 @@ in_addr CUDPSocket::lookup(const std::string& hostname)
 		return addr;
 	}
 
-	LogError("Cannot find address for host %s", hostname.c_str());
+	::fprintf(stderr, "Cannot find address for host %s\n", hostname.c_str());
 
 	addr.s_addr = INADDR_NONE;
 	return addr;
@@ -107,9 +106,9 @@ bool CUDPSocket::open()
 	m_fd = ::socket(PF_INET, SOCK_DGRAM, 0);
 	if (m_fd < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Cannot create the UDP socket, err: %lu", ::GetLastError());
+		::fprintf(stderr, "Cannot create the UDP socket, err: %lu\n", ::GetLastError());
 #else
-		LogError("Cannot create the UDP socket, err: %d", errno);
+		::fprintf(stderr, "Cannot create the UDP socket, err: %d\n", errno);
 #endif
 		return false;
 	}
@@ -128,7 +127,7 @@ bool CUDPSocket::open()
 			addr.sin_addr.s_addr = ::inet_addr(m_address.c_str());
 #endif
 			if (addr.sin_addr.s_addr == INADDR_NONE) {
-				LogError("The local address is invalid - %s", m_address.c_str());
+				::fprintf(stderr, "The local address is invalid - %s\n", m_address.c_str());
 				return false;
 			}
 		}
@@ -136,23 +135,23 @@ bool CUDPSocket::open()
 		int reuse = 1;
 		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == -1) {
 #if defined(_WIN32) || defined(_WIN64)
-			LogError("Cannot set the UDP socket option, err: %lu", ::GetLastError());
+			::fprintf(stderr, "Cannot set the UDP socket option, err: %lu\n", ::GetLastError());
 #else
-			LogError("Cannot set the UDP socket option, err: %d", errno);
+			::fprintf(stderr, "Cannot set the UDP socket option, err: %d\n", errno);
 #endif
 			return false;
 		}
 
 		if (::bind(m_fd, (sockaddr*)&addr, sizeof(sockaddr_in)) == -1) {
 #if defined(_WIN32) || defined(_WIN64)
-			LogError("Cannot bind the UDP address, err: %lu", ::GetLastError());
+			::fprintf(stderr, "Cannot bind the UDP address, err: %lu\n", ::GetLastError());
 #else
-			LogError("Cannot bind the UDP address, err: %d", errno);
+			::fprintf(stderr, "Cannot bind the UDP address, err: %d\n", errno);
 #endif
 			return false;
 		}
 
-		LogInfo("Opening UDP port on %u", m_port);
+		::fprintf(stdout, "Opening UDP port on %u\n", m_port);
 	}
 
 	return true;
@@ -180,9 +179,9 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, in_addr& addres
 	int ret = ::select(m_fd + 1, &readFds, NULL, NULL, &tv);
 	if (ret < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from UDP select, err: %lu", ::GetLastError());
+		::fprintf(stderr, "Error returned from UDP select, err: %lu\n", ::GetLastError());
 #else
-		LogError("Error returned from UDP select, err: %d", errno);
+		::fprintf(stderr, "Error returned from UDP select, err: %d\n", errno);
 #endif
 		return -1;
 	}
@@ -204,9 +203,9 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, in_addr& addres
 #endif
 	if (len <= 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from recvfrom, err: %lu", ::GetLastError());
+		::fprintf(stderr, "Error returned from recvfrom, err: %lu\n", ::GetLastError());
 #else
-		LogError("Error returned from recvfrom, err: %d", errno);
+		::fprintf(stderr, "Error returned from recvfrom, err: %d\n", errno);
 #endif
 		return -1;
 	}
@@ -236,9 +235,9 @@ bool CUDPSocket::write(const unsigned char* buffer, unsigned int length, const i
 #endif
 	if (ret < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from sendto, err: %lu", ::GetLastError());
+		::fprintf(stderr, "Error returned from sendto, err: %lu\n", ::GetLastError());
 #else
-		LogError("Error returned from sendto, err: %d", errno);
+		::fprintf(stderr, "Error returned from sendto, err: %d\n", errno);
 #endif
 		return false;
 	}

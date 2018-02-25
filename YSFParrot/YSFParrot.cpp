@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #include "Version.h"
 #include "Thread.h"
 #include "Timer.h"
-#include "Log.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -32,40 +31,24 @@
 int main(int argc, char** argv)
 {
 	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFParrot [-d|--debug] [-n|--nolog] <port>\n");
+		::fprintf(stderr, "Usage: YSFParrot [-d|--debug] <port>\n");
 		return 1;
 	}
 
-	int n = 1U;
-
-	bool debug = false;
-	bool log = true;
-
-	for (; n < argc-1; n++) {
-		if (::strcmp(argv[n], "-d") == 0 || ::strcmp(argv[n], "--debug") == 0) {
-			debug = true;
-		}
-		if (::strcmp(argv[n], "-n") == 0 || ::strcmp(argv[n], "--nolog") == 0) {
-			log = false;
-		}
-	}
-
-	unsigned int port = ::atoi(argv[n]);
+	unsigned int port = ::atoi(argv[1U]);
 	if (port == 0U) {
-		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[n]);
+		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[1U]);
 		return 1;
 	}
 
-	CYSFParrot parrot(port, debug, log);
+	CYSFParrot parrot(port);
 	parrot.run();
 
 	return 0;
 }
 
-CYSFParrot::CYSFParrot(unsigned int port, bool debug, bool log) :
-m_port(port),
-m_debug(debug),
-m_log(log)
+CYSFParrot::CYSFParrot(unsigned int port) :
+m_port(port)
 {
 }
 
@@ -75,27 +58,12 @@ CYSFParrot::~CYSFParrot()
 
 void CYSFParrot::run()
 {
-	int fileLevel = 0U;
-	if (m_log) {
-		fileLevel = m_debug ? 1U : 2U;
-	}
-	bool ret = ::LogInitialise(".", "YSFParrot", fileLevel, m_debug ? 1U : 2U);
-	if (!ret) {
-		::fprintf(stderr, "YSFParrot: unable to open the log file\n");
-		return;
-	}
-
-	LogInfo("Debug: %s", m_debug ? "enabled" : "disabled");
-	LogInfo("Logging to file: %s", m_log ? "enabled" : "disabled");
-
 	CParrot parrot(180U);
 	CNetwork network(m_port);
 
-	ret = network.open();
-	if (!ret) {
-		::LogFinalise();
+	bool ret = network.open();
+	if (!ret)
 		return;
-	}
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -107,7 +75,7 @@ void CYSFParrot::run()
 	unsigned int count = 0U;
 	bool playing = false;
 
-	LogInfo("Starting YSFParrot-%s", VERSION);
+	::fprintf(stdout, "Starting YSFParrot-%s\n", VERSION);
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -118,7 +86,6 @@ void CYSFParrot::run()
 			watchdogTimer.start();
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
-				LogDebug("Received end of transmission");
 				turnaroundTimer.start();
 				watchdogTimer.stop();
 				parrot.end();
@@ -157,7 +124,6 @@ void CYSFParrot::run()
 		turnaroundTimer.clock(ms);
 
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			LogDebug("Network watchdog has expired");
 			turnaroundTimer.start();
 			watchdogTimer.stop();
 			parrot.end();
@@ -168,6 +134,4 @@ void CYSFParrot::run()
 	}
 
 	network.close();
-
-	::LogFinalise();
 }
