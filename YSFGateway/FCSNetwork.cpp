@@ -39,6 +39,7 @@ m_reflector(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
 m_pingTimer(1000U, 0U, 800U),
+m_resetTimer(1000U, 1U),
 m_state(FCS_UNLINKED)
 {
 	m_info = new unsigned char[100U];
@@ -73,6 +74,7 @@ bool CFCSNetwork::open()
 void CFCSNetwork::clearDestination()
 {
 	m_pingTimer.stop();
+	m_resetTimer.stop();
 
 	m_state = FCS_UNLINKED;
 }
@@ -134,6 +136,18 @@ void CFCSNetwork::writeUnlink(unsigned int count)
 
 void CFCSNetwork::clock(unsigned int ms)
 {
+	m_pingTimer.clock(ms);
+	if (m_pingTimer.isRunning() && m_pingTimer.hasExpired()) {
+		writePing();
+		m_pingTimer.start();
+	}
+
+	m_resetTimer.clock(ms);
+	if (m_resetTimer.isRunning() && m_resetTimer.hasExpired()) {
+		m_n = 0U;
+		m_resetTimer.stop();
+	}
+
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
@@ -144,12 +158,6 @@ void CFCSNetwork::clock(unsigned int ms)
 
 	if (m_state == FCS_UNLINKED)
 		return;
-
-	m_pingTimer.clock(ms);
-	if (m_pingTimer.isRunning() && m_pingTimer.hasExpired()) {
-		writePing();
-		m_pingTimer.start();
-	}
 
 	if (address.s_addr != m_address.s_addr || port != FCS_PORT)
 		return;
@@ -196,6 +204,8 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 
 		return 14U;
 	}
+
+	m_resetTimer.start();
 
 	unsigned char buffer[130U];
 	m_buffer.getData(buffer, len);

@@ -66,6 +66,7 @@ private:
 	std::map<std::string, in_addr> m_addresses;
 	unsigned char                  m_n;
 	CTimer                         m_pingTimer;
+	CTimer                         m_resetTimer;
 	FCS_STATE                      m_state;
 
 	void writeInfo();
