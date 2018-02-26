@@ -33,13 +33,12 @@ CFCSNetwork::CFCSNetwork(unsigned int port, const std::string& callsign, unsigne
 m_socket(port),
 m_debug(debug),
 m_address(),
-m_port(0U),
 m_ping(NULL),
 m_info(NULL),
 m_reflector(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
-m_pingTimer(1000U, 5U),
+m_pingTimer(1000U, 0U, 800U),
 m_state(FCS_UNLINKED)
 {
 	m_info = new unsigned char[100U];
@@ -73,9 +72,6 @@ bool CFCSNetwork::open()
 
 void CFCSNetwork::clearDestination()
 {
-	m_address.s_addr = INADDR_NONE;
-	m_port           = 0U;
-
 	m_pingTimer.stop();
 
 	m_state = FCS_UNLINKED;
@@ -84,9 +80,6 @@ void CFCSNetwork::clearDestination()
 void CFCSNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
-
-	if (m_port == 0U)
-		return;
 
 	if (m_state != FCS_LINKED)
 		return;
@@ -99,12 +92,12 @@ void CFCSNetwork::write(const unsigned char* data)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", buffer, 130U);
 
-	m_socket.write(buffer, 130U, m_address, m_port);
+	m_socket.write(buffer, 130U, m_address, FCS_PORT);
 }
 
 bool CFCSNetwork::writeLink(const std::string& reflector)
 {
-	if (m_port == 0U) {
+	if (m_state != FCS_LINKED) {
 		std::string name = reflector.substr(0U, 6U);
 		if (m_addresses.count(name) == 0U) {
 			LogError("Unknown FCS reflector - %s", name.c_str());
@@ -118,32 +111,25 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 		}
 	}
 
-	m_port = FCS_PORT;
-
 	m_reflector = reflector;
-
 	::memcpy(m_ping + 10U, m_reflector.c_str(), 8U);
 
-	writePing();
+	m_state = FCS_LINKING;
 
 	m_pingTimer.start();
 
-	m_state = FCS_LINKING;
+	writePing();
 
 	return true;
 }
 
 void CFCSNetwork::writeUnlink(unsigned int count)
 {
-	if (m_port == 0U)
+	if (m_state != FCS_LINKED)
 		return;
 
 	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, m_port);
-
-	m_pingTimer.stop();
-
-	m_state = FCS_UNLINKED;
+		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, FCS_PORT);
 }
 
 void CFCSNetwork::clock(unsigned int ms)
@@ -156,7 +142,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (m_port == 0U)
+	if (m_state == FCS_UNLINKED)
 		return;
 
 	m_pingTimer.clock(ms);
@@ -165,18 +151,20 @@ void CFCSNetwork::clock(unsigned int ms)
 		m_pingTimer.start();
 	}
 
-	if (address.s_addr != m_address.s_addr || port != m_port)
+	if (address.s_addr != m_address.s_addr || port != FCS_PORT)
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
 	if (length == 7) {
+		LogMessage("Linked to %s", m_reflector.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
 	}
 
 	if (length == 10 && m_state == FCS_LINKING) {
+		LogMessage("Linked to %s", m_reflector.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
 	}
@@ -201,17 +189,22 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	// Pass pings up to the gateway to reset the lost timer.
 	if (len == 10U) {
 		m_buffer.getData(data, len);
-		return 10U;
+
+		::memset(data + 0U, ' ', 14U);
+		::memcpy(data + 0U, "YSFP", 4U);
+		::memcpy(data + 4U, m_reflector.c_str(), 8U);
+
+		return 14U;
 	}
 
 	unsigned char buffer[130U];
 	m_buffer.getData(buffer, len);
 
-	::memcpy(data + 0U, "YSFDDB0SAT    DB0SAT-RPTALL        ", 35U);
+	::memcpy(data + 0U, "YSFD                    ALL        ", 35U);
 	::memcpy(data + 35U, buffer, 120U);
 
 	// Put the reflector name as the via callsign.
-	::memcpy(data + 4U, buffer + 121U, 8U);
+	::memcpy(data + 4U, m_reflector.c_str(), 8U);
 
 	data[34U] = m_n;
 	m_n += 2U;
@@ -228,22 +221,22 @@ void CFCSNetwork::close()
 
 void CFCSNetwork::writeInfo()
 {
-	if (m_port == 0U)
+	if (m_state != FCS_LINKED)
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
 
-	m_socket.write(m_info, 100U, m_address, m_port);
+	m_socket.write(m_info, 100U, m_address, FCS_PORT);
 }
 
 void CFCSNetwork::writePing()
 {
-	if (m_port == 0U)
+	if (m_state == FCS_UNLINKED)
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", m_ping, 25U);
 
-	m_socket.write(m_ping, 25U, m_address, m_port);
+	m_socket.write(m_ping, 25U, m_address, FCS_PORT);
 }

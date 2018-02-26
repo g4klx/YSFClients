@@ -59,7 +59,6 @@ private:
 	CUDPSocket                     m_socket;
 	bool                           m_debug;
 	in_addr                        m_address;
-	unsigned int                   m_port;
 	unsigned char*                 m_ping;
 	unsigned char*                 m_info;
 	std::string                    m_reflector;

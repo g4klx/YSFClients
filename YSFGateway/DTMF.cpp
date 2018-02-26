@@ -167,30 +167,27 @@ WX_STATUS CDTMF::decodeVDMode2Slice(unsigned char* ambe, bool end)
 WX_STATUS CDTMF::validate() const
 {
 	size_t length = m_command.length();
-	if (length != 3U && length != 4U && length != 6U)
-		return WXS_NONE;
-
 	char first = m_command.at(0U);
-	if (first != '#' && first != 'A')
-		return WXS_NONE;
 
-	if (length == 3U) {
-		for (unsigned int i = 1U; i <= 3U; i++) {
-			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+	if (length == 1U && first == '#') {
+		return WXS_DISCONNECT;
+	} else if (length == 3U && first == 'A') {
+		for (unsigned int i = 1U; i < 3U; i++) {
+			if (m_command.at(i) < '0' || m_command.at(i) > '9')
 				return WXS_NONE;
 		}
 
 		return WXS_CONNECT_FCS;
-	} else if (length == 4U) {
-		for (unsigned int i = 1U; i <= 4U; i++) {
-			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+	} else if (length == 4U && first == 'A') {
+		for (unsigned int i = 1U; i < 4U; i++) {
+			if (m_command.at(i) < '0' || m_command.at(i) > '9')
 				return WXS_NONE;
 		}
 
 		return WXS_CONNECT_FCS;
-	} else {
-		for (unsigned int i = 1U; i <= 6U; i++) {
-			if (m_command.at(1U) < '0' || m_command.at(1U) > '9')
+	} else if (length == 6U && first == '#') {
+		for (unsigned int i = 1U; i < 6U; i++) {
+			if (m_command.at(i) < '0' || m_command.at(i) > '9')
 				return WXS_NONE;
 		}
 
@@ -199,6 +196,8 @@ WX_STATUS CDTMF::validate() const
 
 		return WXS_CONNECT_YSF;
 	}
+
+	return WXS_NONE;
 }
 
 std::string CDTMF::getReflector()

@@ -564,11 +564,16 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 		}
 		break;
 	case WXS_CONNECT_FCS: {
-		std::string id = m_dtmf.getReflector();
-		if (id.length() == 2U)
-			id = "FCS00" + id.at(0U) + std::string("0") + id.at(1U);
-		else
-			id = "FCS00" + id.at(0U) + id.at(1U) + id.at(2U);
+		std::string raw = m_dtmf.getReflector();
+		std::string id = "FCS00";
+		if (raw.length() == 2U) {
+			id += raw.at(0U) + std::string("0") + raw.at(1U);
+		} else if (raw.length() == 3U) {
+			id += raw;
+		} else {
+			LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
+			return;
+		}
 
 		if (m_linkType == LINK_YSF) {
 			m_ysfNetwork->writeUnlink(3U);
