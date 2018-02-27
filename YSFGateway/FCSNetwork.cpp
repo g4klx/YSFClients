@@ -166,7 +166,8 @@ void CFCSNetwork::clock(unsigned int ms)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
 	if (length == 7) {
-		LogMessage("Linked to %s", m_reflector.c_str());
+		if (m_state == FCS_LINKING)
+			LogMessage("Linked to %s", m_reflector.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
 	}
