@@ -166,28 +166,34 @@ WX_STATUS CDTMF::decodeVDMode2Slice(unsigned char* ambe, bool end)
 
 WX_STATUS CDTMF::validate() const
 {
+	if (m_command.empty())
+		return WXS_NONE;
+
 	size_t length = m_command.length();
-	char first = m_command.at(0U);
+	char first    = m_command.at(0U);
 
 	if (length == 1U && first == '#') {
 		return WXS_DISCONNECT;
 	} else if (length == 3U && first == 'A') {
 		for (unsigned int i = 1U; i < 3U; i++) {
-			if (m_command.at(i) < '0' || m_command.at(i) > '9')
+			char c = m_command.at(i);
+			if (c < '0' || c > '9')
 				return WXS_NONE;
 		}
 
 		return WXS_CONNECT_FCS;
 	} else if (length == 4U && first == 'A') {
 		for (unsigned int i = 1U; i < 4U; i++) {
-			if (m_command.at(i) < '0' || m_command.at(i) > '9')
+			char c = m_command.at(i);
+			if (c < '0' || c > '9')
 				return WXS_NONE;
 		}
 
 		return WXS_CONNECT_FCS;
 	} else if (length == 6U && first == '#') {
 		for (unsigned int i = 1U; i < 6U; i++) {
-			if (m_command.at(i) < '0' || m_command.at(i) > '9')
+			char c = m_command.at(i);
+			if (c < '0' || c > '9')
 				return WXS_NONE;
 		}
 
@@ -204,6 +210,9 @@ std::string CDTMF::getReflector()
 {
 	std::string command = m_command;
 	reset();
+
+	if (command.empty())
+		return "";
 
 	return command.substr(1U);
 }
