@@ -36,6 +36,7 @@ m_address(),
 m_ping(NULL),
 m_info(NULL),
 m_reflector(),
+m_print(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
 m_pingTimer(1000U, 0U, 800U),
@@ -114,7 +115,9 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 	}
 
 	m_reflector = reflector;
-	::memcpy(m_ping + 10U, m_reflector.c_str(), 8U);
+	::memcpy(m_ping + 10U, reflector.c_str(), 8U);
+
+	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 
 	m_state = FCS_LINKING;
 
@@ -167,18 +170,18 @@ void CFCSNetwork::clock(unsigned int ms)
 
 	if (length == 7) {
 		if (m_state == FCS_LINKING)
-			LogMessage("Linked to %s", m_reflector.c_str());
+			LogMessage("Linked to %s", m_print.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
 	}
 
 	if (length == 10 && m_state == FCS_LINKING) {
-		LogMessage("Linked to %s", m_reflector.c_str());
+		LogMessage("Linked to %s", m_print.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
 	}
 
-	if (length == 10 || length == 130) {
+	if (length == 7 || length == 10 || length == 130) {
 		unsigned char len = length;
 		m_buffer.addData(&len, 1U);
 		m_buffer.addData(buffer, len);
@@ -196,12 +199,12 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	m_buffer.getData(&len, 1U);
 
 	// Pass pings up to the gateway to reset the lost timer.
-	if (len == 10U) {
+	if (len != 130U) {
 		m_buffer.getData(data, len);
 
 		::memset(data + 0U, ' ', 14U);
 		::memcpy(data + 0U, "YSFP", 4U);
-		::memcpy(data + 4U, m_reflector.c_str(), 8U);
+		::memcpy(data + 4U, m_print.c_str(), 8U);
 
 		return 14U;
 	}
@@ -211,11 +214,12 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	unsigned char buffer[130U];
 	m_buffer.getData(buffer, len);
 
-	::memcpy(data + 0U, "YSFD                    ALL        ", 35U);
+	::memset(data + 0U, ' ', 35U);
+	::memcpy(data + 0U, "YSFD", 4U);
 	::memcpy(data + 35U, buffer, 120U);
 
 	// Put the reflector name as the via callsign.
-	::memcpy(data + 4U, m_reflector.c_str(), 8U);
+	::memcpy(data + 4U, m_print.c_str(), 9U);
 
 	data[34U] = m_n;
 	m_n += 2U;
