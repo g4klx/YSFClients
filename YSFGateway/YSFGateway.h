@@ -20,6 +20,7 @@
 #define	YSFGateway_H
 
 #include "YSFNetwork.h"
+#include "YSFReflectors.h"
 #include "FCSNetwork.h"
 #include "WiresX.h"
 #include "Timer.h"
@@ -44,20 +45,21 @@ public:
 	int run();
 
 private:
-	std::string  m_callsign;
-	std::string  m_suffix;
-	CConf        m_conf;
-	CGPS*        m_gps;
-	CWiresX*     m_wiresX;
-	CDTMF        m_dtmf;
-	CYSFNetwork* m_ysfNetwork;
-	CFCSNetwork* m_fcsNetwork;
-	LINK_TYPE    m_linkType;
-	std::string  m_current;
-	std::string  m_startup;
-	bool         m_exclude;
-	CTimer       m_inactivityTimer;
-	CTimer       m_lostTimer;
+	std::string     m_callsign;
+	std::string     m_suffix;
+	CConf           m_conf;
+	CGPS*           m_gps;
+	CYSFReflectors* m_reflectors;
+	CWiresX*        m_wiresX;
+	CDTMF           m_dtmf;
+	CYSFNetwork*    m_ysfNetwork;
+	CFCSNetwork*    m_fcsNetwork;
+	LINK_TYPE       m_linkType;
+	std::string     m_current;
+	std::string     m_startup;
+	bool            m_exclude;
+	CTimer          m_inactivityTimer;
+	CTimer          m_lostTimer;
 
 	void startupLinking();
 	std::string calculateLocator();

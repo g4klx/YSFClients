@@ -55,7 +55,8 @@ public:
 
 	bool load();
 
-	CYSFReflector* find(const std::string& id);
+	CYSFReflector* findById(const std::string& id);
+	CYSFReflector* findByName(const std::string& name);
 
 	std::vector<CYSFReflector*>& current();
 

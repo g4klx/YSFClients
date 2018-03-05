@@ -35,7 +35,7 @@ public:
 
 	bool open();
 
-	void setDestination(const in_addr& address, unsigned int port);
+	void setDestination(const std::string& name, const in_addr& address, unsigned int port);
 	void clearDestination();
 
 	void write(const unsigned char* data);
@@ -58,6 +58,8 @@ private:
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_pollTimer;
+	std::string                m_name;
+	bool                       m_linked;
 };
 
 #endif

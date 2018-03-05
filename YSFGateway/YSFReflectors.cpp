@@ -163,14 +163,29 @@ bool CYSFReflectors::load()
 	return true;
 }
 
-CYSFReflector* CYSFReflectors::find(const std::string& id)
+CYSFReflector* CYSFReflectors::findById(const std::string& id)
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
+	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
 		if (id == (*it)->m_id)
 			return *it;
 	}
 
 	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
+
+	return NULL;
+}
+
+CYSFReflector* CYSFReflectors::findByName(const std::string& name)
+{
+	std::string fullName = name;
+	fullName.resize(16U, ' ');
+
+	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
+		if (fullName == (*it)->m_name)
+			return *it;
+	}
+
+	LogMessage("Trying to find non existent YSF reflector with a name of %s", name.c_str());
 
 	return NULL;
 }

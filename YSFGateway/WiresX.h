@@ -43,7 +43,7 @@ enum WXSI_STATUS {
 
 class CWiresX {
 public:
-	CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, const std::string& hostsFile, unsigned int reloadTime);
+	CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, CYSFReflectors& reflectors);
 	~CWiresX();
 
 	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);
@@ -55,7 +55,7 @@ public:
 	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 
 	CYSFReflector* getReflector() const;
-	CYSFReflector* getReflector(const std::string& id);
+	void setReflector(CYSFReflector* reflector);
 
 	void processConnect(CYSFReflector* reflector);
 	void processDisconnect(const unsigned char* source = NULL);
@@ -63,25 +63,25 @@ public:
 	void clock(unsigned int ms);
 
 private:
-	std::string    m_callsign;
-	std::string    m_node;
-	CYSFNetwork*   m_network;
-	CYSFReflectors m_reflectors;
-	CYSFReflector* m_reflector;
-	std::string    m_id;
-	std::string    m_name;
-	unsigned char* m_command;
-	unsigned int   m_txFrequency;
-	unsigned int   m_rxFrequency;
-	CTimer         m_timer;
-	unsigned char  m_seqNo;
-	unsigned char* m_header;
-	unsigned char* m_csd1;
-	unsigned char* m_csd2;
-	unsigned char* m_csd3;
-	WXSI_STATUS    m_status;
-	unsigned int   m_start;
-	std::string    m_search;
+	std::string     m_callsign;
+	std::string     m_node;
+	CYSFNetwork*    m_network;
+	CYSFReflectors& m_reflectors;
+	CYSFReflector*  m_reflector;
+	std::string     m_id;
+	std::string     m_name;
+	unsigned char*  m_command;
+	unsigned int    m_txFrequency;
+	unsigned int    m_rxFrequency;
+	CTimer          m_timer;
+	unsigned char   m_seqNo;
+	unsigned char*  m_header;
+	unsigned char*  m_csd1;
+	unsigned char*  m_csd2;
+	unsigned char*  m_csd3;
+	WXSI_STATUS     m_status;
+	unsigned int    m_start;
+	std::string     m_search;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
 	void processDX(const unsigned char* source);

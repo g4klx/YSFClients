@@ -17,7 +17,6 @@
 */
 
 #include "YSFGateway.h"
-#include "YSFReflectors.h"
 #include "UDPSocket.h"
 #include "StopWatch.h"
 #include "Version.h"
@@ -80,6 +79,7 @@ m_callsign(),
 m_suffix(),
 m_conf(configFile),
 m_gps(NULL),
+m_reflectors(NULL),
 m_wiresX(NULL),
 m_dtmf(),
 m_ysfNetwork(NULL),
@@ -182,7 +182,7 @@ int CYSFGateway::run()
 	unsigned int myPort   = m_conf.getMyPort();
 
 	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
-	rptNetwork.setDestination(rptAddress, rptPort);
+	rptNetwork.setDestination("MMDVM", rptAddress, rptPort);
 
 	ret = rptNetwork.open();
 	if (!ret) {
@@ -224,6 +224,17 @@ int CYSFGateway::run()
 
 	m_inactivityTimer.setTimeout(m_conf.getNetworkInactivityTimeout() * 60U);
 
+	std::string fileName = m_conf.getYSFNetworkHosts();
+	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
+
+	m_reflectors = new CYSFReflectors(fileName, reloadTime);
+	m_reflectors->load();
+	m_reflectors->reload();
+
+	createWiresX(&rptNetwork);
+
+	createGPS();
+
 	m_startup   = m_conf.getNetworkStartup();
 	bool revert = m_conf.getNetworkRevert();
 
@@ -233,10 +244,6 @@ int CYSFGateway::run()
 	stopWatch.start();
 
 	LogMessage("Starting YSFGateway-%s", VERSION);
-
-	createWiresX(&rptNetwork);
-
-	createGPS();
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -441,10 +448,7 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 {
 	assert(rptNetwork != NULL);
 
-	std::string fileName    = m_conf.getYSFNetworkHosts();
-	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
-
-	m_wiresX = new CWiresX(m_callsign, m_suffix, rptNetwork, fileName, reloadTime);
+	m_wiresX = new CWiresX(m_callsign, m_suffix, rptNetwork, *m_reflectors);
 
 	std::string name = m_conf.getName();
 
@@ -485,7 +489,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-			m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
 			m_ysfNetwork->writePoll(3U);
 
 			m_current = reflector->m_id;
@@ -539,7 +543,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 	switch (status) {
 	case WXS_CONNECT_YSF: {
 			std::string id = m_dtmf.getReflector();
-			CYSFReflector* reflector = m_wiresX->getReflector(id);
+			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector != NULL) {
 				m_wiresX->processConnect(reflector);
 
@@ -553,7 +557,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = id;
@@ -576,6 +580,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 		}
 
 		if (m_linkType == LINK_YSF) {
+			m_wiresX->processDisconnect();
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
 		}
@@ -707,11 +712,13 @@ void CYSFGateway::startupLinking()
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 
-			CYSFReflector* reflector = m_wiresX->getReflector(m_startup);
+			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
-				m_ysfNetwork->setDestination(reflector->m_address, reflector->m_port);
+				m_wiresX->setReflector(reflector);
+
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = m_startup;

@@ -42,11 +42,11 @@ const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFD                    ALL      ";
 
-CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, const std::string& hostsFile, unsigned int reloadTime) :
+CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, CYSFReflectors& reflectors) :
 m_callsign(callsign),
 m_node(),
 m_network(network),
-m_reflectors(hostsFile, reloadTime),
+m_reflectors(reflectors),
 m_reflector(NULL),
 m_id(),
 m_name(),
@@ -159,10 +159,6 @@ void CWiresX::setYSF2DMR(const std::string& address, unsigned int port)
 
 bool CWiresX::start()
 {
-	bool ret = m_reflectors.load();
-	if (!ret)
-		return false;
-
 	m_reflectors.reload();
 
 	return true;
@@ -239,11 +235,9 @@ CYSFReflector* CWiresX::getReflector() const
 	return m_reflector;
 }
 
-CYSFReflector* CWiresX::getReflector(const std::string& id)
+void CWiresX::setReflector(CYSFReflector* reflector)
 {
-	m_reflector = m_reflectors.find(id);
-
-	return m_reflector;
+	m_reflector = reflector;
 }
 
 void CWiresX::processDX(const unsigned char* source)
@@ -287,7 +281,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 	std::string id = std::string((char*)data, 5U);
 
-	m_reflector = m_reflectors.find(id);
+	m_reflector = m_reflectors.findById(id);
 	if (m_reflector == NULL)
 		return WXS_NONE;
 
