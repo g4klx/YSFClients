@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -46,5 +46,7 @@ const unsigned char YSF_CM_INDIVIDUAL = 0x03U;
 
 const unsigned char YSF_MR_NOT_BUSY = 0x01U;
 const unsigned char YSF_MR_BUSY     = 0x02U;
+
+const unsigned int FCS_PORT = 62500U;
 
 #endif

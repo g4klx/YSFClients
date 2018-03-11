@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#if !defined(Reflectors_H)
-#define	Reflectors_H
+#if !defined(YSFReflectors_H)
+#define	YSFReflectors_H
 
 #include "UDPSocket.h"
 #include "Timer.h"
@@ -45,17 +45,18 @@ public:
 	unsigned int m_port;
 };
 
-class CReflectors {
+class CYSFReflectors {
 public:
-	CReflectors(const std::string& hostsFile, unsigned int reloadTime);
-	~CReflectors();
+	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime);
+	~CYSFReflectors();
 
 	void setParrot(const std::string& address, unsigned int port);	
 	void setYSF2DMR(const std::string& address, unsigned int port);
 
 	bool load();
 
-	CYSFReflector* find(const std::string& id);
+	CYSFReflector* findById(const std::string& id);
+	CYSFReflector* findByName(const std::string& name);
 
 	std::vector<CYSFReflector*>& current();
 

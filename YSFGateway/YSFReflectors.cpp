@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "Reflectors.h"
+#include "YSFReflectors.h"
 #include "Log.h"
 
 #include <algorithm>
@@ -26,7 +26,7 @@
 #include <cstring>
 #include <cctype>
 
-CReflectors::CReflectors(const std::string& hostsFile, unsigned int reloadTime) :
+CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime) :
 m_hostsFile(hostsFile),
 m_parrotAddress(),
 m_parrotPort(0U),
@@ -39,7 +39,7 @@ m_timer(1000U, reloadTime * 60U)
 		m_timer.start();
 }
 
-CReflectors::~CReflectors()
+CYSFReflectors::~CYSFReflectors()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
 		delete *it;
@@ -68,19 +68,19 @@ static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 	return false;
 }
 
-void CReflectors::setParrot(const std::string& address, unsigned int port)
+void CYSFReflectors::setParrot(const std::string& address, unsigned int port)
 {
 	m_parrotAddress = address;
 	m_parrotPort    = port;
 }
 
-void CReflectors::setYSF2DMR(const std::string& address, unsigned int port)
+void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned int port)
 {
 	m_YSF2DMRAddress = address;
 	m_YSF2DMRPort    = port;
 }
 
-bool CReflectors::load()
+bool CYSFReflectors::load()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
 		delete *it;
@@ -163,24 +163,39 @@ bool CReflectors::load()
 	return true;
 }
 
-CYSFReflector* CReflectors::find(const std::string& id)
+CYSFReflector* CYSFReflectors::findById(const std::string& id)
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
+	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
 		if (id == (*it)->m_id)
 			return *it;
 	}
 
-	LogMessage("Trying to find non existent reflector with an id of %s", id.c_str());
+	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
 
 	return NULL;
 }
 
-std::vector<CYSFReflector*>& CReflectors::current()
+CYSFReflector* CYSFReflectors::findByName(const std::string& name)
+{
+	std::string fullName = name;
+	fullName.resize(16U, ' ');
+
+	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
+		if (fullName == (*it)->m_name)
+			return *it;
+	}
+
+	LogMessage("Trying to find non existent YSF reflector with a name of %s", name.c_str());
+
+	return NULL;
+}
+
+std::vector<CYSFReflector*>& CYSFReflectors::current()
 {
 	return m_currReflectors;
 }
 
-std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
+std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 {
 	m_search.clear();
 
@@ -204,7 +219,7 @@ std::vector<CYSFReflector*>& CReflectors::search(const std::string& name)
 	return m_search;
 }
 
-bool CReflectors::reload()
+bool CYSFReflectors::reload()
 {
 	if (m_newReflectors.empty())
 		return false;
@@ -221,7 +236,7 @@ bool CReflectors::reload()
 	return true;
 }
 
-void CReflectors::clock(unsigned int ms)
+void CYSFReflectors::clock(unsigned int ms)
 {
 	m_timer.clock(ms);
 

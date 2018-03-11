@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -32,13 +32,16 @@ enum SECTION {
   SECTION_INFO,
   SECTION_LOG,
   SECTION_APRS_FI,
-  SECTION_NETWORK
+  SECTION_NETWORK,
+  SECTION_YSF_NETWORK,
+  SECTION_FCS_NETWORK
 };
 
 CConf::CConf(const std::string& file) :
 m_file(file),
 m_callsign(),
 m_suffix(),
+m_id(0U),
 m_rptAddress(),
 m_rptPort(0U),
 m_myAddress(),
@@ -61,18 +64,20 @@ m_aprsServer(),
 m_aprsPort(0U),
 m_aprsPassword(),
 m_aprsDescription(),
-m_networkEnabled(false),
-m_networkPort(0U),
-m_networkHosts(),
-m_networkReloadTime(0U),
-m_networkParrotAddress("127.0.0.1"),
-m_networkParrotPort(0U),
-m_networkYSF2DMRAddress("127.0.0.1"),
-m_networkYSF2DMRPort(0U),
 m_networkStartup(),
 m_networkInactivityTimeout(0U),
 m_networkRevert(false),
-m_networkDebug(false)
+m_networkDebug(false),
+m_ysfNetworkEnabled(false),
+m_ysfNetworkPort(0U),
+m_ysfNetworkHosts(),
+m_ysfNetworkReloadTime(0U),
+m_ysfNetworkParrotAddress("127.0.0.1"),
+m_ysfNetworkParrotPort(0U),
+m_ysfNetworkYSF2DMRAddress("127.0.0.1"),
+m_ysfNetworkYSF2DMRPort(0U),
+m_fcsNetworkEnabled(false),
+m_fcsNetworkPort(0U)
 {
 }
 
@@ -102,10 +107,14 @@ bool CConf::read()
 		  section = SECTION_INFO;
 	  else if (::strncmp(buffer, "[Log]", 5U) == 0)
 		  section = SECTION_LOG;
-	  else if (::strncmp(buffer, "[aprs.fi]", 5U) == 0)
+	  else if (::strncmp(buffer, "[aprs.fi]", 9U) == 0)
 		  section = SECTION_APRS_FI;
-	  else if (::strncmp(buffer, "[Network]", 5U) == 0)
+	  else if (::strncmp(buffer, "[Network]", 9U) == 0)
 		  section = SECTION_NETWORK;
+	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
+		  section = SECTION_YSF_NETWORK;
+	  else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
+		  section = SECTION_FCS_NETWORK;
 	  else
         section = SECTION_NONE;
 
@@ -128,7 +137,9 @@ bool CConf::read()
 			for (unsigned int i = 0U; value[i] != 0; i++)
 				value[i] = ::toupper(value[i]);
 			m_suffix = value;
-		} else if (::strcmp(key, "RptAddress") == 0)
+		} else if (::strcmp(key, "Id") == 0)
+			m_id = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "RptAddress") == 0)
 			m_rptAddress = value;
 		else if (::strcmp(key, "RptPort") == 0)
 			m_rptPort = (unsigned int)::atoi(value);
@@ -176,23 +187,7 @@ bool CConf::read()
 		else if (::strcmp(key, "Description") == 0)
 			m_aprsDescription = value;
 	} else if (section == SECTION_NETWORK) {
-		if (::strcmp(key, "Enable") == 0)
-			m_networkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Port") == 0)
-			m_networkPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Hosts") == 0)
-			m_networkHosts = value;
-		else if (::strcmp(key, "ReloadTime") == 0)
-			m_networkReloadTime = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "ParrotAddress") == 0)
-			m_networkParrotAddress = value;
-		else if (::strcmp(key, "ParrotPort") == 0)
-			m_networkParrotPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "YSF2DMRAddress") == 0)
-			m_networkYSF2DMRAddress = value;
-		else if (::strcmp(key, "YSF2DMRPort") == 0)
-			m_networkYSF2DMRPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Startup") == 0)
+		if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
@@ -200,6 +195,28 @@ bool CConf::read()
 			m_networkRevert = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
 			m_networkDebug = ::atoi(value) == 1;
+	} else if (section == SECTION_YSF_NETWORK) {
+		if (::strcmp(key, "Enable") == 0)
+			m_ysfNetworkEnabled = ::atoi(value) == 1;
+		else if (::strcmp(key, "Port") == 0)
+			m_ysfNetworkPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Hosts") == 0)
+			m_ysfNetworkHosts = value;
+		else if (::strcmp(key, "ReloadTime") == 0)
+			m_ysfNetworkReloadTime = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "ParrotAddress") == 0)
+			m_ysfNetworkParrotAddress = value;
+		else if (::strcmp(key, "ParrotPort") == 0)
+			m_ysfNetworkParrotPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "YSF2DMRAddress") == 0)
+			m_ysfNetworkYSF2DMRAddress = value;
+		else if (::strcmp(key, "YSF2DMRPort") == 0)
+			m_ysfNetworkYSF2DMRPort = (unsigned int)::atoi(value);
+	} else if (section == SECTION_FCS_NETWORK) {
+		if (::strcmp(key, "Enable") == 0)
+			m_fcsNetworkEnabled = ::atoi(value) == 1;
+		else if (::strcmp(key, "Port") == 0)
+			m_fcsNetworkPort = (unsigned int)::atoi(value);
 	}
   }
 
@@ -216,6 +233,11 @@ std::string CConf::getCallsign() const
 std::string CConf::getSuffix() const
 {
 	return m_suffix;
+}
+
+unsigned int CConf::getId() const
+{
+	return m_id;
 }
 
 std::string CConf::getRptAddress() const
@@ -328,46 +350,6 @@ std::string CConf::getAPRSDescription() const
 	return m_aprsDescription;
 }
 
-bool CConf::getNetworkEnabled() const
-{
-	return m_networkEnabled;
-}
-
-unsigned int CConf::getNetworkPort() const
-{
-  return m_networkPort;
-}
-
-std::string CConf::getNetworkHosts() const
-{
-	return m_networkHosts;
-}
-
-unsigned int CConf::getNetworkReloadTime() const
-{
-	return m_networkReloadTime;
-}
-
-std::string CConf::getNetworkParrotAddress() const
-{
-	return m_networkParrotAddress;
-}
-
-unsigned int CConf::getNetworkParrotPort() const
-{
-	return m_networkParrotPort;
-}
-
-std::string CConf::getNetworkYSF2DMRAddress() const
-{
-	return m_networkYSF2DMRAddress;
-}
-
-unsigned int CConf::getNetworkYSF2DMRPort() const
-{
-	return m_networkYSF2DMRPort;
-}
-
 std::string CConf::getNetworkStartup() const
 {
 	return m_networkStartup;
@@ -386,4 +368,54 @@ bool CConf::getNetworkRevert() const
 bool CConf::getNetworkDebug() const
 {
 	return m_networkDebug;
+}
+
+bool CConf::getYSFNetworkEnabled() const
+{
+	return m_ysfNetworkEnabled;
+}
+
+unsigned int CConf::getYSFNetworkPort() const
+{
+  return m_ysfNetworkPort;
+}
+
+std::string CConf::getYSFNetworkHosts() const
+{
+	return m_ysfNetworkHosts;
+}
+
+unsigned int CConf::getYSFNetworkReloadTime() const
+{
+	return m_ysfNetworkReloadTime;
+}
+
+std::string CConf::getYSFNetworkParrotAddress() const
+{
+	return m_ysfNetworkParrotAddress;
+}
+
+unsigned int CConf::getYSFNetworkParrotPort() const
+{
+	return m_ysfNetworkParrotPort;
+}
+
+std::string CConf::getYSFNetworkYSF2DMRAddress() const
+{
+	return m_ysfNetworkYSF2DMRAddress;
+}
+
+unsigned int CConf::getYSFNetworkYSF2DMRPort() const
+{
+	return m_ysfNetworkYSF2DMRPort;
+}
+
+bool CConf::getFCSNetworkEnabled() const
+{
+	return m_fcsNetworkEnabled;
+}
+
+unsigned int CConf::getFCSNetworkPort() const
+{
+	return m_fcsNetworkPort;
 }

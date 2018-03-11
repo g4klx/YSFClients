@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  */
 
 #include "YSFDefines.h"
-#include "Network.h"
+#include "YSFNetwork.h"
 #include "Utils.h"
 #include "Log.h"
 
@@ -27,14 +27,17 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
 m_address(),
 m_port(0U),
 m_poll(NULL),
 m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer")
+m_buffer(1000U, "YSF Network Buffer"),
+m_pollTimer(1000U, 5U),
+m_name(),
+m_linked(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -51,14 +54,15 @@ m_buffer(1000U, "YSF Network Buffer")
 	}
 }
 
-CNetwork::CNetwork(unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned int port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
 m_port(0U),
 m_poll(NULL),
 m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer")
+m_buffer(1000U, "YSF Network Buffer"),
+m_pollTimer(1000U, 5U)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -75,64 +79,74 @@ m_buffer(1000U, "YSF Network Buffer")
 	}
 }
 
-CNetwork::~CNetwork()
+CYSFNetwork::~CYSFNetwork()
 {
 	delete[] m_poll;
 }
 
-bool CNetwork::open()
+bool CYSFNetwork::open()
 {
 	LogMessage("Opening YSF network connection");
 
 	return m_socket.open();
 }
 
-void CNetwork::setDestination(const in_addr& address, unsigned int port)
+void CYSFNetwork::setDestination(const std::string& name, const in_addr& address, unsigned int port)
 {
+	m_name    = name;
 	m_address = address;
 	m_port    = port;
+	m_linked  = false;
 }
 
-void CNetwork::clearDestination()
+void CYSFNetwork::clearDestination()
 {
 	m_address.s_addr = INADDR_NONE;
 	m_port           = 0U;
+	m_linked         = false;
+
+	m_pollTimer.stop();
 }
 
-bool CNetwork::write(const unsigned char* data)
+void CYSFNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
 
 	if (m_port == 0U)
-		return true;
+		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	return m_socket.write(data, 155U, m_address, m_port);
+	m_socket.write(data, 155U, m_address, m_port);
 }
 
-bool CNetwork::writePoll()
-{
-	if (m_port == 0U)
-		return true;
-
-	return m_socket.write(m_poll, 14U, m_address, m_port);
-}
-
-bool CNetwork::writeUnlink()
-{
-	if (m_port == 0U)
-		return true;
-
-	return m_socket.write(m_unlink, 14U, m_address, m_port);
-}
-
-void CNetwork::clock(unsigned int ms)
+void CYSFNetwork::writePoll(unsigned int count)
 {
 	if (m_port == 0U)
 		return;
 
+	m_pollTimer.start();
+
+	for (unsigned int i = 0U; i < count; i++)
+		m_socket.write(m_poll, 14U, m_address, m_port);
+}
+
+void CYSFNetwork::writeUnlink(unsigned int count)
+{
+	m_pollTimer.stop();
+
+	if (m_port == 0U)
+		return;
+
+	for (unsigned int i = 0U; i < count; i++)
+		m_socket.write(m_unlink, 14U, m_address, m_port);
+
+	m_linked = false;
+}
+
+void CYSFNetwork::clock(unsigned int ms)
+{
 	unsigned char buffer[BUFFER_LENGTH];
 
 	in_addr address;
@@ -141,8 +155,20 @@ void CNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
+	if (m_port == 0U)
+		return;
+
+	m_pollTimer.clock(ms);
+	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
+		writePoll();
+
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
+
+	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {
+		LogMessage("Linked to %s", m_name.c_str());
+		m_linked = true;
+	}
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
@@ -153,7 +179,7 @@ void CNetwork::clock(unsigned int ms)
 	m_buffer.addData(buffer, length);
 }
 
-unsigned int CNetwork::read(unsigned char* data)
+unsigned int CYSFNetwork::read(unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -168,7 +194,7 @@ unsigned int CNetwork::read(unsigned char* data)
 	return len;
 }
 
-void CNetwork::close()
+void CYSFNetwork::close()
 {
 	m_socket.close();
 

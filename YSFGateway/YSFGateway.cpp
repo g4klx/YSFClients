@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 */
 
 #include "YSFGateway.h"
-#include "Reflectors.h"
 #include "UDPSocket.h"
 #include "StopWatch.h"
 #include "Version.h"
@@ -46,6 +45,7 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cstdlib>
 #include <cstring>
 #include <clocale>
+#include <cmath>
 
 int main(int argc, char** argv)
 {
@@ -79,11 +79,17 @@ m_callsign(),
 m_suffix(),
 m_conf(configFile),
 m_gps(NULL),
+m_reflectors(NULL),
 m_wiresX(NULL),
-m_dtmf(NULL),
-m_netNetwork(NULL),
-m_linked(false),
-m_exclude(false)
+m_dtmf(),
+m_ysfNetwork(NULL),
+m_fcsNetwork(NULL),
+m_linkType(LINK_NONE),
+m_current(),
+m_startup(),
+m_exclude(false),
+m_inactivityTimer(1000U),
+m_lostTimer(1000U, 120U)
 {
 }
 
@@ -115,7 +121,8 @@ int CYSFGateway::run()
 		if (pid == -1) {
 			::LogWarning("Couldn't fork() , exiting");
 			return -1;
-		} else if (pid != 0)
+		}
+		else if (pid != 0)
 			exit(EXIT_SUCCESS);
 
 		// Create new session and process group
@@ -174,8 +181,8 @@ int CYSFGateway::run()
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();
 
-	CNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
-	rptNetwork.setDestination(rptAddress, rptPort);
+	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
+	rptNetwork.setDestination("MMDVM", rptAddress, rptPort);
 
 	ret = rptNetwork.open();
 	if (!ret) {
@@ -184,78 +191,59 @@ int CYSFGateway::run()
 		return 1;
 	}
 
-	unsigned int netPort = m_conf.getNetworkPort();
+	bool ysfNetworkEnabled = m_conf.getYSFNetworkEnabled();
+	if (ysfNetworkEnabled) {
+		unsigned int ysfPort = m_conf.getYSFNetworkPort();
 
-	m_netNetwork = new CNetwork(netPort, m_callsign, debug);
-	ret = m_netNetwork->open();
-	if (!ret) {
-		::LogError("Cannot open the reflector network port");
-		::LogFinalise();
-		return 1;
-	}
-
-	CTimer inactivityTimer(1000U, m_conf.getNetworkInactivityTimeout() * 60U);
-	CTimer lostTimer(1000U, 120U);
-	CTimer pollTimer(1000U, 5U);
-
-	bool revert = m_conf.getNetworkRevert();
-	std::string startup = m_conf.getNetworkStartup();
-
-	bool networkEnabled = m_conf.getNetworkEnabled();
-	if (networkEnabled) {
-		std::string fileName = m_conf.getNetworkHosts();
-		unsigned int reloadTime = m_conf.getNetworkReloadTime();
-
-		m_wiresX = new CWiresX(m_callsign, m_suffix, &rptNetwork, fileName, reloadTime);
-		m_dtmf   = new CDTMF;
-
-		std::string name         = m_conf.getName();
-		unsigned int txFrequency = m_conf.getTxFrequency();
-		unsigned int rxFrequency = m_conf.getRxFrequency();
-
-		m_wiresX->setInfo(name, txFrequency, rxFrequency);
-
-		std::string address = m_conf.getNetworkParrotAddress();
-		unsigned int port = m_conf.getNetworkParrotPort();
-
-		if (port > 0U)
-			m_wiresX->setParrot(address, port);
-
-		address = m_conf.getNetworkYSF2DMRAddress();
-		port = m_conf.getNetworkYSF2DMRPort();
-
-		if (port > 0U)
-			m_wiresX->setYSF2DMR(address, port);
-
-		m_wiresX->start();
-
-		if (!startup.empty()) {
-			CYSFReflector* reflector = m_wiresX->getReflector(startup);
-			if (reflector != NULL) {
-				LogMessage("Automatic connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
-
-				m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-				m_netNetwork->writePoll();
-				m_netNetwork->writePoll();
-				m_netNetwork->writePoll();
-
-				if (!revert)
-					inactivityTimer.start();
-
-				lostTimer.start();
-				pollTimer.start();
-
-				m_linked = true;
-			}
+		m_ysfNetwork = new CYSFNetwork(ysfPort, m_callsign, debug);
+		ret = m_ysfNetwork->open();
+		if (!ret) {
+			::LogError("Cannot open the YSF reflector network port");
+			::LogFinalise();
+			return 1;
 		}
 	}
+
+	bool fcsNetworkEnabled = m_conf.getFCSNetworkEnabled();
+	if (fcsNetworkEnabled) {
+		unsigned int txFrequency = m_conf.getTxFrequency();
+		unsigned int rxFrequency = m_conf.getRxFrequency();
+		std::string locator = calculateLocator();
+		unsigned int id = m_conf.getId();
+
+		unsigned int fcsPort = m_conf.getFCSNetworkPort();
+
+		m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, rxFrequency, txFrequency, locator, id, debug);
+		ret = m_fcsNetwork->open();
+		if (!ret) {
+			::LogError("Cannot open the FCS reflector network port");
+			::LogFinalise();
+			return 1;
+		}
+	}
+
+	m_inactivityTimer.setTimeout(m_conf.getNetworkInactivityTimeout() * 60U);
+
+	std::string fileName = m_conf.getYSFNetworkHosts();
+	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
+
+	m_reflectors = new CYSFReflectors(fileName, reloadTime);
+	m_reflectors->load();
+	m_reflectors->reload();
+
+	createWiresX(&rptNetwork);
+
+	createGPS();
+
+	m_startup   = m_conf.getNetworkStartup();
+	bool revert = m_conf.getNetworkRevert();
+
+	startupLinking();
 
 	CStopWatch stopWatch;
 	stopWatch.start();
 
 	LogMessage("Starting YSFGateway-%s", VERSION);
-
-	createGPS();
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -272,133 +260,56 @@ int CYSFGateway::run()
 				// Don't send out control data
 				m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 
-				if (m_wiresX != NULL) {
-					WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
-					switch (status) {
-					case WXS_CONNECT: {
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
+				processWiresX(buffer, fi, dt, fn, ft);
 
-							CYSFReflector* reflector = m_wiresX->getReflector();
-							LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-
-							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-
-							inactivityTimer.start();
-							lostTimer.start();
-							pollTimer.start();
-
-							m_linked = true;
-						}
-						break;
-					case WXS_DISCONNECT:
-						LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
-
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->writeUnlink();
-						m_netNetwork->clearDestination();
-
-						inactivityTimer.stop();
-						lostTimer.stop();
-						pollTimer.stop();
-
-						m_linked = false;
-						break;
-					default:
-						break;
-					}
-
-					status = WXS_NONE;
-					switch (dt) {
-					case YSF_DT_VD_MODE2:
-						status = m_dtmf->decodeVDMode2(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
-						break;
-					default:
-						break;
-					}
-
-					switch (status) {
-					case WXS_CONNECT: {
-						std::string id = m_dtmf->getReflector();
-						CYSFReflector* reflector = m_wiresX->getReflector(id);
-						if (reflector != NULL) {
-							m_wiresX->processConnect(reflector);
-
-							if (m_linked) {
-								m_netNetwork->writeUnlink();
-								m_netNetwork->writeUnlink();
-								m_netNetwork->writeUnlink();
-							}
-
-							LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-
-							m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-							m_netNetwork->writePoll();
-
-							inactivityTimer.start();
-							lostTimer.start();
-							pollTimer.start();
-
-							m_linked = true;
-						}
-					}
-					break;
-					case WXS_DISCONNECT:
-						if (m_linked) {
-							m_wiresX->processDisconnect();
-
-							LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
-
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->writeUnlink();
-							m_netNetwork->clearDestination();
-
-							inactivityTimer.stop();
-							lostTimer.stop();
-							pollTimer.stop();
-
-							m_linked = false;
-						}
-						break;
-					default:
-						break;
-					}
-				}
+				processDTMF(buffer, dt);
 
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
 			}
 
-			if (networkEnabled && m_linked && !m_exclude) {
-				m_netNetwork->write(buffer);
+			if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && !m_exclude) {
+				m_ysfNetwork->write(buffer);
 				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
-					inactivityTimer.start();
+					m_inactivityTimer.start();
+			}
+
+			if (m_fcsNetwork != NULL && m_linkType == LINK_FCS && !m_exclude) {
+				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
+					m_fcsNetwork->write(buffer);
+					m_inactivityTimer.start();
+				}
 			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
-				if (m_dtmf != NULL)
-					m_dtmf->reset();
+				m_dtmf.reset();
 				m_exclude = false;
 			}
 		}
 
-		while (m_netNetwork->read(buffer) > 0U) {
-			if (networkEnabled && m_linked) {
-				// Only pass through YSF data packets
-				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
-					rptNetwork.write(buffer);
+		if (m_ysfNetwork != NULL) {
+			while (m_ysfNetwork->read(buffer) > 0U) {
+				if (m_linkType == LINK_YSF) {
+					// Only pass through YSF data packets
+					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+						rptNetwork.write(buffer);
 
-				lostTimer.start();
+					m_lostTimer.start();
+				}
+			}
+		}
+
+		if (m_fcsNetwork != NULL) {
+			while (m_fcsNetwork->read(buffer) > 0U) {
+				if (m_linkType == LINK_FCS) {
+					// Only pass through YSF data packets
+					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+						rptNetwork.write(buffer);
+
+					m_lostTimer.start();
+				}
 			}
 		}
 
@@ -406,76 +317,76 @@ int CYSFGateway::run()
 		stopWatch.start();
 
 		rptNetwork.clock(ms);
-		m_netNetwork->clock(ms);
+		if (m_ysfNetwork != NULL)
+			m_ysfNetwork->clock(ms);
+		if (m_fcsNetwork != NULL)
+			m_fcsNetwork->clock(ms);
 		if (m_gps != NULL)
 			m_gps->clock(ms);
-		if (m_wiresX != NULL)
-			m_wiresX->clock(ms);
+		m_wiresX->clock(ms);
 
-		inactivityTimer.clock(ms);
-		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
-			if (m_linked) {
-				CYSFReflector* reflector = NULL;
-				if (revert && !startup.empty() && m_wiresX != NULL)
-					reflector = m_wiresX->getReflector(startup);
-
-				if (reflector != NULL) {
-					LogMessage("Reverting connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
-
-					m_wiresX->processConnect(reflector);
-
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-
-					m_netNetwork->setDestination(reflector->m_address, reflector->m_port);
-					m_netNetwork->writePoll();
-					m_netNetwork->writePoll();
-					m_netNetwork->writePoll();
-
-					lostTimer.start();
-					pollTimer.start();
-				} else {
-					LogMessage("Disconnecting due to inactivity");
-
-					if (m_wiresX != NULL)
+		m_inactivityTimer.clock(ms);
+		if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {
+			if (revert) {
+				if (m_current != m_startup) {
+					if (m_linkType == LINK_YSF) {
 						m_wiresX->processDisconnect();
+						m_ysfNetwork->writeUnlink(3U);
+						m_ysfNetwork->clearDestination();
+					}
 
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->writeUnlink();
-					m_netNetwork->clearDestination();
+					if (m_linkType == LINK_FCS) {
+						m_fcsNetwork->writeUnlink(3U);
+						m_fcsNetwork->clearDestination();
+					}
 
-					lostTimer.stop();
-					pollTimer.stop();
+					m_current.clear();
+					m_inactivityTimer.stop();
+					m_lostTimer.stop();
+					m_linkType = LINK_NONE;
 
-					m_linked = false;
+					startupLinking();
+				} else {
+					m_inactivityTimer.start();
 				}
+			} else {
+				if (m_linkType == LINK_YSF) {
+					LogMessage("Disconnecting due to inactivity");
+					m_wiresX->processDisconnect();
+					m_ysfNetwork->writeUnlink(3U);
+					m_ysfNetwork->clearDestination();
+				}
+
+				if (m_linkType == LINK_FCS) {
+					LogMessage("Disconnecting due to inactivity");
+					m_fcsNetwork->writeUnlink(3U);
+					m_fcsNetwork->clearDestination();
+				}
+
+				m_current.clear();
+				m_inactivityTimer.stop();
+				m_lostTimer.stop();
+				m_linkType = LINK_NONE;
+			}
+		}
+
+		m_lostTimer.clock(ms);
+		if (m_lostTimer.isRunning() && m_lostTimer.hasExpired()) {
+			if (m_linkType == LINK_YSF) {
+				LogWarning("Link has failed, polls lost");
+				m_wiresX->processDisconnect();
+				m_ysfNetwork->clearDestination();
 			}
 
-			inactivityTimer.stop();
-		}
+			if (m_fcsNetwork != NULL) {
+				LogWarning("Link has failed, polls lost");
+				m_fcsNetwork->clearDestination();
+			}
 
-		lostTimer.clock(ms);
-		if (lostTimer.isRunning() && lostTimer.hasExpired()) {
-			LogWarning("Link has failed, polls lost");
-
-			if (m_wiresX != NULL)
-				m_wiresX->processDisconnect();
-
-			m_netNetwork->clearDestination();
-
-			inactivityTimer.stop();
-			lostTimer.stop();
-			pollTimer.stop();
-
-			m_linked = false;
-		}
-
-		pollTimer.clock(ms);
-		if (pollTimer.isRunning() && pollTimer.hasExpired()) {
-			m_netNetwork->writePoll();
-			pollTimer.start();
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
 		}
 
 		if (ms < 5U)
@@ -483,16 +394,23 @@ int CYSFGateway::run()
 	}
 
 	rptNetwork.close();
-	m_netNetwork->close();
 
 	if (m_gps != NULL) {
 		m_gps->close();
 		delete m_gps;
 	}
 
-	delete m_netNetwork;
+	if (m_ysfNetwork != NULL) {
+		m_ysfNetwork->close();
+		delete m_ysfNetwork;
+	}
+
+	if (m_fcsNetwork != NULL) {
+		m_fcsNetwork->close();
+		delete m_fcsNetwork;
+	}
+
 	delete m_wiresX;
-	delete m_dtmf;
 
 	::LogFinalise();
 
@@ -523,5 +441,291 @@ void CYSFGateway::createGPS()
 	if (!ret) {
 		delete m_gps;
 		m_gps = NULL;
+	}
+}
+
+void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
+{
+	assert(rptNetwork != NULL);
+
+	m_wiresX = new CWiresX(m_callsign, m_suffix, rptNetwork, *m_reflectors);
+
+	std::string name = m_conf.getName();
+
+	unsigned int txFrequency = m_conf.getTxFrequency();
+	unsigned int rxFrequency = m_conf.getRxFrequency();
+	m_wiresX->setInfo(name, txFrequency, rxFrequency);
+
+	std::string address = m_conf.getYSFNetworkParrotAddress();
+	unsigned int port = m_conf.getYSFNetworkParrotPort();
+
+	if (port > 0U)
+	m_wiresX->setParrot(address, port);
+
+	address = m_conf.getYSFNetworkYSF2DMRAddress();
+	port = m_conf.getYSFNetworkYSF2DMRPort();
+
+	if (port > 0U)
+	m_wiresX->setYSF2DMR(address, port);
+
+	m_wiresX->start();
+}
+
+void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
+{
+	assert(buffer != NULL);
+
+	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
+	switch (status) {
+	case WXS_CONNECT_YSF: {
+			if (m_linkType == LINK_YSF)
+				m_ysfNetwork->writeUnlink(3U);
+
+			if (m_linkType == LINK_FCS) {
+				m_fcsNetwork->writeUnlink(3U);
+				m_fcsNetwork->clearDestination();
+			}
+
+			CYSFReflector* reflector = m_wiresX->getReflector();
+			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+
+			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+			m_ysfNetwork->writePoll(3U);
+
+			m_current = reflector->m_id;
+			m_inactivityTimer.start();
+			m_lostTimer.start();
+			m_linkType = LINK_YSF;
+		}
+		break;
+	case WXS_DISCONNECT:
+		if (m_linkType == LINK_YSF) {
+			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+
+			m_ysfNetwork->writeUnlink(3U);
+			m_ysfNetwork->clearDestination();
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+		}
+		if (m_linkType == LINK_FCS) {
+			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+
+			m_fcsNetwork->writeUnlink(3U);
+			m_fcsNetwork->clearDestination();
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
+{
+	assert(buffer != NULL);
+
+	WX_STATUS status = WXS_NONE;
+	switch (dt) {
+	case YSF_DT_VD_MODE2:
+		status = m_dtmf.decodeVDMode2(buffer + 35U, (buffer[34U] & 0x01U) == 0x01U);
+		break;
+	default:
+		break;
+	}
+
+	switch (status) {
+	case WXS_CONNECT_YSF: {
+			std::string id = m_dtmf.getReflector();
+			CYSFReflector* reflector = m_reflectors->findById(id);
+			if (reflector != NULL) {
+				m_wiresX->processConnect(reflector);
+
+				if (m_linkType == LINK_YSF)
+					m_ysfNetwork->writeUnlink(3U);
+
+				if (m_linkType == LINK_FCS) {
+					m_fcsNetwork->writeUnlink(3U);
+					m_fcsNetwork->clearDestination();
+				}
+
+				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->writePoll(3U);
+
+				m_current = id;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_YSF;
+			}
+		}
+		break;
+	case WXS_CONNECT_FCS: {
+		std::string raw = m_dtmf.getReflector();
+		std::string id = "FCS00";
+		if (raw.length() == 2U) {
+			id += raw.at(0U) + std::string("0") + raw.at(1U);
+		} else if (raw.length() == 3U) {
+			id += raw;
+		} else {
+			LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
+			return;
+		}
+
+		if (m_linkType == LINK_YSF) {
+			m_wiresX->processDisconnect();
+			m_ysfNetwork->writeUnlink(3U);
+			m_ysfNetwork->clearDestination();
+		}
+		if (m_linkType == LINK_FCS)
+			m_fcsNetwork->writeUnlink(3U);
+
+		m_current.clear();
+		m_inactivityTimer.stop();
+		m_lostTimer.stop();
+		m_linkType = LINK_NONE;
+
+		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
+
+		bool ok = m_fcsNetwork->writeLink(id);
+		if (ok) {
+			m_current = id;
+			m_inactivityTimer.start();
+			m_lostTimer.start();
+			m_linkType = LINK_FCS;
+		} else {
+			LogMessage("Unknown reflector - %s", id.c_str());
+		}
+	}
+    break;
+	case WXS_DISCONNECT:
+		if (m_linkType == LINK_YSF) {
+			m_wiresX->processDisconnect();
+
+			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+
+			m_ysfNetwork->writeUnlink(3U);
+			m_ysfNetwork->clearDestination();
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+		}
+		if (m_linkType == LINK_FCS) {
+			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+
+			m_fcsNetwork->writeUnlink(3U);
+			m_fcsNetwork->clearDestination();
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+std::string CYSFGateway::calculateLocator()
+{
+	std::string locator;
+
+	float latitude  = m_conf.getLatitude();
+	float longitude = m_conf.getLongitude();
+
+	if (latitude < -90.0F || latitude > 90.0F)
+		return "AA00AA";
+
+	if (longitude < -360.0F || longitude > 360.0F)
+		return "AA00AA";
+
+	latitude += 90.0F;
+
+	if (longitude > 180.0F)
+		longitude -= 360.0F;
+
+	if (longitude < -180.0F)
+		longitude += 360.0F;
+
+	longitude += 180.0F;
+
+	float lon = ::floor(longitude / 20.0F);
+	float lat = ::floor(latitude  / 10.0F);
+
+	locator += 'A' + (unsigned int)lon;
+	locator += 'A' + (unsigned int)lat;
+
+	longitude -= lon * 20.0F;
+	latitude  -= lat * 10.0F;
+
+	lon = ::floor(longitude / 2.0F);
+	lat = ::floor(latitude  / 1.0F);
+
+	locator += '0' + (unsigned int)lon;
+	locator += '0' + (unsigned int)lat;
+
+	longitude -= lon * 2.0F;
+	latitude  -= lat * 1.0F;
+
+	lon = ::floor(longitude / (2.0F / 24.0F));
+	lat = ::floor(latitude  / (1.0F / 24.0F));
+
+	locator += 'A' + (unsigned int)lon;
+	locator += 'A' + (unsigned int)lat;
+
+	return locator;
+}
+
+void CYSFGateway::startupLinking()
+{
+	if (!m_startup.empty()) {
+		if (m_startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+
+			bool ok = m_fcsNetwork->writeLink(m_startup);
+			if (ok) {
+				LogMessage("Automatic (re-)connection to %s", m_startup.c_str());
+
+				m_current = m_startup;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_FCS;
+			} else {
+				LogMessage("Unknown reflector - %s", m_startup.c_str());
+			}
+		} else if (m_ysfNetwork != NULL) {
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+
+			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
+			if (reflector != NULL) {
+				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+
+				m_wiresX->setReflector(reflector);
+
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->writePoll(3U);
+
+				m_current = m_startup;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_YSF;
+			}
+		}
 	}
 }

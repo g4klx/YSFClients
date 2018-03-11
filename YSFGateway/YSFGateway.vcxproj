@@ -151,11 +151,10 @@
     <ClInclude Include="Conf.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="DTMF.h" />
+    <ClInclude Include="FCSNetwork.h" />
     <ClInclude Include="Golay24128.h" />
     <ClInclude Include="GPS.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="Network.h" />
-    <ClInclude Include="Reflectors.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="StopWatch.h" />
     <ClInclude Include="Sync.h" />
@@ -170,7 +169,9 @@
     <ClInclude Include="YSFDefines.h" />
     <ClInclude Include="YSFFICH.h" />
     <ClInclude Include="YSFGateway.h" />
+    <ClInclude Include="YSFNetwork.h" />
     <ClInclude Include="YSFPayload.h" />
+    <ClInclude Include="YSFReflectors.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="APRSWriter.cpp" />
@@ -178,11 +179,10 @@
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="CRC.cpp" />
     <ClCompile Include="DTMF.cpp" />
+    <ClCompile Include="FCSNetwork.cpp" />
     <ClCompile Include="Golay24128.cpp" />
     <ClCompile Include="GPS.cpp" />
     <ClCompile Include="Log.cpp" />
-    <ClCompile Include="Network.cpp" />
-    <ClCompile Include="Reflectors.cpp" />
     <ClCompile Include="StopWatch.cpp" />
     <ClCompile Include="Sync.cpp" />
     <ClCompile Include="TCPSocket.cpp" />
@@ -194,7 +194,9 @@
     <ClCompile Include="YSFConvolution.cpp" />
     <ClCompile Include="YSFFICH.cpp" />
     <ClCompile Include="YSFGateway.cpp" />
+    <ClCompile Include="YSFNetwork.cpp" />
     <ClCompile Include="YSFPayload.cpp" />
+    <ClCompile Include="YSFReflectors.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
