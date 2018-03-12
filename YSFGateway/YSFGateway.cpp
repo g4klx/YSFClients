@@ -228,7 +228,6 @@ int CYSFGateway::run()
 	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
 
 	m_reflectors = new CYSFReflectors(fileName, reloadTime);
-	m_reflectors->load();
 	m_reflectors->reload();
 
 	createWiresX(&rptNetwork);
@@ -460,14 +459,15 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	unsigned int port = m_conf.getYSFNetworkParrotPort();
 
 	if (port > 0U)
-	m_wiresX->setParrot(address, port);
+		m_wiresX->setParrot(address, port);
 
 	address = m_conf.getYSFNetworkYSF2DMRAddress();
 	port = m_conf.getYSFNetworkYSF2DMRPort();
 
 	if (port > 0U)
-	m_wiresX->setYSF2DMR(address, port);
+		m_wiresX->setYSF2DMR(address, port);
 
+	m_reflectors->load();
 	m_wiresX->start();
 }
 
