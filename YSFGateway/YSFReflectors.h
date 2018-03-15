@@ -25,6 +25,11 @@
 #include <vector>
 #include <string>
 
+enum YSF_TYPE {
+	YT_YSF,
+	YT_FCS
+};
+
 class CYSFReflector {
 public:
 	CYSFReflector() :
@@ -33,7 +38,8 @@ public:
 	m_desc(),
 	m_count("000"),
 	m_address(),
-	m_port(0U)
+	m_port(0U),
+	m_type(YT_YSF)
 	{
 	}
 
@@ -43,6 +49,7 @@ public:
 	std::string  m_count;
 	in_addr      m_address;
 	unsigned int m_port;
+	YSF_TYPE     m_type;
 };
 
 class CYSFReflectors {
@@ -52,6 +59,7 @@ public:
 
 	void setParrot(const std::string& address, unsigned int port);	
 	void setYSF2DMR(const std::string& address, unsigned int port);
+	void addFCSRoom(const std::string& name);
 
 	bool load();
 
@@ -72,6 +80,7 @@ private:
 	unsigned int                m_parrotPort;
 	std::string                 m_YSF2DMRAddress;
 	unsigned int                m_YSF2DMRPort;
+	std::vector<std::string>    m_fcsRooms;
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;

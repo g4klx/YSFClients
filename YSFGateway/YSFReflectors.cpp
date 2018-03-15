@@ -30,6 +30,9 @@ CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reload
 m_hostsFile(hostsFile),
 m_parrotAddress(),
 m_parrotPort(0U),
+m_YSF2DMRAddress(),
+m_YSF2DMRPort(0U),
+m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
 m_search(),
@@ -80,6 +83,11 @@ void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned int port)
 	m_YSF2DMRPort    = port;
 }
 
+void CYSFReflectors::addFCSRoom(const std::string& name)
+{
+	m_fcsRooms.push_back(name);
+}
+
 bool CYSFReflectors::load()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
@@ -107,12 +115,13 @@ bool CYSFReflectors::load()
 				in_addr address = CUDPSocket::lookup(host);
 				if (address.s_addr != INADDR_NONE) {
 					CYSFReflector* refl = new CYSFReflector;
-					refl->m_id = std::string(p1);
-					refl->m_name = std::string(p2);
-					refl->m_desc = std::string(p3);
+					refl->m_id      = std::string(p1);
+					refl->m_name    = std::string(p2);
+					refl->m_desc    = std::string(p3);
 					refl->m_address = address;
-					refl->m_port = (unsigned int)::atoi(p5);
-					refl->m_count = std::string(p6);;
+					refl->m_port    = (unsigned int)::atoi(p5);
+					refl->m_count   = std::string(p6);;
+					refl->m_type    = YT_YSF;
 
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
@@ -137,7 +146,10 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_parrotAddress);
 		refl->m_port    = m_parrotPort;
 		refl->m_count   = "000";
+		refl->m_type    = YT_YSF;
+
 		m_newReflectors.push_back(refl);
+
 		LogInfo("Loaded YSF parrot");
 	}
 
@@ -150,8 +162,34 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_YSF2DMRAddress);
 		refl->m_port    = m_YSF2DMRPort;
 		refl->m_count   = "000";
+		refl->m_type    = YT_YSF;
+
 		m_newReflectors.push_back(refl);
+
 		LogInfo("Loaded YSF2DMR");
+	}
+
+	unsigned int id = 10U;
+	for (std::vector<std::string>::const_iterator it = m_fcsRooms.cbegin(); it != m_fcsRooms.cend(); ++it, id++) {
+		char text[10U];
+		::sprintf(text, "%05u", id);
+
+		std::string name = *it;
+
+		CYSFReflector* refl = new CYSFReflector;
+		refl->m_id    = text;
+		refl->m_name  = name;
+		refl->m_desc  = name;
+		refl->m_port  = 0U;
+		refl->m_count = "000";
+		refl->m_type  = YT_FCS;
+
+		refl->m_name.resize(16U, ' ');
+		refl->m_desc.resize(14U, ' ');
+
+		m_newReflectors.push_back(refl);
+
+		LogInfo("Loaded %s", name.c_str());
 	}
 
 	size = m_newReflectors.size();
@@ -203,7 +241,7 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), trimmed.end());
 	std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), ::toupper);
 
-	unsigned int len = trimmed.size();
+	size_t len = trimmed.size();
 
 	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
 		std::string reflector = (*it)->m_name;

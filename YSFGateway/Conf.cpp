@@ -77,6 +77,7 @@ m_ysfNetworkParrotPort(0U),
 m_ysfNetworkYSF2DMRAddress("127.0.0.1"),
 m_ysfNetworkYSF2DMRPort(0U),
 m_fcsNetworkEnabled(false),
+m_fcsNetworkEntries(),
 m_fcsNetworkPort(0U)
 {
 }
@@ -215,7 +216,18 @@ bool CConf::read()
 	} else if (section == SECTION_FCS_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_fcsNetworkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Port") == 0)
+		else if (::strcmp(key, "Entries") == 0) {
+			char* p = ::strtok(value, ",\r\n");
+			while (p != NULL) {
+				if (::strlen(p) > 0U) {
+					for (unsigned int i = 0U; p[i] != 0; i++)
+						p[i] = ::toupper(p[i]);
+					std::string name = std::string(p);
+					m_fcsNetworkEntries.push_back(name);
+				}
+				p = ::strtok(NULL, ",\r\n");
+			}
+		} else if (::strcmp(key, "Port") == 0)
 			m_fcsNetworkPort = (unsigned int)::atoi(value);
 	}
   }
@@ -413,6 +425,11 @@ unsigned int CConf::getYSFNetworkYSF2DMRPort() const
 bool CConf::getFCSNetworkEnabled() const
 {
 	return m_fcsNetworkEnabled;
+}
+
+std::vector<std::string> CConf::getFCSNetworkEntries() const
+{
+	return m_fcsNetworkEntries;
 }
 
 unsigned int CConf::getFCSNetworkPort() const
