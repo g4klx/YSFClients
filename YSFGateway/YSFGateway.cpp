@@ -465,8 +465,8 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	if (port > 0U)
 		m_wiresX->setYSF2DMR(address, port);
 
-	std::vector<std::string> entries = m_conf.getFCSNetworkEntries();
-	for (std::vector<std::string>::const_iterator it = entries.cbegin(); it != entries.cend(); ++it)
+	std::vector<std::pair<std::string, std::string>> entries = m_conf.getFCSNetworkEntries();
+	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = entries.cbegin(); it != entries.cend(); ++it)
 		m_wiresX->addFCSRoom(*it);
 
 	m_reflectors->load();

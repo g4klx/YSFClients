@@ -157,9 +157,9 @@ void CWiresX::setYSF2DMR(const std::string& address, unsigned int port)
 	m_reflectors.setYSF2DMR(address, port);
 }
 
-void CWiresX::addFCSRoom(const std::string& name)
+void CWiresX::addFCSRoom(const std::pair<std::string, std::string>& entry)
 {
-	m_reflectors.addFCSRoom(name);
+	m_reflectors.addFCSRoom(entry);
 }
 
 bool CWiresX::start()

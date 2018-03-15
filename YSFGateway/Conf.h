@@ -81,7 +81,7 @@ public:
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
-  std::vector<std::string> getFCSNetworkEntries() const;
+  std::vector<std::pair<std::string, std::string>> getFCSNetworkEntries() const;
   unsigned int getFCSNetworkPort() const;
 
 private:
@@ -130,7 +130,7 @@ private:
   unsigned int m_ysfNetworkYSF2DMRPort;
 
   bool         m_fcsNetworkEnabled;
-  std::vector<std::string> m_fcsNetworkEntries;
+  std::vector<std::pair<std::string, std::string>> m_fcsNetworkEntries;
   unsigned int m_fcsNetworkPort;
 };
 

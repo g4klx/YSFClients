@@ -49,7 +49,7 @@ public:
 	void setInfo(const std::string& name, unsigned int txFrequency, unsigned int rxFrequency);
 	void setParrot(const std::string& address, unsigned int port);
 	void setYSF2DMR(const std::string& address, unsigned int port);
-	void addFCSRoom(const std::string& name);
+	void addFCSRoom(const std::pair<std::string, std::string>& entry);
 
 	bool start();
 

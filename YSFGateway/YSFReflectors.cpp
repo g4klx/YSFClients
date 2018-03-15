@@ -83,9 +83,9 @@ void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned int port)
 	m_YSF2DMRPort    = port;
 }
 
-void CYSFReflectors::addFCSRoom(const std::string& name)
+void CYSFReflectors::addFCSRoom(const std::pair<std::string, std::string>& entry)
 {
-	m_fcsRooms.push_back(name);
+	m_fcsRooms.push_back(entry);
 }
 
 bool CYSFReflectors::load()
@@ -170,16 +170,17 @@ bool CYSFReflectors::load()
 	}
 
 	unsigned int id = 10U;
-	for (std::vector<std::string>::const_iterator it = m_fcsRooms.cbegin(); it != m_fcsRooms.cend(); ++it, id++) {
+	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = m_fcsRooms.cbegin(); it != m_fcsRooms.cend(); ++it, id++) {
 		char text[10U];
 		::sprintf(text, "%05u", id);
 
-		std::string name = *it;
+		std::string name = it->first;
+		std::string desc = it->second;
 
 		CYSFReflector* refl = new CYSFReflector;
 		refl->m_id    = text;
 		refl->m_name  = name;
-		refl->m_desc  = name;
+		refl->m_desc  = desc;
 		refl->m_port  = 0U;
 		refl->m_count = "000";
 		refl->m_type  = YT_FCS;
