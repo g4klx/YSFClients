@@ -457,15 +457,17 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 
 	std::string address = m_conf.getYSFNetworkParrotAddress();
 	unsigned int port = m_conf.getYSFNetworkParrotPort();
-
 	if (port > 0U)
 		m_wiresX->setParrot(address, port);
 
 	address = m_conf.getYSFNetworkYSF2DMRAddress();
 	port = m_conf.getYSFNetworkYSF2DMRPort();
-
 	if (port > 0U)
 		m_wiresX->setYSF2DMR(address, port);
+
+	std::vector<std::pair<std::string, std::string>> entries = m_conf.getFCSNetworkEntries();
+	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = entries.cbegin(); it != entries.cend(); ++it)
+		m_wiresX->addFCSRoom(*it);
 
 	m_reflectors->load();
 	m_wiresX->start();
@@ -496,6 +498,37 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_inactivityTimer.start();
 			m_lostTimer.start();
 			m_linkType = LINK_YSF;
+		}
+		break;
+	case WXS_CONNECT_FCS: {
+			if (m_linkType == LINK_YSF) {
+				m_ysfNetwork->writeUnlink(3U);
+				m_ysfNetwork->clearDestination();
+			}
+
+			if (m_linkType == LINK_FCS)
+				m_fcsNetwork->writeUnlink(3U);
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+
+			CYSFReflector* reflector = m_wiresX->getReflector();
+			LogMessage("Connect to %s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+
+			std::string name = reflector->m_name;
+			name.resize(8U, '0');
+
+			bool ok = m_fcsNetwork->writeLink(name);
+			if (ok) {
+				m_current = name;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_FCS;
+			} else {
+				LogMessage("Unknown reflector - %s", name.c_str());
+			}
 		}
 		break;
 	case WXS_DISCONNECT:

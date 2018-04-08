@@ -157,6 +157,11 @@ void CWiresX::setYSF2DMR(const std::string& address, unsigned int port)
 	m_reflectors.setYSF2DMR(address, port);
 }
 
+void CWiresX::addFCSRoom(const std::pair<std::string, std::string>& entry)
+{
+	m_reflectors.addFCSRoom(entry);
+}
+
 bool CWiresX::start()
 {
 	m_reflectors.reload();
@@ -288,7 +293,14 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	m_status = WXSI_CONNECT;
 	m_timer.start();
 
-	return WXS_CONNECT_YSF;
+	switch (m_reflector->m_type) {
+	case YT_YSF:
+		return WXS_CONNECT_YSF;
+	case YT_FCS:
+		return WXS_CONNECT_FCS;
+	default:
+		return WXS_NONE;
+	}
 }
 
 void CWiresX::processConnect(CYSFReflector* reflector)

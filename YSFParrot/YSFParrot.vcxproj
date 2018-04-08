@@ -150,7 +150,6 @@
     <ClInclude Include="Thread.h" />
     <ClInclude Include="Version.h" />
     <ClInclude Include="YSFParrot.h" />
-    <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="Network.h" />

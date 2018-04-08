@@ -119,7 +119,6 @@ void CYSFParrot::run()
 		unsigned int ms = stopWatch.elapsed();
 		stopWatch.start();
 
-		network.clock(ms);
 		watchdogTimer.clock(ms);
 		turnaroundTimer.clock(ms);
 

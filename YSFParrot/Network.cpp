@@ -27,8 +27,7 @@ const unsigned int BUFFER_LENGTH = 200U;
 CNetwork::CNetwork(unsigned int port) :
 m_socket(port),
 m_address(),
-m_port(0U),
-m_buffer(1000U, "YSF Network")
+m_port(0U)
 {
 }
 
@@ -76,52 +75,38 @@ bool CNetwork::writePoll(const in_addr& address, unsigned int port)
 	return m_socket.write(buffer, 14U, address, port);
 }
 
-void CNetwork::clock(unsigned int ms)
+unsigned int CNetwork::read(unsigned char* data)
 {
-	unsigned char buffer[BUFFER_LENGTH];
-
 	in_addr address;
 	unsigned int port;
-	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
+	int length = m_socket.read(data, BUFFER_LENGTH, address, port);
 	if (length <= 0)
-		return;
+		return 0U;
 
 	// Handle incoming polls
-	if (::memcmp(buffer, "YSFP", 4U) == 0) {
+	if (::memcmp(data, "YSFP", 4U) == 0) {
 		writePoll(address, port);
-		return;
+		return 0U;
 	}
 
 	// Handle incoming unlinks
-	if (::memcmp(buffer, "YSFU", 4U) == 0)
-		return;
+	if (::memcmp(data, "YSFU", 4U) == 0)
+		return 0U;
 
 	// Handle the status command
-	if (::memcmp(buffer, "YSFS", 4U) == 0) {
+	if (::memcmp(data, "YSFS", 4U) == 0) {
 		unsigned char status[50U];
 		::sprintf((char*)status, "YSFS%05u%-16.16s%-14.14s%03u", 1U, "Parrot", "Parrot", 0U);
 		m_socket.write(status, 42U, address, port);
-		return;
+		return 0U;
 	}
 
 	// Invalid packet type?
-	if (::memcmp(buffer, "YSFD", 4U) != 0)
-		return;
+	if (::memcmp(data, "YSFD", 4U) != 0)
+		return 0U;
 
 	m_address.s_addr = address.s_addr;
 	m_port = port;
-
-	m_buffer.addData(buffer, 155U);
-}
-
-unsigned int CNetwork::read(unsigned char* data)
-{
-	assert(data != NULL);
-
-	if (m_buffer.isEmpty())
-		return 0U;
-
-	m_buffer.getData(data, 155U);
 
 	return 155U;
 }
