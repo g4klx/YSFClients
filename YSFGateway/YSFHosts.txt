@@ -39,6 +39,7 @@
 79602;Carolina Link;Carolina Link;52.3.47.55;42000;007;http://52.3.47.55/index.php
 30998;CH 228 Swiss;Bridge BM22820;176.10.105.210;42000;007;http://ysf.hb-connect.ch/
 52796;CH JOTA;Jota CH;157.161.57.65;42001;000;http://pi2.woody.ch:8080/YSFReflector-Dashboard/ (ipv6 only)
+18829;CN CC#1;TG 460501;47.104.177.248;42000;001;https://mmdvm.cc/ysf/
 80337;CN China #1;C4FM YSF;120.234.41.144;42000;043;http://ysf.sz790.com:8081/
 82442;CN China #2;W24269/TG46072;116.6.107.115;42006;007;http://ufozhuzi.tpddns.cn:8081/
 09724;CN China #99;YSF Test;103.107.105.251;42000;000;http://ysf.ncwxd.com
