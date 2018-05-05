@@ -76,6 +76,10 @@ m_ysfNetworkParrotAddress("127.0.0.1"),
 m_ysfNetworkParrotPort(0U),
 m_ysfNetworkYSF2DMRAddress("127.0.0.1"),
 m_ysfNetworkYSF2DMRPort(0U),
+m_ysfNetworkYSF2NXDNAddress("127.0.0.1"),
+m_ysfNetworkYSF2NXDNPort(0U),
+m_ysfNetworkYSF2P25Address("127.0.0.1"),
+m_ysfNetworkYSF2P25Port(0U),
 m_fcsNetworkEnabled(false),
 m_fcsNetworkEntries(),
 m_fcsNetworkPort(0U)
@@ -213,6 +217,14 @@ bool CConf::read()
 			m_ysfNetworkYSF2DMRAddress = value;
 		else if (::strcmp(key, "YSF2DMRPort") == 0)
 			m_ysfNetworkYSF2DMRPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "YSF2NXDNAddress") == 0)
+			m_ysfNetworkYSF2NXDNAddress = value;
+		else if (::strcmp(key, "YSF2NXDNPort") == 0)
+			m_ysfNetworkYSF2NXDNPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "YSF2P25Address") == 0)
+			m_ysfNetworkYSF2P25Address = value;
+		else if (::strcmp(key, "YSF2P25Port") == 0)
+			m_ysfNetworkYSF2P25Port = (unsigned int)::atoi(value);
 	} else if (section == SECTION_FCS_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_fcsNetworkEnabled = ::atoi(value) == 1;
@@ -421,6 +433,26 @@ std::string CConf::getYSFNetworkYSF2DMRAddress() const
 unsigned int CConf::getYSFNetworkYSF2DMRPort() const
 {
 	return m_ysfNetworkYSF2DMRPort;
+}
+
+std::string CConf::getYSFNetworkYSF2NXDNAddress() const
+{
+	return m_ysfNetworkYSF2NXDNAddress;
+}
+
+unsigned int CConf::getYSFNetworkYSF2NXDNPort() const
+{
+	return m_ysfNetworkYSF2NXDNPort;
+}
+
+std::string CConf::getYSFNetworkYSF2P25Address() const
+{
+	return m_ysfNetworkYSF2P25Address;
+}
+
+unsigned int CConf::getYSFNetworkYSF2P25Port() const
+{
+	return m_ysfNetworkYSF2P25Port;
 }
 
 bool CConf::getFCSNetworkEnabled() const

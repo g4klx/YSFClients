@@ -78,6 +78,10 @@ public:
   unsigned int getYSFNetworkParrotPort() const;
   std::string  getYSFNetworkYSF2DMRAddress() const;
   unsigned int getYSFNetworkYSF2DMRPort() const;
+  std::string  getYSFNetworkYSF2NXDNAddress() const;
+  unsigned int getYSFNetworkYSF2NXDNPort() const;
+  std::string  getYSFNetworkYSF2P25Address() const;
+  unsigned int getYSFNetworkYSF2P25Port() const;
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
@@ -128,6 +132,10 @@ private:
   unsigned int m_ysfNetworkParrotPort;
   std::string  m_ysfNetworkYSF2DMRAddress;
   unsigned int m_ysfNetworkYSF2DMRPort;
+  std::string  m_ysfNetworkYSF2NXDNAddress;
+  unsigned int m_ysfNetworkYSF2NXDNPort;
+  std::string  m_ysfNetworkYSF2P25Address;
+  unsigned int m_ysfNetworkYSF2P25Port;
 
   bool         m_fcsNetworkEnabled;
   std::vector<std::pair<std::string, std::string>> m_fcsNetworkEntries;
