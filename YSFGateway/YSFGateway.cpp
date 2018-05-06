@@ -465,6 +465,16 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	if (port > 0U)
 		m_wiresX->setYSF2DMR(address, port);
 
+	address = m_conf.getYSFNetworkYSF2NXDNAddress();
+	port = m_conf.getYSFNetworkYSF2NXDNPort();
+	if (port > 0U)
+		m_wiresX->setYSF2NXDN(address, port);
+
+	address = m_conf.getYSFNetworkYSF2P25Address();
+	port = m_conf.getYSFNetworkYSF2P25Port();
+	if (port > 0U)
+		m_wiresX->setYSF2P25(address, port);
+
 	std::vector<std::pair<std::string, std::string>> entries = m_conf.getFCSNetworkEntries();
 	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = entries.cbegin(); it != entries.cend(); ++it)
 		m_wiresX->addFCSRoom(*it);

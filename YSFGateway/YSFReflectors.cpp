@@ -32,6 +32,10 @@ m_parrotAddress(),
 m_parrotPort(0U),
 m_YSF2DMRAddress(),
 m_YSF2DMRPort(0U),
+m_YSF2NXDNAddress(),
+m_YSF2NXDNPort(0U),
+m_YSF2P25Address(),
+m_YSF2P25Port(0U),
 m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
@@ -81,6 +85,18 @@ void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned int port)
 {
 	m_YSF2DMRAddress = address;
 	m_YSF2DMRPort    = port;
+}
+
+void CYSFReflectors::setYSF2NXDN(const std::string& address, unsigned int port)
+{
+	m_YSF2NXDNAddress = address;
+	m_YSF2NXDNPort    = port;
+}
+
+void CYSFReflectors::setYSF2P25(const std::string& address, unsigned int port)
+{
+	m_YSF2P25Address = address;
+	m_YSF2P25Port    = port;
 }
 
 void CYSFReflectors::addFCSRoom(const std::pair<std::string, std::string>& entry)
@@ -167,6 +183,38 @@ bool CYSFReflectors::load()
 		m_newReflectors.push_back(refl);
 
 		LogInfo("Loaded YSF2DMR");
+	}
+
+	// Add the YSF2NXDN entry
+	if (m_YSF2NXDNPort > 0U) {
+		CYSFReflector* refl = new CYSFReflector;
+		refl->m_id      = "00003";
+		refl->m_name    = "YSF2NXDN        ";
+		refl->m_desc    = "Link YSF2NXDN ";
+		refl->m_address = CUDPSocket::lookup(m_YSF2NXDNAddress);
+		refl->m_port    = m_YSF2NXDNPort;
+		refl->m_count   = "000";
+		refl->m_type    = YT_YSF;
+
+		m_newReflectors.push_back(refl);
+
+		LogInfo("Loaded YSF2NXDN");
+	}
+
+	// Add the YSF2P25 entry
+	if (m_YSF2P25Port > 0U) {
+		CYSFReflector* refl = new CYSFReflector;
+		refl->m_id      = "00004";
+		refl->m_name    = "YSF2P25         ";
+		refl->m_desc    = "Link YSF2P25  ";
+		refl->m_address = CUDPSocket::lookup(m_YSF2P25Address);
+		refl->m_port    = m_YSF2P25Port;
+		refl->m_count   = "000";
+		refl->m_type    = YT_YSF;
+
+		m_newReflectors.push_back(refl);
+
+		LogInfo("Loaded YSF2P25");
 	}
 
 	unsigned int id = 10U;
