@@ -48,8 +48,10 @@ m_state(FCS_UNLINKED)
 	::memset(m_info + 43U, ' ', 57U);
 
 	m_ping = new unsigned char[25U];
-	::sprintf((char*)m_ping, "PING%6.6s", callsign.c_str());
-	::memset(m_ping + 10U, ' ', 15U);
+	::memcpy(m_ping + 0U, "PING", 4U);
+	::memset(m_ping + 4U, ' ', 6U);
+	::memcpy(m_ping + 4U, callsign.c_str(), callsign.size());
+	::memset(m_ping + 10U, 0x00U, 15U);
 }
 
 CFCSNetwork::~CFCSNetwork()
