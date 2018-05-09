@@ -20,7 +20,6 @@
 #define	CONF_H
 
 #include <string>
-#include <vector>
 
 class CConf
 {
@@ -85,7 +84,7 @@ public:
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
-  std::vector<std::pair<std::string, std::string>> getFCSNetworkEntries() const;
+  std::string  getFCSNetworkFile() const;
   unsigned int getFCSNetworkPort() const;
 
 private:
@@ -138,7 +137,7 @@ private:
   unsigned int m_ysfNetworkYSF2P25Port;
 
   bool         m_fcsNetworkEnabled;
-  std::vector<std::pair<std::string, std::string>> m_fcsNetworkEntries;
+  std::string  m_fcsNetworkFile;
   unsigned int m_fcsNetworkPort;
 };
 

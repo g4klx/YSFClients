@@ -61,7 +61,7 @@ public:
 	void setYSF2DMR(const std::string& address, unsigned int port);
 	void setYSF2NXDN(const std::string& address, unsigned int port);
 	void setYSF2P25(const std::string& address, unsigned int port);
-	void addFCSRoom(const std::pair<std::string, std::string>& entry);
+	void addFCSRoom(const std::string& id, const std::string& name);
 
 	bool load();
 

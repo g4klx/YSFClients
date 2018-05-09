@@ -81,7 +81,7 @@ m_ysfNetworkYSF2NXDNPort(0U),
 m_ysfNetworkYSF2P25Address("127.0.0.1"),
 m_ysfNetworkYSF2P25Port(0U),
 m_fcsNetworkEnabled(false),
-m_fcsNetworkEntries(),
+m_fcsNetworkFile(),
 m_fcsNetworkPort(0U)
 {
 }
@@ -228,19 +228,9 @@ bool CConf::read()
 	} else if (section == SECTION_FCS_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_fcsNetworkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Entry") == 0) {
-			char* p1 = ::strtok(value, ",");
-			char* p2 = ::strtok(NULL, "\r\n");
-			if (p1 != NULL && p2 != NULL) {
-				if (::strlen(p1) > 0U && ::strlen(p2) > 0U) {
-					for (unsigned int i = 0U; p1[i] != 0; i++)
-						p1[i] = ::toupper(p1[i]);
-					std::string name = std::string(p1);
-					std::string desc = std::string(p2);
-					m_fcsNetworkEntries.push_back(std::make_pair(name, desc));
-				}
-			}
-		} else if (::strcmp(key, "Port") == 0)
+		else if (::strcmp(key, "Rooms") == 0)
+			m_fcsNetworkFile = value;
+		else if (::strcmp(key, "Port") == 0)
 			m_fcsNetworkPort = (unsigned int)::atoi(value);
 	}
   }
@@ -460,9 +450,9 @@ bool CConf::getFCSNetworkEnabled() const
 	return m_fcsNetworkEnabled;
 }
 
-std::vector<std::pair<std::string, std::string>> CConf::getFCSNetworkEntries() const
+std::string CConf::getFCSNetworkFile() const
 {
-	return m_fcsNetworkEntries;
+	return m_fcsNetworkFile;
 }
 
 unsigned int CConf::getFCSNetworkPort() const
