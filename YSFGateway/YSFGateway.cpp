@@ -475,9 +475,8 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
 
-	std::vector<std::pair<std::string, std::string>> entries = m_conf.getFCSNetworkEntries();
-	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = entries.cbegin(); it != entries.cend(); ++it)
-		m_wiresX->addFCSRoom(*it);
+	std::string filename = m_conf.getFCSNetworkFile();
+	readFCSRoomsFile(filename);
 
 	m_reflectors->load();
 	m_wiresX->start();
@@ -771,4 +770,31 @@ void CYSFGateway::startupLinking()
 			}
 		}
 	}
+}
+
+void CYSFGateway::readFCSRoomsFile(const std::string& filename)
+{
+	FILE* fp = ::fopen(filename.c_str(), "rt");
+	if (fp == NULL)
+		return;
+
+	unsigned int count = 0U;
+
+	char buffer[200U];
+	while (::fgets(buffer, 200, fp) != NULL) {
+		if (buffer[0U] == '#')
+			continue;
+
+		char* p1 = ::strtok(buffer, ";");
+		char* p2 = ::strtok(NULL, ";");
+
+		if (p1 != NULL && p2 != NULL) {
+			m_wiresX->addFCSRoom(p1, p2);
+			count++;
+		}
+	}
+
+	::fclose(fp);
+
+	LogInfo("Loaded %u FCS room descriptions", count);
 }

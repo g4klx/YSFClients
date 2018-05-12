@@ -99,9 +99,9 @@ void CYSFReflectors::setYSF2P25(const std::string& address, unsigned int port)
 	m_YSF2P25Port    = port;
 }
 
-void CYSFReflectors::addFCSRoom(const std::pair<std::string, std::string>& entry)
+void CYSFReflectors::addFCSRoom(const std::string& id, const std::string& name)
 {
-	m_fcsRooms.push_back(entry);
+	m_fcsRooms.push_back(std::make_pair(id, name));
 }
 
 bool CYSFReflectors::load()
@@ -237,8 +237,6 @@ bool CYSFReflectors::load()
 		refl->m_desc.resize(14U, ' ');
 
 		m_newReflectors.push_back(refl);
-
-		LogInfo("Loaded %s", name.c_str());
 	}
 
 	size = m_newReflectors.size();
