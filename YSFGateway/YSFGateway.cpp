@@ -89,7 +89,8 @@ m_current(),
 m_startup(),
 m_exclude(false),
 m_inactivityTimer(1000U),
-m_lostTimer(1000U, 120U)
+m_lostTimer(1000U, 120U),
+m_fcsNetworkEnabled(false)
 {
 }
 
@@ -204,8 +205,8 @@ int CYSFGateway::run()
 		}
 	}
 
-	bool fcsNetworkEnabled = m_conf.getFCSNetworkEnabled();
-	if (fcsNetworkEnabled) {
+	m_fcsNetworkEnabled = m_conf.getFCSNetworkEnabled();
+	if (m_fcsNetworkEnabled) {
 		unsigned int txFrequency = m_conf.getTxFrequency();
 		unsigned int rxFrequency = m_conf.getRxFrequency();
 		std::string locator = calculateLocator();
@@ -478,7 +479,8 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 		m_wiresX->setYSF2P25(address, port);
 
 	std::string filename = m_conf.getFCSNetworkFile();
-	readFCSRoomsFile(filename);
+	if (m_fcsNetworkEnabled)
+		readFCSRoomsFile(filename);
 
 	m_reflectors->load();
 	m_wiresX->start();
