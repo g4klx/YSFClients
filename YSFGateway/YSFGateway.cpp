@@ -246,10 +246,12 @@ int CYSFGateway::run()
 
 	for (;;) {
 		unsigned char buffer[200U];
+		memset(buffer, 0U, 200U);
 
 		while (rptNetwork.read(buffer) > 0U) {
 			CYSFFICH fich;
 			bool valid = fich.decode(buffer + 35U);
+			m_exclude = false;
 			if (valid) {
 				unsigned char fi = fich.getFI();
 				unsigned char dt = fich.getDT();
