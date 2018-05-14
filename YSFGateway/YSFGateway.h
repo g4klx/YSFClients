@@ -60,6 +60,7 @@ private:
 	bool            m_exclude;
 	CTimer          m_inactivityTimer;
 	CTimer          m_lostTimer;
+	bool            m_fcsNetworkEnabled;
 
 	void startupLinking();
 	std::string calculateLocator();
