@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010,2011,2012,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010,2011,2012,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 class CAPRSWriter {
 public:
-	CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port);
+	CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string& suffix);
 	~CAPRSWriter();
 
 	bool open();
@@ -50,6 +50,7 @@ private:
 	float              m_longitude;
 	int                m_height;
 	std::string        m_desc;
+	std::string        m_suffix;
 
 	void sendIdFrames();
 };

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010-2014,2016,2017 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010-2014,2016,2017,2018 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <cstring>
 #include <cmath>
 
-CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string& suffix) :
 m_thread(NULL),
 m_enabled(false),
 m_idTimer(1000U, 20U * 60U),		// 20 minutes
@@ -35,16 +35,17 @@ m_rxFrequency(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
 m_height(0),
-m_desc()
+m_desc(),
+m_suffix(suffix)
 {
 	assert(!callsign.empty());
 	assert(!password.empty());
 	assert(!address.empty());
 	assert(port > 0U);
 
-	if (!suffix.empty()) {
+	if (!rptSuffix.empty()) {
 		m_callsign.append("-");
-		m_callsign.append(suffix.substr(0U, 1U));
+		m_callsign.append(rptSuffix.substr(0U, 1U));
 	}
 
 	m_thread = new CAPRSWriterThread(m_callsign, password, address, port);
@@ -75,12 +76,17 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	assert(source != NULL);
 	assert(type != NULL);
 
-	char callsign[11U];
+	char callsign[15U];
 	::memcpy(callsign, source, YSF_CALLSIGN_LENGTH);
 	callsign[YSF_CALLSIGN_LENGTH] = 0x00U;
 
 	size_t n = ::strspn(callsign, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 	callsign[n] = 0x00U;
+
+	if (!m_suffix.empty()) {
+		::strcat(callsign, "-");
+		::strcat(callsign, m_suffix.substr(0U, 1U).c_str());
+	}
 
 	double tempLat = ::fabs(fLatitude);
 	double tempLong = ::fabs(fLongitude);
@@ -116,7 +122,7 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	}
 
 	char output[300U];
-	::sprintf(output, "%s-Y>APDPRS,C4FM*,qAR,%s:!%s%c/%s%c%c %s via MMDVM",
+	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s:!%s%c/%s%c%c %s via MMDVM",
 		callsign, m_callsign.c_str(),
 		lat, (fLatitude < 0.0F) ? 'S' : 'N',
 		lon, (fLongitude < 0.0F) ? 'W' : 'E',
