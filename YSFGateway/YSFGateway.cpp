@@ -343,13 +343,10 @@ int CYSFGateway::run()
 					}
 
 					m_current.clear();
-					m_inactivityTimer.stop();
 					m_lostTimer.stop();
 					m_linkType = LINK_NONE;
 
 					startupLinking();
-				} else {
-					m_inactivityTimer.start();
 				}
 			} else {
 				if (m_linkType == LINK_YSF) {
@@ -366,10 +363,11 @@ int CYSFGateway::run()
 				}
 
 				m_current.clear();
-				m_inactivityTimer.stop();
 				m_lostTimer.stop();
 				m_linkType = LINK_NONE;
 			}
+
+			m_inactivityTimer.start();
 		}
 
 		m_lostTimer.clock(ms);
@@ -386,7 +384,7 @@ int CYSFGateway::run()
 			}
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
@@ -523,7 +521,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 				m_fcsNetwork->writeUnlink(3U);
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 
@@ -536,7 +534,6 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			bool ok = m_fcsNetwork->writeLink(name);
 			if (ok) {
 				m_current = name;
-				m_inactivityTimer.start();
 				m_lostTimer.start();
 				m_linkType = LINK_FCS;
 			} else {
@@ -552,7 +549,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_ysfNetwork->clearDestination();
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
@@ -563,7 +560,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_fcsNetwork->clearDestination();
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
