@@ -772,6 +772,8 @@ void CYSFGateway::startupLinking()
 			}
 		}
 	}
+	if (m_startup.empty())
+		 LogMessage("No connection startup");
 }
 
 void CYSFGateway::readFCSRoomsFile(const std::string& filename)
