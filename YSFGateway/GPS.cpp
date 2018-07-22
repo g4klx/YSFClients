@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ const unsigned char NULL_GPS[] = {0x47U, 0x63U};
 const unsigned char SHRT_GPS[] = {0x22U, 0x62U};
 const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 
-CGPS::CGPS(const std::string& callsign, const std::string& suffix, const std::string& password, const std::string& address, unsigned int port) :
-m_writer(callsign, suffix, password, address, port),
+CGPS::CGPS(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string suffix) :
+m_writer(callsign, rptSuffix, password, address, port, suffix),
 m_buffer(NULL),
 m_sent(false)
 {
