@@ -133,10 +133,6 @@ int CYSFGateway::run()
 			return -1;
 		}
 
-		::close(STDIN_FILENO);
-		::close(STDOUT_FILENO);
-		::close(STDERR_FILENO);
-
 		// If we are currently root...
 		if (getuid() == 0) {
 			struct passwd* user = ::getpwnam("mmdvm");
@@ -173,6 +169,14 @@ int CYSFGateway::run()
 		::fprintf(stderr, "YSFGateway: unable to open the log file\n");
 		return 1;
 	}
+
+#if !defined(_WIN32) && !defined(_WIN64)
+	if (m_daemon) {
+		::close(STDIN_FILENO);
+		::close(STDOUT_FILENO);
+		::close(STDERR_FILENO);
+	}
+#endif
 
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
