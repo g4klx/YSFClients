@@ -213,7 +213,8 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 		bool valid = false;
 
 		// Find the end marker
-		for (unsigned int i = (fn - 1U) * 40U + 20U; i > 0U; i--) {
+		unsigned int cmd_len = (fn - 1U) * 40U + 20U;
+		for (unsigned int i = cmd_len; i > 0U; i--) {
 			if (m_command[i] == 0x03U) {
 				unsigned char crc = CCRC::addCRC(m_command, i + 1U);
 				if (crc == m_command[i + 1U])
@@ -237,7 +238,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 			processDisconnect(source);
 			return WXS_DISCONNECT;
 		} else {
-			CUtils::dump("Unknown Wires-X command", m_command, fn * 20U);
+			CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
 			return WXS_NONE;
 		}
 	}
