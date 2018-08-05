@@ -136,7 +136,7 @@ bool CYSFReflectors::load()
 					refl->m_desc    = std::string(p3);
 					refl->m_address = address;
 					refl->m_port    = (unsigned int)::atoi(p5);
-					refl->m_count   = std::string(p6);;
+					refl->m_count   = std::string(p6);
 					refl->m_type    = YT_YSF;
 
 					refl->m_name.resize(16U, ' ');
