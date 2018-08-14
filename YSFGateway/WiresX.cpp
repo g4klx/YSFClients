@@ -32,6 +32,7 @@ const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
+const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
 
 const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU, 0x26U};
 const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
@@ -237,6 +238,9 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 		} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
 			processDisconnect(source);
 			return WXS_DISCONNECT;
+		} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
+			processCategory(source, m_command + 5U);
+			return WXS_NONE;
 		} else {
 			CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
 			return WXS_NONE;
@@ -261,6 +265,39 @@ void CWiresX::processDX(const unsigned char* source)
 	::LogDebug("Received DX from %10.10s", source);
 
 	m_status = WXSI_DX;
+	m_timer.start();
+}
+
+void CWiresX::processCategory(const unsigned char* source, const unsigned char* data)
+{
+	::LogDebug("Received CATEGORY request from %10.10s", source);
+
+	char buffer[6U];
+	::memcpy(buffer, data + 5U, 2U);
+	buffer[3U] = 0x00U;
+
+	unsigned int len = atoi(buffer);
+
+	if (len == 0U)
+		return;
+
+	if (len > 20U)
+		return;
+
+	m_category.clear();
+
+	for (unsigned int j = 0U; j < len; j++) {
+		::memcpy(buffer, data + 7U + j * 5U, 5U);
+		buffer[5U] = 0x00U;
+
+		std::string id = std::string(buffer, 5U);
+
+		CYSFReflector* refl = m_reflectors.findById(id);
+		if (refl)
+			m_category.push_back(refl);
+	}
+
+	m_status = WXSI_CATEGORY;
 	m_timer.start();
 }
 
@@ -354,6 +391,9 @@ void CWiresX::clock(unsigned int ms)
 			break;
 		case WXSI_DISCONNECT:
 			sendDisconnectReply();
+			break;
+		case WXSI_CATEGORY:
+			sendCategoryReply();
 			break;
 		default:
 			break;
@@ -725,9 +765,9 @@ void CWiresX::sendAllReply()
 	unsigned int k = 1029U - offset;
 	for(unsigned int i = 0U; i < k; i++)
 		data[i + offset] = 0x20U;
-	
+
 	offset += k;
-    
+
 	data[offset + 0U] = 0x03U;			// End of data marker
 	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
 
@@ -853,3 +893,73 @@ void CWiresX::sendSearchNotFoundReply()
 
 	m_seqNo++;
 }
+
+void CWiresX::sendCategoryReply()
+{
+	unsigned char data[1100U];
+	::memset(data, 0x00U, 1100U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = ALL_RESP[i];
+
+	data[5U] = '2';
+	data[6U] = '1';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 7U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 12U] = m_node.at(i);
+
+	unsigned int n = m_category.size();
+	if (n > 20U)
+		n = 20U;
+
+	::sprintf((char*)(data + 22U), "%03u%03u", n, n);
+
+	data[28U] = 0x0DU;
+
+	unsigned int offset = 29U;
+	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
+		CYSFReflector* refl = m_category.at(j);
+
+		::memset(data + offset, ' ', 50U);
+
+		data[offset + 0U] = '5';
+
+		for (unsigned int i = 0U; i < 5U; i++)
+			data[i + offset + 1U] = refl->m_id.at(i);
+
+		for (unsigned int i = 0U; i < 16U; i++)
+			data[i + offset + 6U] = refl->m_name.at(i);
+
+		for (unsigned int i = 0U; i < 3U; i++)
+			data[i + offset + 22U] = refl->m_count.at(i);
+
+		for (unsigned int i = 0U; i < 10U; i++)
+			data[i + offset + 25U] = ' ';
+
+		for (unsigned int i = 0U; i < 14U; i++)
+			data[i + offset + 35U] = refl->m_desc.at(i);
+
+		data[offset + 49U] = 0x0DU;
+	}
+
+	unsigned int k = 1029U - offset;
+	for(unsigned int i = 0U; i < k; i++)
+		data[i + offset] = 0x20U;
+
+	offset += k;
+
+	data[offset + 0U] = 0x03U;			// End of data marker
+	data[offset + 1U] = CCRC::addCRC(data, offset + 1U);
+
+	CUtils::dump(1U, "CATEGORY Reply", data, offset + 2U);
+
+	createReply(data, offset + 2U);
+
+	m_seqNo++;
+}
+
