@@ -47,6 +47,4 @@ const unsigned char YSF_CM_INDIVIDUAL = 0x03U;
 const unsigned char YSF_MR_NOT_BUSY = 0x01U;
 const unsigned char YSF_MR_BUSY     = 0x02U;
 
-const unsigned int FCS_PORT = 62500U;
-
 #endif
