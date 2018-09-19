@@ -33,8 +33,7 @@ enum SECTION {
   SECTION_LOG,
   SECTION_APRS_FI,
   SECTION_NETWORK,
-  SECTION_YSF_NETWORK,
-  SECTION_FCS_NETWORK
+  SECTION_YSF_NETWORK
 };
 
 CConf::CConf(const std::string& file) :
@@ -80,10 +79,7 @@ m_ysfNetworkYSF2DMRPort(0U),
 m_ysfNetworkYSF2NXDNAddress("127.0.0.1"),
 m_ysfNetworkYSF2NXDNPort(0U),
 m_ysfNetworkYSF2P25Address("127.0.0.1"),
-m_ysfNetworkYSF2P25Port(0U),
-m_fcsNetworkEnabled(false),
-m_fcsNetworkFile(),
-m_fcsNetworkPort(0U)
+m_ysfNetworkYSF2P25Port(0U)
 {
 }
 
@@ -119,8 +115,6 @@ bool CConf::read()
 		  section = SECTION_NETWORK;
 	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
 		  section = SECTION_YSF_NETWORK;
-	  else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-		  section = SECTION_FCS_NETWORK;
 	  else
         section = SECTION_NONE;
 
@@ -228,13 +222,6 @@ bool CConf::read()
 			m_ysfNetworkYSF2P25Address = value;
 		else if (::strcmp(key, "YSF2P25Port") == 0)
 			m_ysfNetworkYSF2P25Port = (unsigned int)::atoi(value);
-	} else if (section == SECTION_FCS_NETWORK) {
-		if (::strcmp(key, "Enable") == 0)
-			m_fcsNetworkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Rooms") == 0)
-			m_fcsNetworkFile = value;
-		else if (::strcmp(key, "Port") == 0)
-			m_fcsNetworkPort = (unsigned int)::atoi(value);
 	}
   }
 
@@ -451,19 +438,4 @@ std::string CConf::getYSFNetworkYSF2P25Address() const
 unsigned int CConf::getYSFNetworkYSF2P25Port() const
 {
 	return m_ysfNetworkYSF2P25Port;
-}
-
-bool CConf::getFCSNetworkEnabled() const
-{
-	return m_fcsNetworkEnabled;
-}
-
-std::string CConf::getFCSNetworkFile() const
-{
-	return m_fcsNetworkFile;
-}
-
-unsigned int CConf::getFCSNetworkPort() const
-{
-	return m_fcsNetworkPort;
 }

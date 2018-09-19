@@ -36,7 +36,6 @@ m_YSF2NXDNAddress(),
 m_YSF2NXDNPort(0U),
 m_YSF2P25Address(),
 m_YSF2P25Port(0U),
-m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
 m_search(),
@@ -99,11 +98,6 @@ void CYSFReflectors::setYSF2P25(const std::string& address, unsigned int port)
 	m_YSF2P25Port    = port;
 }
 
-void CYSFReflectors::addFCSRoom(const std::string& id, const std::string& name)
-{
-	m_fcsRooms.push_back(std::make_pair(id, name));
-}
-
 bool CYSFReflectors::load()
 {
 	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
@@ -137,7 +131,6 @@ bool CYSFReflectors::load()
 					refl->m_address = address;
 					refl->m_port    = (unsigned int)::atoi(p5);
 					refl->m_count   = std::string(p6);
-					refl->m_type    = YT_YSF;
 
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
@@ -162,7 +155,6 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_parrotAddress);
 		refl->m_port    = m_parrotPort;
 		refl->m_count   = "000";
-		refl->m_type    = YT_YSF;
 
 		m_newReflectors.push_back(refl);
 
@@ -178,7 +170,6 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_YSF2DMRAddress);
 		refl->m_port    = m_YSF2DMRPort;
 		refl->m_count   = "000";
-		refl->m_type    = YT_YSF;
 
 		m_newReflectors.push_back(refl);
 
@@ -194,7 +185,6 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_YSF2NXDNAddress);
 		refl->m_port    = m_YSF2NXDNPort;
 		refl->m_count   = "000";
-		refl->m_type    = YT_YSF;
 
 		m_newReflectors.push_back(refl);
 
@@ -210,33 +200,10 @@ bool CYSFReflectors::load()
 		refl->m_address = CUDPSocket::lookup(m_YSF2P25Address);
 		refl->m_port    = m_YSF2P25Port;
 		refl->m_count   = "000";
-		refl->m_type    = YT_YSF;
 
 		m_newReflectors.push_back(refl);
 
 		LogInfo("Loaded YSF2P25");
-	}
-
-	unsigned int id = 10U;
-	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = m_fcsRooms.cbegin(); it != m_fcsRooms.cend(); ++it, id++) {
-		char text[10U];
-		::sprintf(text, "%05u", id);
-
-		std::string name = it->first;
-		std::string desc = it->second;
-
-		CYSFReflector* refl = new CYSFReflector;
-		refl->m_id    = text;
-		refl->m_name  = name;
-		refl->m_desc  = desc;
-		refl->m_port  = 0U;
-		refl->m_count = "000";
-		refl->m_type  = YT_FCS;
-
-		refl->m_name.resize(16U, ' ');
-		refl->m_desc.resize(14U, ' ');
-
-		m_newReflectors.push_back(refl);
 	}
 
 	size = m_newReflectors.size();

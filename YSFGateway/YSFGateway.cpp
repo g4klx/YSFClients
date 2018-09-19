@@ -83,14 +83,12 @@ m_reflectors(NULL),
 m_wiresX(NULL),
 m_dtmf(),
 m_ysfNetwork(NULL),
-m_fcsNetwork(NULL),
 m_linkType(LINK_NONE),
 m_current(),
 m_startup(),
 m_exclude(false),
 m_inactivityTimer(1000U),
-m_lostTimer(1000U, 120U),
-m_fcsNetworkEnabled(false)
+m_lostTimer(1000U, 120U)
 {
 }
 
@@ -210,24 +208,6 @@ int CYSFGateway::run()
 		}
 	}
 
-	m_fcsNetworkEnabled = m_conf.getFCSNetworkEnabled();
-	if (m_fcsNetworkEnabled) {
-		unsigned int txFrequency = m_conf.getTxFrequency();
-		unsigned int rxFrequency = m_conf.getRxFrequency();
-		std::string locator = calculateLocator();
-		unsigned int id = m_conf.getId();
-
-		unsigned int fcsPort = m_conf.getFCSNetworkPort();
-
-		m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, rxFrequency, txFrequency, locator, id, debug);
-		ret = m_fcsNetwork->open();
-		if (!ret) {
-			::LogError("Cannot open the FCS reflector network port");
-			::LogFinalise();
-			return 1;
-		}
-	}
-
 	m_inactivityTimer.setTimeout(m_conf.getNetworkInactivityTimeout() * 60U);
 
 	std::string fileName = m_conf.getYSFNetworkHosts();
@@ -281,13 +261,6 @@ int CYSFGateway::run()
 					m_inactivityTimer.start();
 			}
 
-			if (m_fcsNetwork != NULL && m_linkType == LINK_FCS && !m_exclude) {
-				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
-					m_fcsNetwork->write(buffer);
-					m_inactivityTimer.start();
-				}
-			}
-
 			if ((buffer[34U] & 0x01U) == 0x01U) {
 				if (m_gps != NULL)
 					m_gps->reset();
@@ -308,26 +281,12 @@ int CYSFGateway::run()
 			}
 		}
 
-		if (m_fcsNetwork != NULL) {
-			while (m_fcsNetwork->read(buffer) > 0U) {
-				if (m_linkType == LINK_FCS) {
-					// Only pass through YSF data packets
-					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
-						rptNetwork.write(buffer);
-
-					m_lostTimer.start();
-				}
-			}
-		}
-
 		unsigned int ms = stopWatch.elapsed();
 		stopWatch.start();
 
 		rptNetwork.clock(ms);
 		if (m_ysfNetwork != NULL)
 			m_ysfNetwork->clock(ms);
-		if (m_fcsNetwork != NULL)
-			m_fcsNetwork->clock(ms);
 		if (m_gps != NULL)
 			m_gps->clock(ms);
 		m_wiresX->clock(ms);
@@ -340,11 +299,6 @@ int CYSFGateway::run()
 						m_wiresX->processDisconnect();
 						m_ysfNetwork->writeUnlink(3U);
 						m_ysfNetwork->clearDestination();
-					}
-
-					if (m_linkType == LINK_FCS) {
-						m_fcsNetwork->writeUnlink(3U);
-						m_fcsNetwork->clearDestination();
 					}
 
 					m_current.clear();
@@ -361,12 +315,6 @@ int CYSFGateway::run()
 					m_ysfNetwork->clearDestination();
 				}
 
-				if (m_linkType == LINK_FCS) {
-					LogMessage("Disconnecting due to inactivity");
-					m_fcsNetwork->writeUnlink(3U);
-					m_fcsNetwork->clearDestination();
-				}
-
 				m_current.clear();
 				m_lostTimer.stop();
 				m_linkType = LINK_NONE;
@@ -381,11 +329,6 @@ int CYSFGateway::run()
 				LogWarning("Link has failed, polls lost");
 				m_wiresX->processDisconnect();
 				m_ysfNetwork->clearDestination();
-			}
-
-			if (m_fcsNetwork != NULL) {
-				LogWarning("Link has failed, polls lost");
-				m_fcsNetwork->clearDestination();
 			}
 
 			m_current.clear();
@@ -408,11 +351,6 @@ int CYSFGateway::run()
 	if (m_ysfNetwork != NULL) {
 		m_ysfNetwork->close();
 		delete m_ysfNetwork;
-	}
-
-	if (m_fcsNetwork != NULL) {
-		m_fcsNetwork->close();
-		delete m_fcsNetwork;
 	}
 
 	delete m_wiresX;
@@ -482,10 +420,6 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
 
-	std::string filename = m_conf.getFCSNetworkFile();
-	if (m_fcsNetworkEnabled)
-		readFCSRoomsFile(filename);
-
 	m_reflectors->load();
 	m_wiresX->start();
 }
@@ -496,14 +430,9 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
 	switch (status) {
-	case WXS_CONNECT_YSF: {
+	case WXS_CONNECT: {
 			if (m_linkType == LINK_YSF)
 				m_ysfNetwork->writeUnlink(3U);
-
-			if (m_linkType == LINK_FCS) {
-				m_fcsNetwork->writeUnlink(3U);
-				m_fcsNetwork->clearDestination();
-			}
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
@@ -517,53 +446,12 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_linkType = LINK_YSF;
 		}
 		break;
-	case WXS_CONNECT_FCS: {
-			if (m_linkType == LINK_YSF) {
-				m_ysfNetwork->writeUnlink(3U);
-				m_ysfNetwork->clearDestination();
-			}
-
-			if (m_linkType == LINK_FCS)
-				m_fcsNetwork->writeUnlink(3U);
-
-			m_current.clear();
-			m_inactivityTimer.start();
-			m_lostTimer.stop();
-			m_linkType = LINK_NONE;
-
-			CYSFReflector* reflector = m_wiresX->getReflector();
-			LogMessage("Connect to %s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-
-			std::string name = reflector->m_name;
-			name.resize(8U, '0');
-
-			bool ok = m_fcsNetwork->writeLink(name);
-			if (ok) {
-				m_current = name;
-				m_lostTimer.start();
-				m_linkType = LINK_FCS;
-			} else {
-				LogMessage("Unknown reflector - %s", name.c_str());
-			}
-		}
-		break;
 	case WXS_DISCONNECT:
 		if (m_linkType == LINK_YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
-
-			m_current.clear();
-			m_inactivityTimer.start();
-			m_lostTimer.stop();
-			m_linkType = LINK_NONE;
-		}
-		if (m_linkType == LINK_FCS) {
-			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
-
-			m_fcsNetwork->writeUnlink(3U);
-			m_fcsNetwork->clearDestination();
 
 			m_current.clear();
 			m_inactivityTimer.start();
@@ -590,7 +478,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 	}
 
 	switch (status) {
-	case WXS_CONNECT_YSF: {
+	case WXS_CONNECT: {
 			std::string id = m_dtmf.getReflector();
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector != NULL) {
@@ -599,10 +487,6 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 				if (m_linkType == LINK_YSF)
 					m_ysfNetwork->writeUnlink(3U);
 
-				if (m_linkType == LINK_FCS) {
-					m_fcsNetwork->writeUnlink(3U);
-					m_fcsNetwork->clearDestination();
-				}
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
@@ -616,44 +500,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			}
 		}
 		break;
-	case WXS_CONNECT_FCS: {
-		std::string raw = m_dtmf.getReflector();
-		std::string id = "FCS00";
-		if (raw.length() == 2U) {
-			id += raw.at(0U) + std::string("0") + raw.at(1U);
-		} else if (raw.length() == 3U) {
-			id += raw;
-		} else {
-			LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
-			return;
-		}
 
-		if (m_linkType == LINK_YSF) {
-			m_wiresX->processDisconnect();
-			m_ysfNetwork->writeUnlink(3U);
-			m_ysfNetwork->clearDestination();
-		}
-		if (m_linkType == LINK_FCS)
-			m_fcsNetwork->writeUnlink(3U);
-
-		m_current.clear();
-		m_inactivityTimer.stop();
-		m_lostTimer.stop();
-		m_linkType = LINK_NONE;
-
-		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
-
-		bool ok = m_fcsNetwork->writeLink(id);
-		if (ok) {
-			m_current = id;
-			m_inactivityTimer.start();
-			m_lostTimer.start();
-			m_linkType = LINK_FCS;
-		} else {
-			LogMessage("Unknown reflector - %s", id.c_str());
-		}
-	}
-    break;
 	case WXS_DISCONNECT:
 		if (m_linkType == LINK_YSF) {
 			m_wiresX->processDisconnect();
@@ -668,94 +515,16 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
-		if (m_linkType == LINK_FCS) {
-			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
-
-			m_fcsNetwork->writeUnlink(3U);
-			m_fcsNetwork->clearDestination();
-
-			m_current.clear();
-			m_inactivityTimer.stop();
-			m_lostTimer.stop();
-			m_linkType = LINK_NONE;
-		}
 		break;
 	default:
 		break;
 	}
 }
 
-std::string CYSFGateway::calculateLocator()
-{
-	std::string locator;
-
-	float latitude  = m_conf.getLatitude();
-	float longitude = m_conf.getLongitude();
-
-	if (latitude < -90.0F || latitude > 90.0F)
-		return "AA00AA";
-
-	if (longitude < -360.0F || longitude > 360.0F)
-		return "AA00AA";
-
-	latitude += 90.0F;
-
-	if (longitude > 180.0F)
-		longitude -= 360.0F;
-
-	if (longitude < -180.0F)
-		longitude += 360.0F;
-
-	longitude += 180.0F;
-
-	float lon = ::floor(longitude / 20.0F);
-	float lat = ::floor(latitude  / 10.0F);
-
-	locator += 'A' + (unsigned int)lon;
-	locator += 'A' + (unsigned int)lat;
-
-	longitude -= lon * 20.0F;
-	latitude  -= lat * 10.0F;
-
-	lon = ::floor(longitude / 2.0F);
-	lat = ::floor(latitude  / 1.0F);
-
-	locator += '0' + (unsigned int)lon;
-	locator += '0' + (unsigned int)lat;
-
-	longitude -= lon * 2.0F;
-	latitude  -= lat * 1.0F;
-
-	lon = ::floor(longitude / (2.0F / 24.0F));
-	lat = ::floor(latitude  / (1.0F / 24.0F));
-
-	locator += 'A' + (unsigned int)lon;
-	locator += 'A' + (unsigned int)lat;
-
-	return locator;
-}
-
 void CYSFGateway::startupLinking()
 {
 	if (!m_startup.empty()) {
-		if (m_startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
-			m_current.clear();
-			m_inactivityTimer.stop();
-			m_lostTimer.stop();
-			m_linkType = LINK_NONE;
-
-			bool ok = m_fcsNetwork->writeLink(m_startup);
-			if (ok) {
-				LogMessage("Automatic (re-)connection to %s", m_startup.c_str());
-
-				m_current = m_startup;
-				m_inactivityTimer.start();
-				m_lostTimer.start();
-				m_linkType = LINK_FCS;
-			} else {
-				LogMessage("Unknown reflector - %s", m_startup.c_str());
-			}
-		} else if (m_ysfNetwork != NULL) {
+		if (m_ysfNetwork != NULL) {
 			m_current.clear();
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
@@ -779,31 +548,4 @@ void CYSFGateway::startupLinking()
 	}
 	if (m_startup.empty())
 		 LogMessage("No connection startup");
-}
-
-void CYSFGateway::readFCSRoomsFile(const std::string& filename)
-{
-	FILE* fp = ::fopen(filename.c_str(), "rt");
-	if (fp == NULL)
-		return;
-
-	unsigned int count = 0U;
-
-	char buffer[200U];
-	while (::fgets(buffer, 200, fp) != NULL) {
-		if (buffer[0U] == '#')
-			continue;
-
-		char* p1 = ::strtok(buffer, ";");
-		char* p2 = ::strtok(NULL, ";");
-
-		if (p1 != NULL && p2 != NULL) {
-			m_wiresX->addFCSRoom(p1, p2);
-			count++;
-		}
-	}
-
-	::fclose(fp);
-
-	LogInfo("Loaded %u FCS room descriptions", count);
 }

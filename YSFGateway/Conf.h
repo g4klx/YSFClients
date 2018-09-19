@@ -83,11 +83,6 @@ public:
   std::string  getYSFNetworkYSF2P25Address() const;
   unsigned int getYSFNetworkYSF2P25Port() const;
 
-  // The FCS Network section
-  bool         getFCSNetworkEnabled() const;
-  std::string  getFCSNetworkFile() const;
-  unsigned int getFCSNetworkPort() const;
-
 private:
   std::string  m_file;
   std::string  m_callsign;
@@ -137,10 +132,6 @@ private:
   unsigned int m_ysfNetworkYSF2NXDNPort;
   std::string  m_ysfNetworkYSF2P25Address;
   unsigned int m_ysfNetworkYSF2P25Port;
-
-  bool         m_fcsNetworkEnabled;
-  std::string  m_fcsNetworkFile;
-  unsigned int m_fcsNetworkPort;
 };
 
 #endif

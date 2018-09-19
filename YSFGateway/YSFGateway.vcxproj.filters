@@ -86,9 +86,6 @@
     <ClInclude Include="YSFReflectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FCSNetwork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StopWatch.cpp">
@@ -155,9 +152,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="YSFReflectors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FCSNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

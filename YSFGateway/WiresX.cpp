@@ -168,11 +168,6 @@ void CWiresX::setYSF2P25(const std::string& address, unsigned int port)
 	m_reflectors.setYSF2P25(address, port);
 }
 
-void CWiresX::addFCSRoom(const std::string& id, const std::string& name)
-{
-	m_reflectors.addFCSRoom(id, name);
-}
-
 bool CWiresX::start()
 {
 	m_reflectors.reload();
@@ -341,14 +336,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	m_status = WXSI_CONNECT;
 	m_timer.start();
 
-	switch (m_reflector->m_type) {
-	case YT_YSF:
-		return WXS_CONNECT_YSF;
-	case YT_FCS:
-		return WXS_CONNECT_FCS;
-	default:
-		return WXS_NONE;
-	}
+	return WXS_CONNECT;
 }
 
 void CWiresX::processConnect(CYSFReflector* reflector)

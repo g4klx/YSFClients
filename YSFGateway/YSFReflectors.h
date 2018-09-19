@@ -25,11 +25,6 @@
 #include <vector>
 #include <string>
 
-enum YSF_TYPE {
-	YT_YSF,
-	YT_FCS
-};
-
 class CYSFReflector {
 public:
 	CYSFReflector() :
@@ -38,8 +33,7 @@ public:
 	m_desc(),
 	m_count("000"),
 	m_address(),
-	m_port(0U),
-	m_type(YT_YSF)
+	m_port(0U)
 	{
 	}
 
@@ -49,7 +43,6 @@ public:
 	std::string  m_count;
 	in_addr      m_address;
 	unsigned int m_port;
-	YSF_TYPE     m_type;
 };
 
 class CYSFReflectors {
@@ -61,7 +54,6 @@ public:
 	void setYSF2DMR(const std::string& address, unsigned int port);
 	void setYSF2NXDN(const std::string& address, unsigned int port);
 	void setYSF2P25(const std::string& address, unsigned int port);
-	void addFCSRoom(const std::string& id, const std::string& name);
 
 	bool load();
 
@@ -86,7 +78,6 @@ private:
 	unsigned int                m_YSF2NXDNPort;
 	std::string                 m_YSF2P25Address;
 	unsigned int                m_YSF2P25Port;
-	std::vector<std::pair<std::string, std::string>> m_fcsRooms;
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;

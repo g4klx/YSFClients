@@ -21,7 +21,6 @@
 
 #include "YSFNetwork.h"
 #include "YSFReflectors.h"
-#include "FCSNetwork.h"
 #include "WiresX.h"
 #include "Timer.h"
 #include "Conf.h"
@@ -32,8 +31,7 @@
 
 enum LINK_TYPE {
 	LINK_NONE,
-	LINK_YSF,
-	LINK_FCS
+	LINK_YSF
 };
 
 class CYSFGateway
@@ -53,22 +51,18 @@ private:
 	CWiresX*        m_wiresX;
 	CDTMF           m_dtmf;
 	CYSFNetwork*    m_ysfNetwork;
-	CFCSNetwork*    m_fcsNetwork;
 	LINK_TYPE       m_linkType;
 	std::string     m_current;
 	std::string     m_startup;
 	bool            m_exclude;
 	CTimer          m_inactivityTimer;
 	CTimer          m_lostTimer;
-	bool            m_fcsNetworkEnabled;
 
 	void startupLinking();
-	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
-	void readFCSRoomsFile(const std::string& filename);
 };
 
 #endif
