@@ -22,6 +22,7 @@
 #include "YSFNetwork.h"
 #include "YSFReflectors.h"
 #include "FCSNetwork.h"
+#include "APRSWriter.h"
 #include "WiresX.h"
 #include "Timer.h"
 #include "Conf.h"
@@ -48,6 +49,7 @@ private:
 	std::string     m_callsign;
 	std::string     m_suffix;
 	CConf           m_conf;
+	CAPRSWriter*    m_writer;
 	CGPS*           m_gps;
 	CYSFReflectors* m_reflectors;
 	CWiresX*        m_wiresX;

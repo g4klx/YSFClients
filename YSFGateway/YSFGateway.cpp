@@ -78,6 +78,7 @@ CYSFGateway::CYSFGateway(const std::string& configFile) :
 m_callsign(),
 m_suffix(),
 m_conf(configFile),
+m_writer(NULL),
 m_gps(NULL),
 m_reflectors(NULL),
 m_wiresX(NULL),
@@ -328,8 +329,8 @@ int CYSFGateway::run()
 			m_ysfNetwork->clock(ms);
 		if (m_fcsNetwork != NULL)
 			m_fcsNetwork->clock(ms);
-		if (m_gps != NULL)
-			m_gps->clock(ms);
+		if (m_writer != NULL)
+			m_writer->clock(ms);
 		m_wiresX->clock(ms);
 
 		m_inactivityTimer.clock(ms);
@@ -401,7 +402,8 @@ int CYSFGateway::run()
 	rptNetwork.close();
 
 	if (m_gps != NULL) {
-		m_gps->close();
+		m_writer->close();
+		delete m_writer;
 		delete m_gps;
 	}
 
@@ -433,7 +435,7 @@ void CYSFGateway::createGPS()
 	std::string suffix   = m_conf.getAPRSSuffix();
 	std::string desc     = m_conf.getAPRSDescription();
 
-	m_gps = new CGPS(m_callsign, m_suffix, password, hostname, port, suffix);
+	m_writer = new CAPRSWriter(m_callsign, m_suffix, password, hostname, port, suffix);
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
@@ -441,13 +443,24 @@ void CYSFGateway::createGPS()
 	float longitude          = m_conf.getLongitude();
 	int height               = m_conf.getHeight();
 
-	m_gps->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
+	m_writer->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
 
-	bool ret = m_gps->open();
-	if (!ret) {
-		delete m_gps;
-		m_gps = NULL;
+	bool enabled = m_conf.getMobileGPSEnabled();
+	if (enabled) {
+	        std::string address = m_conf.getMobileGPSAddress();
+	        unsigned int port   = m_conf.getMobileGPSPort();
+
+	        m_writer->setMobileGPS(address, port);
 	}
+
+	bool ret = m_writer->open();
+	if (!ret) {
+	        delete m_writer;
+		m_writer = NULL;
+		return;
+	}
+
+	m_gps = new CGPS(m_writer);
 }
 
 void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
