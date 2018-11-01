@@ -33,7 +33,8 @@ enum SECTION {
   SECTION_LOG,
   SECTION_APRS_FI,
   SECTION_NETWORK,
-  SECTION_YSF_NETWORK
+  SECTION_YSF_NETWORK,
+  SECTION_MOBILE_GPS
 };
 
 CConf::CConf(const std::string& file) :
@@ -79,7 +80,10 @@ m_ysfNetworkYSF2DMRPort(0U),
 m_ysfNetworkYSF2NXDNAddress("127.0.0.1"),
 m_ysfNetworkYSF2NXDNPort(0U),
 m_ysfNetworkYSF2P25Address("127.0.0.1"),
-m_ysfNetworkYSF2P25Port(0U)
+m_ysfNetworkYSF2P25Port(0U),
+m_mobileGPSEnabled(false),
+m_mobileGPSAddress(),
+m_mobileGPSPort(0U)
 {
 }
 
@@ -115,13 +119,15 @@ bool CConf::read()
 		  section = SECTION_NETWORK;
 	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
 		  section = SECTION_YSF_NETWORK;
+	  else if (::strncmp(buffer, "[Mobile GPS]", 12U) == 0)
+		  section = SECTION_MOBILE_GPS;
 	  else
         section = SECTION_NONE;
 
       continue;
     }
 
-    char* key   = ::strtok(buffer, " \t=\r\n");
+    char* key = ::strtok(buffer, " \t=\r\n");
     if (key == NULL)
       continue;
 
@@ -222,6 +228,13 @@ bool CConf::read()
 			m_ysfNetworkYSF2P25Address = value;
 		else if (::strcmp(key, "YSF2P25Port") == 0)
 			m_ysfNetworkYSF2P25Port = (unsigned int)::atoi(value);
+	} else if (section == SECTION_MOBILE_GPS) {
+		if (::strcmp(key, "Enable") == 0)
+			m_mobileGPSEnabled = ::atoi(value) == 1;
+		else if (::strcmp(key, "Address") == 0)
+			m_mobileGPSAddress = value;
+		else if (::strcmp(key, "Port") == 0)
+			m_mobileGPSPort = (unsigned int)::atoi(value);
 	}
   }
 
@@ -439,3 +452,19 @@ unsigned int CConf::getYSFNetworkYSF2P25Port() const
 {
 	return m_ysfNetworkYSF2P25Port;
 }
+
+bool CConf::getMobileGPSEnabled() const
+{
+	return m_mobileGPSEnabled;
+}
+
+std::string CConf::getMobileGPSAddress() const
+{
+	return m_mobileGPSAddress;
+}
+
+unsigned int CConf::getMobileGPSPort() const
+{
+	return m_mobileGPSPort;
+}
+

@@ -83,6 +83,11 @@ public:
   std::string  getYSFNetworkYSF2P25Address() const;
   unsigned int getYSFNetworkYSF2P25Port() const;
 
+  // The Mobile GPS section
+  bool         getMobileGPSEnabled() const;
+  std::string  getMobileGPSAddress() const;
+  unsigned int getMobileGPSPort() const;
+
 private:
   std::string  m_file;
   std::string  m_callsign;
@@ -132,6 +137,10 @@ private:
   unsigned int m_ysfNetworkYSF2NXDNPort;
   std::string  m_ysfNetworkYSF2P25Address;
   unsigned int m_ysfNetworkYSF2P25Port;
+
+  bool         m_mobileGPSEnabled;
+  std::string  m_mobileGPSAddress;
+  unsigned int m_mobileGPSPort;
 };
 
 #endif
