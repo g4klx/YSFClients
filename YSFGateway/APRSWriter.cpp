@@ -276,20 +276,18 @@ void CAPRSWriter::sendIdFrameMobile()
 	buffer[ret] = '\0';
 
 	// Parse the GPS data
-	char* p1 = ::strtok((char*)buffer, ",");	// Latitude
-	char* p2 = ::strtok(NULL, ",");			// Longitude
-	char* p3 = ::strtok(NULL, ",");			// Altitude (m)
-	char* p4 = ::strtok(NULL, ",");			// Speed (kms/h)
+	char* p1 = ::strtok((char*)buffer, ",\n");	// Latitude
+	char* p2 = ::strtok(NULL, ",\n");		// Longitude
+	char* p3 = ::strtok(NULL, ",\n");		// Altitude (m)
+	char* p4 = ::strtok(NULL, ",\n");		// Speed (kms/h)
 	char* p5 = ::strtok(NULL, "\n");		// Bearing
 
-	if (p1 == NULL || p2 == NULL || p3 == NULL || p4 == NULL || p5 == NULL)
+	if (p1 == NULL || p2 == NULL || p3 == NULL)
 		return;
 
 	float rawLatitude  = ::atof(p1);
 	float rawLongitude = ::atof(p2);
 	float rawAltitude  = ::atof(p3);
-	float rawSpeed     = ::atof(p4);
-	float rawBearing   = ::atof(p5);
 
 	char desc[200U];
 	if (m_txFrequency != 0U) {
@@ -337,12 +335,19 @@ void CAPRSWriter::sendIdFrameMobile()
 		server.append("S");
 
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&%03.0f/%03.0f/A=%06.0f%s %s",
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&",
 		m_callsign.c_str(), server.c_str(),
 		lat, (rawLatitude < 0.0F)  ? 'S' : 'N',
-		lon, (rawLongitude < 0.0F) ? 'W' : 'E',
-		rawBearing, rawSpeed * 0.539957F,
-		float(rawAltitude) * 3.28F, band, desc);
+		lon, (rawLongitude < 0.0F) ? 'W' : 'E');
+
+	if (p4 != NULL && p5 != NULL) {
+		float rawSpeed   = ::atof(p4);
+		float rawBearing = ::atof(p5);
+
+		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawSpeed * 0.54F);
+	}
+
+	::sprintf(output + ::strlen(output), "/A=%06.0f%s %s", float(rawAltitude) * 3.28F, band, desc);
 
 	m_thread->write(output);
 
