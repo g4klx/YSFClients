@@ -45,9 +45,11 @@ public:
 
 	bool open();
 
-	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc);
+	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc);
 
-	void setMobileGPS(const std::string& address, unsigned int port);
+	void setStaticLocation(float latitude, float longitude, int height);
+
+	void setMobileLocation(const std::string& address, unsigned int port);
 
 	void write(const unsigned char* source, const char* type, unsigned char radio, float latitude, float longitude);
 

@@ -28,7 +28,7 @@
 CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string& suffix) :
 m_thread(NULL),
 m_enabled(false),
-m_idTimer(1000U, 20U * 60U),		// 20 minutes
+m_idTimer(1000U),
 m_callsign(callsign),
 m_txFrequency(0U),
 m_rxFrequency(0U),
@@ -58,17 +58,21 @@ CAPRSWriter::~CAPRSWriter()
 {
 }
 
-void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc)
+void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc)
 {
 	m_txFrequency = txFrequency;
 	m_rxFrequency = rxFrequency;
-	m_latitude    = latitude;
-	m_longitude   = longitude;
-	m_height      = height;
 	m_desc        = desc;
 }
 
-void CAPRSWriter::setMobileGPS(const std::string& address, unsigned int port)
+void CAPRSWriter::setStaticLocation(float latitude, float longitude, int height)
+{
+	m_latitude  = latitude;
+	m_longitude = longitude;
+	m_height    = height;
+}
+
+void CAPRSWriter::setMobileLocation(const std::string& address, unsigned int port)
 {
 	assert(!address.empty());
 	assert(port > 0U);
@@ -91,6 +95,8 @@ bool CAPRSWriter::open()
 
 		// Poll the GPS every minute
 		m_idTimer.setTimeout(60U);
+	} else {
+		m_idTimer.setTimeout(20U * 60U);
 	}
 
 	m_idTimer.start();
@@ -341,8 +347,8 @@ void CAPRSWriter::sendIdFrameMobile()
 		lon, (rawLongitude < 0.0F) ? 'W' : 'E');
 
 	if (pBearing != NULL && pVelocity != NULL) {
-		float rawVelocity  = ::atof(pVelocity);
 		float rawBearing   = ::atof(pBearing);
+		float rawVelocity  = ::atof(pVelocity);
 
 		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
 	}

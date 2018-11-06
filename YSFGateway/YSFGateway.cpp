@@ -439,18 +439,21 @@ void CYSFGateway::createGPS()
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
-	float latitude           = m_conf.getLatitude();
-	float longitude          = m_conf.getLongitude();
-	int height               = m_conf.getHeight();
 
-	m_writer->setInfo(txFrequency, rxFrequency, latitude, longitude, height, desc);
+	m_writer->setInfo(txFrequency, rxFrequency, desc);
 
 	bool enabled = m_conf.getMobileGPSEnabled();
 	if (enabled) {
 	        std::string address = m_conf.getMobileGPSAddress();
 	        unsigned int port   = m_conf.getMobileGPSPort();
 
-	        m_writer->setMobileGPS(address, port);
+	        m_writer->setMobileLocation(address, port);
+	} else {
+	        float latitude  = m_conf.getLatitude();
+                float longitude = m_conf.getLongitude();
+                int height      = m_conf.getHeight();
+
+                m_writer->setStaticLocation(latitude, longitude, height);
 	}
 
 	bool ret = m_writer->open();
