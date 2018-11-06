@@ -433,12 +433,12 @@ void CYSFGateway::createGPS()
 	unsigned int port    = m_conf.getAPRSPort();
 	std::string password = m_conf.getAPRSPassword();
 	std::string suffix   = m_conf.getAPRSSuffix();
-	std::string desc     = m_conf.getAPRSDescription();
 
 	m_writer = new CAPRSWriter(m_callsign, m_suffix, password, hostname, port, suffix);
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
+	std::string desc         = m_conf.getAPRSDescription();
 
 	m_writer->setInfo(txFrequency, rxFrequency, desc);
 

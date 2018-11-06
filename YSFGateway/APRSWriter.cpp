@@ -262,8 +262,6 @@ void CAPRSWriter::sendIdFrameFixed()
 		float(m_height) * 3.28F, band, desc);
 
 	m_thread->write(output);
-
-	m_idTimer.start();
 }
 
 void CAPRSWriter::sendIdFrameMobile()
@@ -356,6 +354,4 @@ void CAPRSWriter::sendIdFrameMobile()
 	::sprintf(output + ::strlen(output), "/A=%06.0f%s %s", float(rawAltitude) * 3.28F, band, desc);
 
 	m_thread->write(output);
-
-	m_idTimer.start();
 }
