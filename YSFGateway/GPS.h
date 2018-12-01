@@ -25,23 +25,15 @@
 
 class CGPS {
 public:
-	CGPS(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string suffix);
+	CGPS(CAPRSWriter* writer);
 	~CGPS();
-
-	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, float latitude, float longitude, int height, const std::string& desc);
-
-	bool open();
 
 	void data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
 
-	void clock(unsigned int ms);
-
 	void reset();
 
-	void close();
-
 private:
-	CAPRSWriter    m_writer;
+	CAPRSWriter*   m_writer;
 	unsigned char* m_buffer;
 	bool           m_sent;
 

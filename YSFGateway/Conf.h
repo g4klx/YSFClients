@@ -88,6 +88,11 @@ public:
   std::string  getFCSNetworkFile() const;
   unsigned int getFCSNetworkPort() const;
 
+  // The Mobile GPS section
+  bool         getMobileGPSEnabled() const;
+  std::string  getMobileGPSAddress() const;
+  unsigned int getMobileGPSPort() const;
+
 private:
   std::string  m_file;
   std::string  m_callsign;
@@ -141,6 +146,10 @@ private:
   bool         m_fcsNetworkEnabled;
   std::string  m_fcsNetworkFile;
   unsigned int m_fcsNetworkPort;
+
+  bool         m_mobileGPSEnabled;
+  std::string  m_mobileGPSAddress;
+  unsigned int m_mobileGPSPort;
 };
 
 #endif
