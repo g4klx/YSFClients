@@ -303,12 +303,12 @@ void CWiresX::processCategory(const unsigned char* source, const unsigned char* 
 
 void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 {
+	char buffer[4U];
+	::memcpy(buffer, data + 2U, 3U);
+	buffer[3U] = 0x00U;
+
 	if (data[0U] == '0' && data[1] == '1') {
 		::LogDebug("Received ALL for \"%3.3s\" from %10.10s", data + 2U, source);
-
-		char buffer[4U];
-		::memcpy(buffer, data + 2U, 3U);
-		buffer[3U] = 0x00U;
 
 		m_start = ::atoi(buffer);
 		if (m_start > 0U)
@@ -319,6 +319,10 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 		m_timer.start();
 	} else if (data[0U] == '1' && data[1U] == '1') {
 		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, source);
+
+		m_start = ::atoi(buffer);
+		if (m_start > 0U)
+			m_start--;
 
 		m_search = std::string((char*)(data + 5U), 16U);
 
@@ -813,7 +817,7 @@ void CWiresX::sendSearchReply()
 	unsigned int total = search.size();
 	if (total > 999U) total = 999U;
 
-	unsigned int n = search.size();
+	unsigned int n = search.size() - m_start;
 	if (n > 20U) n = 20U;
 
 	::sprintf((char*)(data + 23U), "%02u%03u", n, total);
@@ -822,7 +826,7 @@ void CWiresX::sendSearchReply()
 
 	unsigned int offset = 29U;
 	for (unsigned int j = 0U; j < n; j++, offset += 50U) {
-		CYSFReflector* refl = search.at(j);
+		CYSFReflector* refl = search.at(j + m_start);
 
 		::memset(data + offset, ' ', 50U);
 
