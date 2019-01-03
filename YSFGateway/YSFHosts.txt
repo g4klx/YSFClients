@@ -283,3 +283,4 @@
 51125;ysf.dstar.su;DSTAR.SU YSF;188.42.30.175;42000;007;https://ysf.dstar.su/dash/
 94614;YSF004;Crossconnect t;44.103.34.3;42000;001;http://ysf004.kb8zgl.net/YSFReflector
 88240;ZOMBIE-ALERT;SE MI DIGITAL;107.141.52.226;42000;009;
+31075;US YSF317;IDHR YSF REF;ysf317.nf9k.net;42000;000;http://ysf317.nf9k.net
