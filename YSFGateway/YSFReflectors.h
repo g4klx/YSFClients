@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2019 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public:
 
 class CYSFReflectors {
 public:
-	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime);
+	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper);
 	~CYSFReflectors();
 
 	void setParrot(const std::string& address, unsigned int port);	
@@ -90,6 +90,7 @@ private:
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;
+	bool                        m_makeUpper;
 	CTimer                      m_timer;
 };
 

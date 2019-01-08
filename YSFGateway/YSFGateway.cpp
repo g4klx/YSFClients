@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2019 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -233,8 +233,9 @@ int CYSFGateway::run()
 
 	std::string fileName = m_conf.getYSFNetworkHosts();
 	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
+	bool wiresXMakeUpper = m_conf.getWiresXMakeUpper();
 
-	m_reflectors = new CYSFReflectors(fileName, reloadTime);
+	m_reflectors = new CYSFReflectors(fileName, reloadTime, wiresXMakeUpper);
 	m_reflectors->reload();
 
 	createWiresX(&rptNetwork);

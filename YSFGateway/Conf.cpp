@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015-2019 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ m_rptAddress(),
 m_rptPort(0U),
 m_myAddress(),
 m_myPort(0U),
+m_wiresXMakeUpper(true),
 m_daemon(false),
 m_rxFrequency(0U),
 m_txFrequency(0U),
@@ -159,6 +160,8 @@ bool CConf::read()
 			m_myAddress = value;
 		else if (::strcmp(key, "LocalPort") == 0)
 			m_myPort = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "WiresXMakeUpper") == 0)
+			m_wiresXMakeUpper = ::atoi(value) == 1;
 		else if (::strcmp(key, "Daemon") == 0)
 			m_daemon = ::atoi(value) == 1;
 	} else if (section == SECTION_INFO) {
@@ -289,6 +292,11 @@ std::string CConf::getMyAddress() const
 unsigned int CConf::getMyPort() const
 {
 	return m_myPort;
+}
+
+bool CConf::getWiresXMakeUpper() const
+{
+	return m_wiresXMakeUpper;
 }
 
 bool CConf::getDaemon() const
