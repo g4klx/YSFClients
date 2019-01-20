@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2019 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include <cstring>
 #include <cctype>
 
-CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime) :
+CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper) :
 m_hostsFile(hostsFile),
 m_parrotAddress(),
 m_parrotPort(0U),
@@ -40,6 +40,7 @@ m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
 m_search(),
+m_makeUpper(makeUpper),
 m_timer(1000U, reloadTime * 60U)
 {
 	if (reloadTime > 0U)
@@ -242,6 +243,13 @@ bool CYSFReflectors::load()
 	size = m_newReflectors.size();
 	if (size == 0U)
 		return false;
+
+	if (m_makeUpper) {
+		for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it) {
+			std::transform((*it)->m_name.begin(), (*it)->m_name.end(), (*it)->m_name.begin(), ::toupper);
+			std::transform((*it)->m_desc.begin(), (*it)->m_desc.end(), (*it)->m_desc.begin(), ::toupper);
+		}
+	}
 
 	std::sort(m_newReflectors.begin(), m_newReflectors.end(), refComparison);
 

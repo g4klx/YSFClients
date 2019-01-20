@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015-2019 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ public:
   unsigned int getRptPort() const;
   std::string  getMyAddress() const;
   unsigned int getMyPort() const;
+  bool         getWiresXMakeUpper() const;
   bool         getDaemon() const;
 
   // The Info section
@@ -102,6 +103,7 @@ private:
   unsigned int m_rptPort;
   std::string  m_myAddress;
   unsigned int m_myPort;
+  bool         m_wiresXMakeUpper;
   bool         m_daemon;
 
   unsigned int m_rxFrequency;
