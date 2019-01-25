@@ -244,6 +244,7 @@ int CYSFGateway::run()
 
 	m_startup   = m_conf.getNetworkStartup();
 	bool revert = m_conf.getNetworkRevert();
+	bool wiresXCommandPassthrough = m_conf.getWiresXCommandPassthrough();
 
 	startupLinking();
 
@@ -266,12 +267,18 @@ int CYSFGateway::run()
 				unsigned char fn = fich.getFN();
 				unsigned char ft = fich.getFT();
 
-				// Don't send out control data
-				m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-
-				processWiresX(buffer, fi, dt, fn, ft);
-
-				processDTMF(buffer, dt);
+				CYSFReflector* reflector = m_wiresX->getReflector();
+				if ( (wiresXCommandPassthrough == true) && (m_linkType == LINK_YSF) && (reflector->m_name.rfind("YSF2DMR", 0) == 0 || reflector->m_name.rfind("YSF2P25", 0) == 0 || reflector->m_name.rfind("YSF2NXDN", 0) == 0) ) {
+                                        // Allow WiresX to Pass Through
+					processDTMF(buffer, dt);
+					processWiresX(buffer, fi, dt, fn, ft, true);
+                                }
+                                else {
+					// Don't Pass Control Commands
+					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+					processDTMF(buffer, dt);
+					processWiresX(buffer, fi, dt, fn, ft, false);
+				}
 
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
@@ -507,11 +514,11 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
+void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough)
 {
 	assert(buffer != NULL);
 
-	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft);
+	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, wiresXCommandPassthrough);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
 			if (m_linkType == LINK_YSF)

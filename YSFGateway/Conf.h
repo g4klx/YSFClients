@@ -38,6 +38,7 @@ public:
   std::string  getMyAddress() const;
   unsigned int getMyPort() const;
   bool         getWiresXMakeUpper() const;
+  bool         getWiresXCommandPassthrough() const;
   bool         getDaemon() const;
 
   // The Info section
@@ -104,6 +105,7 @@ private:
   std::string  m_myAddress;
   unsigned int m_myPort;
   bool         m_wiresXMakeUpper;
+  bool         m_wiresXCommandPassthrough;
   bool         m_daemon;
 
   unsigned int m_rxFrequency;

@@ -56,7 +56,7 @@ public:
 
 	bool start();
 
-	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
+	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough);
 
 	CYSFReflector* getReflector() const;
 	void setReflector(CYSFReflector* reflector);
@@ -87,6 +87,7 @@ private:
 	unsigned int    m_start;
 	std::string     m_search;
 	std::vector<CYSFReflector*> m_category;
+	bool            m_wiresXCommandPassthrough;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
 	void processDX(const unsigned char* source);
