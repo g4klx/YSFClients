@@ -574,6 +574,10 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 	case WXS_DISCONNECT:
 		if (m_linkType == LINK_YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
+			if ( (wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {
+				m_ysfNetwork->write(buffer);
+				m_wiresX->sendDisconnectReply();
+			}
 
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
