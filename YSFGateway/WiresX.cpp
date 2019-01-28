@@ -228,7 +228,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 			return WXS_NONE;
 
 		// If we are using WiresX Passthrough (we already know we are on a YSF2xxx room from YSFGateway
-		if (wiresXCommandPassthrough == true) {
+		if (wiresXCommandPassthrough) {
 			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
                                 return WXS_NONE;
                         } else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
