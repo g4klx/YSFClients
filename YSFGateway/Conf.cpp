@@ -48,6 +48,7 @@ m_rptPort(0U),
 m_myAddress(),
 m_myPort(0U),
 m_wiresXMakeUpper(true),
+m_wiresXCommandPassthrough(false),
 m_daemon(false),
 m_rxFrequency(0U),
 m_txFrequency(0U),
@@ -162,6 +163,8 @@ bool CConf::read()
 			m_myPort = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "WiresXMakeUpper") == 0)
 			m_wiresXMakeUpper = ::atoi(value) == 1;
+		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
+			m_wiresXCommandPassthrough = ::atoi(value) == 1;
 		else if (::strcmp(key, "Daemon") == 0)
 			m_daemon = ::atoi(value) == 1;
 	} else if (section == SECTION_INFO) {
@@ -297,6 +300,11 @@ unsigned int CConf::getMyPort() const
 bool CConf::getWiresXMakeUpper() const
 {
 	return m_wiresXMakeUpper;
+}
+
+bool CConf::getWiresXCommandPassthrough() const
+{
+	return m_wiresXCommandPassthrough;
 }
 
 bool CConf::getDaemon() const
