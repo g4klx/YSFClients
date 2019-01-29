@@ -268,7 +268,7 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if ( (wiresXCommandPassthrough) && (reflector->reflector->m_wiresX) ) {
+				if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
                                         // Allow WiresX to Pass Through
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fi, dt, fn, ft, true);
