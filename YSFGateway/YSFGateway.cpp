@@ -268,13 +268,22 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
-                                        // Allow WiresX to Pass Through
-					processDTMF(buffer, dt);
-					processWiresX(buffer, fi, dt, fn, ft, true);
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF) {
+					// Connected to a YSF reflector, figure out what kind it is
+					if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
+                                        	// Pass Control Commands (WiresX capable reflector)
+						processDTMF(buffer, dt);
+						processWiresX(buffer, fi, dt, fn, ft, true);
+					}
+					else {
+						// Don't Pass Control Commands (Not a WiresX capable reflector)
+						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+						processDTMF(buffer, dt);
+						processWiresX(buffer, fi, dt, fn, ft, false);
+					}
                                 }
                                 else {
-					// Don't Pass Control Commands
+					// Don't Pass Control Commands (Not connected to a reflector)
 					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fi, dt, fn, ft, false);
