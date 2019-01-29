@@ -429,10 +429,14 @@ void CWiresX::clock(unsigned int ms)
 	}
 }
 
-void CWiresX::createReply(const unsigned char* data, unsigned int length)
+void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network)
 {
 	assert(data != NULL);
 	assert(length > 0U);
+
+	// If we don't explicitly pass a network, use the default one.
+	if (network == NULL)
+		network = m_network;
 
 	unsigned char bt = 0U;
 
@@ -475,7 +479,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	buffer[34U] = seqNo;
 	seqNo += 2U;
 
-	m_network->write(buffer);
+	network->write(buffer);
 
 	fich.setFI(YSF_FI_COMMUNICATIONS);
 
@@ -522,7 +526,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 		buffer[34U] = seqNo;
 		seqNo += 2U;
 
-		m_network->write(buffer);
+		network->write(buffer);
 
 		fn++;
 		if (fn >= 8U) {
@@ -542,7 +546,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	buffer[34U] = seqNo | 0x01U;
 
-	m_network->write(buffer);
+	network->write(buffer);
 }
 
 unsigned char CWiresX::calculateFT(unsigned int length, unsigned int offset) const
@@ -633,6 +637,27 @@ void CWiresX::sendDXReply()
 	CUtils::dump(1U, "DX Reply", data, 129U);
 
 	createReply(data, 129U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendConnect(CYSFNetwork* network)
+{
+	unsigned char data[20U];
+	::memset(data, 0x00U, 20U);
+	::memset(data, ' ', 16U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 3U; i++)
+		data[i + 1U] = DX_REQ[i];
+
+	data[15U] = 0x03U;			// End of data marker
+	data[16U] = CCRC::addCRC(data, 16U);
+
+	CUtils::dump(1U, "CONNECT", data, 20U);
+
+	createReply(data, 20U, network);
 
 	m_seqNo++;
 }

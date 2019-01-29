@@ -64,6 +64,8 @@ public:
 	void processConnect(CYSFReflector* reflector);
 	void processDisconnect(const unsigned char* source = NULL);
 
+	void sendConnect(CYSFNetwork* network);
+
 	void clock(unsigned int ms);
 
 private:
@@ -102,7 +104,7 @@ private:
 	void sendSearchNotFoundReply();
 	void sendCategoryReply();
 
-	void createReply(const unsigned char* data, unsigned int length);
+	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = NULL);
 	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };
 
