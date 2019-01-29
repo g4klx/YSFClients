@@ -268,7 +268,7 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if ( (wiresXCommandPassthrough) && (m_linkType == LINK_YSF) && (reflector->m_name.rfind("YSF2DMR", 0) == 0 || reflector->m_name.rfind("YSF2P25", 0) == 0 || reflector->m_name.rfind("YSF2NXDN", 0) == 0) ) {
+				if ( (wiresXCommandPassthrough) && (reflector->reflector->m_wiresX) ) {
                                         // Allow WiresX to Pass Through
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fi, dt, fn, ft, true);
@@ -539,6 +539,11 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_inactivityTimer.start();
 			m_lostTimer.start();
 			m_linkType = LINK_YSF;
+
+			// If we are linking to a YSF2xxx mode, send the YSF2xxx gateway the link command too
+			if (reflector->m_wiresX) {
+				m_wiresX->sendConnect(m_ysfNetwork);
+			}
 		}
 		break;
 	case WXS_CONNECT_FCS: {
