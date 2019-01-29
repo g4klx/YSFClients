@@ -550,7 +550,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_linkType = LINK_YSF;
 
 			// If we are linking to a YSF2xxx mode, send the YSF2xxx gateway the link command too
-			if (reflector->m_wiresX) {
+			if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
 				m_wiresX->sendConnect(m_ysfNetwork);
 			}
 		}
