@@ -268,9 +268,9 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if ( (wiresXCommandPassthrough) && (reflector) ) {
-					// Connected to a reflector, figure out what kind it is
-					if (reflector->m_wiresX) {
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF) {
+					// Connected to a YSF reflector, figure out what kind it is
+					if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
                                         	// Pass Control Commands (WiresX capable reflector)
 						processDTMF(buffer, dt);
 						processWiresX(buffer, fi, dt, fn, ft, true);
