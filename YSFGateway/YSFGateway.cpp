@@ -268,26 +268,24 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF) {
-					// Connected to a YSF reflector, figure out what kind it is
-					if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
-                                        	// Pass Control Commands (WiresX capable reflector)
-						processDTMF(buffer, dt);
-						processWiresX(buffer, fi, dt, fn, ft, true);
-					}
-					else {
-						// Don't Pass Control Commands (Not a WiresX capable reflector)
-						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-						processDTMF(buffer, dt);
-						processWiresX(buffer, fi, dt, fn, ft, false);
-					}
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough) {
+                                        if (reflector->m_wiresX) {
+                                                processDTMF(buffer, dt);
+                                                processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
+                                        } else {
+                                                m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+                                                processDTMF(buffer, dt);
+                                                processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+                                        }
+                                } else if (wiresXCommandPassthrough) {
+                                        m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+                                        processDTMF(buffer, dt);
+                                        processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+                                } else {
+                                        m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+                                        processDTMF(buffer, dt);
+                                        processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
                                 }
-                                else {
-					// Don't Pass Control Commands (Not connected to a reflector)
-					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-					processDTMF(buffer, dt);
-					processWiresX(buffer, fi, dt, fn, ft, false);
-				}
 
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
@@ -523,11 +521,11 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough)
+void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
 {
 	assert(buffer != NULL);
 
-	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, wiresXCommandPassthrough);
+	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, dontProcessWiresXLocal);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
 			if (m_linkType == LINK_YSF)
@@ -550,9 +548,10 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_linkType = LINK_YSF;
 
 			// If we are linking to a YSF2xxx mode, send the YSF2xxx gateway the link command too
-			if ( (wiresXCommandPassthrough) && (reflector->m_wiresX) ) {
-				m_wiresX->sendConnect(m_ysfNetwork);
-			}
+			if (reflector->m_wiresX && wiresXCommandPassthrough) {
+                                LogMessage("Forward WiresX Connect to \"%s\"", reflector->m_name.c_str());
+                                m_wiresX->sendConnect(m_ysfNetwork);
+                        }
 		}
 		break;
 	case WXS_CONNECT_FCS: {
