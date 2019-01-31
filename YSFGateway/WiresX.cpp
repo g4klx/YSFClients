@@ -31,6 +31,7 @@
 const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
+const unsigned char DISC_REQ2[] = {0x5DU, 0x63U, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
 const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
 
@@ -180,7 +181,7 @@ bool CWiresX::start()
 	return true;
 }
 
-WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
+WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough)
 {
 	assert(data != NULL);
 	assert(source != NULL);
@@ -227,23 +228,50 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 		if (!valid)
 			return WXS_NONE;
 
-		if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
-			processDX(source);
-			return WXS_NONE;
-		} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
-			processAll(source, m_command + 5U);
-			return WXS_NONE;
-		} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
-			return processConnect(source, m_command + 5U);
-		} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
-			processDisconnect(source);
-			return WXS_DISCONNECT;
-		} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
-			processCategory(source, m_command + 5U);
-			return WXS_NONE;
-		} else {
-			CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
-			return WXS_NONE;
+		// If we are using WiresX Passthrough (we already know we are on a YSF2xxx room from YSFGateway
+		if (wiresXCommandPassthrough) {
+			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
+                                return WXS_NONE;
+                        } else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
+                                return WXS_NONE;
+                        } else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
+                                return WXS_NONE;
+                        } else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
+                                processDisconnect(source);
+                                return WXS_DISCONNECT;
+			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
+                                processDisconnect(source);
+                                return WXS_DISCONNECT;
+                        } else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
+                                return WXS_NONE;
+                        } else {
+                                CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
+                                return WXS_NONE;
+                        }
+		}
+		// Origional Code Here
+		else {
+			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
+                                processDX(source);
+                                return WXS_NONE;
+                        } else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
+                                processAll(source, m_command + 5U);
+                                return WXS_NONE;
+                        } else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
+                                return processConnect(source, m_command + 5U);
+                        } else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
+                                processDisconnect(source);
+                                return WXS_DISCONNECT;
+			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
+                                processDisconnect(source);
+                                return WXS_DISCONNECT;
+                        } else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
+                                processCategory(source, m_command + 5U);
+                                return WXS_NONE;
+                        } else {
+                                CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
+                                return WXS_NONE;
+                        }
 		}
 	}
 
@@ -408,10 +436,14 @@ void CWiresX::clock(unsigned int ms)
 	}
 }
 
-void CWiresX::createReply(const unsigned char* data, unsigned int length)
+void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network)
 {
 	assert(data != NULL);
 	assert(length > 0U);
+
+	// If we don't explicitly pass a network, use the default one.
+	if (network == NULL)
+		network = m_network;
 
 	unsigned char bt = 0U;
 
@@ -454,7 +486,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 	buffer[34U] = seqNo;
 	seqNo += 2U;
 
-	m_network->write(buffer);
+	network->write(buffer);
 
 	fich.setFI(YSF_FI_COMMUNICATIONS);
 
@@ -501,7 +533,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 		buffer[34U] = seqNo;
 		seqNo += 2U;
 
-		m_network->write(buffer);
+		network->write(buffer);
 
 		fn++;
 		if (fn >= 8U) {
@@ -521,7 +553,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length)
 
 	buffer[34U] = seqNo | 0x01U;
 
-	m_network->write(buffer);
+	network->write(buffer);
 }
 
 unsigned char CWiresX::calculateFT(unsigned int length, unsigned int offset) const
@@ -612,6 +644,27 @@ void CWiresX::sendDXReply()
 	CUtils::dump(1U, "DX Reply", data, 129U);
 
 	createReply(data, 129U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendConnect(CYSFNetwork* network)
+{
+	unsigned char data[20U];
+	::memset(data, 0x00U, 20U);
+	::memset(data, ' ', 16U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 3U; i++)
+		data[i + 1U] = DX_REQ[i];
+
+	data[15U] = 0x03U;			// End of data marker
+	data[16U] = CCRC::addCRC(data, 16U);
+
+	CUtils::dump(1U, "CONNECT", data, 20U);
+
+	createReply(data, 20U, network);
 
 	m_seqNo++;
 }

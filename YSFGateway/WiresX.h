@@ -56,13 +56,15 @@ public:
 
 	bool start();
 
-	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
+	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough);
 
 	CYSFReflector* getReflector() const;
 	void setReflector(CYSFReflector* reflector);
 
 	void processConnect(CYSFReflector* reflector);
 	void processDisconnect(const unsigned char* source = NULL);
+
+	void sendConnect(CYSFNetwork* network);
 
 	void clock(unsigned int ms);
 
@@ -87,6 +89,7 @@ private:
 	unsigned int    m_start;
 	std::string     m_search;
 	std::vector<CYSFReflector*> m_category;
+	bool            m_wiresXCommandPassthrough;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
 	void processDX(const unsigned char* source);
@@ -101,7 +104,7 @@ private:
 	void sendSearchNotFoundReply();
 	void sendCategoryReply();
 
-	void createReply(const unsigned char* data, unsigned int length);
+	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = NULL);
 	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };
 

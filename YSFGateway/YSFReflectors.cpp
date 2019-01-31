@@ -139,6 +139,7 @@ bool CYSFReflectors::load()
 					refl->m_port    = (unsigned int)::atoi(p5);
 					refl->m_count   = std::string(p6);
 					refl->m_type    = YT_YSF;
+					refl->m_wiresX  = false;
 
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
@@ -164,6 +165,7 @@ bool CYSFReflectors::load()
 		refl->m_port    = m_parrotPort;
 		refl->m_count   = "000";
 		refl->m_type    = YT_YSF;
+		refl->m_wiresX  = false;
 
 		m_newReflectors.push_back(refl);
 
@@ -180,6 +182,7 @@ bool CYSFReflectors::load()
 		refl->m_port    = m_YSF2DMRPort;
 		refl->m_count   = "000";
 		refl->m_type    = YT_YSF;
+		refl->m_wiresX  = true;
 
 		m_newReflectors.push_back(refl);
 
@@ -196,6 +199,7 @@ bool CYSFReflectors::load()
 		refl->m_port    = m_YSF2NXDNPort;
 		refl->m_count   = "000";
 		refl->m_type    = YT_YSF;
+		refl->m_wiresX  = true;
 
 		m_newReflectors.push_back(refl);
 
@@ -212,6 +216,7 @@ bool CYSFReflectors::load()
 		refl->m_port    = m_YSF2P25Port;
 		refl->m_count   = "000";
 		refl->m_type    = YT_YSF;
+		refl->m_wiresX  = true;
 
 		m_newReflectors.push_back(refl);
 
@@ -227,12 +232,13 @@ bool CYSFReflectors::load()
 		std::string desc = it->second;
 
 		CYSFReflector* refl = new CYSFReflector;
-		refl->m_id    = text;
-		refl->m_name  = name;
-		refl->m_desc  = desc;
-		refl->m_port  = 0U;
-		refl->m_count = "000";
-		refl->m_type  = YT_FCS;
+		refl->m_id     = text;
+		refl->m_name   = name;
+		refl->m_desc   = desc;
+		refl->m_port   = 0U;
+		refl->m_count  = "000";
+		refl->m_type   = YT_FCS;
+		refl->m_wiresX = false;
 
 		refl->m_name.resize(16U, ' ');
 		refl->m_desc.resize(14U, ' ');

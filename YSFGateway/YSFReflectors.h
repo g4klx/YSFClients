@@ -39,7 +39,8 @@ public:
 	m_count("000"),
 	m_address(),
 	m_port(0U),
-	m_type(YT_YSF)
+	m_type(YT_YSF),
+	m_wiresX(false)
 	{
 	}
 
@@ -50,6 +51,7 @@ public:
 	in_addr      m_address;
 	unsigned int m_port;
 	YSF_TYPE     m_type;
+	bool         m_wiresX;
 };
 
 class CYSFReflectors {
