@@ -148,19 +148,19 @@ void CYSFNetwork::writeUnlink(unsigned int count)
 void CYSFNetwork::clock(unsigned int ms)
 {
 	unsigned char buffer[BUFFER_LENGTH];
-
 	in_addr address;
 	unsigned int port;
+
+	m_pollTimer.clock(ms);
+	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
+		writePoll();
+
 	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
 	if (length <= 0)
 		return;
 
 	if (m_port == 0U)
 		return;
-
-	m_pollTimer.clock(ms);
-	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
-		writePoll();
 
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
