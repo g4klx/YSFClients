@@ -292,9 +292,10 @@ int CYSFGateway::run()
 			}
 
 			if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && !m_exclude) {
-				m_ysfNetwork->write(buffer);
-				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+				if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
+					m_ysfNetwork->write(buffer);
 					m_inactivityTimer.start();
+				}
 			}
 
 			if (m_fcsNetwork != NULL && m_linkType == LINK_FCS && !m_exclude) {
