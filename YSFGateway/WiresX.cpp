@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2019 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -230,50 +230,52 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 		if (!valid)
 			return WXS_NONE;
 
+		CUtils::dump(1U, "Received Wires-X command", m_command, cmd_len);
+
 		// If we are using WiresX Passthrough (we already know we are on a YSF2xxx room from YSFGateway
 		if (wiresXCommandPassthrough) {
 			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
-                                return WXS_NONE;
-                        } else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
-                                return WXS_NONE;
-                        } else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
-                                return WXS_NONE;
-                        } else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
-                                processDisconnect(source);
-                                return WXS_DISCONNECT;
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
+				processDisconnect(source);
+				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
-                                processDisconnect(source);
-                                return WXS_DISCONNECT;
-                        } else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
-                                return WXS_NONE;
-                        } else {
-                                CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
-                                return WXS_NONE;
-                        }
+				processDisconnect(source);
+				return WXS_DISCONNECT;
+			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
+				return WXS_NONE;
+			} else {
+				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
+				return WXS_NONE;
+			}
 		}
 		// Origional Code Here
 		else {
 			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
-                                processDX(source);
-                                return WXS_NONE;
-                        } else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
-                                processAll(source, m_command + 5U);
-                                return WXS_NONE;
-                        } else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
-                                return processConnect(source, m_command + 5U);
-                        } else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
-                                processDisconnect(source);
-                                return WXS_DISCONNECT;
+				processDX(source);
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
+				processAll(source, m_command + 5U);
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
+				return processConnect(source, m_command + 5U);
+			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
+				processDisconnect(source);
+				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
-                                processDisconnect(source);
-                                return WXS_DISCONNECT;
-                        } else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
-                                processCategory(source, m_command + 5U);
-                                return WXS_NONE;
-                        } else {
-                                CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
-                                return WXS_NONE;
-                        }
+				processDisconnect(source);
+				return WXS_DISCONNECT;
+			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
+				processCategory(source, m_command + 5U);
+				return WXS_NONE;
+			} else {
+				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
+				return WXS_NONE;
+			}
 		}
 	}
 
@@ -1040,8 +1042,7 @@ void CWiresX::sendCategoryReply()
 	m_seqNo++;
 }
 
-bool CWiresX::isBusy()
+bool CWiresX::isBusy() const
 {
 	return m_busy;
 }
-
