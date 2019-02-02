@@ -63,7 +63,9 @@ m_csd2(NULL),
 m_csd3(NULL),
 m_status(WXSI_NONE),
 m_start(0U),
-m_search()
+m_search(),
+m_busy(false),
+m_busyTimer(3000U, 1U)
 {
 	assert(network != NULL);
 
@@ -362,6 +364,9 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 
 WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned char* data)
 {
+	m_busy = true;
+	m_busyTimer.start();
+
 	::LogDebug("Received Connect to %5.5s from %10.10s", data, source);
 
 	std::string id = std::string((char*)data, 5U);
@@ -385,6 +390,9 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 void CWiresX::processConnect(CYSFReflector* reflector)
 {
+	m_busy = true;
+	m_busyTimer.start();
+
 	m_reflector = reflector;
 
 	m_status = WXSI_CONNECT;
@@ -433,6 +441,12 @@ void CWiresX::clock(unsigned int ms)
 
 		m_status = WXSI_NONE;
 		m_timer.stop();
+	}
+
+	m_busyTimer.clock(ms);
+	if (m_busyTimer.isRunning() && m_busyTimer.hasExpired()) {
+		m_busy = false;
+		m_busyTimer.stop();
 	}
 }
 
@@ -1024,5 +1038,10 @@ void CWiresX::sendCategoryReply()
 	createReply(data, offset + 2U);
 
 	m_seqNo++;
+}
+
+bool CWiresX::isBusy()
+{
+	return m_busy;
 }
 
