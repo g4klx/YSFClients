@@ -317,7 +317,7 @@ int CYSFGateway::run()
 			while (m_ysfNetwork->read(buffer) > 0U) {
 				if (m_linkType == LINK_YSF) {
 					// Only pass through YSF data packets
-					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0 && !m_wiresX->isBusy())
 						rptNetwork.write(buffer);
 
 					m_lostTimer.start();
@@ -329,7 +329,7 @@ int CYSFGateway::run()
 			while (m_fcsNetwork->read(buffer) > 0U) {
 				if (m_linkType == LINK_FCS) {
 					// Only pass through YSF data packets
-					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0)
+					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0 && !m_wiresX->isBusy())
 						rptNetwork.write(buffer);
 
 					m_lostTimer.start();
