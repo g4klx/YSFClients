@@ -268,19 +268,9 @@ int CYSFGateway::run()
 				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough) {
-					if (reflector->m_wiresX) {
-						processDTMF(buffer, dt);
-						processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
-					} else {
-						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-						processDTMF(buffer, dt);
-						processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
-					}
-				} else if (wiresXCommandPassthrough) {
-					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+					processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
 				} else {
 					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 					processDTMF(buffer, dt);
