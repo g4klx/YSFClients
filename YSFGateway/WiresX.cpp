@@ -65,7 +65,8 @@ m_status(WXSI_NONE),
 m_start(0U),
 m_search(),
 m_busy(false),
-m_busyTimer(3000U, 1U)
+m_busyTimer(3000U, 1U),
+m_bufferTX(10000U, "YSF Wires-X TX Buffer")
 {
 	assert(network != NULL);
 
@@ -84,6 +85,8 @@ m_busyTimer(3000U, 1U)
 	m_csd1   = new unsigned char[20U];
 	m_csd2   = new unsigned char[20U];
 	m_csd3   = new unsigned char[20U];
+
+	m_txWatch.start();
 }
 
 CWiresX::~CWiresX()
@@ -414,6 +417,8 @@ void CWiresX::processDisconnect(const unsigned char* source)
 
 void CWiresX::clock(unsigned int ms)
 {
+	unsigned char buffer[200U];
+
 	m_reflectors.clock(ms);
 
 	m_timer.clock(ms);
@@ -445,6 +450,18 @@ void CWiresX::clock(unsigned int ms)
 		m_timer.stop();
 	}
 
+	if (m_txWatch.elapsed() > 90U) {
+		if (!m_bufferTX.isEmpty() && m_bufferTX.dataSize() >= 155U) {
+			unsigned char len = 0U;
+			m_bufferTX.getData(&len, 1U);
+			if (len == 155U) {
+				m_bufferTX.getData(buffer, 155U);
+				m_network->write(buffer);
+			}
+		}
+		m_txWatch.start();
+	}
+
 	m_busyTimer.clock(ms);
 	if (m_busyTimer.isRunning() && m_busyTimer.hasExpired()) {
 		m_busy = false;
@@ -457,9 +474,13 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNe
 	assert(data != NULL);
 	assert(length > 0U);
 
+	bool isYSF2XX = true;
+
 	// If we don't explicitly pass a network, use the default one.
-	if (network == NULL)
+	if (network == NULL) {
+		isYSF2XX = false;
 		network = m_network;
+	}
 
 	unsigned char bt = 0U;
 
@@ -502,7 +523,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNe
 	buffer[34U] = seqNo;
 	seqNo += 2U;
 
-	network->write(buffer);
+	writeData(buffer, network, isYSF2XX);
 
 	fich.setFI(YSF_FI_COMMUNICATIONS);
 
@@ -549,7 +570,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNe
 		buffer[34U] = seqNo;
 		seqNo += 2U;
 
-		network->write(buffer);
+		writeData(buffer, network, isYSF2XX);
 
 		fn++;
 		if (fn >= 8U) {
@@ -569,7 +590,20 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNe
 
 	buffer[34U] = seqNo | 0x01U;
 
-	network->write(buffer);
+	writeData(buffer, network, isYSF2XX);
+}
+
+void CWiresX::writeData(const unsigned char* buffer, CYSFNetwork* network, bool isYSF2XX)
+{
+	if (isYSF2XX) {
+		// Send YSF2XXX Wires-X reply directly to the network
+		network->write(buffer);
+	} else {
+		// Send host Wires-X reply using ring buffer
+		unsigned char len = 155U;
+		m_bufferTX.addData(&len, 1U);
+		m_bufferTX.addData(buffer, len);
+	}
 }
 
 unsigned char CWiresX::calculateFT(unsigned int length, unsigned int offset) const

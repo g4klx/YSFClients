@@ -22,6 +22,8 @@
 #include "YSFReflectors.h"
 #include "YSFNetwork.h"
 #include "Timer.h"
+#include "StopWatch.h"
+#include "RingBuffer.h"
 
 #include <string>
 
@@ -92,6 +94,8 @@ private:
 	std::vector<CYSFReflector*> m_category;
 	bool            m_busy;
 	CTimer          m_busyTimer;
+	CStopWatch      m_txWatch;
+	CRingBuffer<unsigned char> m_bufferTX;
 
 	WX_STATUS processConnect(const unsigned char* source, const unsigned char* data);
 	void processDX(const unsigned char* source);
@@ -107,6 +111,7 @@ private:
 	void sendCategoryReply();
 
 	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = NULL);
+	void writeData(const unsigned char* data, CYSFNetwork* network, bool isYSF2XX);
 	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };
 
