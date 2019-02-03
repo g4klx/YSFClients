@@ -27,7 +27,6 @@
 #include <cassert>
 #include <cstring>
 
-const unsigned char NULL_GPS[] = {0x47U, 0x63U};
 const unsigned char SHRT_GPS[] = {0x22U, 0x62U};
 const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 

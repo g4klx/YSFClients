@@ -27,7 +27,6 @@
 
 CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string& suffix) :
 m_thread(NULL),
-m_enabled(false),
 m_idTimer(1000U),
 m_callsign(callsign),
 m_txFrequency(0U),

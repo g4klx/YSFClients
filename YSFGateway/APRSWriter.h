@@ -59,7 +59,6 @@ public:
 
 private:
 	CAPRSWriterThread* m_thread;
-	bool               m_enabled;
 	CTimer             m_idTimer;
 	std::string        m_callsign;
 	unsigned int       m_txFrequency;

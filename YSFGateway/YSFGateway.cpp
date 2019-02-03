@@ -269,23 +269,23 @@ int CYSFGateway::run()
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
 				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough) {
-                                        if (reflector->m_wiresX) {
-                                                processDTMF(buffer, dt);
-                                                processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
-                                        } else {
-                                                m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-                                                processDTMF(buffer, dt);
-                                                processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
-                                        }
-                                } else if (wiresXCommandPassthrough) {
-                                        m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-                                        processDTMF(buffer, dt);
-                                        processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
-                                } else {
-                                        m_exclude = (dt == YSF_DT_DATA_FR_MODE);
-                                        processDTMF(buffer, dt);
-                                        processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
-                                }
+					if (reflector->m_wiresX) {
+						processDTMF(buffer, dt);
+						processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
+					} else {
+						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+						processDTMF(buffer, dt);
+						processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+					}
+				} else if (wiresXCommandPassthrough) {
+					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+					processDTMF(buffer, dt);
+					processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+				} else {
+					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
+					processDTMF(buffer, dt);
+					processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+				}
 
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
@@ -460,21 +460,21 @@ void CYSFGateway::createGPS()
 
 	bool enabled = m_conf.getMobileGPSEnabled();
 	if (enabled) {
-	        std::string address = m_conf.getMobileGPSAddress();
-	        unsigned int port   = m_conf.getMobileGPSPort();
+		std::string address = m_conf.getMobileGPSAddress();
+		unsigned int port   = m_conf.getMobileGPSPort();
 
-	        m_writer->setMobileLocation(address, port);
+		m_writer->setMobileLocation(address, port);
 	} else {
-	        float latitude  = m_conf.getLatitude();
-                float longitude = m_conf.getLongitude();
-                int height      = m_conf.getHeight();
+		float latitude  = m_conf.getLatitude();
+		float longitude = m_conf.getLongitude();
+		int height      = m_conf.getHeight();
 
-                m_writer->setStaticLocation(latitude, longitude, height);
+		m_writer->setStaticLocation(latitude, longitude, height);
 	}
 
 	bool ret = m_writer->open();
 	if (!ret) {
-	        delete m_writer;
+		delete m_writer;
 		m_writer = NULL;
 		return;
 	}
@@ -550,9 +550,9 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 
 			// If we are linking to a YSF2xxx mode, send the YSF2xxx gateway the link command too
 			if (reflector->m_wiresX && wiresXCommandPassthrough) {
-                                LogMessage("Forward WiresX Connect to \"%s\"", reflector->m_name.c_str());
-                                m_wiresX->sendConnect(m_ysfNetwork);
-                        }
+				LogMessage("Forward WiresX Connect to \"%s\"", reflector->m_name.c_str());
+				m_wiresX->sendConnect(m_ysfNetwork);
+			}
 		}
 		break;
 	case WXS_CONNECT_FCS: {
@@ -659,43 +659,43 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 		}
 		break;
 	case WXS_CONNECT_FCS: {
-		std::string raw = m_dtmf.getReflector();
-		std::string id = "FCS00";
-		if (raw.length() == 2U) {
-			id += raw.at(0U) + std::string("0") + raw.at(1U);
-		} else if (raw.length() == 3U) {
-			id += raw;
-		} else {
-			LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
-			return;
+			std::string raw = m_dtmf.getReflector();
+			std::string id = "FCS00";
+			if (raw.length() == 2U) {
+				id += raw.at(0U) + std::string("0") + raw.at(1U);
+			} else if (raw.length() == 3U) {
+				id += raw;
+			} else {
+				LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
+				return;
+			}
+
+			if (m_linkType == LINK_YSF) {
+				m_wiresX->processDisconnect();
+				m_ysfNetwork->writeUnlink(3U);
+				m_ysfNetwork->clearDestination();
+			}
+			if (m_linkType == LINK_FCS)
+				m_fcsNetwork->writeUnlink(3U);
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+
+			LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
+
+			bool ok = m_fcsNetwork->writeLink(id);
+			if (ok) {
+				m_current = id;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_FCS;
+			} else {
+				LogMessage("Unknown reflector - %s", id.c_str());
+			}
 		}
-
-		if (m_linkType == LINK_YSF) {
-			m_wiresX->processDisconnect();
-			m_ysfNetwork->writeUnlink(3U);
-			m_ysfNetwork->clearDestination();
-		}
-		if (m_linkType == LINK_FCS)
-			m_fcsNetwork->writeUnlink(3U);
-
-		m_current.clear();
-		m_inactivityTimer.stop();
-		m_lostTimer.stop();
-		m_linkType = LINK_NONE;
-
-		LogMessage("Connect via DTMF to %s has been requested by %10.10s", id.c_str(), buffer + 14U);
-
-		bool ok = m_fcsNetwork->writeLink(id);
-		if (ok) {
-			m_current = id;
-			m_inactivityTimer.start();
-			m_lostTimer.start();
-			m_linkType = LINK_FCS;
-		} else {
-			LogMessage("Unknown reflector - %s", id.c_str());
-		}
-	}
-    break;
+		break;
 	case WXS_DISCONNECT:
 		if (m_linkType == LINK_YSF) {
 			m_wiresX->processDisconnect();
@@ -820,7 +820,7 @@ void CYSFGateway::startupLinking()
 		}
 	}
 	if (m_startup.empty())
-		 LogMessage("No connection startup");
+		LogMessage("No connection startup");
 }
 
 void CYSFGateway::readFCSRoomsFile(const std::string& filename)
