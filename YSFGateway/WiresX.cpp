@@ -31,7 +31,6 @@
 const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
-const unsigned char DISC_REQ2[] = {0x5DU, 0x63U, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
 const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
 
@@ -246,9 +245,6 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
 				processDisconnect(source);
 				return WXS_DISCONNECT;
-			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
-				processDisconnect(source);
-				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
 				return WXS_NONE;
 			} else {
@@ -267,9 +263,6 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
 				return processConnect(source, m_command + 5U);
 			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
-				processDisconnect(source);
-				return WXS_DISCONNECT;
-			} else if (::memcmp(m_command + 1U, DISC_REQ2, 3U) == 0) {
 				processDisconnect(source);
 				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
