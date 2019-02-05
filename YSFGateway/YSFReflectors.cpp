@@ -277,6 +277,9 @@ CYSFReflector* CYSFReflectors::findById(const std::string& id)
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 {
 	std::string fullName = name;
+	if (m_makeUpper) {
+                std::transform(fullName.begin(), fullName.end(), fullName.begin(), ::toupper);
+        }
 	fullName.resize(16U, ' ');
 
 	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
