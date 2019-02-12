@@ -33,12 +33,14 @@ const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
 const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
+const unsigned char INFO_REQ[]  = {0x5DU, 0x63U, 0x5FU};
 
 const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU, 0x26U};
 const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char INV_RESP[]  = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
+const unsigned char INFO_RESP[] = {0x5DU, 0x43U, 0x5FU, 0x26U};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
@@ -248,6 +250,8 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
 				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, INFO_REQ, 3U) == 0) {
+				return WXS_NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
 				return WXS_NONE;
@@ -268,6 +272,9 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 				return WXS_DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
 				processCategory(source, m_command + 5U);
+				return WXS_NONE;
+			} else if (::memcmp(m_command + 1U, INFO_REQ, 3U) == 0) {
+				processInfo(source, m_command + 5U);
 				return WXS_NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
@@ -412,6 +419,14 @@ void CWiresX::processDisconnect(const unsigned char* source)
 	m_timer.start();
 }
 
+void CWiresX::processInfo(const unsigned char* source)
+{
+	::LogDebug("Received Info Request from %10.10s", source);
+
+	m_status = WXSI_INFO;
+	m_timer.start();
+}
+
 void CWiresX::clock(unsigned int ms)
 {
 	unsigned char buffer[200U];
@@ -441,6 +456,9 @@ void CWiresX::clock(unsigned int ms)
 			break;
 		case WXSI_INVALID:
 			sendInvalidReply();
+			break;
+		case WXSI_INFO:
+			sendInfoReply();
 			break;
 		default:
 			break;
@@ -842,6 +860,40 @@ void CWiresX::sendInvalidReply()
 	CUtils::dump(1U, "INVALID Reply", data, 91U);
 
 	createReply(data, 91U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendInfoReply()
+{
+	unsigned char data[60U];
+	::memset(data, 0x00U, 60U);
+	::memset(data, ' ', 20U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = INFO_RESP[i];
+
+	data[5U] = '0';
+	data[6U] = '1';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 7U] = m_id.at(i);
+
+	data[17U] = '0';
+	data[18U] = '0';
+	data[19U] = '0';
+	data[20U] = '0';
+	data[21U] = '0';
+	data[22U] = 0x0DU;
+
+	data[23U] = 0x03U;			// End of data marker
+	data[24U] = CCRC::addCRC(data, 24U);
+
+	CUtils::dump(1U, "INFO Reply", data, 25U);
+
+	createReply(data, 25U);
 
 	m_seqNo++;
 }

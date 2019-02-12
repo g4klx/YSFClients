@@ -42,6 +42,7 @@ enum WXSI_STATUS {
 	WXSI_ALL,
 	WXSI_SEARCH,
 	WXSI_CATEGORY,
+	WXSI_INFO,
 	WXSI_INVALID
 };
 
@@ -102,6 +103,7 @@ private:
 	void processDX(const unsigned char* source);
 	void processAll(const unsigned char* source, const unsigned char* data);
 	void processCategory(const unsigned char* source, const unsigned char* data);
+	void processInfo(const unsigned char* source, const unsigned char* data);
 
 	void sendDXReply();
 	void sendConnectReply();
@@ -111,6 +113,7 @@ private:
 	void sendSearchReply();
 	void sendSearchNotFoundReply();
 	void sendCategoryReply();
+	void sendInfoReply();
 
 	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = NULL);
 	void writeData(const unsigned char* data, CYSFNetwork* network, bool isYSF2XX);
