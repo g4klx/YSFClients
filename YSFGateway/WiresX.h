@@ -103,7 +103,7 @@ private:
 	void processDX(const unsigned char* source);
 	void processAll(const unsigned char* source, const unsigned char* data);
 	void processCategory(const unsigned char* source, const unsigned char* data);
-	void processInfo(const unsigned char* source, const unsigned char* data);
+	void processInfo(const unsigned char* source);
 
 	void sendDXReply();
 	void sendConnectReply();

@@ -40,7 +40,7 @@ const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char INV_RESP[]  = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
-const unsigned char INFO_RESP[] = {0x5DU, 0x43U, 0x5FU, 0x26U};
+const unsigned char INFO_RESP[] = {0x5DU, 0x43U, 0x5FU, 0x28U};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
@@ -274,7 +274,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 				processCategory(source, m_command + 5U);
 				return WXS_NONE;
 			} else if (::memcmp(m_command + 1U, INFO_REQ, 3U) == 0) {
-				processInfo(source, m_command + 5U);
+				processInfo(source);
 				return WXS_NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
@@ -879,7 +879,7 @@ void CWiresX::sendInfoReply()
 	data[6U] = '1';
 
 	for (unsigned int i = 0U; i < 5U; i++)
-		data[i + 7U] = m_id.at(i);
+		data[i + 7U] = m_reflector->m_id.at(i);
 
 	data[17U] = '0';
 	data[18U] = '0';
