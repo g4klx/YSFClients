@@ -37,6 +37,7 @@ const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
 const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU, 0x26U};
 const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
+const unsigned char INV_RESP[]  = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
@@ -370,8 +371,11 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	std::string id = std::string((char*)data, 5U);
 
 	m_reflector = m_reflectors.findById(id);
-	if (m_reflector == NULL)
+	if (m_reflector == NULL) {
+		m_status = WXSI_INVALID;
+		m_timer.start();
 		return WXS_NONE;
+	}
 
 	m_status = WXSI_CONNECT;
 	m_timer.start();
@@ -434,6 +438,9 @@ void CWiresX::clock(unsigned int ms)
 			break;
 		case WXSI_CATEGORY:
 			sendCategoryReply();
+			break;
+		case WXSI_INVALID:
+			sendInvalidReply();
 			break;
 		default:
 			break;
@@ -796,6 +803,43 @@ void CWiresX::sendDisconnectReply()
 	data[90U] = CCRC::addCRC(data, 90U);
 
 	CUtils::dump(1U, "DISCONNECT Reply", data, 91U);
+
+	createReply(data, 91U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendInvalidReply()
+{
+	unsigned char data[110U];
+	::memset(data, 0x00U, 110U);
+	::memset(data, ' ', 90U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 4U; i++)
+		data[i + 1U] = INV_RESP[i];
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 5U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 10U] = m_node.at(i);
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 20U] = m_name.at(i);
+
+	data[34U] = '0';
+	data[35U] = '0';
+
+	data[57U] = '0';
+	data[58U] = '0';
+	data[59U] = '0';
+
+	data[89U] = 0x03U;			// End of data marker
+	data[90U] = CCRC::addCRC(data, 90U);
+
+	CUtils::dump(1U, "INVALID Reply", data, 91U);
 
 	createReply(data, 91U);
 

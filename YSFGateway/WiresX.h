@@ -41,7 +41,8 @@ enum WXSI_STATUS {
 	WXSI_DISCONNECT,
 	WXSI_ALL,
 	WXSI_SEARCH,
-	WXSI_CATEGORY
+	WXSI_CATEGORY,
+	WXSI_INVALID
 };
 
 class CWiresX {
@@ -104,6 +105,7 @@ private:
 
 	void sendDXReply();
 	void sendConnectReply();
+	void sendInvalidReply();
 	void sendDisconnectReply();
 	void sendAllReply();
 	void sendSearchReply();
