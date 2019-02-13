@@ -276,7 +276,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 				processCategory(source, m_command + 5U);
 				return WXS_NONE;
 			} else if (::memcmp(m_command + 1U, INFO_REQ, 3U) == 0) {
-				processInfo(source);
+				processInfo(source, m_command + 5U);
 				return WXS_NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
@@ -300,7 +300,7 @@ void CWiresX::setReflector(CYSFReflector* reflector)
 
 void CWiresX::processDX(const unsigned char* source)
 {
-	::LogDebug("Received DX from %10.10s", source);
+	::LogDebug("Received DX request from %10.10s", source);
 
 	m_status = WXSI_DX;
 	m_timer.start();
@@ -356,7 +356,7 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 
 		m_timer.start();
 	} else if (data[0U] == '1' && data[1U] == '1') {
-		::LogDebug("Received SEARCH for \"%16.16s\" from %10.10s", data + 5U, source);
+		::LogDebug("Received SEARCH request for \"%16.16s\" from %10.10s", data + 5U, source);
 
 		m_start = ::atoi(buffer);
 		if (m_start > 0U)
@@ -367,6 +367,12 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 		m_status = WXSI_SEARCH;
 
 		m_timer.start();
+	} else if (data[0U] == 'A' && data[1U] == '1') {
+		::LogDebug("Received LOCAL NEWS request from %10.10s", source);
+
+		m_status = WXSI_LCLNEWS;
+
+		m_timer.start();
 	}
 }
 
@@ -375,7 +381,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	m_busy = true;
 	m_busyTimer.start();
 
-	::LogDebug("Received Connect to %5.5s from %10.10s", data, source);
+	::LogDebug("Received Connect request to %5.5s from %10.10s", data, source);
 
 	std::string id = std::string((char*)data, 5U);
 
@@ -413,7 +419,7 @@ void CWiresX::processConnect(CYSFReflector* reflector)
 void CWiresX::processDisconnect(const unsigned char* source)
 {
 	if (source != NULL)
-		::LogDebug("Received Disconect from %10.10s", source);
+		::LogDebug("Received Disconect request from %10.10s", source);
 
 	m_reflector = NULL;
 
@@ -421,12 +427,19 @@ void CWiresX::processDisconnect(const unsigned char* source)
 	m_timer.start();
 }
 
-void CWiresX::processInfo(const unsigned char* source)
+void CWiresX::processInfo(const unsigned char* source, const unsigned char* data)
 {
-	::LogDebug("Received Info Request from %10.10s", source);
+	if (::memcmp(data, "DNEWS", 5U) == 0) {
+		::LogDebug("Received INTERNATIONAL NEWS request from %10.10s", source);
 
-	m_status = WXSI_INFO;
-	m_timer.start();
+		m_status = WXSI_INTNEWS;
+		m_timer.start();
+	} else {
+		::LogDebug("Received Info request from %10.10s", source);
+
+		m_status = WXSI_INFO;
+		m_timer.start();
+	}
 }
 
 void CWiresX::clock(unsigned int ms)
@@ -461,6 +474,12 @@ void CWiresX::clock(unsigned int ms)
 			break;
 		case WXSI_INFO:
 			sendInfoReply();
+			break;
+		case WXSI_LCLNEWS:
+			sendLclNewsReply();
+			break;
+		case WXSI_INTNEWS:
+			sendIntNewsReply();
 			break;
 		default:
 			break;
@@ -904,6 +923,111 @@ void CWiresX::sendInfoReply()
 	data[24U] = CCRC::addCRC(data, 24U);
 
 	CUtils::dump(1U, "INFO Reply", data, 25U);
+
+	createReply(data, 25U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendLclNewsReply()
+{
+	unsigned char data[90U];
+	::memset(data, 0x00U, 90U);
+	::memset(data, ' ', 80U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 3U; i++)
+		data[i + 1U] = ALL_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
+
+	data[5U] = '0';
+	data[6U] = '2';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 7U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 12U] = m_node.at(i);
+
+	data[22U] = 'A';
+	data[23U] = '0';
+	data[24U] = '1';
+	data[25U] = '0';
+	data[26U] = '0';
+	data[27U] = '1';
+	data[28U] = 0x0DU;
+
+	data[29U] = '3';
+
+	for (unsigned int i = 0U; i < 5U; i++)
+		data[i + 30U] = m_id.at(i);
+
+	for (unsigned int i = 0U; i < 10U; i++)
+		data[i + 35U] = m_node.at(i);
+
+	data[51U] = '0';
+	data[52U] = '0';
+	data[53U] = '1';
+
+	for (unsigned int i = 0U; i < 10U; i++) {
+		unsigned char c = m_node.at(i);
+		if (c == '-')
+			break;
+
+		data[i + 54U] = c;
+	}
+
+	for (unsigned int i = 0U; i < 14U; i++)
+		data[i + 64U] = m_name.at(i);
+
+	data[78U] = 0x0DU;
+
+	data[79U] = 0x03U;			// End of data marker
+	data[80U] = CCRC::addCRC(data, 80U);
+
+	CUtils::dump(1U, "LOCAL NEWS Reply", data, 81U);
+
+	createReply(data, 81U);
+
+	m_seqNo++;
+}
+
+void CWiresX::sendIntNewsReply()
+{
+	unsigned char data[30U];
+	::memset(data, 0x00U, 30U);
+	::memset(data, ' ', 25U);
+
+	data[0U] = m_seqNo;
+
+	for (unsigned int i = 0U; i < 3U; i++)
+		data[i + 1U] = INFO_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
+
+	data[5U] = '0';
+	data[6U] = '1';
+
+	data[7U]  = 'D';
+	data[8U]  = 'N';
+	data[9U]  = 'E';
+	data[10U] = 'W';
+	data[11U] = 'S';
+
+	data[17U] = '1';
+	data[18U] = '0';
+	data[19U] = '1';
+	data[20U] = '1';
+	data[21U] = '0';
+
+	data[22U] = 0x0DU;
+
+	data[23U] = 0x03U;			// End of data marker
+	data[24U] = CCRC::addCRC(data, 24U);
+
+	CUtils::dump(1U, "INTERNATIONAL NEWS Reply", data, 25U);
 
 	createReply(data, 25U);
 
