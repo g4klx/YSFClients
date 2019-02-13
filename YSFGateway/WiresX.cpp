@@ -28,6 +28,8 @@
 #include <cassert>
 #include <cstdlib>
 
+const unsigned char WIRESX_VERSION = 0x28U;
+
 const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
@@ -35,12 +37,12 @@ const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
 const unsigned char CAT_REQ[]   = {0x5DU, 0x67U, 0x5FU};
 const unsigned char INFO_REQ[]  = {0x5DU, 0x63U, 0x5FU};
 
-const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU, 0x26U};
-const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
-const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
-const unsigned char INV_RESP[]  = {0x5DU, 0x41U, 0x5FU, 0x26U};
-const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
-const unsigned char INFO_RESP[] = {0x5DU, 0x43U, 0x5FU, 0x28U};
+const unsigned char DX_RESP[]   = {0x5DU, 0x51U, 0x5FU};
+const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU};
+const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU};
+const unsigned char INV_RESP[]  = {0x5DU, 0x41U, 0x5FU};
+const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU};
+const unsigned char INFO_RESP[] = {0x5DU, 0x43U, 0x5FU};
 
 const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
@@ -651,8 +653,10 @@ void CWiresX::sendDXReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = DX_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 5U] = m_id.at(i);
@@ -664,14 +668,14 @@ void CWiresX::sendDXReply()
 		data[i + 20U] = m_name.at(i);
 
 	if (m_reflector == NULL) {
-		data[34U] = '1';
+		data[34U] = '0';
 		data[35U] = '2';
 
 		data[57U] = '0';
 		data[58U] = '0';
 		data[59U] = '0';
 	} else {
-		data[34U] = '1';
+		data[34U] = '0';
 		data[35U] = '5';
 
 		for (unsigned int i = 0U; i < 5U; i++)
@@ -747,8 +751,10 @@ void CWiresX::sendConnectReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = CONN_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 5U] = m_id.at(i);
@@ -759,7 +765,7 @@ void CWiresX::sendConnectReply()
 	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 20U] = m_name.at(i);
 
-	data[34U] = '1';
+	data[34U] = '0';
 	data[35U] = '5';
 
 	for (unsigned int i = 0U; i < 5U; i++)
@@ -798,8 +804,10 @@ void CWiresX::sendDisconnectReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = DISC_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 5U] = m_id.at(i);
@@ -835,8 +843,10 @@ void CWiresX::sendInvalidReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = INV_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	for (unsigned int i = 0U; i < 5U; i++)
 		data[i + 5U] = m_id.at(i);
@@ -872,8 +882,10 @@ void CWiresX::sendInfoReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = INFO_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	data[5U] = '0';
 	data[6U] = '1';
@@ -910,8 +922,10 @@ void CWiresX::sendAllReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = ALL_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	data[5U] = '2';
 	data[6U] = '1';
@@ -992,8 +1006,10 @@ void CWiresX::sendSearchReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = ALL_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	data[5U] = '0';
 	data[6U] = '2';
@@ -1065,8 +1081,10 @@ void CWiresX::sendSearchNotFoundReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = ALL_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	data[5U] = '0';
 	data[6U] = '1';
@@ -1103,8 +1121,10 @@ void CWiresX::sendCategoryReply()
 
 	data[0U] = m_seqNo;
 
-	for (unsigned int i = 0U; i < 4U; i++)
+	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 1U] = ALL_RESP[i];
+
+	data[4U] = WIRESX_VERSION;
 
 	data[5U] = '2';
 	data[6U] = '1';
