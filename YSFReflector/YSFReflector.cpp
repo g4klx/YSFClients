@@ -285,7 +285,7 @@ void CYSFReflector::run()
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			CYSFRepeater* itRpt = *it;
 			if (itRpt->m_timer.hasExpired()) {
-				LogMessage("Removing %s (%s:%u) disappeared", itRpt->m_callsign.c_str(), ::inet_ntoa(address), port);
+				LogMessage("Removing %s (%s:%u) disappeared", itRpt->m_callsign.c_str(), ::inet_ntoa(itRpt->m_address), itRpt->m_port);
 				m_repeaters.erase(it);
 				delete itRpt;
 				network.setCount(m_repeaters.size());
