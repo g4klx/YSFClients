@@ -305,15 +305,27 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), trimmed.end());
 	std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), ::toupper);
 
-	size_t len = trimmed.size();
+	// Removed now un-used variable
+	// size_t len = trimmed.size();
 
 	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
 		std::string reflector = (*it)->m_name;
 		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
 
-		if (trimmed == reflector.substr(0U, len))
-			m_search.push_back(*it);
+		// Origional match function - only matches start of string.
+		// if (trimmed == reflector.substr(0U, len))
+		//	m_search.push_back(*it);
+		
+		// New match function searches the whole string
+		unsigned int refSrcPos;
+                for (refSrcPos=0;refSrcPos<reflector.length(); refSrcPos++)
+                {
+                        if (reflector.substr(refSrcPos,trimmed.length()) == trimmed)
+                        {
+                                m_search.push_back(*it);
+                        }
+                }
 	}
 
 	std::sort(m_search.begin(), m_search.end(), refComparison);
