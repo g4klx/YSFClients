@@ -216,6 +216,8 @@
 53326;RU R2DOO YSF;Wires-X to YSF;82.146.33.78;42001;002;http://82.146.33.78/dash
 37829;RU Russia YSF;RUSSIA YSF;176.192.125.46;42000;002;http://176.192.125.46/YSF/
 16530;RU VLGDNK;Volgodonsk;176.192.125.46;42001;001;http://176.192.125.46/YSF2/
+91740;RU RADIOCULT;MSK;ysf.radiocult.su;42000;001;http://ysf.radiocult.su:8083/
+83414;RU Syktyvkar;Komi;ysf.r1ik.ru;42000;001;http://ysf.r1ik.ru
 40208;SC Scotland;Scottish YSF;13.69.14.204;42000;011;http://c4fm.dvscotland.net
 77010;SE SW-Sweden;C4FM;46.236.122.101;52000;000;http://sm4wdq.hopto.org:9999/
 16390;SG YSF-V2;SINGAPORE-YSF;14.102.146.160;42000;002;https://ysf.lucifernet.com/
