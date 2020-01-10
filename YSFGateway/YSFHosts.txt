@@ -84,6 +84,7 @@
 31639;DigiComm Cafe;DigiComm Cafe;18.221.190.22;42001;002;http://18.221.190.22/DG/
 91025;DTDXA_YSF;Thailand;119.59.126.210;42000;009;https://ysf.dtdxa.com
 00561;DVSwitch NA;North America;44.103.34.4;42000;000;http://dvswitch.org/ysfreflector/
+22401;EA C4FM Spain;(YCS224);212.237.3.141;42000;096;http://ycs.xreflector.es/
 42493;EA Distrito 2;YSF Bizkaia;185.47.129.230;42000;002;http://server.sustrai.org/ysf/
 62980;EA Distrito 4;REM SPAIN;212.237.0.67;42000;008;http://ysfdistrito4.xreflector.es/
 39908;EA Distrito 5;YSF EALINK;216.86.147.198;42000;002;http://ysfdistrito5.mmdvm.es/
