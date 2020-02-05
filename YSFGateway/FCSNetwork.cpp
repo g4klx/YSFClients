@@ -68,6 +68,10 @@ bool CFCSNetwork::open()
 	m_addresses["FCS002"] = CUDPSocket::lookup("fcs002.xreflector.net");
 	m_addresses["FCS003"] = CUDPSocket::lookup("fcs003.xreflector.net");
 	m_addresses["FCS004"] = CUDPSocket::lookup("fcs004.xreflector.net");
+	m_addresses["FCS005"] = CUDPSocket::lookup("fcs005.xreflector.net");
+	m_addresses["FCS222"] = CUDPSocket::lookup("fcs222.xreflector.net");
+	m_addresses["FCS224"] = CUDPSocket::lookup("fcs224.xreflector.net");
+	m_addresses["FCS232"] = CUDPSocket::lookup("fcs232.xreflector.net");
 
 	LogMessage("Opening FCS network connection");
 
