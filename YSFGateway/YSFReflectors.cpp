@@ -313,19 +313,17 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
 
-		// Origional match function - only matches start of string.
+		// Original match function - only matches start of string.
 		// if (trimmed == reflector.substr(0U, len))
-		//	m_search.push_back(*it);
+		// 	m_search.push_back(*it);
 		
 		// New match function searches the whole string
-		unsigned int refSrcPos;
-                for (refSrcPos=0;refSrcPos<reflector.length(); refSrcPos++)
-                {
-                        if (reflector.substr(refSrcPos,trimmed.length()) == trimmed)
-                        {
-                                m_search.push_back(*it);
-                        }
-                }
+		for (unsigned int refSrcPos = 0U; refSrcPos < reflector.length(); refSrcPos++) {
+			if (reflector.substr(refSrcPos, trimmed.length()) == trimmed) {
+				m_search.push_back(*it);
+				break;
+			}
+		}
 	}
 
 	std::sort(m_search.begin(), m_search.end(), refComparison);
