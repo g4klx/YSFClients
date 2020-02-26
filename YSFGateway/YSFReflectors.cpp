@@ -139,7 +139,7 @@ bool CYSFReflectors::load()
 					refl->m_port    = (unsigned int)::atoi(p5);
 					refl->m_count   = std::string(p6);
 					refl->m_type    = YT_YSF;
-					refl->m_wiresX  = false;
+					refl->m_wiresX  = (refl->m_name.compare(0, 3, "XLX") == 0);
 
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
