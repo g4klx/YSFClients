@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010,2011,2012,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010,2011,2012,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "TCPSocket.h"
 #include "RingBuffer.h"
+#include "Timer.h"
 #include "Thread.h"
 
 #include <string>
@@ -45,6 +46,8 @@ public:
 
 	void setReadAPRSCallback(ReadAPRSFrameCallback cb);
 
+	void clock(unsigned int ms);
+
 private:
 	std::string            m_username;
 	std::string            m_password;
@@ -52,11 +55,14 @@ private:
 	CRingBuffer<char*>     m_queue;
 	bool                   m_exit;
 	bool                   m_connected;
+	CTimer                 m_reconnectTimer;
+	unsigned int           m_tries;
 	ReadAPRSFrameCallback  m_APRSReadCallback;
 	std::string            m_filter;
 	std::string            m_clientName;
 
 	bool connect();
+	void startReconnectionTimer();
 };
 
 #endif

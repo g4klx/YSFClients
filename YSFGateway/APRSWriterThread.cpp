@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010-2014,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@ m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
 m_connected(false),
+m_reconnectTimer(1000U),
+m_tries(1U),
 m_APRSReadCallback(NULL),
 m_filter(),
 m_clientName("YSFGateway")
@@ -63,6 +65,8 @@ m_socket(address, port),
 m_queue(20U, "APRS Queue"),
 m_exit(false),
 m_connected(false),
+m_reconnectTimer(1000U),
+m_tries(1U),
 m_APRSReadCallback(NULL),
 m_filter(filter),
 m_clientName(clientName)
@@ -94,19 +98,28 @@ void CAPRSWriterThread::entry()
 	LogMessage("Starting the APRS Writer thread");
 
 	m_connected = connect();
+	if (!m_connected) {
+		LogError("Connect attempt to the APRS server has failed");
+		startReconnectionTimer();
+	}
 
 	try {
 		while (!m_exit) {
 			if (!m_connected) {
-				m_connected = connect();
+				if (m_reconnectTimer.isRunning() && m_reconnectTimer.hasExpired()) {
+					m_reconnectTimer.stop();
 
-				if (!m_connected){
-					LogError("Reconnect attempt to the APRS server has failed");
-					sleep(10000UL);		// 10 secs
+					m_connected = connect();
+					if (!m_connected) {
+						LogError("Reconnect attempt to the APRS server has failed");
+						startReconnectionTimer();
+					}
 				}
 			}
 
 			if (m_connected) {
+				m_tries = 0U;
+
 				if (!m_queue.isEmpty()){
 					char* p = NULL;
 					m_queue.getData(&p, 1U);
@@ -115,11 +128,12 @@ void CAPRSWriterThread::entry()
 
 					::strcat(p, "\r\n");
 
-					bool ret = m_socket.write((unsigned char*)p, ::strlen(p));
+					bool ret = m_socket.write((unsigned char*)p, (unsigned int)::strlen(p));
 					if (!ret) {
 						m_connected = false;
 						m_socket.close();
 						LogError("Connection to the APRS thread has failed");
+						startReconnectionTimer();
 					}
 
 					delete[] p;
@@ -132,6 +146,7 @@ void CAPRSWriterThread::entry()
 						m_connected = false;
 						m_socket.close();
 						LogError("Error when reading from the APRS server");
+						startReconnectionTimer();
 					}
 
 					if(length > 0 && line.at(0U) != '#'//check if we have something and if that something is an APRS frame
@@ -176,7 +191,7 @@ void CAPRSWriterThread::write(const char* data)
 	if (!m_connected)
 		return;
 
-	unsigned int len = ::strlen(data);
+	unsigned int len = (unsigned int)::strlen(data);
 
 	char* p = new char[len + 5U];
 	::strcpy(p, data);
@@ -194,6 +209,11 @@ void CAPRSWriterThread::stop()
 	m_exit = true;
 
 	wait();
+}
+
+void CAPRSWriterThread::clock(unsigned int ms)
+{
+	m_reconnectTimer.clock(ms);
 }
 
 bool CAPRSWriterThread::connect()
@@ -245,4 +265,15 @@ bool CAPRSWriterThread::connect()
 	LogMessage("Connected to the APRS server");
 
 	return true;
+}
+
+void CAPRSWriterThread::startReconnectionTimer()
+{
+	// Clamp at a ten minutes reconnect time
+	m_tries++;
+	if (m_tries > 10U)
+		m_tries = 10U;
+
+	m_reconnectTimer.setTimeout(m_tries * 60U);
+	m_reconnectTimer.start();
 }

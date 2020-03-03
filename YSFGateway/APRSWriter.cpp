@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010-2014,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -168,6 +168,8 @@ void CAPRSWriter::clock(unsigned int ms)
 {
 	m_idTimer.clock(ms);
 
+	m_thread->clock(ms);
+
 	if (m_socket != NULL) {
 		if (m_idTimer.hasExpired()) {
 			pollGPS();
@@ -289,9 +291,9 @@ void CAPRSWriter::sendIdFrameMobile()
 	if (pLatitude == NULL || pLongitude == NULL || pAltitude == NULL)
 		return;
 
-	float rawLatitude  = ::atof(pLatitude);
-	float rawLongitude = ::atof(pLongitude);
-	float rawAltitude  = ::atof(pAltitude);
+	float rawLatitude  = float(::atof(pLatitude));
+	float rawLongitude = float(::atof(pLongitude));
+	float rawAltitude  = float(::atof(pAltitude));
 
 	char desc[200U];
 	if (m_txFrequency != 0U) {
@@ -345,8 +347,8 @@ void CAPRSWriter::sendIdFrameMobile()
 		lon, (rawLongitude < 0.0F) ? 'W' : 'E');
 
 	if (pBearing != NULL && pVelocity != NULL) {
-		float rawBearing   = ::atof(pBearing);
-		float rawVelocity  = ::atof(pVelocity);
+		float rawBearing   = float(::atof(pBearing));
+		float rawVelocity  = float(::atof(pVelocity));
 
 		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
 	}
