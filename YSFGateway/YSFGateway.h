@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ private:
 	CTimer          m_inactivityTimer;
 	CTimer          m_lostTimer;
 	bool            m_fcsNetworkEnabled;
+	CUDPSocket*     m_remoteSocket;
 
 	void startupLinking();
 	std::string calculateLocator();
@@ -71,6 +72,7 @@ private:
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
 	void readFCSRoomsFile(const std::string& filename);
+	void processRemoteCommands();
 };
 
 #endif

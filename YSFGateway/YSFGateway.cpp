@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2019 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "YSFFICH.h"
 #include "Thread.h"
 #include "Timer.h"
+#include "Utils.h"
 #include "Log.h"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -91,7 +92,8 @@ m_startup(),
 m_exclude(false),
 m_inactivityTimer(1000U),
 m_lostTimer(1000U, 120U),
-m_fcsNetworkEnabled(false)
+m_fcsNetworkEnabled(false),
+m_remoteSocket(NULL)
 {
 }
 
@@ -242,6 +244,15 @@ int CYSFGateway::run()
 
 	createGPS();
 
+	if (m_conf.getRemoteCommandsEnabled()) {
+		m_remoteSocket = new CUDPSocket(m_conf.getRemoteCommandsPort());
+		ret = m_remoteSocket->open();
+		if (!ret) {
+			delete m_remoteSocket;
+			m_remoteSocket = NULL;
+		}
+	}
+
 	m_startup   = m_conf.getNetworkStartup();
 	bool revert = m_conf.getNetworkRevert();
 	bool wiresXCommandPassthrough = m_conf.getWiresXCommandPassthrough();
@@ -326,6 +337,9 @@ int CYSFGateway::run()
 				}
 			}
 		}
+
+		if (m_remoteSocket != NULL)
+			processRemoteCommands();
 
 		unsigned int ms = stopWatch.elapsed();
 		stopWatch.start();
@@ -421,6 +435,11 @@ int CYSFGateway::run()
 	if (m_fcsNetwork != NULL) {
 		m_fcsNetwork->close();
 		delete m_fcsNetwork;
+	}
+
+	if (m_remoteSocket != NULL) {
+		m_remoteSocket->close();
+		delete m_remoteSocket;
 	}
 
 	delete m_wiresX;
@@ -838,4 +857,107 @@ void CYSFGateway::readFCSRoomsFile(const std::string& filename)
 	::fclose(fp);
 
 	LogInfo("Loaded %u FCS room descriptions", count);
+}
+
+void CYSFGateway::processRemoteCommands()
+{
+	unsigned char buffer[200U];
+	in_addr address;
+	unsigned int port;
+
+	int res = m_remoteSocket->read(buffer, 200U, address, port);
+	if (res > 0) {
+		buffer[res] = '\0';
+		if (::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) {
+			std::string id = std::string((char*)(buffer + 7U));
+			CYSFReflector* reflector = m_reflectors->findById(id);
+			if (reflector == NULL)
+				reflector = m_reflectors->findByName(id);
+			if (reflector != NULL) {
+				m_wiresX->processConnect(reflector);
+
+				if (m_linkType == LINK_YSF)
+					m_ysfNetwork->writeUnlink(3U);
+
+				if (m_linkType == LINK_FCS) {
+					m_fcsNetwork->writeUnlink(3U);
+					m_fcsNetwork->clearDestination();
+				}
+
+				LogMessage("Connect by remote command to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->writePoll(3U);
+
+				m_current = id;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_YSF;
+			} else {
+				LogWarning("Invalid YSF reflector id/name - \"%s\"", id.c_str());
+				return;
+			}
+		} else if (::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) {
+			std::string raw = std::string((char*)(buffer + 7U));
+			std::string id = "FCS00";
+			if (raw.length() == 3U) {
+				id += raw;
+			} else {
+				LogWarning("Invalid FCS reflector id - \"%s\"", raw.c_str());
+				return;
+			}
+
+			if (m_linkType == LINK_YSF) {
+				m_wiresX->processDisconnect();
+				m_ysfNetwork->writeUnlink(3U);
+				m_ysfNetwork->clearDestination();
+			}
+			if (m_linkType == LINK_FCS)
+				m_fcsNetwork->writeUnlink(3U);
+
+			m_current.clear();
+			m_inactivityTimer.stop();
+			m_lostTimer.stop();
+			m_linkType = LINK_NONE;
+
+			LogMessage("Connect by remote command to %s", id.c_str());
+
+			bool ok = m_fcsNetwork->writeLink(id);
+			if (ok) {
+				m_current = id;
+				m_inactivityTimer.start();
+				m_lostTimer.start();
+				m_linkType = LINK_FCS;
+			} else {
+				LogMessage("Unknown reflector - %s", id.c_str());
+			}
+		} else if (::memcmp(buffer + 0U, "UnLink", 6U) == 0) {
+			if (m_linkType == LINK_YSF) {
+				m_wiresX->processDisconnect();
+
+				LogMessage("Disconnect by remote command");
+
+				m_ysfNetwork->writeUnlink(3U);
+				m_ysfNetwork->clearDestination();
+
+				m_current.clear();
+				m_inactivityTimer.stop();
+				m_lostTimer.stop();
+				m_linkType = LINK_NONE;
+			}
+			if (m_linkType == LINK_FCS) {
+				LogMessage("Disconnect by remote command");
+
+				m_fcsNetwork->writeUnlink(3U);
+				m_fcsNetwork->clearDestination();
+
+				m_current.clear();
+				m_inactivityTimer.stop();
+				m_lostTimer.stop();
+				m_linkType = LINK_NONE;
+			}
+		} else {
+			CUtils::dump("Invalid remote command received", buffer, res);
+		}
+	}
 }
