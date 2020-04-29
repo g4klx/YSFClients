@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 class CNetwork {
 public:
-	CNetwork(unsigned int port, const std::string& name, const std::string& description, bool debug);
+	CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug);
 	~CNetwork();
 
 	bool open();
@@ -44,6 +44,7 @@ public:
 
 private:
 	CUDPSocket   m_socket;
+    unsigned int m_id;
 	std::string  m_name;
 	std::string  m_description;
 	std::string  m_callsign;

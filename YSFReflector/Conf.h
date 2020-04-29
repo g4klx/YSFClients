@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ public:
   bool         getDaemon() const;
 
   // The Info section
+  unsigned int getId() const;
   std::string  getName() const;
   std::string  getDescription() const;
 
@@ -51,6 +52,7 @@ private:
   std::string  m_file;
   bool         m_daemon;
 
+  unsigned int m_id;
   std::string  m_name;
   std::string  m_description;
 

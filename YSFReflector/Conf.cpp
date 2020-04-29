@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ enum SECTION {
 CConf::CConf(const std::string& file) :
 m_file(file),
 m_daemon(false),
+m_id(0U),
 m_name(),
 m_description(),
 m_logDisplayLevel(0U),
@@ -91,7 +92,9 @@ bool CConf::read()
 		  if (::strcmp(key, "Daemon") == 0)
 			  m_daemon = ::atoi(value) == 1;
 	  } else if (section == SECTION_INFO) {
-		  if (::strcmp(key, "Name") == 0)
+		  if (::strcmp(key, "Id") == 0)
+			  m_id = (unsigned int)::atoi(value);
+		  else if (::strcmp(key, "Name") == 0)
 			  m_name = value;
 		  else if (::strcmp(key, "Description") == 0)
 			  m_description = value;
@@ -120,6 +123,11 @@ bool CConf::read()
 bool CConf::getDaemon() const
 {
 	return m_daemon;
+}
+
+unsigned int CConf::getId() const
+{
+	return m_id;
 }
 
 std::string CConf::getName() const

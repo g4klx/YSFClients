@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2018,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -162,7 +162,7 @@ void CYSFReflector::run()
 	}
 #endif
 
-	CNetwork network(m_conf.getNetworkPort(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
+	CNetwork network(m_conf.getNetworkPort(), m_conf.getId(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
 
 	ret = network.open();
 	if (!ret) {
