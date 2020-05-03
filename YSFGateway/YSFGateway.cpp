@@ -651,10 +651,13 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 	case WXS_CONNECT_FCS: {
 			std::string raw = m_dtmf.getReflector();
 			std::string id = "FCS00";
+			std::string idShort = "FCS";
 			if (raw.length() == 2U) {
 				id += raw.at(0U) + std::string("0") + raw.at(1U);
 			} else if (raw.length() == 3U) {
 				id += raw;
+			} else if (raw.length() == 5U) {
+				idShort += raw;
 			} else {
 				LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
 				return;
