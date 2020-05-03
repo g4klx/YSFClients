@@ -676,7 +676,8 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			} else if (raw.length() == 3U) {
 				id += raw;
 			} else if (raw.length() == 5U) {
-				idShort += raw;
+				id = idShort;
+				id += raw;
 			} else {
 				LogWarning("Nonsense from the DTMF decoder - \"%s\"", raw.c_str());
 				return;
@@ -907,7 +908,8 @@ void CYSFGateway::processRemoteCommands()
 			if (raw.length() == 3U) {
 				id += raw;
 			} else if (raw.length() == 5U) {
-				idShort += raw;
+				id = idShort;
+				id += raw;
 			} else {
 				LogWarning("Invalid FCS reflector id - \"%s\"", raw.c_str());
 				return;
