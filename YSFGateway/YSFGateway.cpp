@@ -906,7 +906,7 @@ void CYSFGateway::processRemoteCommands()
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {
 				id += raw;
-			if (raw.length() == 5U) {
+			} else if (raw.length() == 5U) {
 				idShort += raw;
 			} else {
 				LogWarning("Invalid FCS reflector id - \"%s\"", raw.c_str());
