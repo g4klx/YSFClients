@@ -57,11 +57,10 @@ public:
   std::string  getLogFilePath() const;
   std::string  getLogFileRoot() const;
 
-  // The aprs.fi section
+  // The APRS section
   bool         getAPRSEnabled() const;
-  std::string  getAPRSServer() const;
+  std::string  getAPRSAddress() const;
   unsigned int getAPRSPort() const;
-  std::string  getAPRSPassword() const;
   std::string  getAPRSSuffix() const;
   std::string  getAPRSDescription() const;
 
@@ -127,9 +126,8 @@ private:
   std::string  m_logFileRoot;
 
   bool         m_aprsEnabled;
-  std::string  m_aprsServer;
+  std::string  m_aprsAddress;
   unsigned int m_aprsPort;
-  std::string  m_aprsPassword;
   std::string  m_aprsSuffix;
   std::string  m_aprsDescription;
 

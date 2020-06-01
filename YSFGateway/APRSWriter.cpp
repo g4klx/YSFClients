@@ -25,8 +25,7 @@
 #include <cstring>
 #include <cmath>
 
-CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& password, const std::string& address, unsigned int port, const std::string& suffix) :
-m_thread(NULL),
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& address, unsigned int port, const std::string& suffix) :
 m_idTimer(1000U),
 m_callsign(callsign),
 m_txFrequency(0U),
@@ -36,12 +35,14 @@ m_longitude(0.0F),
 m_height(0),
 m_desc(),
 m_suffix(suffix),
+m_aprsAddress(),
+m_aprsPort(port),
+m_aprsSocket(),
 m_mobileGPSAddress(),
 m_mobileGPSPort(0U),
-m_socket(NULL)
+m_mobileSocket(NULL)
 {
 	assert(!callsign.empty());
-	assert(!password.empty());
 	assert(!address.empty());
 	assert(port > 0U);
 
@@ -50,7 +51,7 @@ m_socket(NULL)
 		m_callsign.append(rptSuffix.substr(0U, 1U));
 	}
 
-	m_thread = new CAPRSWriterThread(m_callsign, password, address, port);
+	m_aprsAddress = CUDPSocket::lookup(address);
 }
 
 CAPRSWriter::~CAPRSWriter()
@@ -79,16 +80,16 @@ void CAPRSWriter::setMobileLocation(const std::string& address, unsigned int por
 	m_mobileGPSAddress = CUDPSocket::lookup(address);
 	m_mobileGPSPort    = port;
 
-	m_socket = new CUDPSocket;
+	m_mobileSocket = new CUDPSocket;
 }
 
 bool CAPRSWriter::open()
 {
-	if (m_socket != NULL) {
-		bool ret = m_socket->open();
+	if (m_mobileSocket != NULL) {
+		bool ret = m_mobileSocket->open();
 		if (!ret) {
-			delete m_socket;
-			m_socket = NULL;
+			delete m_mobileSocket;
+			m_mobileSocket = NULL;
 			return false;
 		}
 
@@ -100,7 +101,7 @@ bool CAPRSWriter::open()
 
 	m_idTimer.start();
 
-	return m_thread->start();
+	return m_aprsSocket.open();
 }
 
 void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned char radio, float fLatitude, float fLongitude)
@@ -155,22 +156,20 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	}
 
 	char output[300U];
-	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s:!%s%c/%s%c%c %s via MMDVM",
+	::sprintf(output, "%s>APDPRS,C4FM*,qAR,%s:!%s%c/%s%c%c %s via MMDVM\r\n",
 		callsign, m_callsign.c_str(),
 		lat, (fLatitude < 0.0F) ? 'S' : 'N',
 		lon, (fLongitude < 0.0F) ? 'W' : 'E',
 		symbol, type);
 
-	m_thread->write(output);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
 
 void CAPRSWriter::clock(unsigned int ms)
 {
 	m_idTimer.clock(ms);
 
-	m_thread->clock(ms);
-
-	if (m_socket != NULL) {
+	if (m_mobileSocket != NULL) {
 		if (m_idTimer.hasExpired()) {
 			pollGPS();
 			m_idTimer.start();
@@ -187,26 +186,23 @@ void CAPRSWriter::clock(unsigned int ms)
 
 void CAPRSWriter::close()
 {
-	if (m_socket != NULL) {
-		m_socket->close();
-		delete m_socket;
-	}
+	m_aprsSocket.close();
 
-	m_thread->stop();
+	if (m_mobileSocket != NULL) {
+		m_mobileSocket->close();
+		delete m_mobileSocket;
+	}
 }
 
 bool CAPRSWriter::pollGPS()
 {
-	assert(m_socket != NULL);
+	assert(m_mobileSocket != NULL);
 
-	return m_socket->write((unsigned char*)"YSFGateway", 10U, m_mobileGPSAddress, m_mobileGPSPort);
+	return m_mobileSocket->write((unsigned char*)"YSFGateway", 10U, m_mobileGPSAddress, m_mobileGPSPort);
 }
 
 void CAPRSWriter::sendIdFrameFixed()
 {
-	if (!m_thread->isConnected())
-		return;
-
 	// Default values aren't passed on
 	if (m_latitude == 0.0F && m_longitude == 0.0F)
 		return;
@@ -257,13 +253,13 @@ void CAPRSWriter::sendIdFrameFixed()
 		server.append("S");
 
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&/A=%06.0f%s %s",
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&/A=%06.0f%s %s\r\n",
 		m_callsign.c_str(), server.c_str(),
 		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
 		lon, (m_longitude < 0.0F) ? 'W' : 'E',
 		float(m_height) * 3.28F, band, desc);
 
-	m_thread->write(output);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
 
 void CAPRSWriter::sendIdFrameMobile()
@@ -272,11 +268,8 @@ void CAPRSWriter::sendIdFrameMobile()
 	unsigned char buffer[200U];
 	in_addr address;
 	unsigned int port;
-	int ret = m_socket->read(buffer, 200U, address, port);
+	int ret = m_mobileSocket->read(buffer, 200U, address, port);
 	if (ret <= 0)
-		return;
-
-	if (!m_thread->isConnected())
 		return;
 
 	buffer[ret] = '\0';
@@ -353,7 +346,7 @@ void CAPRSWriter::sendIdFrameMobile()
 		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
 	}
 
-	::sprintf(output + ::strlen(output), "/A=%06.0f%s %s", float(rawAltitude) * 3.28F, band, desc);
+	::sprintf(output + ::strlen(output), "/A=%06.0f%s %s\r\n", float(rawAltitude) * 3.28F, band, desc);
 
-	m_thread->write(output);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }

@@ -10,6 +10,6 @@ The Gateway and Reflector have ini files that contain the parameters for running
 
 The MMDVM .ini file should have the IP address and port number of the client in the [System Fusion Network] settings.
 
-They build on 32-bit and 64-bit Linux as well as on Windows using Visual Studio 2017 on x86 and x64.
+They build on 32-bit and 64-bit Linux as well as on Windows using Visual Studio 2019 on x86 and x64.
 
 This software is licenced under the GPL v2 and is intended for amateur and educational use only. Use of this software for commercial purposes is strictly forbidden.

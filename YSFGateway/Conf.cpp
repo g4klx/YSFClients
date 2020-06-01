@@ -31,7 +31,7 @@ enum SECTION {
   SECTION_GENERAL,
   SECTION_INFO,
   SECTION_LOG,
-  SECTION_APRS_FI,
+  SECTION_APRS,
   SECTION_NETWORK,
   SECTION_YSF_NETWORK,
   SECTION_FCS_NETWORK,
@@ -64,9 +64,8 @@ m_logFileLevel(0U),
 m_logFilePath(),
 m_logFileRoot(),
 m_aprsEnabled(false),
-m_aprsServer(),
+m_aprsAddress(),
 m_aprsPort(0U),
-m_aprsPassword(),
 m_aprsSuffix(),
 m_aprsDescription(),
 m_networkStartup(),
@@ -122,8 +121,8 @@ bool CConf::read()
 		  section = SECTION_INFO;
 	  else if (::strncmp(buffer, "[Log]", 5U) == 0)
 		  section = SECTION_LOG;
-	  else if (::strncmp(buffer, "[aprs.fi]", 9U) == 0)
-		  section = SECTION_APRS_FI;
+	  else if (::strncmp(buffer, "[APRS]", 6U) == 0)
+		  section = SECTION_APRS;
 	  else if (::strncmp(buffer, "[Network]", 9U) == 0)
 		  section = SECTION_NETWORK;
 	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
@@ -198,15 +197,13 @@ bool CConf::read()
 			m_logFileLevel = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "DisplayLevel") == 0)
 			m_logDisplayLevel = (unsigned int)::atoi(value);
-	} else if (section == SECTION_APRS_FI) {
+	} else if (section == SECTION_APRS) {
 		if (::strcmp(key, "Enable") == 0)
 			m_aprsEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Server") == 0)
-			m_aprsServer = value;
+		else if (::strcmp(key, "Address") == 0)
+			m_aprsAddress = value;
 		else if (::strcmp(key, "Port") == 0)
 			m_aprsPort = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Password") == 0)
-			m_aprsPassword = value;
 		else if (::strcmp(key, "Suffix") == 0)
 			m_aprsSuffix = value;
 		else if (::strcmp(key, "Description") == 0)
@@ -387,19 +384,14 @@ bool CConf::getAPRSEnabled() const
 	return m_aprsEnabled;
 }
 
-std::string CConf::getAPRSServer() const
+std::string CConf::getAPRSAddress() const
 {
-	return m_aprsServer;
+	return m_aprsAddress;
 }
 
 unsigned int CConf::getAPRSPort() const
 {
 	return m_aprsPort;
-}
-
-std::string CConf::getAPRSPassword() const
-{
-	return m_aprsPassword;
 }
 
 std::string CConf::getAPRSSuffix() const

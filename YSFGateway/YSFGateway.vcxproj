@@ -147,7 +147,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="APRSWriter.h" />
-    <ClInclude Include="APRSWriterThread.h" />
     <ClInclude Include="Conf.h" />
     <ClInclude Include="CRC.h" />
     <ClInclude Include="DTMF.h" />
@@ -158,7 +157,6 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="StopWatch.h" />
     <ClInclude Include="Sync.h" />
-    <ClInclude Include="TCPSocket.h" />
     <ClInclude Include="Thread.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="UDPSocket.h" />
@@ -175,7 +173,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="APRSWriter.cpp" />
-    <ClCompile Include="APRSWriterThread.cpp" />
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="CRC.cpp" />
     <ClCompile Include="DTMF.cpp" />
@@ -185,7 +182,6 @@
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="StopWatch.cpp" />
     <ClCompile Include="Sync.cpp" />
-    <ClCompile Include="TCPSocket.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="UDPSocket.cpp" />
