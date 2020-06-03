@@ -276,6 +276,9 @@ void CAPRSWriter::sendIdFrameMobile()
 	if (!::gps_waiting(&m_gpsdData, 0))
 		return;
 
+	if (::gps_read(&m_gpsdData, NULL, 0) <= 0)
+		return;
+
 	bool latlonSet   = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
 	bool altitudeSet = (m_gpsdData.set & ALTITUDE_SET) == ALTITUDE_SET;
 	bool velocitySet = (m_gpsdData.set & SPEED_SET) == SPEED_SET;
