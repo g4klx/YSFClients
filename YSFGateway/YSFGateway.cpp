@@ -466,12 +466,12 @@ void CYSFGateway::createGPS()
 
 	m_writer->setInfo(txFrequency, rxFrequency, desc);
 
-	bool enabled = m_conf.getMobileGPSEnabled();
+	bool enabled = m_conf.getGPSDEnabled();
 	if (enabled) {
-		std::string address = m_conf.getMobileGPSAddress();
-		unsigned int port   = m_conf.getMobileGPSPort();
+		std::string address = m_conf.getGPSDAddress();
+		std::string port    = m_conf.getGPSDPort();
 
-		m_writer->setMobileLocation(address, port);
+		m_writer->setGPSDLocation(address, port);
 	} else {
 		float latitude  = m_conf.getLatitude();
 		float longitude = m_conf.getLongitude();

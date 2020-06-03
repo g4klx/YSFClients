@@ -33,6 +33,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <gps.h>
 #else
 #include <winsock.h>
 #endif
@@ -48,7 +49,7 @@ public:
 
 	void setStaticLocation(float latitude, float longitude, int height);
 
-	void setMobileLocation(const std::string& address, unsigned int port);
+	void setGPSDLocation(const std::string& address, const std::string& port);
 
 	void write(const unsigned char* source, const char* type, unsigned char radio, float latitude, float longitude);
 
@@ -57,23 +58,25 @@ public:
 	void close();
 
 private:
-	CTimer       m_idTimer;
-	std::string  m_callsign;
-	unsigned int m_txFrequency;
-	unsigned int m_rxFrequency;
-	float        m_latitude;
-	float        m_longitude;
-	int          m_height;
-	std::string  m_desc;
-	std::string  m_suffix;
-	in_addr      m_aprsAddress;
-	unsigned int m_aprsPort;
-	CUDPSocket   m_aprsSocket;
-	in_addr      m_mobileGPSAddress;
-	unsigned int m_mobileGPSPort;
-	CUDPSocket*  m_mobileSocket;
+	CTimer            m_idTimer;
+	std::string       m_callsign;
+	unsigned int      m_txFrequency;
+	unsigned int      m_rxFrequency;
+	float             m_latitude;
+	float             m_longitude;
+	int               m_height;
+	std::string       m_desc;
+	std::string       m_suffix;
+	in_addr           m_aprsAddress;
+	unsigned int      m_aprsPort;
+	CUDPSocket        m_aprsSocket;
+#if !defined(_WIN32) && !defined(_WIN64)
+	bool              m_gpsdEnabled;
+	std::string       m_gpsdAddress;
+	std::string       m_gpsdPort;
+	struct gps_data_t m_gpsdData;
+#endif
 
-	bool pollGPS();
 	void sendIdFrameFixed();
 	void sendIdFrameMobile();
 };
