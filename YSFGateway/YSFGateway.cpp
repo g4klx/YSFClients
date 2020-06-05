@@ -457,8 +457,9 @@ void CYSFGateway::createGPS()
 	std::string address = m_conf.getAPRSAddress();
 	unsigned int port   = m_conf.getAPRSPort();
 	std::string suffix  = m_conf.getAPRSSuffix();
+	bool debug          = m_conf.getDebug();
 
-	m_writer = new CAPRSWriter(m_callsign, m_suffix, address, port, suffix);
+	m_writer = new CAPRSWriter(m_callsign, m_suffix, address, port, suffix, debug);
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();

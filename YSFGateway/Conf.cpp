@@ -50,6 +50,7 @@ m_myAddress(),
 m_myPort(0U),
 m_wiresXMakeUpper(true),
 m_wiresXCommandPassthrough(false),
+m_debug(false),
 m_daemon(false),
 m_rxFrequency(0U),
 m_txFrequency(0U),
@@ -169,6 +170,8 @@ bool CConf::read()
 			m_wiresXMakeUpper = ::atoi(value) == 1;
 		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
 			m_wiresXCommandPassthrough = ::atoi(value) == 1;
+		else if (::strcmp(key, "Debug") == 0)
+			m_debug = ::atoi(value) == 1;
 		else if (::strcmp(key, "Daemon") == 0)
 			m_daemon = ::atoi(value) == 1;
 	} else if (section == SECTION_INFO) {
@@ -312,6 +315,11 @@ bool CConf::getWiresXMakeUpper() const
 bool CConf::getWiresXCommandPassthrough() const
 {
 	return m_wiresXCommandPassthrough;
+}
+
+bool CConf::getDebug() const
+{
+	return m_debug;
 }
 
 bool CConf::getDaemon() const

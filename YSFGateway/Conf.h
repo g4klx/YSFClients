@@ -39,6 +39,7 @@ public:
   unsigned int getMyPort() const;
   bool         getWiresXMakeUpper() const;
   bool         getWiresXCommandPassthrough() const;
+  bool         getDebug() const;
   bool         getDaemon() const;
 
   // The Info section
@@ -109,6 +110,7 @@ private:
   unsigned int m_myPort;
   bool         m_wiresXMakeUpper;
   bool         m_wiresXCommandPassthrough;
+  bool         m_debug;
   bool         m_daemon;
 
   unsigned int m_rxFrequency;

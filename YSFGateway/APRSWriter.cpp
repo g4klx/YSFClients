@@ -25,9 +25,10 @@
 #include <cstring>
 #include <cmath>
 
-CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& address, unsigned int port, const std::string& suffix) :
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& address, unsigned int port, const std::string& suffix, bool debug) :
 m_idTimer(1000U),
 m_callsign(callsign),
+m_debug(debug),
 m_txFrequency(0U),
 m_rxFrequency(0U),
 m_latitude(0.0F),
@@ -178,6 +179,9 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 		lon, (fLongitude < 0.0F) ? 'W' : 'E',
 		symbol, type);
 
+	if (m_debug)
+		LogDebug("APRS ==> %s", output);
+
 	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
 
@@ -273,14 +277,14 @@ void CAPRSWriter::sendIdFrameFixed()
 		lon, (m_longitude < 0.0F) ? 'W' : 'E',
 		float(m_height) * 3.28F, band, desc);
 
+	if (m_debug)
+		LogDebug("APRS ==> %s", output);
+
 	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
 
 void CAPRSWriter::sendIdFrameMobile()
 {
-	if (!m_gpsdEnabled)
-		return;
-
 	if (!::gps_waiting(&m_gpsdData, 0))
 		return;
 
@@ -362,6 +366,9 @@ void CAPRSWriter::sendIdFrameMobile()
 		::sprintf(output + ::strlen(output), "/A=%06.0f", float(rawAltitude) * 3.28F);
 
 	::sprintf(output + ::strlen(output), "%s %s\r\n", band, desc);
+
+	if (m_debug)
+		LogDebug("APRS ==> %s", output);
 
 	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
