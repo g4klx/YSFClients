@@ -44,10 +44,10 @@ CNetwork::~CNetwork()
 	delete[] m_status;
 }
 
-bool CNetwork::open(const char* bindaddr)
+bool CNetwork::open(const std::string& bindaddr)
 {
-	if (strlen(bindaddr) > 0)
-		::fprintf(stdout, "Opening YSF network connection on address %s\n", bindaddr);
+	if (bindaddr.length() > 0)
+		::fprintf(stdout, "Opening YSF network connection on address %s\n", bindaddr.c_str());
 	else 
 		::fprintf(stdout, "Opening YSF network connection on all interfaces\n");
 
