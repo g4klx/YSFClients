@@ -47,6 +47,7 @@ public:
   // The Network section
   unsigned int getNetworkPort() const;
   bool         getNetworkDebug() const;
+  std::string  getNetworkBindAddr() const;
 
 private:
   std::string  m_file;
@@ -63,6 +64,7 @@ private:
 
   unsigned int m_networkPort;
   bool         m_networkDebug;
+  std::string  m_networkBindAddr;
 };
 
 #endif

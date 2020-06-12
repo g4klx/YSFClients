@@ -40,7 +40,7 @@ public:
 	CUDPSocket(unsigned int port = 0U);
 	~CUDPSocket();
 
-	bool open();
+	bool open(const std::string& bindaddr);
 
 	int  read(unsigned char* buffer, unsigned int length, in_addr& address, unsigned int& port);
 	bool write(const unsigned char* buffer, unsigned int length, const in_addr& address, unsigned int port);
