@@ -102,7 +102,7 @@ in_addr CUDPSocket::lookup(const std::string& hostname)
 #endif
 }
 
-bool CUDPSocket::open()
+bool CUDPSocket::open(const char* bindaddr)
 {
 	m_fd = ::socket(PF_INET, SOCK_DGRAM, 0);
 	if (m_fd < 0) {
@@ -119,7 +119,16 @@ bool CUDPSocket::open()
 		::memset(&addr, 0x00, sizeof(sockaddr_in));
 		addr.sin_family      = AF_INET;
 		addr.sin_port        = htons(m_port);
-		addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+		if ( strlen(bindaddr) > 0){
+			int validaddr = inet_pton(AF_INET, bindaddr, &(addr.sin_addr));
+			if (validaddr != 1){
+				LogError("The BindAddress in the .ini is invalid - %s", bindaddr);
+				return false;
+			}
+		} else {
+			addr.sin_addr.s_addr = htonl(INADDR_ANY);
+		}
 
 		if (!m_address.empty()) {
 #if defined(_WIN32) || defined(_WIN64)

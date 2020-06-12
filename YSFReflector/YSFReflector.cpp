@@ -164,7 +164,9 @@ void CYSFReflector::run()
 
 	CNetwork network(m_conf.getNetworkPort(), m_conf.getId(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
 
-	ret = network.open();
+	const char* bindaddr = m_conf.getNetworkBindAddr().c_str();
+
+	ret = network.open(bindaddr);
 	if (!ret) {
 		::LogFinalise();
 		return;
