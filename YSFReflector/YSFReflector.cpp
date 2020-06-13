@@ -164,7 +164,7 @@ void CYSFReflector::run()
 
 	CNetwork network(m_conf.getNetworkPort(), m_conf.getId(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
 
-	ret = network.open();
+	ret = network.open(m_conf.getNetworkBindAddr());
 	if (!ret) {
 		::LogFinalise();
 		return;

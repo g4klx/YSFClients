@@ -31,7 +31,7 @@ public:
 	CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug);
 	~CNetwork();
 
-	bool open();
+	bool open(const std::string& bindaddr);
 
 	bool writeData(const unsigned char* data, const in_addr& address, unsigned int port);
 	bool writePoll(const in_addr& address, unsigned int port);

@@ -45,7 +45,8 @@ m_logFileLevel(0U),
 m_logFilePath(),
 m_logFileRoot(),
 m_networkPort(0U),
-m_networkDebug(false)
+m_networkDebug(false),
+m_networkBindAddr()
 {
 }
 
@@ -112,6 +113,8 @@ bool CConf::read()
 			  m_networkPort = (unsigned int)::atoi(value);
 		  else if (::strcmp(key, "Debug") == 0)
 			  m_networkDebug = ::atoi(value) == 1;
+		  else if (::strcmp(key, "BindAddress") == 0)
+			  m_networkBindAddr = value;
 	  }
   }
 
@@ -168,4 +171,9 @@ unsigned int CConf::getNetworkPort() const
 bool CConf::getNetworkDebug() const
 {
 	return m_networkDebug;
+}
+
+std::string CConf::getNetworkBindAddr() const
+{
+	return m_networkBindAddr;
 }
