@@ -1,6 +1,12 @@
 CC      = gcc
 CXX     = g++
+
+# Use the following CFLAGS if you don't want to use gpsd.
 CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
+
+# Use the following CFLAGS if you do want to use gpsd.
+CFLAGS  = -g -O3 -Wall -DUSE_GPSD -std=c++0x -pthread
+
 LIBS    = -lm -lpthread -lgps
 LDFLAGS = -g
 

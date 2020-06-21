@@ -39,7 +39,7 @@ m_suffix(suffix),
 m_aprsAddress(),
 m_aprsPort(port),
 m_aprsSocket()
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 ,m_gpsdEnabled(false),
 m_gpsdAddress(),
 m_gpsdPort(),
@@ -78,7 +78,7 @@ void CAPRSWriter::setStaticLocation(float latitude, float longitude, int height)
 
 void CAPRSWriter::setGPSDLocation(const std::string& address, const std::string& port)
 {
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	assert(!address.empty());
 	assert(!port.empty());
 
@@ -90,7 +90,7 @@ void CAPRSWriter::setGPSDLocation(const std::string& address, const std::string&
 
 bool CAPRSWriter::open()
 {
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
 		if (ret != 0) {
@@ -183,7 +183,7 @@ void CAPRSWriter::clock(unsigned int ms)
 {
 	m_idTimer.clock(ms);
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		if (m_idTimer.hasExpired()) {
 			sendIdFrameMobile();
@@ -197,7 +197,7 @@ void CAPRSWriter::clock(unsigned int ms)
 			m_idTimer.setTimeout(20U * 60U);
 			m_idTimer.start();
 		}
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	}
 #endif
 }
@@ -206,7 +206,7 @@ void CAPRSWriter::close()
 {
 	m_aprsSocket.close();
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		::gps_stream(&m_gpsdData, WATCH_DISABLE, NULL);
 		::gps_close(&m_gpsdData);
@@ -278,6 +278,7 @@ void CAPRSWriter::sendIdFrameFixed()
 	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
 
+#if defined(USE_GPSD)
 void CAPRSWriter::sendIdFrameMobile()
 {
 	if (!::gps_waiting(&m_gpsdData, 0))
@@ -367,4 +368,4 @@ void CAPRSWriter::sendIdFrameMobile()
 
 	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
 }
-
+#endif

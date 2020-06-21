@@ -71,7 +71,7 @@ private:
 	in_addr           m_aprsAddress;
 	unsigned int      m_aprsPort;
 	CUDPSocket        m_aprsSocket;
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(USE_GPSD)
 	bool              m_gpsdEnabled;
 	std::string       m_gpsdAddress;
 	std::string       m_gpsdPort;
