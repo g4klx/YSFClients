@@ -284,8 +284,14 @@ void CAPRSWriter::sendIdFrameMobile()
 	if (!::gps_waiting(&m_gpsdData, 0))
 		return;
 
+#if GPSD_API_MAJOR_VERSION >= 7
 	if (::gps_read(&m_gpsdData, NULL, 0) <= 0)
 		return;
+#else
+	if (::gps_read(&m_gpsdData) <= 0)
+		return;
+#endif
+
 
 	if (m_gpsdData.status != STATUS_FIX)
 		return;
@@ -300,7 +306,11 @@ void CAPRSWriter::sendIdFrameMobile()
 
 	float rawLatitude  = float(m_gpsdData.fix.latitude);
 	float rawLongitude = float(m_gpsdData.fix.longitude);
+#if GPSD_API_MAJOR_VERSION >= 9
 	float rawAltitude  = float(m_gpsdData.fix.altMSL);
+#else
+	float rawAltitude  = float(m_gpsdData.fix.altitude);
+#endif
 	float rawVelocity  = float(m_gpsdData.fix.speed);
 	float rawBearing   = float(m_gpsdData.fix.track);
 
