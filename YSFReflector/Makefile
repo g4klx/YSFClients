@@ -14,6 +14,9 @@ YSFReflector:	$(OBJECTS)
 %.o: %.cpp
 		$(CXX) $(CFLAGS) -c -o $@ $<
 
+install:
+		install -m 755 YSFReflector /usr/local/bin/
+
 clean:
 		$(RM) YSFReflector *.o *.d *.bak *~
  

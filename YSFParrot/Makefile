@@ -14,6 +14,9 @@ YSFParrot:	$(OBJECTS)
 %.o: %.cpp
 		$(CXX) $(CFLAGS) -c -o $@ $<
 
+install:
+		install -m 755 YSFParrot /usr/local/bin/
+
 clean:
 		$(RM) YSFParrot *.o *.d *.bak *~
  
