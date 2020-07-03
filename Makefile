@@ -1,4 +1,4 @@
-SUBDIRS = YSFReflector
+SUBDIRS = YSFGateway YSFParrot YSFReflector
 CLEANDIRS = $(SUBDIRS:%=clean-%)
 INSTALLDIRS = $(SUBDIRS:%=install-%)
 
