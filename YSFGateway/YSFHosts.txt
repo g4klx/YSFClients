@@ -20,7 +20,7 @@
 59911;AT Austria OE8;OE8VIK;178.198.23.201;42000;004;http://oe8vik.ddns.net/YSFReflector-Dashboard
 55693;AT C4FM Austria;YSF;89.185.97.38;42000;023;http://c4fm.oevsv.at/ysf
 43110;AU NSW;AU NSW;193.119.93.145;42000;000;http://ysfnsw.gustotech.net/
-80706;AU TAS;BM TG5057;45.248.50.37;42000;003;http://vk7hse.duckdns.org:81
+05057;AU TAS;VK7 Tasmania;45.248.50.37;42001;003;http://vk7hse.duckdns.org/ysf
 66921;AU VIC;YSFReflector;110.141.223.15;42000;004;http://ysf.vk3mck.com
 04201;AU YSF001;1st WW YSF;110.232.113.108;42000;016;http://ysf001.duckdns.org
 00043;BAYAREA-YSF;SF Bay W6BSD;45.32.129.65;42000;005;http://ysf.bsdworld.org/
