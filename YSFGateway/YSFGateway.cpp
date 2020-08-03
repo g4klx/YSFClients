@@ -281,11 +281,10 @@ int CYSFGateway::run()
 				CYSFReflector* reflector = m_wiresX->getReflector();
 				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
+					m_exclude = processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
 				} else {
-					m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+					m_exclude = processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
 				}
 
 				if (m_gps != NULL)
@@ -533,6 +532,8 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 
 void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
 {
+	bool ret=true;
+	
 	assert(buffer != NULL);
 
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, dontProcessWiresXLocal);
@@ -623,8 +624,10 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 		}
 		break;
 	default:
+		ret = false;
 		break;
 	}
+	return ret;
 }
 
 void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
