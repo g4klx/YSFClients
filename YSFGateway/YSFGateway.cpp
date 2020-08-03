@@ -530,7 +530,7 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
+bool CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
 {
 	bool ret=true;
 	
