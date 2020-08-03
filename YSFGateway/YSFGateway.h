@@ -67,7 +67,7 @@ private:
 
 	void startupLinking();
 	std::string calculateLocator();
-	void processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
+	bool processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
