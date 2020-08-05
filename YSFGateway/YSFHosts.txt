@@ -1,290 +1,899 @@
-65702;0 OE-Austria;Official;94.199.173.123;42000;001;http://oe9xvi.dyndns.org:46193
-38089;0077;IRLP/DMR Esp;216.21.9.156;42000;004;xe1dvi.crabdance.com/html/index.php
-11500;0E7XTR;OE7-Oberland;193.80.116.160;42000;002;https://hitthi.synology.me:46193
-02573;1004DMR;DRM C4FM CROSS;210.178.113.173;42000;004;http://1004dmr.dvham.com/indexysf.php
-74652;119-YSF;TG45004 XLX170;125.129.207.86;42000;003;http://ysf119.dvham.com/index.php
-06015;50525;Bridge-NXDN-P2;45.33.5.123;42000;003;50525.ysfreflector.net
-17950;AH-HUH.NET;YSF;52.192.129.174;42000;005;http://ah-huh.net/ysf/
-99063;AJ6EE-YSF1;Kevin's YSF;107.214.105.80;42000;000;http://aj6ee.redirectme.net:9080
-02034;Alabama-Link;Alabama-Link;96.47.95.121;42000;052;http://ysf.alabamalink.info/
-13953;America-Link;America-Link;96.47.95.121;42001;078;http://amlink.alabamalink.info
-64230;America-RC;YSF-TO-WIRES-X;65.101.7.49;42000;026;http://65.101.7.49
-33360;AR Arg-ROOM;C4FM to DMR;190.194.12.53;42000;002;http://190.194.12.53/ysf_dashboard/index.php
-73599;AR TG722 LINK;YSF to TG722;80.211.1.59;42000;001;http://722ysfargentina.dnsalias.com
-03189;AR TG7221 LINK;YSF to TG7221;80.211.7.43;42000;001;http://7221ysfargentina.dnsalias.com
-88060;AREC US FL-727;C4FM Bridge BM;97.76.81.165;42000;001;http://ysf.inerrantenergy.com/ysf/
-66099;ARGENTINA LINK;Link to TG7227;212.237.3.87;42000;007;http://ysfargentina.dnsalias.com
-42586;ARRGUS_ArrayN;Back up server;45.62.254.207;42000;001;http://ysf6.arrg.us
-25223;AT Austria OE1;OE1XFV;213.47.71.17;42000;005;http://oe1phs.ddns.net/YSFReflector-Dashboard/
-00396;AT Austria OE3;OE3AAS;178.112.70.116;42100;000;http://oe3aas.ddns.net/YSFReflector-Dashboard/
-59911;AT Austria OE8;OE8VIK;178.198.23.201;42000;004;http://oe8vik.ddns.net/YSFReflector-Dashboard
-55693;AT C4FM Austria;YSF;89.185.97.38;42000;023;http://c4fm.oevsv.at/ysf
-43110;AU NSW;AU NSW;193.119.93.145;42000;000;http://ysfnsw.gustotech.net/
-05057;AU TAS;VK7 Tasmania;45.248.50.37;42001;003;http://vk7hse.duckdns.org/ysf
-66921;AU VIC;YSFReflector;110.141.223.15;42000;004;http://ysf.vk3mck.com
-04201;AU YSF001;1st WW YSF;110.232.113.108;42000;016;http://ysf001.duckdns.org
-00043;BAYAREA-YSF;SF Bay W6BSD;45.32.129.65;42000;005;http://ysf.bsdworld.org/
-64364;BE YSF-Vl;C4FMVlaanderen;81.95.126.168;42000;005;http://ysf.on4top.be/ysf/
-79520;BE YSF-Wallonie;C4FM Wallon;51.255.193.63;42000;002;http://www.ysfwallonie.net/
-67661;BG Bulgaria;Sysop: LZ1LCD;95.43.222.149;42000;000;http://fusion.spirka.net
-35409;Blount,Co-Link;Local Area Lin;12.202.202.19;43000;000;http://blountysf.sytes.net
-14341;BM-TG-208;BrMstr TG208;51.254.126.212;42000;001;
-30745;BM-TG-2080;BrMstr TG2080;51.254.126.212;42080;002;
-00872;BM-TG-20820;BrMstr TG20820;51.254.126.212;42020;001;
-37594;BM-TG-20845;BrMstr TG20845;51.254.126.212;42045;001;
-93206;BM-TG-2088;BrMstr TG2088;51.254.126.212;42008;001;
-36096;BR YSF724;C4FM - DV Braz;66.55.64.14;42000;005;http://ysf.dvbrazil.com.br/
-67862;C4FM DENMARK;BM TG23810;172.104.159.208;42000;001;http://ysf238.brandmeister.digital
-85044;C4FM-SEOUL;TG45004 XLX170;121.162.91.45;42000;003;http://ysfso.dvham.com/indexysf.php
-77353;CA Canada;C4FM Ontario;144.217.241.23;42100;011;http://c4fmontario.hopto.org
-71083;CA Canada FR;Fusion Canada;38.110.97.161;42000;008;
-19952;CA Nanikana;Nanikana;142.217.113.98;42000;004;http://142.217.113.98
-79602;Carolina Link;Carolina Link;52.3.47.55;42000;003;http://52.3.47.55/index.php
-30998;CH 228 Swiss;Bridge BM22820;195.225.116.245;42000;017;http://ysf.hb-connect.ch/
-63347;CH 228 Swiss2;HB-CONNECT;176.10.105.210;42002;001;http://176.10.105.210/2/index.php
-52796;CH JOTA;Jota CH;157.161.57.65;42001;000;http://pi2.woody.ch:8080/YSFReflector-Dashboard/ (ipv6 only)
-54037;CI-LOCAL;BM 311752;66.94.192.212;42000;001;http://ysfreflector.peoriaradio.com
-72350;CL CHILE;YSF to TG730;186.64.123.59;42000;002;http://sdradio.cl/ysf
-18829;CN CC#1;TG 460501;47.104.177.248;42000;001;https://mmdvm.cc/ysf/
-80337;CN China #1;W24166/TG46001;120.234.41.144;42000;044;http://ysf.sz790.com:8081/
-82442;CN China #2;W24269/TG46072;116.6.107.115;42006;000;http://ufozhuzi.tpddns.cn:8081/
-86319;CN China #3;C4FM;123.58.6.137;42000;002;http://123.58.6.137:8088/
-08408;CN CN-China-4;P25;47.105.33.47;42003;001;http://www.bg3hbr.cn/xiuno
-19610;CN-SXXY-YSF;TG46091;123.139.189.182;42000;002;http://ysf.jzsqx.com:3578/ysf/
-10552;CN-SZ-YSF;BM TG46073;116.6.107.114;42006;001;
-30490;CO 4 KILO MIKE;Antioquia;190.159.68.105;42000;000;
-72001;CO HK_NAL_LCRA;BM TG732;186.29.69.76;42000;000;http://ysfnal.lcra.org.co
-66032;Colombia-Link;Voz-Digital-HK;45.56.117.158;42000;001;
-04523;CT CATALANA;C4FM Catalunya;85.214.119.76;42000;016;http://ysfcat.ea3hkb.com
-30549;CT WIRESCAT;C4FM Catalunya;85.214.119.76;42001;004;http://wirescat.ea3hkb.com
-26541;CZ Czech;TG2300 DCS019V;80.250.3.114;42000;006;http://80.250.3.114/index.php
-52690;CZ YSF Klatovy;CZ;46.23.62.124;42200;002;http://46.23.62.124:42080
-77329;CZ YSF Praha;CZ YSF Praha;185.32.183.148;42000;005;http://185.32.183.148/ysf/
-34046;CZ YSF-DMR;Bridge TG23010;78.45.50.229;42200;001;http://www.ok1pmp.eu/ysf/
-21972;DE Berlin;Spandau;81.169.245.52;42000;000;http://www.comvision.de/ysf/
-14187;DE DL-DL1BH;Bremerhaven;91.248.101.215;42000;001;
-80861;DE DL-NORD;AFu-Nord.de;5.45.96.68;42000;001;http://funk-sh.de
-54919;DE DL-NORDWEST;Nordwest-DL;84.140.19.119;42000;024;http://dl-nordwest.spdns.de
-62829;DE Germany;YSF262 BM263;213.202.229.15;42000;034;https://c4fm.ysfreflector.de/Germany
-22675;DE Germany02;MultiNet-Bridg;213.202.228.87;42000;004;213.202.228.87/ysf/
-92161;DE GOETTINGEN;Raum GÃ¶;51.15.40.103;42001;005;ysf-goettingen.tk
-44305;DE Heidekreis;Niedersachsen;77.23.104.248;41000;004;http://do3bsl.ddns.net
-92469;DE Hessen;YSFReflector H;5.9.184.13;42000;000;http://www.db0rei.de/dehessen/
-02225;DE NIEDERSACHSEN;TG 262337;80.129.67.126;42010;000;
-09319;DE Oberpfalz;Region Opf.;85.214.193.146;42009;000;https://www.vfdb.org/no-dashboard
-74154;DE PEGASUS;Multi-Bridge;78.46.11.65;42000;018;https://status.projekt-pegasus.net/
-20548;DE PEGASUS2;Test System;78.46.11.65;42001;003;https://status.projekt-pegasus.net/
-63421;DE Ruhrgebiet;Ruhrgebiet;144.76.12.90;42000;004;http://dg3yjb.beba.re/YSFReflector
-15017;DE Saarland;darc-saar.de;213.202.229.220;42000;000;https://c4fm.darc-saar.de/
-55966;DE Thueringen;C4FM Reflektor;37.26.200.222;42000;004;http://relais.db0ins.de/YSFReflector-Dashboard/
-95352;DE Twitterrunde;GW BM TG263333;213.202.229.15;42001;001;https://c4fm.ysfreflector.de/Twitterrunde
-53414;DE VFDB;Telekom&Post;85.214.193.146;42000;001;https://www.vfdb.org/ysf/
-71855;DE YSF for OWL;Gateway;185.188.4.15;42000;003;ysf.hb9gfx.ch
-51236;DETROIT-METRO;DETROIT AREA;107.141.52.226;42012;000;
-31639;DigiComm Cafe;DigiComm Cafe;18.221.190.22;42001;002;http://18.221.190.22/DG/
-91025;DTDXA_YSF;Thailand;119.59.126.210;42000;009;https://ysf.dtdxa.com
-00561;DVSwitch NA;North America;44.103.34.4;42000;000;http://dvswitch.org/ysfreflector/
-22401;EA C4FM Spain;(YCS224);212.237.3.141;42000;096;http://ycs.xreflector.es/
-42493;EA Distrito 2;YSF Bizkaia;185.47.129.230;42000;002;http://server.sustrai.org/ysf/
-62980;EA Distrito 4;REM SPAIN;212.237.0.67;42000;008;http://ysfdistrito4.xreflector.es/
-39908;EA Distrito 5;YSF EALINK;216.86.147.198;42000;002;http://ysfdistrito5.mmdvm.es/
-58314;EA Distrito 7;RC Veleta;212.237.11.53;42000;010;http://212.237.11.53/html/ysf/
-37172;EA Sevilla;Prov Sevilla;204.44.93.190;42000;001;http://ysfsevilla.xreflector.es/
-31977;ECOAMERICA;AB6MM;104.194.206.233;42000;001;http://104.194.206.233/index.php
-32027;ES ADER;ASSOCIACIO;80.211.226.198;42000;005;http://80.211.226.198/index_dashboard.php
-09059;ES CANARIAS;Canarias C4FM;185.166.212.132;42000;001;185.166.212.132/ysf/
-99760;ES EALINK;YSF EALINK;194.182.66.76;42000;000;http://www.fusion.ealink.es/ysf/
-98529;ES ED2ZAE;Multiporpouse;94.177.237.192;42000;001;http://ysf900.dyndns.org/ysf
-11650;ES EL EJIDO;EL EJIDO SPAIN;80.88.90.73;42000;000;http://80.88.90.73/
-96124;ES ES ALMERIA;YSF ALMERIA;80.211.1.143;42000;004;http://80.211.1.143/ysf/
-92620;ES IBERIA;C4FM;88.18.153.217;42000;001;http://ea8ajc.ddns.net/ysf
-14275;ES MADRID;C4FM en Madrid;54.38.242.248;42000;003;54.38.242.248/ysf
-15642;ES REM SPAIN;YSF Reflector;80.211.163.139;42000;006;ysfreflector-rem.spdns.org
-18044;ES TECNICO Y MAS;URE CT TENERIF;185.166.212.132;42002;002;185.166.212.132/ysf3/
-45904;ES TENERIFE;YSF<>TG21438;185.166.212.132;42001;004;185.166.212.132/ysf2/
-60318;ES Wires X;BM TG2140;80.211.236.189;42000;007;http://ysf.xreflector.es/
-29701;ES WIRESLINK-EA;room 27276;80.211.155.206;42000;002;80.211.155.206/ref/
-50246;ES Zulu Radio;YSF Zulu Radio;51.254.128.134;42000;005;https://zuluradio.es/ysf/
-60786;FR F1ZLJ (95);Val dOise-ARAM;82.236.81.19;42000;002;http://82.236.81.19
-00645;FR FON-Gateway;AllModes-GW;185.109.201.81;42000;000;
-86886;FR Room-ZIT;Room F1ZIT;151.80.143.185;42002;020;http://151.80.143.185/zit/YSFReflector-Dashboard/
-72721;FR RRF-Gateway;AllModes-GW;185.109.201.81;42001;000;
-39510;FR wiresxfrance;Wires-X-France;151.80.143.185;42000;002;http://151.80.143.185/WXF/YSFReflector-Dashboard/index.php
-58199;FR YSF Dijon;FR YSF Dijon;149.91.81.249;42000;001;http://149.91.81.249/
-59495;FR YSF St Amand;St Amand (59);51.15.172.24;42000;002;https://srv.hambox.fr/dashboard/
-83665;FR YSF-Alpes;Rhone-Alpes;217.182.66.229;42000;001;http://ysf-alpes.f4gve.net
-60284;FR YSF-Alsace;Room (67-68);5.135.188.16;42000;001;http://c4fm.vulcain.space/
-13844;FR YSF-Cappelle;YSF Room F1ZKY;92.188.0.124;42000;001;ysf.a3rn.org:2626
-58617;FR YSF-France;Fusion France;87.98.132.205;42000;033;http://ysf-france.fr/
-91713;FR YSF-Limouzi;C4FM Limousin;82.64.55.4;42000;002;http://ysf-limousin.dyndns.org:8787
-46353;FR YSF-Nord;Nord;178.32.163.106;42000;007;
-24703;FR YSF-NordOuest;XLX933-E;78.206.208.208;42000;004;http://78.206.208.208:8081/YSFReflector-Dashboard/index.php
-33751;FUSION-ITALY;Italy YSFR;188.213.173.69;42000;001;http://c4fm-it.selfip.com/
-42233;GB BLIND-VETS;Blind Veterans;159.65.16.93;42000;000;
-91767;GB Fusion Kernow;Fusion SW UK;87.117.229.165;43000;001;http://ysf.mb6cc.co.uk
-56429;GB GB7WF;IO82UI;86.181.128.127;42021;003;http://wfrg.ddns.net/
-60481;GB MB6ER;Scotland Chat,;81.150.10.63;42000;002;
-97576;GB N.Ireland;YSF N.Ireland;87.117.229.165;42500;005;
-58362;GB NorthWestLink;Bridge BM23520;139.162.213.89;42002;001;
-45621;GB XLX925;MI5DAW Linking;90.255.232.101;42000;010;
-41142;GB XLX969;NWFG All modes;142.93.46.36;42000;000;http://xlx969.nwfg.online
-39270;GB XRF922;CQ-UK;81.150.10.62;42000;011;http://www.mb6er.com/ysf/
-20408;GB YSF-CYMRU;REFLECTOR-CYM;217.35.151.219;42000;004;http://ysf.cymru.link/ysf
-89995;Great Lakes;Great Lakes Ar;107.141.52.226;42003;000;
-25419;Guatemala;BM TG 704;104.143.94.48;42000;003;http://104.143.94.48/index.php
-69528;HaaglandenVBG;TST Haaglanden;44.137.33.172;42000;001;http://ysfreflector.pi1vbg.ampr.org
-47247;HB C4FM Basel;CISAR Basel;212.237.33.114;42000;000;http://212.237.33.114/c4fm/index.php
-62928;HBLINK EA5GVK;HBLINK EA5GVK;79.109.228.192;42000;001;http://ea5gvk.duckdns.org:84/YSFReflector
-01689;HP-PANAMA-HUB;C4FM DMR;179.63.194.94;42000;003;http://ysf-hp1cdw.it.cx
-49993;HU HU TG2162;BM TG2162;185.187.75.192;42300;006;http://brandmeister.hu/ysfref2162/
-41120;HU Hungary;BM TG216;185.187.75.192;42100;001;http://brandmeister.hu/ysfref/
-99603;HUBNet;Link to HUBNet;139.162.213.89;42000;006;g7rpg.hubnetwork.uk
-04251;IE YSF Ireland;Fusion <> DMR;87.44.19.111;42000;007;
-77388;IT ARC-YSF;SICILY CROSSLI;87.27.40.53;42000;002;http://ysf.iq9il.it/ysf
-46773;IT C4FM ABRUZZO;IT-DMR>TG22261;2.236.110.71;42000;003;ysf-abruzzo.ns0.it
-30483;IT C4FM Lodi;Lombardia;94.177.187.40;42000;005;http://ysflodi.iw2gob.it/c4fm/index.php
-51231;IT C4FM NORD;ITALY-NORD;78.47.154.19;42000;006;http://italy-nord.dyndns.biz/dashboard/index.php
-19437;IT C4FM Piemonte;Link DMR TG 22;94.177.173.53;42000;001;http://94.177.173.53:8085/c4fm/index.php
-26765;IT C4FM ROSETO;YSF<>TG222035;178.23.207.167;42000;002;http://ysf-roseto.ddns.net
-16547;IT C4FM-LECCE;PUGLIA;188.213.166.199;42000;002;http://c4fm-lecce.ddns.net/YSFReflector-Dashboard/
-47946;IT Digiland;Italia;212.227.203.37;42000;002;http://212.227.203.37/ysf/index.php
-64120;IT DSTAR-LINK;LINK DSTAR;151.50.247.16;42000;002;64120.ddns.net:8888/index.php
-58288;IT GDO FUSION;C4FM OSSOLA;78.134.124.226;42000;001;http://iz1zpj.ddns.net/index.php
-26045;IT GRF-YSF;TUSCANY MULTIP;5.249.151.111;42000;008;http://ysf.grupporadiofirenze.net/ysf
-86968;IT GRF-YSF2;ITALY MULTIP;31.14.142.119;42000;003;http://ysf2.grupporadiofirenze.net/ysf
-81840;IT HAMRADIOENNA;Fusion #81840;94.176.6.45;42000;002;http://hamradioenna.roomsicilia.it
-45679;IT I6-ABRUZZO;IT-I6-ABRUZZO;95.252.231.241;42000;001;iz6ouf77.ddns.net/ysf/
-18255;IT ITALIA;YSF Italia;185.203.118.8;42000;002;http://185.203.118.8/italia/
-10885;IT RNRE-YSF;CROSSLINK;31.14.135.7;42000;002;http://ysf888.duckdns.org/ysf/
-34697;IT SICILIA;Fusion #34697;2.226.183.226;42001;009;ysf.roomsicilia.it
-79445;IT TUSCANY;C4FM;62.11.51.165;42001;000;iu5hju.ddns.net
-71249;IT UMBRIA;YSF UMBRIA;80.211.107.181;42000;003;http://itumbria.iu0krr.it
-29443;IT YSFROOM I7;C4FM Puglia It;80.211.19.121;42000;002;http://xlx991.iz7auh.net/ysf
-82044;IT YSFROOM-ITALY;WIRES-X ITALY;80.211.96.39;42000;026;http://ysfroomitaly.iw2gob.it/c4fm/index.php
-67411;IT Zona 4;EmiliaRomagna;212.84.32.29;42000;000;
-03832;IT-I0-LAZIO;773RadioGroup;93.186.255.126;42000;005;ysf.iz0rin.it/ysf
-25383;JP JAPAN;Fusion Japan;122.222.1.50;42000;011;http://c4fm.owari.biz/ysfref/
-88748;JP SAKURA-Net;SNWLab Fusion;153.126.179.214;42000;001;http://ysfref.snwlab.net/
-13077;JP SPDYSF;SPD-NET;104.223.59.212;42000;006;http://xlx893.work/ysf/
-83251;JP XRF499;YSF;203.137.76.22;42000;000;http://xrf499.xreflector-jp.org/ysf/
-00622;KM8V Reddit;KM8V Cleveland;74.214.25.135;42000;001;http://xlx216.n8usk.com/ysf/
-13827;ME YSFMontenegro;TG29792;89.188.45.102;43007;006;http://13827ysf.ddns.net
-38558;MI THUMB AREA;MI LAKE HURON;107.141.52.226;42006;000;
-20457;Miami-LATINO;C4FM;80.211.175.168;42000;000;http://80.211.175.168/
-74718;MID MICHIGAN;Great Lakes;107.141.52.226;42005;000;
-11714;MY Malaysia Net;Malaysia Net;150.129.184.54;42000;001;http://ysf.dmrnet.org/ysf/index.php
-07261;NEARC;BM TG 31257;206.189.189.247;42000;002;http://ysf.w0jay.com/YSFReflector-Dashboard/index.php
-96455;NL Central;Centraal NL;90.145.156.196;42000;019;http://c4fm.pa7lim.nl/
-20070;NL Hobbyscoop;hobbyscoop.nl;44.137.42.25;42000;008;http://fusion.pi9noz.ampr.org
-03578;NL MMX411;Muli Mode [X]C;82.171.119.45;42000;002;http://pa0rob.ddns.net:8080
-73238;NL Noord;test reflector;44.137.87.82;42000;002;http://44.137.87.82/index.php
-63539;NL Oost;test reflector;44.137.87.83;42000;005;http://44.137.87.83/index.php
-73443;NL PI1DAF;Multi Repeater;77.174.30.155;42000;004;http://pd0poh.ddns.net
-66644;NL YSF amprnet;ampr reflector;44.137.33.52;42000;000;http://44.137.33.52/index.php
-38627;NL YSF444;Dutch Refl.;188.68.37.51;42000;003;http://ysf444.pa3dfn.nl
-22354;NL ZODigi;YSF no Bridge;82.171.119.45;42001;000;http://pa0rob.ddns.net:8083
-44919;NO General;Norwegian chat;80.89.46.242;42000;001;http://ysf.hamlabs.no/ysf/index.php
-89797;NZ YSF-XLX287;ysf.zl2wl.nz;43.245.172.2;42000;000;http://ysf.zl2wl.nz
-07338;NZ YSF-XLX750;www.ysf.co.nz;203.86.206.49;42001;003;www.ysf.co.nz
-33209;NZ ZL1AMK;ZL1AMK YSF;47.72.125.196;42000;007;zl1amk.ddns.net:85
-46031;NZ ZL2VH;ZL2VH YSF;123.255.47.67;42000;001;http://123.255.47.67:84
-48038;Ohio-Link;Linking Ohio;209.190.4.10;42000;018;http://ysf.glorb.com
-37761;OklahomaLink;Wires21733,BM3;98.178.137.106;42000;004;http://oklahomalink.duckdns.org:2080
-00001;Parrot;Parrot;213.202.229.15;42020;000;
-28426;PH DX1ARC-Ref;Manila DX1ARC;35.231.197.155;42100;000;http://dv1zej.ddns.net/dashboard
-23050;Phil-Link;Philippines;35.235.97.226;42100;001;philippinelink.hopto.org
-25393;PL 4280;YSF/DMR/DCS132;94.246.175.66;42031;002;https://brandmeister.network/?page=lh&DestinationID=260080
-61266;PL BRIDGE;Poland BRIDGE;188.116.7.66;42026;003;http://ysfbridge.pzk.pl/
-29114;PL POLAND;YSF PL POLAND;80.211.251.171;42025;012;
-15495;PL POLSKA;POLSKA WIRESX;94.246.175.66;42026;002;
-55546;PL Silesia;Poland Silesia;188.116.7.66;42003;002;http://ysfsilesia.pzk.pl/
-38691;PL SR4H;SR4H-ROOM;91.244.185.128;42000;001;
-40464;PL SR7MK;Swiety Krzyz W;94.246.175.66;42024;001;http://ysf016.wiresx.pl:8081/sr7mk/
-40594;PL SR8DEF;Debica;94.246.175.66;42033;001;
-78099;PL SR8FWD;Wlodawa WiresX;94.246.175.66;42030;001;http://sr8fwd.wiresx.pl
-79009;PL SR8K;Dubiecko;94.246.175.66;42032;001;http://ysf016.wiresx.pl:8081/sr8k/
-91407;PL SR8LUF;Lublin;94.246.175.66;42028;001;http://ysf016.wiresx.pl:8081/sr8luf/
-87318;PL SR8UVC;Chotylow;94.246.175.66;42034;001;
-54644;PL SR8UWD;Wlodawa YSF;94.246.175.66;42027;000;http://sr8uwd.wiresx.pl
-80986;PL YSF260;BM TG260;94.246.175.66;42035;002;http://ysf016.wiresx.pl:8081/260/
-09948;PT YSF009;C4FM-Portugal;109.71.44.237;42000;003;http://c4fm.from-ct.com/
-12223;Puppi;svago;95.110.229.223;42000;000;
-95623;R.C. AMIRED - C4;WiresX CATALUN;89.36.215.181;42000;017;89.36.215.181
-13131;ref.c4fm.se;ref.c4fm.se;176.10.140.161;42000;003;http://ysf.c4fm.se
-95093;RO YSF DMR YO W;YSF DMR+ Link;89.33.44.100;42007;005;http://ysf2dmr.hamnet.ro
-39544;RU KAVKAZ;North Caucasus;37.18.35.2;42000;001;http://kavkaz.qrz.ru/YSF/
-31022;RU POCTOB;Rostov-Don;80.80.98.62;42000;004;http://c4fm.xyz/our-c4fm-wires-x-room.php
-53326;RU R2DOO YSF;Wires-X to YSF;82.146.33.78;42001;002;http://82.146.33.78/dash
-37829;RU Russia YSF;RUSSIA YSF;176.192.125.46;42000;002;http://176.192.125.46/YSF/
-16530;RU VLGDNK;Volgodonsk;176.192.125.46;42001;001;http://176.192.125.46/YSF2/
-91740;RU RADIOCULT;MSK;ysf.radiocult.su;42000;001;http://ysf.radiocult.su:8083/
-83414;RU Syktyvkar;Komi;ysf.r1ik.ru;42000;001;http://ysf.r1ik.ru
-40208;SC Scotland;Scottish YSF;13.69.14.204;42000;011;http://c4fm.dvscotland.net
-77010;SE SW-Sweden;C4FM;46.236.122.101;52000;000;http://sm4wdq.hopto.org:9999/
-16390;SG YSF-V2;SINGAPORE-YSF;14.102.146.160;42000;002;https://ysf.lucifernet.com/
-48857;SI-Slovenia;YSF <-> TG293;213.172.232.13;42000;005;http://xlx511.ddns.net:46193/index.php
-94513;TH YSF520;C4FM THAILAND;119.59.125.192;42000;002;http://ysf.dtdxa.com
-67529;TheGuild;TheGuild;18.221.190.22;42000;004;http://18.221.190.22/TG/
-30743;TW HAMTALK;C4FM @HAMTALK;118.150.164.96;42000;002;http://www.hamtalk.net/ysfr
-00325;TW YSF886;C4FM Taiwan;118.163.103.178;42000;005;http://xlx886.metropit.net/ysfr/
-13201;UK DVMEGA;DVMEGA CHAT;212.237.34.32;42000;002;http://c4fm.dvmega.co.uk
-93019;UK DVMEGA SH;DVMEGA CHAT SH;212.237.18.27;42000;001;http://212.237.18.27/ysf/
-83087;UK_YSF_BM_UK;UK_Ref_DN_ONLY;87.117.229.171;42000;016;
-20087;UNIVERSAL-TWR;SE MI DIGITAL;107.141.52.226;42001;000;
-21988;US AggielandLink;Aggieland Link;71.252.210.227;42000;000;http://www.aggielandlink.com/Dashboard
-99256;US BM TG 31088;Colorado HD;54.191.50.212;42000;003;http:///54.191.50.212
-93196;US BM TG 31444;RI Digital Hub;54.68.216.180;42001;003;http://southeast.digitallink.us/RI/
-49235;US CKRG;Central Kansas;198.211.109.207;42000;003;
-39906;US COLORADO-LINK;Colorado Link;13.78.187.50;42000;011;http://cartradioysf.ae2l.net
-04101;US CQ-California;CAL-YSFtoWires;104.218.36.162;42000;004;
-11102;US DXLINKSYSTEM;DX-LINK SYSTEM;45.77.102.203;42000;004;http://xlx749.duckdns.org/ysf
-13186;US FILAMARS;FILAMARS C4FM;45.79.84.232;42100;001;
-04162;US GLOBAL DX;Global DX;206.72.198.26;42000;002;http://206.72.198.26/ysf/index.php
-83132;US Illinois Link;Illinois Link;74.208.235.115;42000;005;http://74.208.235.115/YSFReflector-Dashboard/
-80374;US K4BUM;K4BUM-Group;18.235.182.102;42000;000;
-12479;US Kansas City;Kansas City MO;99.169.52.241;42000;003;https://www.salaman.org/ysf
-99597;US Kingsland;Kingsland GA;54.68.216.180;42000;003;http://w1kfr.from-ga.com/GA/index.php
-87205;US LADO;Los Amigos;24.26.245.51;42100;003;http://lado.hopto.org
-02912;US Nationwide;United States;174.36.222.36;42000;026;ysf.kc2idb.net
-85788;US NJ EXP;US NJ EXP;45.62.232.244;42000;001;
-47460;US NJPAASTERISK;NJPAASTERISK;45.62.232.244;42100;003;http://ysfreflector.kb2ear.net
-20899;US NQ4T XLX725A;XLX725A Bridge;172.245.9.180;42000;001;https://ysf.nq4t.com
-10463;US NQ4T XLX725D;XLX725D Bridge;172.245.9.180;42003;001;https://ysf.nq4t.com/D/
-83242;US NW-Ohio;YSF-WiresX-284;52.54.69.145;42000;002;http://ysf.k8xg.com
-51645;US NY NJ LINK;Fusion Rptr;100.38.187.163;42007;006;192.168.1.14
-53594;US Ohio;Ohio;192.241.240.7;42000;003;http://ysf.n8qq.com
-67286;US OMIK;OMIK Radio;45.62.239.191;42000;007;http://omik-ysf.dyndns.org
-42366;US PNW-SAIL;PWN Sailing;144.202.88.119;42000;000;http://144.202.88.119/
-09585;US RFIT;YSF TO DMR;71.224.96.155;42000;002;
-09585;US RFIT;YSF TO DMR;71.224.96.155;42000;002;
-84398;US SADRC;SanAntonioDRC;71.78.10.76;42000;017;
-60309;US SAT;SanAntonioTest;70.125.152.178;42100;001;
-18262;US SKYNET;SKYNET;104.130.158.171;42000;001;ysfdash.mostlychris.com
-00070;US SNARS;SNARS TG31328;162.248.93.209;42000;004;http://ysf.snars.net
-71185;US STA-MAR-31668;STA-MAR-31668;74.91.127.166;42000;001;p25gateway.com/ysf
-62554;US Texas-Nexus;Texas-Nexus;70.121.78.169;42000;022;http://ysf.texas-nexus.dyndns.org/ysf/
-18541;US TG-31648;TG-31648-YSF;35.211.244.113;42000;001;http://35.211.244.113/
-22172;US TGIF- 31665;TGIF Nerja;35.207.17.39;42010;002;http://ysf.alecwasserman.com
-76864;US Triangle NC;Triangle NC;192.223.28.198;42000;004;http://ysf.trianglenc.net
-37143;US WM-CONNECT;N8UKF Rpt Grp;44.103.39.4;42000;007;https://ysfdashboard.wmtg.me
-98899;US WolfDen;Massachusetts;100.0.173.84;42000;002;http://wolfden.ddnsgeek.com:42080
-16408;US YorkCountySC;YCARS-ARES;67.197.29.112;42000;002;
-90943;US YSF 858;YSF SDCA-NZ6D;104.236.156.191;42000;000;http://nz6d.dx40.com/ysf
-04128;US YSF New York;Fusion YSF;72.230.170.36;42000;004;http://ysf.honieriver.com
-08398;US-Kansas3120;K0USY 3120;129.130.229.11;42030;001;http://129.130.229.11:15426/3120/
-96429;US-KansasLink;Kansas C4FM Re;129.130.229.11;42010;008;http://129.130.229.11:15426/kansas
-74247;US-RepeaterBook;DMR TG 31419;129.130.229.11;42020;002;http://129.130.229.11:15426/rb
-71442;USECA;K8UO;107.141.52.226;42002;002;
-97912;US_SIN_Southern;Indiana_Link;142.93.181.147;42000;009;http://w9windigital.org/ysf/
-82699;VCDRC;VCDRC;162.248.93.195;42000;003;http://vcdrc.radio/ysf
-38635;Wires-X YO W;WiresX Romania;89.33.44.100;42001;001;http://wiresx.hamnet.ro
-17004;YO Wires-X E;WiresX Romania;85.122.16.152;42000;002;http://85.122.16.152
-12338;YSF BR PU2LRZ;C4FM - BRAZil;200.231.36.174;42000;007;http://ysf.pu2lrz.com
-95427;YSF Cyprus;YSF Cyprus;139.138.200.251;42000;002;http://conflictj.ddns.net/
-41577;YSF YO W;Fusion Romania;89.33.44.100;42000;011;http://ysf.hamnet.ro
-28929;YSF-EA SPAIN;MultiProtocolo;79.109.228.192;42105;006;http://ea5gvk.duckdns.org:84/YSF
-26626;YSF-TI;YSF Tango Indi;159.89.183.117;42000;002;http://xrf.ossdr.com/ysf
-51125;ysf.dstar.su;DSTAR.SU YSF;188.42.30.175;42000;007;https://ysf.dstar.su/dash/
-94614;YSF004;Crossconnect t;44.103.34.3;42000;001;http://ysf004.kb8zgl.net/YSFReflector
-88240;ZOMBIE-ALERT;SE MI DIGITAL;107.141.52.226;42000;009;
-31075;US YSF317;IDHR YSF REF;ysf317.nf9k.net;42000;000;http://ysf317.nf9k.net
+90681;0-0-AMERICA;CQ USA! USA!;130.211.170.41;42001;010;http://
+03729;0-0-CHINAVIRUS;COVID CHAT;130.211.170.41;42002;001;http://
+27793;0-0-CQ-UK-ROOM;cq-uk.co.uk;81.150.10.62;42200;073;http://www.mb6er.com/ysf/
+24160;0-CQ-UK-AUSSIE;Reflector 2;81.150.10.63;42100;009;https://www.cq-uk.co.uk
+02203;0-HUBNet;Link to HUBNet;81.105.24.211;42000;005;https://hubnetwork.uk/
+84922;0-KP3AV-Systems;Puerto Rico HU;70.45.32.69;41000;004;https://www.kp3av.net/
+92150;0-MAGA;MAGA AMERICA;130.211.170.41;42000;001;http://no.not.yet/
+65702;0-OE-Austria;Official;94.199.173.123;42200;001;http://oe9xvi.dyndns.org:46193
+24117;00-AACQ-VK;VK WiRES-X;110.232.113.108;42002;014;http://110.232.113.108/vw
+38900;00-AAYSF001;YSF001;110.232.113.108;42000;005;http://ysf001.duckdns.org
+38089;0077;IRLP/ DMR/ D-S;23.94.25.146;42002;006;http://xe1dvi.crabdance.com/html/index.php
+32642;021YSF;KR 021YSF;27.100.207.79;42000;006;http://ysf021.dvham.com
+33280;0303_YSFColo;0303_YSFColo;3.22.106.87;42000;002;http://
+40608;069-Er-Super-Fre;BM-YSF-P25-NXD;13.57.29.35;42000;004;http://
+84905;096ysf-Busan-KR;Link TG450391;125.135.231.82;42000;000;http://096ysf.duckdns.org
+11506;0970_YSFColo;0970_YSFColo;75.71.97.203;42000;004;http://
+11500;0E7XTR;Tirol Oberland;185.199.82.169;42000;002;https://inet01.synology.me:46193
+02573;1004DMR;DRM C4FM CROSS;218.144.164.10;42000;004;http://1004dmr.dvham.com/indexysf.php
+74652;119-YSF;KR 119YSF;61.42.88.20;42000;030;http://ysf119.dvham.com/index.php
+68800;2007-DXGROUP;Web Server;89.46.75.115;42000;005;http://89.46.75.115/index
+37865;450IPSC2;C4FM TO DMR;220.71.19.222;42000;005;http://450ipsc2.dvham.com/indexysf.php
+21796;4X-Israel;Israel Digital;109.226.48.53;42000;001;http://ysf972.ddns.net
+06015;50525;Bridge-NXDN-P2;103.1.187.140;42000;003;http://50525.ysfreflector.net
+97629;79435;IT S.M.A.M Pis;185.177.59.32;42000;005;http://185.177.59.32
+65947;843IPSC2;IPSC2-DMR(TG84;218.144.164.13;42000;001;http://ipsc2843.dvham.com/indexysf.php
+60227;911-Cop-Talk;911 Cop Talk;34.238.149.231;42000;002;http://ysf.k2cop.com
+83018;95ANorth;Fernley,NV USA;216.128.134.46;42000;001;http://ysf.k7wby.com
+44734;AARC-Fusion;AARC Fusion;64.179.223.222;42000;001;https://ysf.spdns.org
+17950;AH-HUH.NET;YSF;52.192.129.174;42000;012;http://ah-huh.net/ysf/
+02034;Alabama-Link;Alabama-Link;96.47.95.121;42000;048;http://ysf.alabamalink.info/
+64230;America-RC;YSF-TO-WIRES-X;65.101.7.50;42001;015;http://arcysf.duckdns.org
+21080;AmericaLink;AmericaLink;209.126.110.236;42000;443;http://hamfm.com/ysf/
+30458;AnHui-HeFei01;YSF/BM460601;47.116.60.36;42000;003;http://eei-edu.f3322.net
+31897;AR-AR-CIRCULO;ROSARIO;181.165.15.51;42000;007;http://circulorosario.linkpc.net
+10111;AR-ARG;*ARG* Argentin;149.28.100.251;42000;001;http://ysfarg.ddns.net
+73599;AR-TG722-LINK;YSF to TG722;80.211.1.59;42000;000;http://722ysfargentina.dnsalias.com
+60842;ARG-FUSION;C4FM;200.81.152.112;42000;000;http://rotativos.dyndns.org:42002
+31302;ARG-ROOM;Argentina-ROOM;190.194.12.53;42000;008;http://xlx.argentina-room.dns-cloud.net
+66099;ARGENTINA-LINK;Link to TG7227;80.211.7.43;42000;014;http://7221ysfargentina.dnsalias.com
+61159;ArkLaTex;ArkLaTex;104.198.203.19;42000;002;http://104.198.203.19
+24490;ASL48270;AllStar;104.143.94.48;42042;001;http://104.143.94.48/YSFReflector/index.php
+25223;AT-Austria-OE1;OE1XFV;213.47.71.17;42000;003;http://oe1xfv.ddns.net/YSFReflector-Dashboard/
+00396;AT-Austria-OE3;OE3AAS;77.116.18.249;42100;001;http://oe3aas.ddns.net/YSFReflector-Dashboard/
+71095;AT-Austria-OE5;OE5XOL;185.16.114.90;42000;001;http://oe5xol.ham-radio-op.net/YSFReflector-Dashboard/
+59911;AT-Austria-OE8;OE8VIK;178.199.109.52;42000;000;http://oe8vik.internet-box.ch/YSFReflector-Dashboard
+23201;AT-C4FM-Austria;(YCS001);89.185.97.38;42000;073;http://c4fm.oevsv.at/ycs/
+73082;AU-Albury-Chat;Albury Chat;52.63.126.187;42000;009;http://52.63.126.187/
+43110;AU-NSW;AU NSW;123.243.237.216;42000;000;http://ysfnsw.gustotech.net/
+05057;AU_TAS;VK7 Tasmania;45.248.50.37;42001;001;http://vk7hse.duckdns.org/ysf
+74037;BARC-ONT-CA;Burlington ARC;69.158.63.158;42000;000;http://barcysfreflector.ddns.net
+00043;BAYAREA-YSF;Silicon Valley;45.32.129.65;42000;010;http://ysf.bsdworld.org/ysf/
+44992;BE-YSF-Liege;Wires-X<>YSF;51.75.249.214;42002;000;http://51.75.249.214/ysf/
+64364;BE-YSF-Vl;C4FMVlaanderen;81.95.126.168;42001;009;http://ysf.on4top.be/ysf/
+79520;BE-YSF-Wallonie;C4FM Wallon;51.255.193.63;42000;003;http://www.ysfwallonie.net/
+46197;BE-YSFEUREGIO;LNK_BE_EUREGIO;213.49.173.226;43000;003;http://rmx.noip.me:6380
+00076;Berks-County;Pennsylvania;24.115.37.118;42020;000;http://
+69733;BM2410/XLX010D;SSA Bulletin;95.216.197.75;42001;001;http://ysf2.brandmeister.se
+56800;Boar's-Nest;Good Ol' Boys;67.140.163.107;42002;000;http://
+90558;BR-PU2LRZ;TG268916 WIRES;186.228.91.9;42000;010;http://ysf-brasil.com.br
+08059;Brasil-AMRASE;Brasil-Link;201.62.48.60;42000;003;http://ysf.amrase.org.br/ysf
+72526;BRAZIL-724;DV Brazil;191.252.203.6;42000;004;https://ysf.dvbrazil.com.br/
+85044;C4FM-SEOUL;TG45050 TO C4F;222.110.59.176;42000;004;http://ysfso.dvham.com/indexysf.php
+36037;CA-420-Network;RAGCHEW;142.93.158.165;42000;003;https://ysf.420hamradio.network
+77353;CA-Canada;C4FM Ontario;144.217.241.23;42100;007;http://c4fmontario.hopto.org
+71083;CA-Canada-FR;Fusion Canada;38.110.97.161;42000;015;http://38.110.97.161
+29579;CA-CQ-Canada;DMR TGIF 3022;142.93.158.165;42002;003;https://cqcanada.420hamradio.network/
+71305;CA-DMRQ-3022;DMRQ TG3022;38.110.97.161;42554;003;http://dmrq.ca/
+53710;CA-Maritimes;Can Maritimes;178.128.231.202;42000;007;http://ysf.nbdmr.net
+19952;CA-Nanikana;Nanikana;142.217.113.98;42000;000;http://142.217.113.98
+36010;CA-ON-ProCom;ON Prov Comms;70.50.41.195;42000;003;http://freestar.homelinux.net/ysf
+23829;CA-Upper-Can;Upper Can QRP;64.118.21.239;42100;005;http://ve3ucc.ddns.net/
+13339;CA-WEST-CAN;Western Canada;172.105.26.148;42001;000;http://ysf.ve6meo.ca
+13124;CA-YSF-CHARC;SW QUEBEC,CA;207.35.36.179;42000;002;https://207.35.36.179
+72576;CA-YSF-TO-WIRESX;REF-BRIDGE-LAB;192.222.226.35;42002;000;http://dashboard.va2ss.com:8080/
+48095;CAMCAST;YSF REFLECTOR;80.211.12.209;42000;000;http://80.211.12.209/index.php
+01177;CARG;CURACAO YSF;138.219.142.144;42000;001;http://138.219.142.144
+79602;Carolina-Link;79602;208.104.55.181;42001;012;http://208.104.55.181/index.php
+77785;CDARIN;CDARIN-XLX420;149.28.54.17;42002;000;https://xlx.cdarin.net/ysf
+30998;CH-228-Swiss;YCS Group 28 S;195.225.116.245;42000;005;http://ysf.hb-connect.ch/
+63347;CH-228-Swiss2;HB-CONNECT;176.10.105.210;42002;000;http://
+15280;CH-HB9VD;Radioamateurs;217.182.128.3;42000;002;http://reflector.hb9vd.ch/ysf
+37664;CH-IT-SWISS;C4FM OM;94.177.215.206;42000;000;http://94.177.215.206
+66049;ChinaLink;China YSF Refl;60.219.211.9;42000;000;http://ysf.tocall.fun:8081
+22638;CH_JOTA;Jamboree on th;157.161.57.65;42001;000;http://pi2.woody.ch:8080/YSFReflector-Dashboard/ (ipv6 only)
+72350;CL-CHILE;YSF to TG730;186.64.123.59;42000;002;http://sdradio.cl/ysf
+34287;CL-CL-CHILE;YSF HOTSPOT'S;186.103.150.254;42000;000;https://www.radioaficion.pro/ysf
+19525;CL-EMCOMM;TG 730911;186.64.123.59;42001;000;http://sdradio.cl/ysf2
+09627;CL-YSF;CHILE YSF ROOM;186.64.123.59;42002;002;http://sdradio.cl/ysf3
+18829;CN-CC#1;TG 460501;47.104.177.248;42000;001;https://mmdvm.cc/ysf/
+86319;CN-China-#3;C4FM;123.58.6.137;42000;003;http://123.58.6.137:8088/
+46055;CN-China-#4;TG460531;112.229.25.110;42003;000;http://pi.jwebid.com:81
+49766;CN-China-#7;YSFn/DMR/P25;47.100.76.205;42002;000;http://
+50565;CN-CN-BJS-YSF;CN BJS C4FM;49.233.142.122;42250;002;https://ysf.bh1ofp.com/
+08408;CN-CN-China-4;P25;47.105.33.47;42003;002;http://www.bg3hbr.cn/ysfp25/
+25574;CN-CN-SH;YSF/TG46068;116.235.186.62;42000;002;http://chinafex.tpddns.cn:82
+99996;CN-CN-SH-BR4AC;TG46021;118.89.184.51;42000;001;http://
+41095;CN-CN-SH-JIUTING;TG4601319;140.143.12.207;42000;001;http://
+99117;CN-LiaoNing;YSF by BH2UOL;47.95.194.251;42000;000;http://47.95.194.251
+36400;CN-NMG-1#;C4FM China;39.64.187.131;42000;001;http://jw.jwebid.com:88
+01347;CN-Shanghai;YSF by BH4EZG;124.78.51.205;42000;000;http://
+45441;CN-Shenyang-2;YSF by BH2UOL;139.226.2.194;42000;000;http://angel66.f3322.net:2122/
+87327;CN-SHLK;C4FM;218.79.217.10;42000;002;http://
+19610;CN-SXXY-YSF;TG46091;123.139.189.182;42000;001;http://ysf.jzsqx.com:3578/ysf/
+10552;CN-SZ-YSF;BM TG46073;14.116.159.221;42000;005;http://
+78497;CN-TIANJIN;C4FM/TG460022;47.104.79.192;42000;002;http://
+57490;CN-Wuhan;CNWUH YSFRef;118.89.199.238;42000;004;http://
+84099;CN-XUZHOU;TG460516;119.45.191.42;42000;003;http://www.bd4two.cn
+69058;CNARN;CNARN;45.76.175.5;42000;014;http://cnarn.hopto.org
+20059;CN_China_#1;W24166/TG46001;58.250.171.29;42000;056;http://ysf.sz790.com:8081/
+72001;CO-HK_NAL_LCRA;BM TG732;186.29.69.76;42000;007;http://ysfnal.lcra.org.co
+11115;CQ-MICHIGAN;MICHIGAN USA;107.141.52.226;42002;000;http://
+27715;CQ-OHIO;Ohio, USA;24.192.74.248;42002;001;http://
+18480;CT-BMCAT;C4FM Catalunya;94.177.237.192;42000;010;http://ysf900.dyndns.org/ysf
+04523;CT-CATALANA;C4FM CATALUNYA;213.195.111.148;42000;004;http://catalana.ea3hkb.cat
+68592;CT-GARRAF;C4FM CATALUNYA;213.195.111.148;42001;005;http://garraf.ea3hkb.cat
+99797;CT-RI-ROOM;C4FM LINKED;45.58.45.126;42000;008;http://
+12096;CW-ToyTronNet;Sunny Curacao;186.159.96.100;42001;000;http://ysf.toytron.com
+14353;CY-YSF-Cyprus;YSF Cyprus Ref;213.7.197.202;42000;001;http://xlx146.ddns.net:81/ysf/
+26541;CZ-Czech;TG2300 DCS19V;80.250.3.114;42000;011;http://80.250.3.114/index.php
+26541;CZ-Czech;TG2300 DCS19V;80.250.3.114;42000;011;http://xlx230.ok2it.com
+52690;CZ-YSF-Klatovy;CZ;46.23.62.124;42200;000;http://46.23.62.124:42080
+77329;CZ-YSF-Praha;CZ YSF Praha;185.32.183.148;42000;004;http://185.32.183.148/ysf/
+21972;DE-Berlin;Spandau;81.169.245.52;42000;004;http://www.comvision.de/ysf/
+42539;DE-Bremen;Bremen-Nord;82.207.204.207;42002;000;http://do0bre.ddns.net/
+14187;DE-DL-DL1BH;Bremerhaven;87.245.30.60;42000;003;http://
+90730;DE-DL-Elbe-Weser;DL-Elbe-Weser;91.58.164.76;42000;002;http://dl-elbe-weser.spdns.de
+07588;DE-DL-Hamburg;Hamburg City;95.116.202.35;42000;006;http://db0fs-router.hamnet.hamburg:22225/index.php
+54919;DE-DL-NORDWEST;DL-Nordwest;93.240.48.68;42000;034;http://dl-nordwest.spdns.de
+68399;DE-DL-Oberberg;Bergisches Kr.;82.165.136.160;42000;001;http://ysf.shakerware.de
+47791;DE-DL-Saar;Saarland;167.86.110.62;42002;001;https://c4fm.ysfreflector.de/DL-Saar/
+07794;DE-DL5OCD;Hildesheim;46.41.2.20;42000;004;http://dl5ocd.selfhost.eu
+21584;DE-Fusion-MUC;Fusion-MUC;93.240.113.55;42004;002;http://
+62829;DE-Germany;YSF262 BM263;167.86.110.62;42000;010;https://c4fm.ysfreflector.de/Germany
+22675;DE-Germany02;MultiNet-Bridg;185.228.139.209;42000;009;http://ysf-germany02.xreflector.net/ysf/
+92161;DE-GOETTINGEN;Raum Gö;51.15.40.103;42001;005;http://goettingen-ysf.tk
+02883;DE-Hannover-XLnk;Hannover und U;81.14.225.84;42000;002;http://ysf.hannover-x.link
+44305;DE-Heidekreis;Niedersachsen;91.64.24.111;41000;002;http://do3bsl.ddns.net
+19138;DE-HESSEN-F17;F17 Reflector;80.69.46.184;42000;002;http://
+55160;DE-Huelzweiler;DL4WM-Reflecto;213.135.12.4;42000;000;http://
+93571;DE-Inselfreunde;BM-TG26444;88.198.94.77;42444;002;http://
+68030;DE-Laatzen;Hannover;159.69.64.204;42000;001;https://blackdan.de/ysf
+90448;DE-Neumarkt;YSF Neumarkt;213.202.228.66;42000;004;http://213.202.228.66/neumarkt/YSFReflector-Dashboard/index.php
+87939;DE-Notfunk;NotfunkGruppe;78.47.182.224;42001;000;https://notfunk.ysf.vfdb.org/
+61156;DE-Oberbayern;BM-TG26285;88.198.94.77;42285;003;http://
+13100;DE-OBERLAUSITZ;YSF Ostsachsen;85.214.61.75;42000;002;https://ysf02.bzsax.de/ysf-ol/
+09319;DE-Oberpfalz;Region Opf.;78.47.182.224;42009;007;https://oberpfalz.vfdb.org/
+13111;DE-OBL-RAUM-1;YSF;85.214.61.75;42001;000;http://
+64445;DE-OWL;XLX508G OWL;185.188.4.15;42001;006;http://ysf.hb9gfx.ch
+74154;DE-PEGASUS;Multi-Bridge;78.46.11.65;42000;077;https://status.projekt-pegasus.net/
+20548;DE-PEGASUS2;Test System;78.46.11.65;42001;001;https://status.projekt-pegasus.net/
+63421;DE-Ruhrgebiet;Ruhrgebiet;144.76.12.90;42000;006;http://dg3yjb.beba.re/YSFReflector
+10977;DE-Sachsen;BM TG2629;109.104.48.10;42001;001;http://
+68240;DE-Schwarzwald;#68240 Schwarz;185.75.164.30;42000;008;https://db0vs.de/YSFReflector-Dashboard/index.php
+55966;DE-Thueringen;Thüringen Ref;195.145.3.97;42000;005;http://44.225.117.67/YSFReflector-Dashboard/
+95352;DE-Twitterrunde;GW BM TG263333;167.86.110.62;42001;001;https://c4fm.ysfreflector.de/Twitterrunde
+53414;DE-VFDB;Telekom&Post;78.47.182.224;42000;001;https://vfdb.ysf.vfdb.org/
+33465;DE_DL-Baltic;Greifswald;81.169.128.244;42001;003;http://ysf.digitalfunk-nordost.de
+46981;DL1SGP-YSF;Testing;51.75.79.91;42000;000;http://
+58967;DMRPlus-IT;DMRPlus Italia;185.82.114.247;42000;002;http://ysf.aotnet.it/
+01579;DO-DOMREP;YSF DRP;172.105.158.111;42000;001;http://hi8k.xreflector.es/
+30406;DO-YSF-Dom.-Rep.;YSF for HI;190.166.132.207;42000;002;http://arcrica.dyndns.org:8088
+43499;DPRNS;TH DPRNS;203.150.19.24;42000;005;http://c4fm.dprns.com
+38035;DRIVETIME;FW Drivetime;71.81.181.30;42061;001;http://ysf.ki5cey.com:45000/
+53636;DV-Caribbean;DV Multimode;190.213.20.171;42100;001;http://dvcar.9y4c.tk:8080
+31769;DV-Modems;DV_Modems_YSF_;51.91.78.118;42000;001;http://
+78427;DX1ARM;DX1ARM-RPT;104.168.176.33;42000;006;http://
+11096;DX1O-Amsat-PH;DX1O Amsat PH;206.189.146.41;42000;001;http://206.189.146.41
+06989;DXhunter-SM2;DXhunter SM2;95.217.7.128;42000;001;http://95.217.7.128
+18196;EA-ARSA;EA2RKS;104.148.41.57;42003;002;http://arsa.xreflector.es/
+22401;EA-C4FM-Spain;(YCS224);212.237.3.141;42000;060;http://ycs.xreflector.es/
+73531;EA-CANARIAS;CANARIAS;164.132.96.157;42005;000;http://ysfcanarias.c4fm.es/
+94533;EA-Distrito-1;Wires X Spain;80.211.102.100;42000;001;http://80.211.102.100
+62980;EA-Distrito-4;REM Spain YSF;212.237.0.67;42000;015;http://ysfdistrito4.xreflector.es/
+90182;EA-Distrito-7;RC Veleta;212.237.11.53;42000;001;http://212.237.11.53/html/ysf/
+18470;EA-EXTREMADURA;EXTREMADURA;51.75.140.10;42002;002;http://ysfextemadura.c4fm.es/ysf2
+42670;EA-HAMNET;C4FM Spain;80.211.105.70;42000;001;http://80.211.105.70/
+42670;EA-HAMNET;C4FM Spain;80.211.105.70;42000;001;http://80.211.105.70/
+55815;EA-SPAIN-21461;MULTIPROTOCOLO;85.255.8.71;42105;002;http://hblinkspain.duckdns.org/YSFReflector
+17535;EA-TG21468;CANARIAS;164.132.96.157;42003;004;http://ysfhispano.c4fm.es/
+31977;ECOAMERICA;AB6MM;104.194.206.233;42000;002;http://104.194.206.233/index.php
+74161;ES-112;EMERGENCIAS;51.77.213.200;42004;000;http://51.77.213.200/ysf4
+32027;ES-ADER;ASSOCIACIO ADE;62.171.178.202;42000;004;http://digitalader.ddns.net/ysf
+90884;ES-ADR;Radio Club ADR;51.254.128.134;42003;000;http://51.254.128.134/ysf3
+66492;ES-AMIRED;YAESU AMIRED;89.38.150.252;42010;000;http://
+64324;ES-BM-Sevilla;BM21441;104.148.41.57;42002;001;http://fnssevilla.c4fm.es/ysf2
+96308;ES-CACERES;SEC.LOC.URE CC;51.75.140.10;42000;001;http://ysfcaceres.c4fm.es
+09059;ES-CANARIAS;Canarias C4FM;185.166.212.132;42000;000;http://185.166.212.132/ysf/
+32474;ES-CQ-DX;CQ WORLD WIDE;51.77.213.200;42003;001;http://51.77.213.200/ysf3
+41674;ES-EA-SPAIN;Red WiresX ES;212.237.11.53;42002;001;http://ysfspain.c4fm.es/html/ysf2
+34018;ES-EA4GAX-YSF;YSF EA4GAX;51.83.78.210;42002;000;http://51.83.78.210/YSF/
+16172;ES-EA7URC-Link;EA7URC Oficial;193.30.100.102;42000;001;http://
+99760;ES-EALINK;YSF EALINK;194.182.66.76;42000;000;http://www.fusion.ealink.es/ysf/
+11650;ES-EL-EJIDO;EL EJIDO SPAIN;80.88.90.73;42000;000;http://80.88.90.73/
+41996;ES-ELITE;C4FM;51.77.213.200;42002;019;http://51.77.213.200/ysf2
+96124;ES-ES-ALMERIA;YSF ALMERIA;80.211.1.143;42000;002;http://80.211.1.143/ysf/
+60725;ES-GOMERA;R5 GOMERA VHF;185.166.212.132;42003;000;http://185.166.212.132/ysf4
+10069;ES-IBERIA;C4FM;51.77.213.200;42001;001;http://51.77.213.200/ysf
+14275;ES-MADRID;YSF de Madrid;51.254.128.134;42002;001;http://51.254.128.134/ysf2
+65531;ES-MARCA;YSF MARCA;80.211.41.147;42000;001;http://80.211.41.147/ysf/
+49810;ES-PEANUT-YSF;YSF PEANUT;164.132.96.157;42000;007;http://ysfpeanut.c4fm.es
+15642;ES-REM-SPAIN;YSF Reflector;80.211.163.139;42000;005;http://ysfreflector-rem.spdns.org
+18044;ES-TECNICO-Y-MAS;URE CT TENERIF;185.166.212.132;42002;000;http://185.166.212.132/ysf3/
+45904;ES-TENERIFE;YSF<>TG21438;185.166.212.132;42001;001;http://185.166.212.132/ysf2/
+50246;ES-Zulu-Radio;YSF Zulu Radio;51.254.128.134;42000;003;https://zuluradio.es/ysf/
+50135;EST-Ref;YSF reflector;95.216.163.65;42000;001;http://ysf.2ip.ee/dashboard
+06975;Europe-YSF;Europe-YSF;93.240.48.68;42100;004;http://Europe-YSF.spdns.org:81
+00007;EUROPELINK;Europe link;161.97.73.43;42000;142;http://europelink.pa7lim.nl
+13029;FI-MIKKELI;Mikkeli YSF;139.162.159.150;42000;003;http://139.162.159.150/ysf/
+96442;Foxhole;RagChew;52.176.105.136;42000;000;http://ysf.kz4fox.com
+95198;FR-Centre-France;Centre-France;185.4.78.122;42002;009;http://ysf-centre-france.f1tzo.com:81
+00645;FR-FON-Gateway;Salon FON GW;185.4.78.122;42000;001;http://ysf-fon-gateway.f1tzo.com:81
+71173;FR-Franche-Comte;Franche-Comte;51.75.252.197;42000;000;http://
+30262;FR-International;Salon Interna.;185.4.78.122;42005;002;http://ysf-international-rrf.f1tzo.com:81
+72173;FR-RIDF;FR Reseau IDF;185.4.78.122;42001;001;http://
+86886;FR-Room-ZIT;Room F1ZIT;151.80.143.185;42002;035;http://151.80.143.185/zit/YSFReflector-Dashboard/
+39510;FR-wiresxfrance;Wires-X-France;151.80.143.185;42001;000;http://151.80.143.185/WXF/YSFReflector-Dashboard/index.php
+83665;FR-YSF-Alpes;Rhone-Alpes;217.182.66.229;42000;000;http://ysf-alpes.f4gve.net
+13844;FR-YSF-Cappelle;YSF Room F1ZKY;2.59.239.114;42000;000;http://ysf.a3rn.org:2626
+77805;FR-YSF-Dijon;FR YSF Dijon;185.216.25.140;42000;001;http://
+58617;FR-YSF-France;Fusion France;87.98.132.205;42000;037;http://ysf-france.fr/
+64879;FR-YSF-FraWide;France-Wide;5.135.190.184;42010;005;http://ns3294400.ovh.net/YSFDashboard/
+44708;FR-YSF-HBLink;C4FM HBLink TG;82.64.55.217;42000;000;http://ysf-hblink.dyndns.org:8778/
+16762;FR-YSF-HDF;Region Nord;51.15.172.24;42001;000;https://srv.hambox.fr/hdf-dashboard/
+91713;FR-YSF-Limouzi;C4FM Limousin;82.64.55.4;42000;002;http://ysf-limousin.dyndns.org:8787
+34722;FR-YSF-Linux-fr;Linux French;213.32.19.95;42000;000;http://vps.hambox.fr/ysf-linux-fr/
+41576;FR-YSF-Nantes;YSF Room F5ZLK;92.222.75.165;42000;003;http://www.f5ore.dyndns.org
+46353;FR-YSF-Nord;Nord;178.32.163.106;42000;002;http://
+24703;FR-YSF-NordOuest;XLX933-E;78.206.208.208;42000;001;http://78.206.208.208:8081/YSFReflector-Dashboard/index.php
+59495;FR-YSF-St-Amand;St Amand (59);51.15.172.24;42000;000;http://
+04170;FR-YSF-TEST;France-Tests;51.75.133.61;42000;000;http://vps731279.ovh.net/
+39300;FR-YSF-URGENCE;FR-emcom;78.206.208.208;42021;003;https://fr-emcom.com/
+87357;GB-2E0ENN-DIRECT;Direct Server;86.181.36.50;42003;000;http://
+46504;GB-400-Club;400 Club;157.245.45.67;42008;001;https://400club.446em.uk
+91153;GB-4SQITYSF;4SquareIT YSF;34.89.92.173;42000;000;http://ysf.eilec.com
+01918;GB-Allstars;Fusion Allstrs;81.133.73.69;42002;005;http://
+88473;GB-BARC-CLUB;Burnham On Sea;88.97.60.42;42002;003;http://88.97.60.42:8080/
+42233;GB-BLIND-VETS;Blind Veterans;159.65.16.93;42000;005;http://
+70507;GB-CelticCluster;YSF-Reflector;85.159.210.162;42000;000;https://ysfref.celticcluster.org
+88972;GB-CovARS;Coventry ARS;18.130.199.150;42001;001;http://ysf2.g1iul.org.uk
+23952;GB-CQ-Sussex;All Welcome;84.9.168.216;42002;001;http://
+19889;GB-Dartmoor-Room;Dartmoor Area;80.229.144.250;42002;001;http://
+64259;GB-Durham;YSFReflector;34.89.108.212;42000;000;http://
+91767;GB-Fusion-Kernow;Fusion SW UK;87.117.229.165;43000;001;http://ysf.mb6cc.co.uk
+08248;GB-GX4MWS-Club;Macc A.R. Club;188.165.209.35;42000;000;http://
+16437;GB-hideout;xlx201;157.245.45.67;42003;001;https://ukhide.446em.uk
+57727;GB-HUBNet;Link to HUBNet;5.57.94.92;42000;013;https://hubnetwork.uk/
+84338;GB-M0OUK-Link;www.OARC.uk;165.22.121.251;42002;003;http://ysf.oarc.uk/
+54916;GB-MB6RI;YSFR mb6ri.co.;86.132.7.82;42200;001;http://wires-xuk.sytes.net/
+97576;GB-N.Ireland;YSF N.Ireland;87.117.229.165;42500;002;http://
+13344;GB-North-West-UK;NWRG;209.250.255.162;42000;006;http://209.250.255.162/
+58362;GB-NorthWestLink;TG23520;217.46.179.246;42004;001;http://
+26368;GB-qso365;qso365.co.uk;212.159.79.56;42002;002;http://g6nhu.getmyip.com:8900
+41012;GB-Sandbox;Testing;88.97.60.42;42003;000;http://88.97.60.42:8090
+23551;GB-SCOT-MULTI;SCOTLAND MULTI;92.3.117.38;42000;001;http://
+67256;GB-Smoggie-UK;SMOGGIE LINK;108.61.172.174;42000;004;http://
+62400;GB-W.Mids;IO82UI;86.148.110.250;42021;001;http://wfrg.ddns.net/
+06284;GB-WARC;Warrington ARC;109.148.101.52;42000;004;http://
+93529;GB-WestBerkshire;West Berks UK;62.232.43.186;42000;003;http://m0cuk.uk:8080
+13322;GB-xlx201b;MultiMode;157.245.45.67;42001;001;https://xlx201b.446em.uk
+41142;GB-XLX969;Relfector for;142.93.46.36;42000;000;http://xlx969.nwfg.online
+27617;GB-YORKSHIRE-YSF;YSF Leeds UK;45.58.139.108;42000;001;http://45.58.139.108/
+23945;GB3TH;Tamworth UK;5.2.112.26;42000;004;http://5.2.112.26
+77817;GB7SJ;Repeater link;217.46.179.246;42000;006;http://
+83260;GR-HellasFame;Greek YSF Test;95.179.190.33;42000;002;http://stargate-dmr.net:8080
+96370;Gr8ter-Detroit;Great Lakes MI;107.141.52.226;42006;001;http://
+89995;Great-Lakes;Great Lakes Ar;107.141.52.226;42003;001;http://
+60237;GT-ASL-48455;AllStar Audio;190.148.222.28;42101;001;http://190.148.222.28:8502/index.php
+36606;GT-Guatemala;Enlace DMR+;104.143.94.48;42142;003;http://104.143.94.48/YSFReflector/YSFHBLink/index.php
+25419;Guatemala;Link Regional;ysf.tg9aor.net;42000;002;http://
+47247;HB-C4FM-Basel;Gruppo HB9CSR;212.237.33.114;43000;003;http://212.237.33.114/c4fm/index.php
+87252;HBLINK-SPAIN;HBLINK SPAIN;85.255.8.71;42000;002;http://hblinkspain.duckdns.org/YSF
+73821;HCRA-YSF;HCRA Refl;168.235.80.185;42001;001;http://ysf.nt1k.com
+23667;HELLAS-Zone;YSF Reflector;85.93.91.80;42000;016;http://www.hellaszone.com/index.php/ysf-hellas-zone
+36039;HK-HAM;YSF<=>454;119.237.142.173;42002;002;http://ysf.852ham.org/
+56322;HN-HONDURAS;YSF Honduras;104.223.170.236;42000;002;http://ysfhonduras.xreflector.es/
+01689;HP-PANAMA-HUB;C4FM DMR;179.63.194.94;42000;013;http://hp-panama-hub.c4fmpanama.org/
+14248;HR-9A-C4FM;9A C4FM HR;35.175.149.169;42000;004;http://35.175.149.169
+18164;HU-Balaton;YSF Siofok;5.189.162.5;42200;002;http://5.189.162.5
+49993;HU-HU-TG2162;BM TG2162;185.187.75.192;42300;003;http://brandmeister.hu/ysfref2162/
+41120;HU-Hungary;BM TG216;185.187.75.192;42100;003;http://brandmeister.hu/ysfref/
+26973;Hudson-City-NJ;YSF Reflector;192.223.27.159;42000;003;http://ysf.dmrnet.net/ysf
+52077;IE_YSF_Ireland;Fusion <> DMR;44.155.254.23;42000;004;https://ysf-2724.ei3rcw.ampr.org/index.php
+14689;Indiana-Link-So;Bridge:IRLP_00;107.155.116.148;42000;008;http://107.155.116.148/ysf
+96014;IRLP_0070;Bridge to 0070;75.127.13.79;42000;003;http://k5nx.com/YSFdashboard
+60905;IRLP_0087;Bridge to 0087;192.210.239.5;42000;001;http://k8lrc.crabdance.com/index.php
+75373;IT-773Cluster;TG222773 - BM;89.46.75.166;42000;003;http://xlx773.iz0rin.it/ysf/
+92157;IT-APRS-PUGLIA;www.aprspuglia;185.216.27.214;42000;000;http://185.216.27.214/
+54102;IT-ARI-VINCI;C4FM;80.211.99.134;42000;001;http://80.211.99.134
+46773;IT-C4FM-ABRUZZO;IT-DMR 22261;5.88.241.47;42001;003;http://ysf-abruzzo.ariroseto.it/ysf
+17120;IT-C4FM-HBLink-D;Zona1 Piemonte;94.177.173.53;42000;001;http://94.177.173.53/ysf/index.php
+22201;IT-C4FM-Italy;(YCS222);94.177.187.31;42000;023;http://ycs.grupporadiofirenze.net/ycs/
+16547;IT-C4FM-LECCE;YSFReflector;80.211.133.104;42000;004;http://c4fm-lecce.ddns.net/index.php
+16547;IT-C4FM-LECCE;YSFReflector;80.211.133.104;42000;004;http://c4fm-lecce.ddns.net/index.php
+30483;IT-C4FM-Lodi;Lombardia;94.177.187.40;42000;004;http://ysflodi.iw2gob.it/c4fm/index.php
+14115;IT-C4FM-PUGLIA;DMR TG PUGLIA;95.248.215.75;42000;002;http://ysfpuglia.iz7gll.it:8888
+26765;IT-C4FM-ROSETO;IT-DMR 222035;109.239.250.3;42000;002;http://ysf-roseto.ariroseto.it/ysf
+06901;IT-C4FM-TERAMO;C4FM TERAMO;195.32.87.220;42000;000;http://ysf-teramo.ns0.it/
+94514;IT-CALABRIA;MP CALABRIA;185.250.144.228;42000;001;http://185.250.144.228/
+27746;IT-CATANIA;TG22491-BM;91.92.136.252;42000;001;http://91.92.136.252/YSFdash
+23740;IT-DGT-Zona-0;Rete DGT zona0;185.177.59.221;42000;001;http://185.177.59.221/YSF/
+47946;IT-Digiland;Italia;82.223.18.138;42000;002;http://82.223.18.138/ysf/index.php
+58288;IT-GDO-FUSION;C4FM OSSOLA;88.149.167.221;42000;000;http://iz1zpj.duckdns.org
+76421;IT-GIOIATAURO;#76421;80.211.74.187;42000;005;http://ysf.rcdigital.it
+26045;IT-GRF-YSF;TUSCANY MULTIP;31.14.142.119;42005;008;http://ysf.grupporadiofirenze.net/ysf_5
+03832;IT-I0-LAZIO;773RadioGroup;93.186.255.126;42000;005;http://ysf.iz0rin.it/ysf
+45679;IT-I6-ABRUZZO;IT-I6-ABRUZZO;95.246.180.57;42000;001;http://iz6ouf77.ddns.net/ysf/
+64599;IT-IQ3CR;ARI Belluno;95.233.192.20;42000;000;http://iq3cr.ddns.net/index.php
+92365;IT-IS0-Sardegna;Multiprotocoll;51.254.206.201;42000;002;https://ysf.is0.org
+18255;IT-ITALIA;YSF Italia CIS;185.177.59.166;42000;002;http://
+18316;IT-ITALY-I2-MI;ITALY-I2-MI;94.33.52.82;42001;002;http://www.iw2hgl.it
+82021;IT-IU3GMR-YSF;IU3GMR ROOM;95.233.192.20;43000;000;http://iu3gmr.ddns.net/index.php
+05579;IT-PERAZZA;YSF Reflector;195.128.234.114;42001;000;http://ysf.iz6rnd.it
+73436;IT-RedNet;Svxlink-net;80.211.239.167;42010;001;http://rednet.iu0krr.it/YSF_2/
+01444;IT-RNG-NET;GRF CLUSTER;164.68.100.69;42444;001;http://XLX038.grupporadiofirenze.net
+10885;IT-RNRE-YSF;CROSSLINK;31.14.135.7;42000;001;http://ysf-10885.duckdns.org/ysf/
+34697;IT-SICILIA;#34697;80.211.84.249;42001;004;http://ysf.digitalsicilia.it
+12385;IT-TERNI;TERNI TG88;80.211.239.167;42020;001;http://itterni.iu0krr.it/YSF_1/
+79445;IT-TUSCANY;C4FM-DMR-NXDN;80.211.99.134;42001;001;http://80.211.99.134/YSFTuscany/
+71249;IT-UMBRIA;YSF UMBRIA;80.211.239.167;42000;001;http://itumbria.iu0krr.it/YSF_3/
+72983;IT-VENETO;VENETO MULTIP;81.174.3.170;42010;000;http://ysfr.dyndns.org
+93884;IT-YSF-BRESCIA;CLUSTER BS;212.237.56.10;42000;001;http://ysf.dmrbrescia.it
+28345;IT-YSF-CUNEO;C4FM ROOM CUNE;82.56.147.96;42000;000;http://
+43102;IT-YSF-HBLINK;TG 22200;80.211.64.211;42005;001;https://ysf.hblink.it
+65716;IT-YSF-LUCANIA;YSF LUCANIA;51.255.172.249;42001;000;http://ysf.iz8gur.it/
+31585;IT-YSF-NORD;ITALY NORD;212.237.9.215;42000;007;http://ysfitalynord.dyndns.biz/ysf/
+82044;IT-YSFROOM-ITALY;WIRES-X ITALY;80.211.96.39;42000;029;http://ysfroomitaly.iw2gob.it/c4fm/index.php
+67411;IT-Zona-4;EmiliaRomagna;212.84.32.29;42000;000;http://
+11881;IT-Zona-9;Sicilia;80.211.62.178;42001;004;http://80.211.62.178/YSF/index.php
+22211;IT_C4FM-LIGURIA;Reg. Liguria;212.237.8.77;42004;001;http://
+22236;IT_C4FM-TIGULLIO;Tigullio;188.213.173.69;42000;001;http://c4fm.selfip.com/
+00012;JAPANLINK;Japan link;207.244.224.170;42000;053;http://japanlink.xreflector-jp.org
+90219;Jason's-Bar;C4FM Saloon;67.205.134.229;42000;001;http://ysf.w4jmf.com
+25383;JP-JAPAN;Fusion Japan;122.222.1.50;42000;017;http://c4fm.owari.biz/ysfref/
+88748;JP-SAKURA-Net;SNWLab Fusion;153.126.179.214;42000;000;http://ysfref.snwlab.net/
+15742;JP-YSF-NAGOYA;YSF;221.170.106.177;42000;013;http://xrf098.mydns.jp:8030
+79605;JP-YSF-ONOGORO;YSF;157.65.31.91;42001;000;http://xlx970.onogoro.net/
+30051;JP-YSFDMR-Net;YSF;211.131.179.106;42000;003;http://ysfreflector.pgw.jp
+80960;JP_XRF499;YSF;203.137.76.22;42000;001;http://xrf499.xreflector-jp.org/ysf/
+31983;K8JTK-Hub;DVMIS;149.28.114.219;42001;002;http://YSFReflector31983.K8JTK.org
+10482;KAPIHAN;kapihan.net;45.77.186.5;42001;007;http://ysf.kapihan.net
+22856;KAPIHAN2;kapihan.net;144.202.99.113;42001;001;http://ysf2.kapihan.net
+89902;KB1NE-GROUP;NE Wireless;104.236.92.130;42000;001;http://
+36745;KN6CLM;Elevated RF;107.172.156.110;42000;001;http://107.172.156.110/
+92708;konabarbarian;SF Bay Area;54.197.204.105;42000;002;http://
+48316;KP4GA;Puerto Rico;66.50.96.7;42000;001;http://kp4ga.selfip.com/
+44444;KR1P;YSF to AllStar;166.70.154.77;42225;003;http://ysf.kr1p.org
+17077;LaGrandeDigital;www.lagrandefl;99.145.170.193;42000;002;http://digital.lagrandefl.com
+33461;LATINOS-UNIDO;HISPANIC TG;174.138.36.176;42000;002;http://
+59933;LibertyNet;W8RFA Free4all;68.60.143.37;42000;000;http://
+15425;LincsLink;14 characters;86.181.36.50;42002;003;http://
+07188;LZ0IOS;Repeater Sofia;46.233.56.166;42005;002;http://
+24597;M1AXM-CQUK;Devon UK;fusion2.m1axm.co.uk;42001;000;http://fusion.m1axm.co.uk
+53278;MALLORCA;ZONA EA;82.223.122.28;42000;001;http://
+13827;ME-YSFMontenegro;TG29792;89.188.45.102;43007;004;http://13827ysf.ddns.net
+74718;MID-MICHIGAN;GREAT LAKES;107.141.52.226;42005;000;http://
+21505;MIL+VET;Mil and Vets;5.81.41.50;42000;001;http://gb7rn.ddns.net/9111
+23944;MX-Fusion-Mexico;Fusion Mexico;200.57.9.10;42000;004;http://ysf.ared.org.mx
+67915;MX-Normex;YSF;208.82.116.113;42000;000;http://208.82.116.113/index.php
+11714;MY-Malaysia-Net;Malaysia Net;150.129.184.54;42000;002;http://ysf.dmrnet.org/ysf/index.php
+35767;N1AJW-Test-2;Potpourri;104.153.109.57;42005;003;https:// 104.153.109.57
+88843;NA9PL_PAAROS;PAAROS.com;159.203.73.99;42000;004;http://NA9PL.com/YSF/
+77518;NEARC;BM TG 31257;172.245.110.121;42000;001;http://ysf.w0jay.com/YSFReflector-Dashboard/index.php
+62121;NEMARC-Fusion;NEMARC;3.225.138.100;42003;005;http://k2ej-ysf.ddns.net/
+45734;NETSWATbg;YSF SWATbg NET;94.26.58.60;42005;000;https://ysf.swat.bg
+32772;NL-C4FM-Dutch;NL C4FM Dutch;81.169.224.52;42000;002;http://nlc4fmdutch.pa7lim.nl
+96455;NL-Central;Centraal NL;90.145.156.242;42000;079;http://c4fm.digitalevoice.nl
+31911;NL-DARES;EMCOMM NL;80.115.153.238;42000;000;http://dares.ham-radio-op.net:8080
+20070;NL-Hobbyscoop;hobbyscoop.nl;44.137.42.25;42000;004;http://fusion.pi9noz.ampr.org
+20431;NL-Limburg;Goojundaag LB;37.97.194.88;42002;001;http://limburg.is-very-nice.org
+73238;NL-Noord;test reflector;44.137.87.82;42000;002;http://44.137.87.82/index.php
+63539;NL-Oost;test reflector;44.137.87.83;42000;002;http://44.137.87.83/index.php
+59819;NL-PA0ROB;test nlx204;82.171.119.45;42004;000;http://nlpa0rob.ddns.net/
+01966;NL-PD4MM;Marcel QPO;80.115.153.238;42004;001;http://pd4mm.nl
+73443;NL-PI1DAF;Multi Repeater;86.80.221.107;42000;002;http:/pd0poh.ddns.net
+91665;NL-RNLMC;Marine Corps;95.111.246.149;42001;001;http://Marines.Ham-Radio-OP.net
+63234;NL-TechTalk;204_Z - TG2045;82.171.119.45;42002;002;http://nltechtalk.ddns.net
+71117;NL-TEST;Dutch test;173.249.54.49;42000;002;http://ysftest.pa7lim.nl
+76591;NL-XLX204X;Multi Mode [X];82.171.119.45;42003;002;http://nlxlx204x.ddns.net/
+44919;NO-General;Norwegian chat;80.89.46.242;42000;002;http://ysf.hamlabs.no/ysf/index.php
+21302;North-Mich;W1WRS repeater;47.224.93.95;42002;002;http://192.168.1.12
+67703;Northern-NH-ASL;US NNHASL;72.73.78.92;42000;001;https://nhhub.wordpress.com/
+33156;NV-Bridge;Fernley, NV;71.89.225.19;42000;000;http://
+51561;NZ-Ashburton;Repeater;114.23.212.119;42000;008;http://zl4rx.co.nz:89
+59115;NZ-Canterbury-NZ;Wires-X <<>> B;124.197.62.162;42050;002;http://canterburydigitalreflectors.hopto.org
+62078;NZ-Christchurch;South Island -;124.197.62.162;42000;001;http://xlx530.hopto.org/YSF
+75161;NZ-ROAR-NZ;Rotarians ARNZ;203.86.194.92;42000;001;http://www.xlx299.nz/ysf/
+52755;NZ-Talk;Kiwi Link;123.255.62.27;42000;001;http://nz-talk.ddns.net:89
+29073;NZ-Whangarei;ZL1AMK YSF;218.101.105.192;42000;001;http://zl1amk.ddns.net:85
+33191;NZ-YSF-Reflector;NZ Reflector;114.23.212.119;43000;001;http://zl4rx.co.nz:88
+89797;NZ-YSF-XLX287;ysf.zl2wl.nz;45.32.90.50;42000;001;http://ysf.zl2wl.nz
+07338;NZ-YSF-XLX750;http://www.xlx;203.86.206.49;42001;002;http://ysf.xlx750.nz
+72753;Oakland;W6OAK;45.77.188.74;42000;001;http://ysf.w6oak.org/
+40557;Ohio-Link---LGLG;OHIO-LINK;209.190.4.10;42000;047;http://ysf.glorb.com
+72170;openGD77;openGD77;128.199.76.58;42000;001;http://128.199.76.58/
+52792;Orobie-Reflector;EchoLink Refle;80.211.131.80;42000;002;http://ysf-dagobah.hblink.it/
+15639;Ostsee;Backup DL5CG;91.66.81.13;42001;001;http://dl5cg.ddns.net/ysf
+23020;Ottawa-Ont;Canada Link;184.175.49.98;42000;003;http://ysf-ottawa.ddns.net
+08344;PA-ysf-hp3icc;Ysf Chiriqui;190.141.113.82;42000;007;http://ysf-hp3icc.ddns.net/
+99999;Parrot;Parrot;137.226.79.115;42020;000;http://
+79383;PH-BISDAK;Bisayang Dako;45.79.92.86;42002;001;http://xlx.dmrphilippines.network/ysfbisdak
+59008;PH-DX1AFP;PHILCCOM;167.99.190.123;42100;002;http://167.99.190.123/dx1afp/index.php
+78258;PH-DX1PAR;DX1PAR;178.128.216.38;42100;012;http://
+19751;PH-DX1WPI;DX1WPI;167.99.190.123;42000;001;http://167.99.190.123/index.php
+18808;PH-DX2ACV;MAHARLIKA;108.61.216.100;42030;005;http://ph-dx2acv.ddns.net
+71972;PH-DX7NRD;NORAD7;140.82.14.24;42002;001;http://
+10707;PH-DX9RAG-FDCCU;PH Davao-Cotab;149.28.76.10;42000;001;http://dx9rag-n0mis.ddns.net
+09543;PH-MAHARLIKA;MAHARLIKA;149.28.94.53;42100;001;http://149.28.94.53/index.php
+43437;PH-WMG-ZAM;WMG;67.205.154.243;42000;004;http://
+08318;PH-YSF-DX3NE;YSF-DX3NE;8.3.29.153;42000;002;http://dx3ne.ddns.net
+35328;PIJALNIA-PIWA;OPIS PIJANY;64.53.214.179;42005;000;http://64.53.214.179
+25393;PL-4280;YSF/DMR/DCS132;155.133.14.66;42031;001;https://brandmeister.network/?page=lh&DestinationID=260080
+61266;PL-BRIDGE;Poland BRIDGE;91.197.227.13;42026;000;http://ysfbridge.pzk.pl/
+68368;PL-HBLink;HBLink Polska;80.211.208.227;42080;001;https://ysf.hblink.pl
+22538;PL-Kutno;Kutno;77.55.209.188;42078;001;https://ysf.hblink.kutno.pl/
+74359;PL-Local;Local;91.201.88.18;42234;000;http://
+29114;PL-POLAND;YSF PL POLAND;80.211.251.171;42025;016;http://
+15495;PL-POLSKA;POLSKA WIRESX;155.133.14.66;42026;008;http://
+55546;PL-Silesia;Poland Silesia;91.197.227.13;42003;000;http://ysfsilesia.pzk.pl/
+82068;PL-SLASK;Regionalna;91.201.88.18;42237;001;http://
+53245;PL-SP1;YSF SP1;155.133.14.66;42041;000;http://ysf016.wiresx.pl:8081/sp1/
+12508;PL-SP2;YSF SP2;155.133.14.66;42042;000;http://ysf016.wiresx.pl:8081/sp2/
+02328;PL-SP3;YSF SP3;155.133.14.66;42043;000;http://ysf016.wiresx.pl:8081/sp3/
+48598;PL-SP4;YSF SP4;155.133.14.66;42044;000;http://ysf016.wiresx.pl:8081/sp4/
+45300;PL-SP5;YSF SP5;155.133.14.66;42045;000;http://ysf016.wiresx.pl:8081/sp5/
+92967;PL-SP6;YSF SP6;155.133.14.66;42046;000;http://ysf016.wiresx.pl:8081/sp6/
+92078;PL-SP7;YSF SP7;155.133.14.66;42047;000;http://ysf016.wiresx.pl:8081/sp7/
+71372;PL-SP8;YSF SP8;155.133.14.66;42048;000;http://ysf016.wiresx.pl:8081/sp8/
+78984;PL-SP9;YSF SP9;155.133.14.66;42049;000;http://ysf016.wiresx.pl:8081/sp9/
+38691;PL-SR4H;SR4H-ROOM;91.244.185.128;42000;001;http://
+40464;PL-SR7MK;Swiety Krzyz W;155.133.14.66;42024;001;http://ysf016.wiresx.pl:8081/sr7mk/
+40594;PL-SR8DEF;Debica;155.133.14.66;42033;001;http://
+78099;PL-SR8FWD;Wlodawa WiresX;155.133.14.66;42030;001;http://sr8fwd.wiresx.pl
+79009;PL-SR8K;Dubiecko;155.133.14.66;42032;002;http://ysf016.wiresx.pl:8081/sr8k/
+91407;PL-SR8LUF;Lublin;155.133.14.66;42028;001;http://ysf016.wiresx.pl:8081/sr8luf/
+87318;PL-SR8UVC;Chotylow;155.133.14.66;42034;001;http://
+54644;PL-SR8UWD;Wlodawa YSF;155.133.14.66;42027;001;http://sr8uwd.wiresx.pl
+64506;PL-SR8WD;Wlodawa;155.133.14.66;42029;001;http://ysf016.wiresx.pl:8081/sr8dmr/
+83600;PL-SR9DBN;Myslowice;91.201.88.18;42235;001;http://
+39816;PL-SR9DX;Bytom;85.11.120.150;42223;001;http://www.dx.katowice.pl
+52742;PL-WARMIA-MAZURY;Elblag;109.241.51.213;42055;003;http://sp2wlf.tplinkdns.com/
+09815;PL-XLX132;D-Star Gateway;91.203.55.87;42001;002;http://xlx132.dstar.radom.pl/ysf/
+80986;PL-YSF260;BM TG260;155.133.14.66;42035;003;http://ysf016.wiresx.pl:8081/260/
+37358;PLUG;The Philly LUG;173.12.0.169;42000;003;http://ham.daotechnologies.com/ysf-dashboard
+92044;PR-KP4CA;Boriken DMR Ne;64.154.38.101;42000;003;http://boriken-ysf.ddns.net/
+02986;PT-YSF009;C4FM-Portugal;109.71.44.237;42000;002;http://c4fm.from-ct.com/
+45742;PT-YSF012;BM2682-Link;194.38.140.204;42100;002;http://ysf012.from-ct.com
+52639;PT-YSF268;BM2682-Link;194.38.140.204;42125;001;http://ysf268.from-ct.com
+15461;PT-YSF903;BM2682-Link;194.38.140.204;42150;001;http://ysf903.from-ct.com
+09658;PT-YSF915;BM2682-Link;164.68.117.231;42000;001;http://ysf915.from-ct.com
+30270;PUERTO-RICO;ENLACE BORICUA;162.243.169.90;42000;004;http://kp4msr.praredn.org
+45591;QUAHOG-NETWORK;BM-TG-31445;45.77.213.187;42000;002;http://ysf.ridigitallink.net
+95623;R.C.-AMIRED---C4;WiresX CATALUN;89.36.215.181;42000;016;http://89.36.215.181
+64150;Radio-Oasis;ham radio;50.82.207.97;42000;000;http://50.82.207.97/dashboard
+66265;Randin;RCRG (Ki4eki);75.145.198.42;42000;001;http://
+23531;RAYNET-UK;RAYNET-UK_YSF_;51.91.78.118;42001;007;http://23531.raynet-uk.net/
+31444;RI-DIGITAL-LINK;BM-TG-31444;155.138.201.254;42000;002;http://c4fm.ridigitallink.net/
+43537;RO-YO-EmCom;EmCom Romania;89.33.44.100;42112;003;http://yo2loj.ro/emcom
+03435;RO-YSF-BM-226;YSF BM TG226;89.33.44.100;42002;003;http://ysf2bm.hamnet.ro
+95093;RO-YSF-DMR-YO-W;YSF DMR+ Link;89.33.44.100;42007;005;http://ysf2dmr.hamnet.ro
+75904;RRARE-OKTX;Red RiverOK/TX;18.218.160.231;42000;002;http://18.218.160.231/index.php
+40387;RU-DMR;TG2503;188.42.30.175;42000;004;https://ysf.dstar.su/dash/
+39544;RU-KAVKAZ;North Caucasus;37.18.35.2;42000;003;http://kavkaz.qrz.ru/YSF/
+09020;RU-KRSNDR;Krasnodar;176.192.125.46;42002;001;http://c4fm.tk/YSF3/index.php
+67143;RU-MAYKOP;Maykop;176.192.125.46;42005;001;http://176.192.125.46/YSF5/
+27797;RU-MOSCOW;MOSKWA;128.0.132.69;42000;003;http://128.0.132.69
+31022;RU-POCTOB;Rostov-Don;83.69.77.96;42000;001;http://c4fm.xyz/our-c4fm-wires-x-room.php
+11193;RU-RADIOCULT;YSF;91.247.248.67;42000;001;http://ysf.radiocult.su:8083
+17383;RU-SCANNER;Russia;176.192.125.46;42000;004;http://176.192.125.46/YSF/
+58312;RU-SHAKHTY;Shakhty;176.192.125.46;42004;001;http://c4fm.tk/YSF4/
+16530;RU-VLGDNK;Volgodonsk;176.192.125.46;42001;002;http://176.192.125.46/YSF2/
+25641;RUDIVO;YSF;194.182.85.217;42000;008;http://194.182.85.217/
+75294;RV-rpt-group;Rogue Valley;71.94.243.50;42001;001;http://
+23611;SAT-TRAC;TG 31683;192.99.245.120;42001;003;http://192.99.245.120
+40208;SC-Scotland;Scottish YSF;13.69.14.204;42000;018;http://c4fm.dvscotland.net
+02868;SCAN-i-546;SCAN-i 546;149.28.202.133;42001;006;http://scanintl.spdns.org
+82040;SD_HUB;DMR-ALLSTAR;155.138.225.161;42000;003;http://ysfreflector.sddstar.com
+93753;SE-SE0O_CROSS;YSF>DMR TG2400;31.211.216.13;42000;002;http://
+06000;SE-SM4-SE-01302;Fusion to SM4;94.234.176.231;42000;002;http://94.234.176.231:3180
+80858;SE-SWEDEN-HUB;Wires-X, DMR;95.216.151.253;42000;007;http://ysf.forthmeijer.com
+69673;SE-TG240240-Link;TG240240 Link;95.216.197.75;42000;003;http://ysf.brandmeister.se
+65461;SE-Virginia;Tidewater;71.120.150.136;41500;001;http://71.120.150.136
+30217;SEOH-YSFLINK;SEOH YSFLINK;44.70.25.177;42002;002;http://k8khw.dyndns-remote.com
+43075;SE_SwedenLink_28;SE_SwedenLink_;94.254.105.236;42000;002;http://ysfsl.c4fm.se
+16390;SG-YSF-V2;SINGAPORE-YSF;14.102.146.160;42002;001;https://ysf.lucifernet.com/
+48857;SI-Slovenia;YSF>DMR TG293;188.230.203.194;42000;004;http://xlx511.ddns.net:46193/index.php
+62716;SI-Slovenia2;YSF Slovenia;109.182.208.84;42000;002;http://router.dyn.ts.si:38401/
+98269;SK-B.Bystrica;YFS Slovak;178.143.62.29;42000;002;http://ysfreflektor.koren.network:8080
+83776;SKYNET-YSF;SKYNET/C4FM;167.172.17.107;42000;001;http://c4fm37040.ddns.net/
+28735;SMS1;SMS backup;167.99.135.20;42000;000;http://
+29961;SNARS;SNARS TG31328;162.248.93.209;42000;001;http://ysf.snars.net
+27688;SO-Oregon-rc;SO RC;71.94.243.50;42000;002;http://blahdiadem.hopto.org
+80956;SuperARC;Phoenix, AZ;69.71.61.230;42000;002;http://
+77982;SZ790;TG46073;58.250.171.29;50790;001;http://
+08580;tgwells-ysf;tgwells-ysf;18.191.186.57;42000;000;http://tgwells.com
+40538;The-Missing-Link;Inland Empire;76.174.207.37;42003;001;http://ysfkc6gwf.ddns.net
+45800;TheHideoutCrew;Yeet;69.164.222.140;42002;004;http://69.164.222.140/
+31110;Tipton-ARS;Tipton Co, TN;207.65.47.88;42000;000;http://
+22539;TN-NETDA;TN-NETDA;155.138.237.140;42040;006;http://
+44212;TNARES-EAST;TNARES-EAST;155.138.237.140;42110;001;http://
+07683;TNARES-MID;TNARES-MID;155.138.237.140;42120;000;http://
+76787;TNARES-STWIDE;TNARES-STWIDE;155.138.237.140;42100;004;http://
+76805;TNARES-TAC-E;TNARES-TAC-E;155.138.237.140;42140;000;http://
+67313;TNARES-TAC-M;TNARES-TAC-M;155.138.237.140;42150;000;http://
+47567;TNARES-TAC-W;TNARES-TAC-W;155.138.237.140;42160;000;http://
+48064;TNARES-WEST;TNARES-WEST;155.138.237.140;42130;000;http://
+43513;TROJMIASTO;Poland Tricity;195.140.190.58;42000;000;http://ysftricity.ham-dmr.pl/
+30743;TW-HAMTALK;C4FM @HAMTALK;118.150.164.96;42000;004;http://www.hamtalk.net/ysfr
+26112;TW-YSF338;YSF@TYARC;114.32.215.38;42000;002;http://ysftw338.ddns.net
+39369;UA-Azimuth;Azimuth-club;193.27.208.38;42000;001;http://193.27.208.38
+55467;UA-Dnipro;DMR TG25504;5.255.33.253;42004;001;http://
+57835;UA-Emergency;DMR TG2559;5.255.33.253;42003;001;http://
+46588;UA-Exolink;DMR/C4FM;5.255.33.253;42000;001;http://
+37683;UA-Kyiv-city;DMR TG25501;5.255.33.253;42001;001;http://
+82255;UA-LVOV-YSF;DMR TG25514;134.249.141.148;42002;001;http://ysf82255.uw0wu.ml
+50847;UA-Mykolayiv;DMR TG25515;5.255.33.253;42005;001;http://
+85106;UA-Odesa;DMR TG25516;5.255.33.253;42002;001;http://
+88338;UA-UA-Ref;YSF UA reflect;95.216.163.65;42100;001;http://ysf.2ip.ee/dashboard2
+66216;UA-Zakarpatia;DMR TG25507;142.91.158.199;42002;001;http://xrf255.reflector.up4dar.de/ysf/index.php
+13201;UK-DVMEGA;DVMEGA CHAT;212.237.34.32;42000;002;http://c4fm.dvmega.co.uk
+83087;UK_YSF_BM_UK;UK_Ref_DN_ONLY;87.117.229.171;42000;012;http://
+20087;UNIVERSAL-TWR;SE MI DIGITAL;107.141.52.226;42001;000;http://
+74940;Unix;Unix system ad;185.244.130.88;42002;000;http://ysf.sysprotect.eu
+74940;Unix;Unix system ad;185.244.130.88;42002;000;http://ysf.sysprotect.eu
+65416;URSALAMANCA;URE SALAMANCA;31.14.139.112;42000;000;http://31.14.139.112
+51380;Uruguay-YSF;UY YSF;201.217.131.107;42000;006;http://cx4ae.no-ip.org
+29727;Uruguay-YSF-Char;Uruguay C4FM;201.217.131.106;42000;001;http://ysfuruguay.ddns.net
+59210;US-1st-Resp;TGIF TG 450;157.245.247.7;42000;003;http://
+51123;US-31150;Hawaii;149.28.82.52;42000;005;http://149.28.82.52/YSF
+44693;US-42001hamshack;paducah;142.93.53.85;42000;000;http://
+09344;US-AC1KV;AC1KV Rptr;140.82.14.24;42000;001;http://
+75056;US-AF4Y;AF4Y Refelctor;107.191.51.252;42000;006;http://
+61482;US-AfterNetK4DJL;AfterNet K4DJL;96.47.95.121;42003;001;http://afternet.alabamalink.info
+21988;US-AggielandLink;Aggieland Link;71.252.210.227;42000;000;https://www.aggielandlink.com/Dashboard
+57882;US-AK4LT;The Fire Ants;51.79.69.216;42000;002;http://
+75021;US-AMLEG-NCKYP42;KB4KY Repeater;67.215.222.30;42000;000;https://tinyurl.com/y5tlg93t
+11689;US-Amsat;Satellite Ops;149.28.241.59;42000;017;http://149.28.241.59
+55223;US-AZ-SEOC;Oro Valley ARC;69.244.58.8;42001;001;http://
+36252;US-AZ-TUCSON;Oro Valley ARC;69.244.58.8;42000;003;http://
+79496;US-Beards-Den;Open Room;68.4.184.234;42200;003;http://k6tvb.isa-geek.com:8888/index.php
+00081;US-Berks-County;Pennsylvania;24.152.248.205;42042;000;http://
+85490;US-BM-TG-31083;CO Severe WX;54.191.50.212;42050;001;http://54.191.50.212/ysf2
+99256;US-BM-TG-31088;Colorado HD;54.191.50.212;42005;005;http://54.191.50.212
+97501;US-BRRO;688;54.89.57.238;42000;001;http://xlx688.ab8m.com/
+44742;US-CARA;CARA Group;45.79.93.167;43000;003;http://xlx.cara.nu/ysf
+25662;US-Carlisle,PA;N3JUO;174.49.161.236;42002;000;http://ysfcvpa.hopto.org
+94390;US-Central-AL;WiresX 21713;99.46.36.113;8001;006;http://
+49235;US-CKRG;Central Kansas;100.25.76.93;42000;004;http://
+44977;US-CNJHAM;Link to XLX020;52.23.107.220;42000;004;http://ysfreflector.kb2ear.net
+99032;US-CO-KF0ABA;NOCO Ragchew;73.34.87.216;42000;000;http://ysfnode.jmrust.com/
+53927;US-CO-WE0FUN;Fun Machine Co;199.59.31.9;42000;003;http://c4fm.we0fun.com
+23160;US-ColoradoMega;CO Transcode;74.91.118.134;42000;011;http://ysf.parkerradio.org/ysf
+71941;US-Connecticut;N1AJW-Test;192.223.31.208;42000;000;https://192.223.31.208
+62608;US-Connecticut-1;CT Chat;192.223.31.208;42010;001;http://192.223.31.208
+91800;US-CQ-California;CAL-YSFtoWires;104.218.36.162;42001;004;http://ysfxlx.dyndns.org
+62208;US-CQ-NODAK-A-ZX;CQ NorthDakota;18.217.188.43;42000;006;http://ysf.cqnodak.com
+73884;US-craftwerx;team-craftwerx;67.160.251.224;42511;002;http://
+46301;US-CW-Ops;CW Academy/CW;107.182.34.107;42002;002;http://cwopsysf.dyndns.org
+50279;US-DUDE-Link;DUDE XLX106;69.163.163.88;42000;008;http://xlx106.dudetronics.com
+38542;US-DX-HUB;US DX-HUB;45.32.193.214;42000;000;http://45.32.193.214/YSF
+40422;US-DX3CA-OMG;OLD MAN GROUP;149.248.6.211;42000;007;http://dx3caomg.tqhhc.com
+23957;US-DX3L-YSF;RIZAL-LATITUDE;140.186.202.60;42000;004;http://latitudeysf.ddns.net
+11102;US-DXLINKSYSTEM;DX-LINK SYSTEM;155.138.236.26;42000;003;http://xlx749ysf.drgnz.com
+43953;US-East-Pipeline;Link;75.68.143.156;42007;009;http://
+88084;US-EcosDelCoqui;Conociendo Ami;66.223.212.215;42002;003;http://ecosdelcoqui.kl4ne.net
+88023;US-EOH-GWY-HUB;X Hub/Bridge;64.154.38.103;42000;001;http://29999.link/YSF
+12567;US-ERDN;ERDN YSF Ref;173.208.200.179;42000;001;https://ysf.kc1awv.net/index.php
+12567;US-ERDN;ERDN YSF Ref;173.208.200.179;42000;000;https://xlx337.kc1awv.net
+13458;US-FACSchool-ARC;New Iberia, LA;98.191.70.50;42000;002;http://longwire.net:8088
+11665;US-Farmers;Farm Talk;67.140.163.107;42010;001;http://
+37921;US-FLORIDA;FL REFLECTOR;76.109.114.132;42000;002;http://
+04154;US-Georgia;Georgia USA;45.32.223.140;42000;000;http://ysf-ga.ka7utd.com/
+99602;US-GulfBeach-FL;Gulfcoastradio;50.116.24.240;42000;006;http://50.116.24.240
+36271;US-GulfCoast-FL;Gulfcoastradio;18.205.34.190;42000;000;http://ysf36271.ddns.net
+01896;US-HarleyHangout;DMR_AllStar;38.133.241.80;42000;002;http://
+93877;US-Houston-Texas;Houston Texas;23.30.91.29;42000;002;http://ysf.cognetic.com
+01037;US-HRCC-LINK;HRCC LINK;209.182.218.92;42001;007;http://ysf.hrcc.link
+02931;US-Hudson-NY;Upstate NY;24.105.206.243;42002;006;http://keetz.mynetgear.com
+04400;US-HXO;HXO 31325;162.248.93.209;42005;001;http://ysf.hxo.radio
+83132;US-Illinois-Link;Illinois Link;74.208.235.115;42000;016;http://74.208.235.115/YSFReflector-Dashboard/
+02500;US-IL_NGRMARC;NG Radio Club;73.74.148.160;42000;001;http://
+80060;US-JAXBCH-Link;JAX BCH Link;66.177.51.38;42000;000;http://
+68798;US-JerryNet;YSF Reflector;18.216.66.72;42000;002;https://ysf.ad6dm.net
+01295;US-JOTA-1;9071;104.200.25.53;42001;001;http://
+27662;US-JOTA-2;9072;104.200.25.53;42002;000;http://
+02177;US-K3IHI-RPT;YSF TG;131.106.30.132;42000;003;http://
+05944;US-K4LPD-YSF;YSFReflector;134.209.44.53;42000;001;http://k4lpd.luisra369.com
+32343;US-K4NWS;ALERT-K4NWS;34.219.110.119;42000;001;http://ysf.alert-alabama.org/YSFReflector-Dashboard/
+37581;US-K7SFQ-YSF;K7SFQ YSF Ref;50.39.137.114;42000;000;http://
+12345;US-K9EQ-----DYEF;Development;167.99.150.253;42004;000;http://
+81734;US-K9POL;US K9POL;104.238.162.162;42000;000;http://
+12479;US-Kansas-City;WIRES-X MOKAN;99.169.52.241;42000;006;http://www.salaman.org/ysf
+08398;US-Kansas3120;ks-dmr.net;129.130.229.11;42030;004;http://129.130.229.11:15426/3120/
+77661;US-KB1NYT-YSF;Swansea, MA;24.218.238.119;42000;002;http://kb1nyt.hopto.org:8091/ysf
+57046;US-KB4OVL;Indian Rvr FL;69.137.164.8;42000;001;http://
+04438;US-KC2RC;KC2RC W-X room;3.82.236.213;42000;004;http://3.82.236.213/
+69140;US-KE4SCS;KE4SCS Rptr;155.138.222.156;42000;000;http://155.138.222.156
+92516;US-Kentucky-LARC;Local Rag Chew;161.35.141.182;42000;001;http://
+43114;US-KENTUCKY-OWWZ;W4IOD Test Ref;76.244.26.57;42000;002;http://
+40806;US-KENTUCKY-WXGC;W4IOD Repeater;167.99.150.253;42002;008;http://mnwis-ysf.ddns.net/W4IOD.php
+02824;US-KI5HXE;KI5HXE;157.245.138.123;42000;000;http://
+03772;US-KitsapLink;Kitsap Talk;98.125.77.141;42810;000;http://
+40438;US-KK4OVW-TN-YTR;White House T;104.56.140.47;42000;001;http://
+25956;US-KM4EDS;Blount County;96.47.95.121;42002;003;http://danny.alabamalink.info
+93262;US-KO4AXW-7;Richmond, Virg;142.93.202.44;42000;000;http://ko4axw-ysf.ddns.net/index.php
+29162;US-Ktown;Los Angeles Kt;104.174.35.78;42002;000;https://192.168.0.40
+43310;US-KU0S;Test Bridged Y;76.196.111.153;42000;002;http://ysf.ku0s.com/dashboard/
+21511;US-KV4S;KV4S;96.47.95.121;42004;002;http://kv4s.alabamalink.info
+44967;US-Ky-Hood-Rats;Hood Rats Club;67.140.163.107;42020;001;http://kyhoodrats.ddns.net
+97215;US-LEO-ARC;LEO ARC;74.91.116.36;42000;006;http://74.91.116.36
+65982;US-LHSREF;LHS Podcast;67.224.119.40;42000;001;http://reflector.k5tux.us/Dashboard
+01240;US-LosAngeles;SocalPinoy;47.180.104.101;42003;002;http://socalpinoy.ddns.net
+44428;US-Magnolia-Link;Magnolia Wires;76.107.175.206;42042;001;http://
+87168;US-Marana-AZ;Oro Valley ARC;69.244.58.8;42002;001;http://
+68928;US-MID-TN-RM;Middle Tenn;104.56.140.47;42001;000;http://
+42592;US-MissingLynk;MissingLynk;104.248.12.84;42000;001;http://104.248.12.84
+21493;US-MNWIS----RDNT;21493;167.99.150.253;42000;018;http://mnwis-ysf.ddns.net
+77445;US-Muletown-TN;Maury County;104.237.132.247;42000;002;http://104.237.132.247
+43210;US-MVARC----KBNA;MVARC Idaho;167.99.150.253;42003;004;http://
+92059;US-N1TVI;Dew-Cave;159.65.189.183;42001;000;http://n1tvi.net:8081
+93958;US-N4KWT-ALPHA;Louisville, KY;23.126.8.172;42002;000;http://23.126.8.172/index.php
+08035;US-N4KWT-BRAVO;Louisville, KY;23.126.8.173;42000;000;http://23.126.8.173/index.php
+59680;US-N8RQJ-RPT;WiresX 49602;157.245.93.169;42000;001;http://157.245.93.169
+90882;US-NACS;C4FM;68.232.234.210;42000;001;http://
+54635;US-Nashville-HUB;Nashville-HUB;34.235.143.37;42000;002;http://
+06177;US-NC-440-Link;NC 440 Link;172.104.214.72;42000;001;http://ysf.msmts.com
+32398;US-NE-Oregon;Oregon Room;73.25.190.37;42000;002;http://
+56521;US-Nebraska_Hub;D-Star DMR YSF;71.8.194.163;42000;003;http://ysf.ham-radio-op.net
+77204;US-Nevada;Nevada TG3132;162.248.93.209;42001;002;http://ysf.snars.net/nevada
+93319;US-NgakNgak;Ngakngakan YSF;45.79.92.86;42000;004;http://xlx.dmrphilippines.network/ysf
+58333;US-NOMBRA;nombra.tech;172.90.53.5;42001;000;http://
+00561;US-North-America;DVSwitch.org;44.103.34.4;42000;000;http://dvswitch.org/YSF_NA/
+27402;US-Northstar;Northstar Link;149.28.113.51;42000;001;http://149.28.113.51
+83242;US-NW-Ohio;YSF-NW-Ohio;18.188.19.87;42000;001;http://ec2-18-188-19-87.us-east-2.compute.amazonaws.com/
+13070;US-NWMO;NW Missouri;199.188.121.118;42000;001;http://nwmoroom.duckdns.org
+53594;US-Ohio;Ohio;192.241.240.7;42000;005;http://ysf.n8qq.com
+19053;US-OklahomaLink;RCWA.org;3.208.70.29;42000;013;http://3.208.70.29
+72321;US-OMG-LA-LV;OLD MAN GROUP;149.248.21.148;42002;002;http://omglalv.tqhhc.com
+14927;US-OMISS---YSF;YSF Multimode;104.49.29.243;42001;002;http://
+74158;US-Oro-Valley-AZ;Oro Valley ARC;75.146.134.22;42000;023;http://
+59281;US-OVARC-Test;Oro Valley ARC;69.244.58.8;42003;000;http://
+06864;US-Penn-Link_1;XLX045A YSF;54.85.206.3;42000;004;http://xlx045.pennlinkgroup.com/ysfA
+20223;US-Penn-Link_2;XLX045D YSF;54.85.206.3;42006;000;http://xlx045.Pennlinkgroup.com/ysfD/
+69186;US-Penn-Link_3;XLX545B YSF;3.215.215.169;42001;001;http://xlx545.pennlinkgroup.com/ysfA
+35119;US-Penn-Link_4;XLX045E YSF;54.85.206.3;42001;002;http://xlx045.pennlinkgroup.com/ysfE
+92207;US-Penn-Link_5;XLX545E YSF;3.215.215.169;42000;002;http://xlx545.pennlinkgroup.com/ysfE
+17947;US-Penn-Link_7;XLX045C YSF;54.85.206.3;42002;001;http://xlx045.Pennlinkgroup.com/ysfC/
+19669;US-Penn-Link_8;XLX545A;3.215.215.169;42002;001;http://xlx545.pennlinkgroup.com/ysfA
+69614;US-Phoenix-AZ;Phoenix AZ;68.14.214.57;42500;003;http://68.14.214.57:8080
+30887;US-Phoenix-AZ-2;Phoenix AZ 2;72.194.183.82;42501;001;http://72.194.183.82:8081
+31672;US-Pi-Star-Multi;Pi-Star Multi;142.44.240.244;42000;002;https://multi-reflector.pistar.uk
+03169;US-PINOY-5155;PEANUT-PINOY;107.172.83.104;45000;002;http://ysf-p555.ddns.net
+00094;US-Pottstown-Pa;Pennsylvania;69.249.242.117;42000;000;http://
+63222;US-QCWA;Chapter 147;94.177.189.17;42000;003;http://94.177.189.17/ysf
+63222;US-QCWA;Chapter 147;94.177.189.17;42000;003;http://ysfqcwa.xreflector.es
+61324;US-Radio-Kollel;Torah Kollel;54.83.61.74;42000;000;http://
+35010;US-Reddit;DMR TG 98003;74.214.25.135;42000;007;http://xlx216.km8v.com/
+40874;US-REF020A;REF020A Link;52.23.107.220;42100;002;http://ysf020.kb2ear.net
+33703;US-RKT-CTY-HSV;RKT.CTY.HSV.AL;136.53.51.207;42000;000;http://136.53.51.207
+84105;US-RMM-YSF;RMM YSF;96.244.208.211;55555;000;http://ysf.robmon.com
+92805;US-RocketCity-AL;Huntsville, AL;155.138.207.101;42000;002;http://155.138.207.101
+38469;US-RuralMN-707;Rural MN;24.230.163.50;42000;002;https://707ysf.kd0ioe.com
+84398;US-SADRC;SanAntonioDRC;173.226.176.18;42000;017;http://
+52470;US-SARA-QRX-FCMG;Stillwater MN;69.147.211.168;42000;001;http://
+39642;US-Secret-TG;Secret;75.118.136.88;42002;000;http://
+92722;US-Skyhub-Link;Denver SkyHub;65.114.195.171;42000;010;http://kg0sky.duckdns.org/YSFReflector-Dashboard
+40861;US-SOMN-----FAPG;SO MN;64.254.189.194;42000;003;http://
+12461;US-South-MS-Net;South MS Net;50.246.136.107;42000;000;http://50.246.136.107:42001
+29364;US-South-Texas;South Texas;76.183.98.122;42011;002;http://ae5jo.bounceme.net
+96447;US-SOUTHEASTLINK;Provided by: L;45.32.214.224;42000;009;http://selink.lmarc.net/YSFDash/index.php
+73102;US-Southwest-USA;Southwest USA;24.121.90.225;42000;011;http://24.121.90.225:8888/index.php
+18503;US-SpaceCityChat;SpaceCityChat;108.209.70.215;42000;001;http://kk4lpo.ddnsgeek.com
+95375;US-Steel-City;Pittsburgh, PA;71.60.185.34;42000;000;http://steelcityusa.ddns.net/
+53632;US-TGIF;TGIF 31665;74.91.125.81;42000;003;http://tgif.network/ysf
+81342;US-THINKNET;TEXAS US;104.239.146.135;42000;001;http://thinknet.mostlychris.com
+23964;US-TREKFAN;TrekFan;138.68.11.56;42000;000;http://skylab.trekfan.org
+08106;US-Triangle-Net;Triangle Net;74.91.121.182;42000;001;http://
+15783;US-Truck-Travel;Truck Travel;74.91.121.182;42002;004;http://travel.atruckerslife.com
+00546;US-Tucson-AZ;Oro Valley ARC;69.244.58.8;42004;004;http://
+55817;US-Uni-Link;UniversityLink;128.83.129.92;42000;002;http://repeaters.as.utexas.edu/ysf/
+55326;US-US-JOTA;DMR 907;104.200.25.53;42000;001;http://
+03732;US-US-WNY-XRX;XRX Club;98.3.111.214;42000;001;http://
+99539;US-VaDigital;YSF Reflector;3.19.122.217;42000;004;http://ysf.vadigital.network
+13120;US-W2MMD-Sknkwks;W2MMD Sknkwks;72.82.133.138;42000;004;http://
+39114;US-W6AUSBeeville;YSF Beeville;151.80.166.60;42000;000;http://
+02512;US-WA-PNW;PNW Rag chew;144.202.95.90;42000;000;http://ysf.kc9gwk.com
+07923;US-WA3PNY-GW;Input 1 to Net;3.215.215.169;42003;006;http://xlx545.pennlinkgroup.com/ysfG
+64020;US-WA3PNY-GW2;Input 2 to Net;54.85.206.3;42004;002;http://xlx245.pennlinkgroup.com/ysfG2/
+24157;US-Western-NC;WNC and nearby;199.168.200.18;42000;002;http://
+37733;US-WestSide;Waukesha, WI;54.70.201.171;42000;010;http://www.reflectorusa.com
+97689;US-Wi-Fi-Talk;Wireless Pros;173.162.46.202;42000;001;http://ysf.n4taj.com:8989
+40396;US-WKENTUCKYDXEB;K4KMW RF Link;68.57.59.67;42000;001;http://
+21335;US-WM-CONNECT;Wires-X 21335;199.85.255.10;42000;009;http://ysfdash.wmtg.me
+98899;US-WolfDen;Massachusetts;100.0.63.70;42000;014;http://wolfden.ddnsgeek.com:42080
+31357;US-WU3K;US WU3K;96.255.162.150;42000;000;http://
+19941;US-WV-LINK;WV DIGI LINK;142.93.246.87;42000;002;http://
+73602;US-XLX625;WA8BRO;68.55.76.168;42000;001;http://xlx625.wa8bro.com
+55812;US-YSF-FDCCU;US San Diego;104.207.152.88;42000;004;http://ysf-n0mis.ddns.net
+98060;US-YSF-Miami;YSF Miami;104.148.41.76;42000;002;http://104.148.41.76
+12224;US-YSF-NE;NEW-ENGLAND;18.204.209.243;42000;002;http://
+41373;US-YSF295;OMIK RADIO;64.137.187.75;42000;002;http://ysf295.dyndns.org
+97912;US_SIN_Southern;Indiana_Link;142.93.181.147;42000;019;http://w9windigital.org/ysf
+67356;US_SKYNET;SKYNET;104.130.158.171;42000;003;http://ysfdash.mostlychris.com:9000
+82699;VCDRC;VCDRC TG31070;162.248.93.209;42003;001;http://ysf.snars.net/vcdrc/
+20818;VE2YXY-TEST;VE2YXY-TEST;138.197.143.53;42000;001;http://
+21468;WIRES-X;Room 21468;190.148.222.28;42103;000;http://
+38635;Wires-X-YO-W;WiresX Romania;89.33.44.100;42003;001;http://wiresx.hamnet.ro
+00008;WORLDLINK;World link;209.126.0.55;42000;017;http://worldlink.pa7lim.nl
+27142;W_Tennessee;YSF Reflector;3.15.171.29;42000;001;http://
+18145;XLX000;XLX reflector;45.56.118.86;42000;009;http://xlx000.xlxreflector.org
+71981;XLX004;XLX reflector;44.103.34.3;42001;011;http://xlx004.kb8zgl.net
+65978;XLX010;XLX reflector;85.197.129.86;42000;105;http://xlx.brandmeister.se
+66396;XLX020;XLX reflector;66.175.215.217;42000;019;http://xlx020.k2ie.net
+53148;XLX022;XLX reflector;83.137.45.98;42000;081;http://xlx022.tms-it.net
+41945;XLX023;XLX reflector;77.85.192.94;42000;015;http://xlx023.ddns.net
+86381;XLX026;XLX reflector;209.42.149.140;42000;014;http://xlx026.cnharc.org
+29295;XLX029;XLX reflector;45.62.239.138;42000;000;http://029.r2i.net
+44644;XLX032;XLX reflector;158.64.26.140;42000;015;http://xlx032.epf.lu
+67001;XLX033;XLX reflector;46.226.178.81;42000;009;http://xrf033.dyndns.org
+13908;XLX037;XLX reflector;198.100.154.155;42000;002;http://xlx037.ddns.net
+82176;XLX038;XLX reflector;164.68.100.69;42000;000;http://xlx038.grupporadiofirenze.net/db/dashboard/
+72207;XLX040;XLX reflector;109.71.45.29;42000;016;http://xrf040.dyndns.org
+15976;XLX043;XLX reflector;206.189.239.225;42000;005;http://xlx043.pauldingares.com
+80207;XLX046;XLX reflector;98.128.173.195;42000;000;https://xlx.c4fm.se
+16909;XLX048;XLX reflector;45.62.213.248;42000;000;http://xlx048.ds6.com
+13440;XLX051;XLX reflector;93.186.254.219;42001;037;http://xlx051-ea5spain.duckdns.org
+90443;XLX056;XLX reflector;155.138.237.66;42000;008;http://scmidlands.network
+89670;XLX062;XLX reflector;52.139.47.149;42000;001;http://xlx.baddogmedia.ca
+64547;XLX069;XLX reflector;51.77.213.200;42000;003;http://51.77.213.200/db
+42356;XLX070;COVENTRY ARS;18.130.199.150;42000;001;http://xlx070.g1iul.org.uk
+67018;XLX077;XLX reflector;23.94.25.146;42000;005;http://xe1dvi.crabdance.com/db/index.php
+75749;XLX094;XLX reflector;96.126.124.4;42000;000;http://xlx.txi35hams.com
+59637;XLX098;XLX reflector;221.170.106.177;42001;154;http://xrf098.mydns.jp
+74096;XLX100;XLX reflector;45.62.241.133;42000;000;http://xlx100.xlxreflector.org
+39444;XLX101;XLX reflector;45.62.245.46;42000;000;http://xlx101.xlxreflector.org
+57188;XLX102;XLX reflector;45.79.220.142;42000;027;http://xlx102.xlxreflector.org
+37102;XLX104;XLX reflector;50.116.38.232;42000;007;http://xlx104.xlxreflector.org
+58717;XLX105;XLX reflector;51.254.99.78;42000;003;http://ysf.xrf105.fr
+92626;XLX109;XLX reflector;218.221.179.75;42000;001;http://109.bayfm78.tokyo/
+20012;XLX124;XLX reflector;211.14.169.234;42000;140;http://xrf124.xreflector-jp.org
+35367;XLX126;XLX reflector;217.173.179.95;42000;002;http://xlx126.noip.pl:8080
+39815;XLX129;XLX reflector;220.145.77.199;42000;190;http://guwgw.cir-ins.com/
+88621;XLX131;XLX reflector;80.127.118.226;42000;004;https://xlx131.pe1er.nl
+77462;XLX132;XLX reflector;91.203.55.87;42000;038;http://xlx132.dstar.radom.pl/index.php?show=repeaters
+48375;XLX140;WORLDWIDE;95.211.211.145;42000;000;http://xlx140.nix.pt
+93407;XLX143;XLX reflector;161.35.235.224;42100;001;http://
+59323;XLX174;XLX reflector;81.169.128.244;42000;007;http://xlx.digitalfunk-nordost.de
+07483;XLX175;XLX Reflector;162.248.92.25;38000;000;http://ysf.ke8khn.com
+95272;XLX185;XLX reflector;89.215.13.208;42000;011;http://xlx185.lz2kac.org:8680
+86930;XLX200;XLX reflector;62.171.191.147;42000;001;http://xlxzone.net/index.php
+62200;XLX201;XLX reflector;157.245.45.67;42000;013;https://xlx201.446em.uk
+62862;XLX204;room Z Wires-X;82.171.119.45;42001;023;http://xlx204.ddns.net/
+70248;XLX207;XLX reflector;150.129.138.49;42000;004;http://xlx.br2sy.net
+20236;XLX208;XLX reflector;51.178.80.187;42000;016;https://xlx208.f5kav.fr/index.php
+60106;XLX220;XLX reflector;124.41.83.11;42000;176;http://xlx220.sapotech.com
+79890;XLX227;XLX reflector;89.33.44.100;42000;026;http://xlx227.hamnet.ro
+34300;XLX229;XLX reflector;194.191.4.54;42000;047;http://dstar.hamnet.xyz
+03349;XLX232;XLX reflector;89.185.97.35;42000;132;http://dstar.oevsv.at/db/index.php?show=modules
+66065;XLX240;ZOMBIE-ALERT;107.141.52.226;42000;037;http://
+31725;XLX250;XLX reflector;44.159.15.2;42000;011;https://xlx.ham.in.th
+31855;XLX255;UA XLXd255 REF;142.91.158.199;42000;029;http://xrf255.reflector.up4dar.de/db/index.php
+10347;XLX256;XLX reflector;162.238.214.18;42000;008;http://162.238.214.18
+24862;XLX257;UA XLXd257 REF;134.249.141.148;42000;003;http://xlxd257.uw0wu.ml
+14019;XLX260;XLX reflector;80.211.208.227;42000;008;https://xlx260.hblink.pl
+83294;XLX267;XLX reflector;185.244.130.88;42000;000;http://ysf.sysprotect.eu
+42725;XLX268;XLX reflector;194.38.140.204;42000;058;https://xlx268.from-ct.com
+64702;XLX270;XLX reflector;158.64.26.132;42000;046;https://xlx270.epf.lu/
+44047;XLX290;XLX reflector;44.182.7.20;42000;005;http://xlx.digitalsicilia.it
+81632;XLX295;XLX reflector;64.137.161.161;42000;021;http://xlx295.dyndns.org
+95424;XLX298;XLX reflector;219.107.78.72;42001;015;http://xrf298.mydns.jp
+23565;XLX301;Canberra Link;124.187.44.129;42000;002;http://xlx301.duckdns.org
+67862;XLX302;XLX reflector;144.217.241.23;42000;027;http://xlx302.hopto.org/db/
+30362;XLX305;XLX reflector;178.250.54.203;42000;001;http://xlx.m5adi.com/
+35947;XLX307;XLX reflector;72.21.76.154;42000;035;https://xlx307.openquad.net
+92688;XLX311;XLX reflector;91.204.44.37;42000;000;https://xlx311.db0he.de
+08623;XLX312;TriStateDMR;192.241.160.183;42000;008;http://xlx.dmr-marc.net
+29178;XLX314;XLX reflector;186.19.139.15;42000;000;http://xlx314.ddns.net
+38481;XLX328;XLX reflector;212.237.33.114;42000;022;http://212.237.33.114/index.php
+83603;XLX330;"Megalink 330";44.70.49.128;42000;003;http://xlx.megalink.network
+66149;XLX334;XLX reflector;96.47.95.121;42001;058;http://xlx.alabamalink.info
+26906;XLX339;Hannover-XLink;nc.hannover-x.link;0;005;https://xlx.hannover-x.link
+51599;XLX345;XLX reflector;73.253.128.47;42000;003;http://xlx345.dyndns.org:82
+96507;XLX358;XLX reflector;93.152.167.4;42000;000;http://xlx358.ddns.net/
+22852;XLX359;XLX reflector;94.156.172.213;42000;048;http://xlx359.ddns.net/
+04965;XLX362;XLX reflector;198.166.220.68;42000;002;http://xlx362.gcdtech.ca/index.php
+74839;XLX369;XLX reflector;72.89.122.8;42000;005;http://xlx369.w4eae.net
+40341;XLX375;XLX reflector;12.221.169.50;42000;001;http://
+88395;XLX377;XLX reflector;186.159.96.100;42000;003;http://xlx.toytron.com
+45641;XLX381;TRIANGLE NC;74.91.114.100;42000;006;http://ysf.trianglenc.net
+84823;XLX383;Kingsland GA;74.91.121.41;42000;003;http://74.91.121.41
+00389;XLX389;XLX reflector;49.176.201.188;42000;051;http://xlxdmr.duckdns.org/db/
+48042;XLX395;XLX reflector;95.255.196.50;42444;011;http://xlx395.grupporadiofirenze.net
+66392;XLX398;XLX reflector;139.64.246.155;42000;000;http://xlx398.dyndns.org
+64192;XLX410;XLX-REFLECTOR;166.78.145.146;42000;014;https://xlx.n5amd.com
+29299;XLX420;XLX reflector;149.28.54.17;42000;000;https://xlx.cdarin.net
+58291;XLX421;XLX reflector;118.189.181.236;42000;041;http://9v1lh.spdns.org:8086/
+45165;XLX422;XLX reflector;93.240.48.68;42200;003;http://dl-nordwest.spdns.de:82/
+26451;XLX425;XLX reflector;77.203.220.188;42000;004;http://srv-xlx.ddns.net
+92585;XLX431;XLX reflector;61.195.98.225;42000;240;http://xrf431.xreflector-jp.org/
+62243;XLX434;XLX reflector;51.254.128.134;42001;004;http://51.254.128.134/db
+66583;XLX444;XLX reflector;46.38.241.228;42000;057;http://ysf444.pa3dfn.nl
+68810;XLX449;XLX reflector;75.68.26.134;42000;000;http://hub.ollieted.com/db/
+90015;XLX450;XLX reflector;45.62.241.140;42000;001;http://xlx450.xlxreflector.org
+71743;XLX451;XLX reflector;45.62.239.185;42000;000;http://451.ds6.com
+26845;XLX452;XLX reflector;45.62.210.37;42000;000;http://xlx452.ds6.com
+26845;XLX452;XLX reflector;206.208.56.14;42000;000;http://xlx451.xreflector.org
+97273;XLX453;HKHAM node -1-;61.239.171.240;42000;032;http://xlx453.hkham.org:8087/db
+73993;XLX454;HKHAM node -2-;218.103.102.5;42000;059;http://xlx454.hkham.net/ysf
+43173;XLX455;XLX reflector;208.71.169.83;42000;002;http://
+93342;XLX456;XLX reflector;54.37.205.183;42000;046;https://xlx456.de
+92227;XLX469;XLX reflector;104.207.138.156;42000;001;http://xlx469.kb0isw.com/index.php
+98796;XLX479;XLX reflector;198.58.106.10;42000;007;http://zenas.n9ink.net
+78936;XLX480;XLX reflector;95.179.145.178;42000;000;http://95.179.145.178
+49716;XLX500;XLX reflector;58.96.21.253;42000;006;http://xlx500.org
+51594;XLX502;XLX reflector;190.148.222.28;42102;017;http://190.148.222.28:8503/dashboard/index.php
+07490;XLX503;XLX reflector;179.51.0.153;42000;008;http://179.51.0.153:8503/dashboard
+71247;XLX504;XLX reflector;200.52.151.155;42000;002;http://200.52.151.155:8504/index.php
+85857;XLX505;XLX reflector;45.248.50.37;42000;014;http://vk7hse.duckdns.org/xlx
+88194;XLX507;XLX reflector;201.224.1.251;42000;005;http://xlx507.c4fmpanama.org/
+64446;XLX508;XLX508 OWL;185.188.4.15;42000;052;http://xlx508.hb9gfx.ch
+12230;XLX514;XLX reflector;203.137.118.143;42000;234;http://xrf514.xreflector-jp.org/
+07475;XLX520;XLX reflector;44.159.15.1;42000;071;http://ysf.dtdxa.com
+18807;XLX522;XLX reflector;14.102.146.160;42000;035;https://xlx.lucifernet.com/dashboard/index.php
+59245;XLX530;XLX reflector;124.197.62.162;42025;031;http://xlx530.hopto.org
+40946;XLX531;XLX reflector;149.28.170.145;42000;035;http://xlx531.drgnz.com
+19577;XLX538;XLX reflector;183.76.38.69;42000;139;http://xrf538.mydns.jp
+52074;XLX546;XLX reflector;149.28.202.133;42000;001;http://xlxscanintl.spdns.org
+52074;XLX546;XLX reflector;149.28.202.133;42000;001;http://scani546.mooo.com
+93887;XLX547;XLX reflector;45.77.186.5;42000;005;http://xlx.kapihan.net
+83362;XLX548;XLX reflector;144.202.99.113;42000;000;http://xlx2.kapihan.net
+28340;XLX560;XLX reflector;150.66.42.72;42000;229;http://xrf560.xreflector-jp.org/
+08806;XLX595;XLX reflector;124.26.61.245;42000;014;http://hamradio.dip.jp
+00412;XLX600;XLX reflector;13.69.14.204;42001;045;http://xlx600.dvscotland.net
+91682;XLX621;HRCCLINK XLX;209.182.218.92;42000;006;http://xlxd.hrcc.link
+36240;XLX634;XLX reflector;150.66.9.57;42000;016;http://xrf634.xreflector-jp.org/
+13946;XLX651;XLX reflector;104.143.94.48;42200;004;http://104.143.94.48/XLX/dashboard/index.php
+52732;XLX654;XLX reflector;94.33.52.82;42002;002;http://www.iw2hgl.it:81
+84093;XLX669;XLX reflector;144.202.115.103;42000;003;http://xlx669-maharlika.ddns.net
+76138;XLX679;XLX reflector;45.79.180.62;42000;005;http://xlx.borris.me
+03560;XLX698;XLX reflector;203.137.123.89;42000;231;http://xrf698.xreflector-jp.org/
+86410;XLX710;XLX reflector;209.126.0.55;42001;000;http://xlx710.pa7lim.nl
+51642;XLX711;XLX reflector;192.243.108.150;42000;000;http://xlx711-ni.ddns.net
+51265;XLX714;XLX reflector;213.195.111.148;44000;012;http://xlx714.ea3hkb.cat
+78911;XLX716;XLX reflector;190.232.249.27;42000;005;http://xlx716.ddns.net/
+88921;XLX725;XLX reflector;172.245.9.180;42000;000;http://xrf725.nq4t.com
+84891;XLX741;XLX reflector;203.137.78.41;42000;220;http://xrf741.xreflector-jp.org
+59607;XLX748;XLX reflector;64.137.174.49;42000;000;http://xlx748.dyndns.org
+89323;XLX749;XLX reflector;45.76.252.9;42000;004;http://xlx749.drgnz.com/
+32748;XLX750;XLX reflector;203.86.206.49;42000;103;http://www.xlx750.nz
+41007;XLX751;XLX-REFLECTOR;149.28.71.1;42000;027;https://xlx751.drgnz.com/
+62994;XLX758;XLX reflector;93.240.113.55;42000;001;http://
+73934;XLX760;XLX reflector;172.245.71.164;42000;002;http://
+67173;XLX776;XLX reflector;118.27.26.18;42000;172;http://776.bayfm78.tokyo/
+01906;XLX778;XLX reflector;77.237.7.125;42000;018;https://xlx.hblink.kutno.pl/
+38363;XLX781;XLX reflector;101.143.242.199;42000;240;http://xrf781.xreflector-jp.org/
+45047;XLX799;XLX reflector;37.143.205.157;42000;006;http://xlxsof.ddns.net
+53055;XLX800;XLX reflector;87.252.188.119;42000;015;http://xlx800.ddns.net
+16226;XLX807;XLX reflector;116.91.197.3;42000;109;http://xrf807.owari.biz
+55102;XLX810;XLX reflector;71.41.121.228;42000;003;http://xlx810.xlxreflector.org
+48348;XLX812;XLX reflector;203.145.233.141;42000;138;http://xrf812.xreflector-jp.org/
+70562;XLX837;XLX reflector;204.16.243.183;42000;000;http://xlx837.ai3i.net
+54890;XLX840;XLX reflector;3.22.173.251;42000;001;http://ysf.lyrg.co.uk/
+51106;XLX847;XLX reflector;204.16.243.184;42000;000;http://xlx847.ai3i.net
+23661;XLX857;XLX reflector;204.16.243.185;42000;003;http://xlx857.ai3i.net
+39930;XLX860;Allgaeu;24.134.86.93;42000;002;http://db0ess.de
+08422;XLX888;XLX reflector;212.237.11.233;42000;019;http://xlx888.duckdns.org/db/index.php
+48010;XLX891;XLX reflector;209.251.60.221;42000;007;http://xlx891.cidcomm.com
+44904;XLX899;XLX reflector;45.14.224.180;42000;002;http://xlx899.mywire.org/
+71144;XLX905;XLX reflector;94.199.173.123;42000;052;http://xlx905.oe9.at
+82567;XLX922;XLX reflector;81.150.10.62;42000;016;https://www.cq-uk.co.uk
+52616;XLX934;XLX reflector;79.6.136.177;42000;011;http://xlx934.arifvg.it
+70191;XLX945;XLX reflector;213.202.229.40;42000;051;http://dcs945.xreflector.net
+94341;XLX950;XLX reflector;158.64.26.134;42000;080;http://xlx950.epf.lu
+43446;XLX957;XLX reflector;89.46.67.252;42000;004;http://xlx.dmrbrescia.it/xlxd/
+15401;XLX960;XLX reflector;184.23.183.98;42000;006;http://xlxlist.dyndns.org
+13897;XLX965;XLX reflector;80.211.190.216;42000;012;http://xlx965.hblink.it
+45678;XLX970;XLX reflector;157.65.31.91;42000;204;http://ysf.onogoro.net/
+96771;XLX973;XLX reflector;211.14.169.43;42000;015;http://xrf973.xreflector-jp.org/
+85560;XLX978;XLX reflector;3.96.147.240;42000;004;http://xlx978.dyndns.org
+37815;XLX994;XLX reflector;95.179.231.28;42000;008;https://xlx994.onlineradioclub.org
+30906;XLXARG;XLX reflector;45.62.247.43;42000;009;http://xlxarg.no9s.org
+91940;XLXCFR;XLX reflector;104.167.102.44;42000;009;http://xlxcfr.no9s.org
+50281;XLXGUS;XLX reflector;104.167.112.102;42000;009;http://xlxgus.xlxreflector.org
+17004;YO-Wires-X-E;WiresX Romania;85.122.16.152;42000;000;http://85.122.16.152
+48709;YSF-24566;IT RADIOSCOUT;217.182.156.147;42000;000;http://ysf.radioscout.it/YSFReflector-Dashboard/
+75917;YSF-768;Portugal 768;80.211.15.21;42000;002;http://ysf.voxpopuli.pt
+54357;YSF-HBL-GDA;HBLink Polska;77.55.212.58;42000;000;http://77.55.212.58:8888
+23053;YSF-IQ2AQ-L;YSF-SVXLINK;80.211.32.170;42000;003;http://80.211.32.170/ysf
+06595;YSF-OMEGA;TAMBAYAN C4FM;107.175.49.145;42000;004;http://omegacomm.ddns.net
+64915;YSF-PINOY;SPECTRUM;144.202.115.103;42030;006;http://ysf-pinoyspectrum.ddns.net
+98022;YSF-PUSA;YSF-PUSA;149.248.7.112;42000;000;http://ab6bp.ddns.net
+01183;YSF-TAMBAYAN;TAMBAYAN;47.157.208.97;42050;000;http://ysf-pinoytambayan.ddns.net
+26626;YSF-TI;YSF Tango Indi;165.227.115.205;42000;002;http://xrf.ossdr.com/ysf
+77299;YSF-TSIONG;Tambayan;107.175.215.106;42050;000;http://tsiong.ddns.net
+41577;YSF-YO-W;Fusion Romania;89.33.44.100;42001;004;http://ysf.hamnet.ro
+94614;YSF004;US Michigan Ro;44.103.34.3;42000;001;http://ysf004.kb8zgl.net/YSFReflector
+43223;YSF2WIRESX;WIRESX 43223;104.143.94.48;42424;004;http://
+49868;YSF345;USA CTDGroup;73.253.128.47;42002;001;http://ysf345.dyndns.org:82/YSF/
+86137;ysf4aws;ysf4aws;18.210.76.48;42000;000;http://
+88240;ZOMBIE-ALERT;WiresX #28298;107.141.52.226;42009;016;http://zombiealert.ddns.net
