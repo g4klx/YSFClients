@@ -21,15 +21,38 @@
 
 #include "DGIdNetwork.h"
 #include "YSFDefines.h"
-#include "Conf.h"
+#include "UDPSocket.h"
+#include "RingBuffer.h"
 
-#include <cstdint>
+#include <vector>
 #include <string>
+
+struct IMRSDest {
+	in_addr      m_address;
+	unsigned int m_dgId;
+};
+
+class IMRSDGId {
+public:
+	IMRSDGId() :
+	m_dgId(0U),
+	m_destinations(),
+	m_debug(false),
+	m_buffer(1000U, "IMRS Buffer")
+	{}
+
+	unsigned int               m_dgId;
+	std::vector<IMRSDest*>     m_destinations;
+	bool                       m_debug;
+	CRingBuffer<unsigned char> m_buffer;
+};
 
 class CIMRSNetwork : public CDGIdNetwork {
 public:
-	CIMRSNetwork(const std::vector<IMRSDestination*>& destinations, bool debug);
+	CIMRSNetwork();
 	virtual ~CIMRSNetwork();
+
+	void addDGId(unsigned int dgId, const std::vector<IMRSDest*>& destinations, bool debug);
 
 	virtual bool open();
 
@@ -46,6 +69,11 @@ public:
 	virtual void close();
 
 private:
+	CUDPSocket             m_socket;
+	std::vector<IMRSDGId*> m_dgIds;
+
+	IMRSDGId* find(in_addr address) const;
+	IMRSDGId* find(unsigned int dgId) const;
 };
 
 #endif

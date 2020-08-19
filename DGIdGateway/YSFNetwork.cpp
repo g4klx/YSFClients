@@ -37,7 +37,7 @@ m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
 m_name(name),
-m_linked(false)
+m_linked(true)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -96,6 +96,9 @@ bool CYSFNetwork::open()
 void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
+
+	if (!m_linked)
+		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);

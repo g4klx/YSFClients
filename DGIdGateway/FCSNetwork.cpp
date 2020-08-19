@@ -192,7 +192,6 @@ unsigned int CFCSNetwork::read(unsigned int dgid, unsigned char* data)
 	unsigned char len = 0U;
 	m_buffer.getData(&len, 1U);
 
-	// Pass pings up to the gateway to reset the lost timer.
 	if (len != 130U) {
 		m_buffer.getData(data, len);
 

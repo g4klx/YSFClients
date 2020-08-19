@@ -193,6 +193,13 @@ int CDGIdGateway::run()
 	CYSFReflectors* reflectors = new CYSFReflectors(fileName);
 	reflectors->load();
 
+	CIMRSNetwork* imrs = new CIMRSNetwork;
+	ret = imrs->open();
+	if (!ret) {
+		delete imrs;
+		imrs = NULL;
+	}
+
 	unsigned int currentDGId = 0U;
 
 	CDGIdNetwork* dgIdNetwork[100U];
@@ -234,20 +241,32 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
 		} else if (type == "IMRS") {
-			std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
+			if (imrs != NULL) {
+				std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
+				std::vector<IMRSDest*> dests;
 
-			dgIdNetwork[dgid] = new CIMRSNetwork(destinations, debug);
-			dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
-			dgIdNetwork[dgid]->m_static      = statc;
-			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				for (std::vector<IMRSDestination*>::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
+					IMRSDest* dest = new IMRSDest;
+					dest->m_address = CUDPSocket::lookup((*it)->m_address);
+					dest->m_dgId    = (*it)->m_dgId;
+					dests.push_back(dest);
+				}
+
+				imrs->addDGId(dgid, dests, debug);
+
+				dgIdNetwork[dgid] = imrs;
+				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_static      = true;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			}
 		} else if (type == "Parrot") {
 			in_addr address    = CUDPSocket::lookup((*it)->m_address);
 			unsigned int port  = (*it)->m_port;
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", address, port, m_callsign, debug);;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", address, port, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -259,7 +278,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", address, port, m_callsign, debug);;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", address, port, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -271,7 +290,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", address, port, m_callsign, debug);;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", address, port, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -283,7 +302,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", address, port, m_callsign, debug);;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", address, port, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VOICE_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -291,8 +310,7 @@ int CDGIdGateway::run()
 			}
 		}
 		
-		if (dgIdNetwork[dgid] != NULL) {
-			LogDebug("Loaded DG-ID %u", dgid);
+		if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid] != imrs) {
 			bool ret = dgIdNetwork[dgid]->open();
 			if (!ret) {
 				delete dgIdNetwork[dgid];
@@ -433,13 +451,18 @@ int CDGIdGateway::run()
 	}
 
 	for (unsigned int i = 1U; i < 100U; i++) {
-		if (dgIdNetwork[i] != NULL) {
+		if (dgIdNetwork[i] != NULL && dgIdNetwork[i] != imrs) {
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->close();
 			delete dgIdNetwork[i];
 		}
+	}
+
+	if (imrs != NULL) {
+		imrs->close();
+		delete imrs;
 	}
 
 	::LogFinalise();
