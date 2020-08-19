@@ -13,6 +13,7 @@ x64
 *.user
 *.VC.db
 .vs
+DGIdGateway/DGIdGateway
 YSFGateway/YSFGateway
 YSFParrot/YSFParrot
 YSFReflector/YSFReflector

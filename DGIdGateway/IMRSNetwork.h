@@ -16,23 +16,20 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef	YSFNetwork_H
-#define	YSFNetwork_H
+#ifndef	IMRSNetwork_H
+#define	IMRSNetwork_H
 
 #include "DGIdNetwork.h"
 #include "YSFDefines.h"
-#include "UDPSocket.h"
-#include "RingBuffer.h"
-#include "Timer.h"
+#include "Conf.h"
 
 #include <cstdint>
 #include <string>
 
-class CYSFNetwork : public CDGIdNetwork {
+class CIMRSNetwork : public CDGIdNetwork {
 public:
-	CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug);
-	CYSFNetwork(unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug);
-	virtual ~CYSFNetwork();
+	CIMRSNetwork(const std::vector<IMRSDestination*>& destinations, bool debug);
+	virtual ~CIMRSNetwork();
 
 	virtual bool open();
 
@@ -49,18 +46,6 @@ public:
 	virtual void close();
 
 private:
-	CUDPSocket                 m_socket;
-	bool                       m_debug;
-	in_addr                    m_address;
-	unsigned int               m_port;
-	unsigned char*             m_poll;
-	unsigned char*             m_unlink;
-	CRingBuffer<unsigned char> m_buffer;
-	CTimer                     m_pollTimer;
-	std::string                m_name;
-	bool                       m_linked;
-
-	void writePoll();
 };
 
 #endif

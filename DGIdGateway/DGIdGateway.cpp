@@ -19,6 +19,7 @@
 #include "YSFReflectors.h"
 #include "DGIdGateway.h"
 #include "DGIdNetwork.h"
+#include "IMRSNetwork.h"
 #include "YSFNetwork.h"
 #include "FCSNetwork.h"
 #include "UDPSocket.h"
@@ -171,7 +172,6 @@ int CDGIdGateway::run()
 		::close(STDERR_FILENO);
 	}
 #endif
-
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
@@ -181,9 +181,7 @@ int CDGIdGateway::run()
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();
 
-	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
-	rptNetwork.setDestination("MMDVM", rptAddress, rptPort);
-
+	CYSFNetwork rptNetwork(myAddress, myPort, "MMDVM", rptAddress, rptPort, m_callsign, debug);
 	ret = rptNetwork.open();
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
@@ -192,7 +190,6 @@ int CDGIdGateway::run()
 	}
 
 	std::string fileName = m_conf.getYSFNetHosts();
-
 	CYSFReflectors* reflectors = new CYSFReflectors(fileName);
 	reflectors->load();
 
@@ -230,33 +227,27 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				CYSFNetwork* ysf = new CYSFNetwork(local, m_callsign, debug);
-				ysf->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
-
-				dgIdNetwork[dgid] = ysf;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_address, reflector->m_port, m_callsign, debug);;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
-/*
 		} else if (type == "IMRS") {
-			dgIdNetwork[dgid] = new CIMRSNetwork;
+			std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
+
+			dgIdNetwork[dgid] = new CIMRSNetwork(destinations, debug);
 			dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
-*/
 		} else if (type == "Parrot") {
 			in_addr address    = CUDPSocket::lookup((*it)->m_address);
 			unsigned int port  = (*it)->m_port;
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				CYSFNetwork* ysf = new CYSFNetwork(local, m_callsign, debug);
-				ysf->setDestination("PARROT", address, port);
-
-				dgIdNetwork[dgid] = ysf;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", address, port, m_callsign, debug);;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -268,10 +259,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				CYSFNetwork* ysf = new CYSFNetwork(local, m_callsign, debug);
-				ysf->setDestination("YSF2DMR", address, port);
-
-				dgIdNetwork[dgid] = ysf;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", address, port, m_callsign, debug);;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -283,10 +271,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				CYSFNetwork* ysf = new CYSFNetwork(local, m_callsign, debug);
-				ysf->setDestination("YSF2NXDN", address, port);
-
-				dgIdNetwork[dgid] = ysf;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", address, port, m_callsign, debug);;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -298,10 +283,7 @@ int CDGIdGateway::run()
 			unsigned int local = (*it)->m_local;
 
 			if (address.s_addr != INADDR_NONE) {
-				CYSFNetwork* ysf = new CYSFNetwork(local, m_callsign, debug);
-				ysf->setDestination("YSF2P25", address, port);
-
-				dgIdNetwork[dgid] = ysf;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", address, port, m_callsign, debug);;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VOICE_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -370,11 +352,11 @@ int CDGIdGateway::run()
 
 					if (currentDGId != 0U && dgIdNetwork[currentDGId] != NULL) {
 						// Only allow the wanted modes through
-						if ((dgIdNetwork[currentDGId]->m_modes & dt) != 0U) {
+						if ((dgIdNetwork[currentDGId]->m_modes & dt) != 0U)
 							dgIdNetwork[currentDGId]->write(currentDGId, buffer);
-							inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
-							inactivityTimer.start();
-						}
+
+						inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
+						inactivityTimer.start();
 					}
 				}
 
@@ -397,6 +379,7 @@ int CDGIdGateway::run()
 							fich.encode(buffer + 35U);
 
 							rptNetwork.write(0U, buffer);
+
 							inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
 							inactivityTimer.start();
 
@@ -414,10 +397,12 @@ int CDGIdGateway::run()
 		stopWatch.start();
 
 		rptNetwork.clock(ms);
-		for (unsigned int i = 0U; i < 100U; i++) {
+
+		for (unsigned int i = 1U; i < 100U; i++) {
 			if (dgIdNetwork[i] != NULL)
 				dgIdNetwork[i]->clock(ms);
 		}
+
 		if (m_writer != NULL)
 			m_writer->clock(ms);
 
@@ -428,7 +413,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
 			}
-						}
+
 			LogDebug("DG-ID set to 0 via timeout");
 
 			currentDGId = 0U;

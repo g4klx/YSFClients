@@ -53,6 +53,8 @@ m_state(FCS_UNLINKED)
 	::memcpy(m_ping + 4U, callsign.c_str(), callsign.size());
 	::memset(m_ping + 10U, 0x00U, 15U);
 	::memcpy(m_ping + 10U, reflector.c_str(), 8U);
+
+	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 }
 
 CFCSNetwork::~CFCSNetwork()
@@ -79,7 +81,7 @@ bool CFCSNetwork::open()
 	return m_socket.open();
 }
 
-void CFCSNetwork::write(const unsigned char* data)
+void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -99,29 +101,26 @@ void CFCSNetwork::write(const unsigned char* data)
 
 void CFCSNetwork::link()
 {
-	if (m_state != FCS_LINKED) {
-		std::string name = m_reflector.substr(0U, 6U);
-		if (m_addresses.count(name) == 0U) {
-			LogError("Unknown FCS reflector - %s", name.c_str());
-			return;
-		}
+	if (m_state == FCS_LINKING || m_state == FCS_LINKED)
+		return;
 
-		m_address = m_addresses[name];
-		if (m_address.s_addr == INADDR_NONE) {
-			LogError("FCS reflector %s has no address", name.c_str());
-			return;
-		}
+	std::string name = m_reflector.substr(0U, 6U);
+	if (m_addresses.count(name) == 0U) {
+		LogError("Unknown FCS reflector - %s", name.c_str());
+		return;
 	}
 
-	m_print = m_reflector.substr(0U, 6U) + "-" + m_reflector.substr(6U);
+	m_address = m_addresses[name];
+	if (m_address.s_addr == INADDR_NONE) {
+		LogError("FCS reflector %s has no address", name.c_str());
+		return;
+	}
 
 	m_state = FCS_LINKING;
 
 	m_pingTimer.start();
 
 	writePing();
-
-	return true;
 }
 
 void CFCSNetwork::unlink()
@@ -183,7 +182,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	}
 }
 
-unsigned int CFCSNetwork::read(unsigned char* data)
+unsigned int CFCSNetwork::read(unsigned int dgid, unsigned char* data)
 {
 	assert(data != NULL);
 

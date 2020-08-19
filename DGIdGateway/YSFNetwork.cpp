@@ -27,16 +27,16 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CYSFNetwork::CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
-m_socket(address, port),
+CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug) :
+m_socket(localAddress, localPort),
 m_debug(debug),
-m_address(),
-m_port(0U),
+m_address(address),
+m_port(port),
 m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
-m_name(),
+m_name(name),
 m_linked(false)
 {
 	m_poll = new unsigned char[14U];
@@ -49,20 +49,22 @@ m_linked(false)
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U] = node.at(i);
+		m_poll[i + 4U]   = node.at(i);
 		m_unlink[i + 4U] = node.at(i);
 	}
 }
 
-CYSFNetwork::CYSFNetwork(unsigned int port, const std::string& callsign, bool debug) :
-m_socket(port),
+CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug) :
+m_socket(localPort),
 m_debug(debug),
-m_address(),
-m_port(0U),
+m_address(address),
+m_port(port),
 m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
-m_pollTimer(1000U, 5U)
+m_pollTimer(1000U, 5U),
+m_name(name),
+m_linked(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -91,29 +93,9 @@ bool CYSFNetwork::open()
 	return m_socket.open();
 }
 
-void CYSFNetwork::setDestination(const std::string& name, const in_addr& address, unsigned int port)
-{
-	m_name    = name;
-	m_address = address;
-	m_port    = port;
-	m_linked  = false;
-}
-
-void CYSFNetwork::clearDestination()
-{
-	m_address.s_addr = INADDR_NONE;
-	m_port           = 0U;
-	m_linked         = false;
-
-	m_pollTimer.stop();
-}
-
-void CYSFNetwork::write(const unsigned char* data)
+void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
-
-	if (m_port == 0U)
-		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
@@ -121,26 +103,23 @@ void CYSFNetwork::write(const unsigned char* data)
 	m_socket.write(data, 155U, m_address, m_port);
 }
 
-void CYSFNetwork::writePoll(unsigned int count)
+void CYSFNetwork::link()
 {
-	if (m_port == 0U)
-		return;
-
-	m_pollTimer.start();
-
-	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_poll, 14U, m_address, m_port);
+	writePoll();
 }
 
-void CYSFNetwork::writeUnlink(unsigned int count)
+void CYSFNetwork::writePoll()
+{
+	m_pollTimer.start();
+
+	m_socket.write(m_poll, 14U, m_address, m_port);
+}
+
+void CYSFNetwork::unlink()
 {
 	m_pollTimer.stop();
 
-	if (m_port == 0U)
-		return;
-
-	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_unlink, 14U, m_address, m_port);
+	m_socket.write(m_unlink, 14U, m_address, m_port);
 
 	m_linked = false;
 }
@@ -183,7 +162,7 @@ void CYSFNetwork::clock(unsigned int ms)
 	m_buffer.addData(buffer, length);
 }
 
-unsigned int CYSFNetwork::read(unsigned char* data)
+unsigned int CYSFNetwork::read(unsigned int dgid, unsigned char* data)
 {
 	assert(data != NULL);
 
