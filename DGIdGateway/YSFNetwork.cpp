@@ -93,7 +93,7 @@ bool CYSFNetwork::open()
 	return m_socket.open();
 }
 
-void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
+void CYSFNetwork::write(unsigned int dgid, unsigned char dt, const unsigned char* data)
 {
 	assert(data != NULL);
 

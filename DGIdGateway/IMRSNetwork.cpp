@@ -55,7 +55,7 @@ bool CIMRSNetwork::open()
 	return m_socket.open();
 }
 
-void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
+void CIMRSNetwork::write(unsigned int dgId, unsigned char dt, const unsigned char* data)
 {
 	assert(data != NULL);
 

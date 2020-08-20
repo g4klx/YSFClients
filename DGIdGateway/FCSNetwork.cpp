@@ -81,7 +81,7 @@ bool CFCSNetwork::open()
 	return m_socket.open();
 }
 
-void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
+void CFCSNetwork::write(unsigned int dgid, unsigned char dt, const unsigned char* data)
 {
 	assert(data != NULL);
 
