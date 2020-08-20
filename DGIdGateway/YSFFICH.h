@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2016,2017,2019 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016,2017,2019,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ public:
 	bool decode(const unsigned char* bytes);
 
 	void encode(unsigned char* bytes);
+
+	void setRaw(const unsigned char* bytes);
+	
+	void getRaw(unsigned char* bytes) const;
 
 	unsigned char getFI() const;
 	unsigned char getCM() const;

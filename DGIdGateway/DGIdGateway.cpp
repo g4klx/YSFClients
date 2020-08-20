@@ -375,7 +375,7 @@ int CDGIdGateway::run()
 							fich.setDGId(0U);
 							fich.encode(buffer + 35U);
 
-							dgIdNetwork[currentDGId]->write(currentDGId, dt, buffer);
+							dgIdNetwork[currentDGId]->write(currentDGId, buffer);
 						}
 
 						inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
@@ -401,7 +401,7 @@ int CDGIdGateway::run()
 							fich.setDGId(i);
 							fich.encode(buffer + 35U);
 
-							rptNetwork.write(0U, 0U, buffer);
+							rptNetwork.write(0U, buffer);
 
 							inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
 							inactivityTimer.start();

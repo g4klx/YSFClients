@@ -58,7 +58,7 @@ public:
 
 	virtual void link();
 
-	virtual void write(unsigned int dgId, unsigned char dt, const unsigned char* data);
+	virtual void write(unsigned int dgId, const unsigned char* data);
 
 	virtual unsigned int read(unsigned int dgId, unsigned char* data);
 

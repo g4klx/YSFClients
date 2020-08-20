@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2016,2017,2019 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016,2017,2019,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -167,6 +167,18 @@ void CYSFFICH::encode(unsigned char* bytes)
 		n++;
 		WRITE_BIT1(bytes, n, s1);
 	}
+}
+
+void CYSFFICH::setRaw(const unsigned char* bytes)
+{
+	::memcpy(m_fich, bytes, 6U);
+}
+
+void CYSFFICH::getRaw(unsigned char* bytes) const
+{
+	::memcpy(bytes, m_fich, 6U);
+
+	CCRC::addCCITT16(bytes, 6U);
 }
 
 unsigned char CYSFFICH::getFI() const

@@ -18,6 +18,7 @@
 
 #include "IMRSNetwork.h"
 #include "YSFDefines.h"
+#include "YSFFICH.h"
 #include "Utils.h"
 #include "Log.h"
 
@@ -55,7 +56,7 @@ bool CIMRSNetwork::open()
 	return m_socket.open();
 }
 
-void CIMRSNetwork::write(unsigned int dgId, unsigned char dt, const unsigned char* data)
+void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -63,13 +64,51 @@ void CIMRSNetwork::write(unsigned int dgId, unsigned char dt, const unsigned cha
 	if (ptr == NULL)
 		return;
 
+	CYSFFICH fich;
+	fich.decode(data + 35U);
+
 	unsigned char buffer[200U];
 
-	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
-		if (ptr->m_debug)
-			CUtils::dump(1U, "IMRS Network Data Sent", buffer, 130U);
+	switch (fich.getDT()) {	// XXX
+	case YSF_DT_VD_MODE1:
+		buffer[0U] = '0';
+		buffer[1U] = '0';
+		buffer[2U] = '0';
+		break;
+	case YSF_DT_DATA_FR_MODE:
+		buffer[0U] = '1';
+		buffer[1U] = '1';
+		buffer[2U] = '1';
+		break;
+	case YSF_DT_VD_MODE2:
+		buffer[0U] = '2';
+		buffer[1U] = '2';
+		buffer[2U] = '2';
+		break;
+	case YSF_DT_VOICE_FR_MODE:
+		buffer[0U] = '3';
+		buffer[1U] = '3';
+		buffer[2U] = '3';
+		break;
+	default:
+		return;
+	}
 
-		m_socket.write(buffer, 130U, (*it)->m_address, IMRS_PORT);
+	// Copy the raw DCH
+
+	// Copy the audio
+	::memcpy(buffer + 35U, data + 45U, 130U);	// XXX
+
+	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
+		// Set the correct DG-ID for this destination
+		fich.setDGId((*it)->m_dgId);
+		// Copy the raw FICH
+		fich.getRaw(buffer + 7U);
+
+		if (ptr->m_debug)
+			CUtils::dump(1U, "IMRS Network Data Sent", buffer, 165U);
+
+		m_socket.write(buffer, 165U, (*it)->m_address, IMRS_PORT);
 	}
 }
 
