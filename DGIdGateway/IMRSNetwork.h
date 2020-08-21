@@ -36,12 +36,14 @@ class IMRSDGId {
 public:
 	IMRSDGId() :
 	m_dgId(0U),
+	m_name(),
 	m_destinations(),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")
 	{}
 
 	unsigned int               m_dgId;
+	std::string                m_name;
 	std::vector<IMRSDest*>     m_destinations;
 	bool                       m_debug;
 	CRingBuffer<unsigned char> m_buffer;
@@ -52,9 +54,9 @@ public:
 	CIMRSNetwork();
 	virtual ~CIMRSNetwork();
 
-	void addDGId(unsigned int dgId, const std::vector<IMRSDest*>& destinations, bool debug);
+	void addDGId(unsigned int dgId, const std::string& name, const std::vector<IMRSDest*>& destinations, bool debug);
 
-	virtual std::string getDesc();
+	virtual std::string getDesc(unsigned int dgId);
 
 	virtual bool open();
 

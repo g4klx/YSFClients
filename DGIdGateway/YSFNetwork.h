@@ -34,7 +34,7 @@ public:
 	CYSFNetwork(unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug);
 	virtual ~CYSFNetwork();
 
-	virtual std::string getDesc();
+	virtual std::string getDesc(unsigned int dgId);
 
 	virtual bool open();
 

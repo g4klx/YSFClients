@@ -39,19 +39,24 @@ CIMRSNetwork::~CIMRSNetwork()
 {
 }
 
-void CIMRSNetwork::addDGId(unsigned int dgId, const std::vector<IMRSDest*>& destinations, bool debug)
+void CIMRSNetwork::addDGId(unsigned int dgId, const std::string& name, const std::vector<IMRSDest*>& destinations, bool debug)
 {
 	IMRSDGId* f = new IMRSDGId;
 	f->m_dgId         = dgId;
+	f->m_name         = name;
 	f->m_destinations = destinations;
 	f->m_debug        = debug;
 
 	m_dgIds.push_back(f);
 }
 
-std::string CIMRSNetwork::getDesc()
+std::string CIMRSNetwork::getDesc(unsigned int dgId)
 {
-	return "IMRS";
+	IMRSDGId* ptr = find(dgId);
+	if (ptr == NULL)
+		return "IMRS: Unknown";
+
+	return "IMRS: " + ptr->m_name;
 }
 
 bool CIMRSNetwork::open()

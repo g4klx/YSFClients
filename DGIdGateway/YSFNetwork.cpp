@@ -86,7 +86,7 @@ CYSFNetwork::~CYSFNetwork()
 	delete[] m_poll;
 }
 
-std::string CYSFNetwork::getDesc()
+std::string CYSFNetwork::getDesc(unsigned int dgId)
 {
 	return "YSF: " + m_name;
 }

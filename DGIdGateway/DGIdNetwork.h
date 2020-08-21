@@ -25,7 +25,7 @@ class CDGIdNetwork {
 public:
 	virtual ~CDGIdNetwork() = 0;
 
-	virtual std::string getDesc() = 0;
+	virtual std::string getDesc(unsigned int dgId) = 0;
 
 	virtual bool open() = 0;
 

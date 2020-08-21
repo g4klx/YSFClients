@@ -63,7 +63,7 @@ CFCSNetwork::~CFCSNetwork()
 	delete[] m_ping;
 }
 
-std::string CFCSNetwork::getDesc()
+std::string CFCSNetwork::getDesc(unsigned int dgId)
 {
 	return "FCS: " + m_reflector;
 }

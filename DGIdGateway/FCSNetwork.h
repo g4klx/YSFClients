@@ -40,7 +40,7 @@ public:
 	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
 	virtual ~CFCSNetwork();
 
-	virtual std::string getDesc();
+	virtual std::string getDesc(unsigned int dgId);
 
 	virtual bool open();
 

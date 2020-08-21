@@ -244,6 +244,7 @@ int CDGIdGateway::run()
 			if (imrs != NULL) {
 				std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
 				std::vector<IMRSDest*> dests;
+				std::string name = (*it)->m_name;
 
 				for (std::vector<IMRSDestination*>::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
 					IMRSDest* dest = new IMRSDest;
@@ -252,7 +253,7 @@ int CDGIdGateway::run()
 					dests.push_back(dest);
 				}
 
-				imrs->addDGId(dgid, dests, debug);
+				imrs->addDGId(dgid, name, dests, debug);
 
 				dgIdNetwork[dgid] = imrs;
 				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
@@ -361,7 +362,7 @@ int CDGIdGateway::run()
 							dgIdNetwork[dgId]->link();
 						}
 
-						std::string desc = dgIdNetwork[dgId]->getDesc();
+						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogDebug("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
 					}
@@ -408,7 +409,7 @@ int CDGIdGateway::run()
 							inactivityTimer.start();
 
 							if (currentDGId == 0U) {
-								std::string desc = dgIdNetwork[i]->getDesc();
+								std::string desc = dgIdNetwork[i]->getDesc(i);
 								LogDebug("DG-ID set to %u (%s) via Network", i, desc.c_str());
 								currentDGId = i;
 							}
