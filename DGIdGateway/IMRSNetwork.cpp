@@ -65,6 +65,8 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 {
 	assert(data != NULL);
 
+	return;	// XXX Disable IMRS transmit
+
 	IMRSDGId* ptr = find(dgId);
 	if (ptr == NULL)
 		return;
@@ -148,6 +150,10 @@ void CIMRSNetwork::clock(unsigned int ms)
 	int length = m_socket.read(buffer, 500U, address, port);
 	if (length <= 0)
 		return;
+
+	LogDebug("IMRS Network Data Reecived from port %u", port);
+	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
+	return;
 
 	if (port != IMRS_PORT)
 		return;

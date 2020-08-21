@@ -240,7 +240,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
-/*		} else if (type == "IMRS") {
+		} else if (type == "IMRS") {
 			if (imrs != NULL) {
 				std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
 				std::vector<IMRSDest*> dests;
@@ -260,7 +260,6 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
-*/
 		} else if (type == "Parrot") {
 			in_addr address    = CUDPSocket::lookup((*it)->m_address);
 			unsigned int port  = (*it)->m_port;
