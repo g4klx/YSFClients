@@ -54,6 +54,8 @@ public:
 
 	void addDGId(unsigned int dgId, const std::vector<IMRSDest*>& destinations, bool debug);
 
+	virtual std::string getDesc();
+
 	virtual bool open();
 
 	virtual void link();

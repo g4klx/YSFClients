@@ -86,6 +86,11 @@ CYSFNetwork::~CYSFNetwork()
 	delete[] m_poll;
 }
 
+std::string CYSFNetwork::getDesc()
+{
+	return "YSF: " + m_name;
+}
+
 bool CYSFNetwork::open()
 {
 	LogMessage("Opening YSF network connection");

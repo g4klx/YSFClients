@@ -19,10 +19,13 @@
 #ifndef	DGIdNetwork_H
 #define	DGIdNetwork_H
 
+#include <string>
 
 class CDGIdNetwork {
 public:
 	virtual ~CDGIdNetwork() = 0;
+
+	virtual std::string getDesc() = 0;
 
 	virtual bool open() = 0;
 

@@ -63,6 +63,11 @@ CFCSNetwork::~CFCSNetwork()
 	delete[] m_ping;
 }
 
+std::string CFCSNetwork::getDesc()
+{
+	return "FCS: " + m_reflector;
+}
+
 bool CFCSNetwork::open()
 {
 	LogMessage("Resolving FCS00x addresses");

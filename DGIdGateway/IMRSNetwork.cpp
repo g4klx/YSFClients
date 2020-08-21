@@ -49,6 +49,11 @@ void CIMRSNetwork::addDGId(unsigned int dgId, const std::vector<IMRSDest*>& dest
 	m_dgIds.push_back(f);
 }
 
+std::string CIMRSNetwork::getDesc()
+{
+	return "IMRS";
+}
+
 bool CIMRSNetwork::open()
 {
 	LogMessage("Opening IMRS network connection");
@@ -69,35 +74,49 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 
 	unsigned char buffer[200U];
 
-	switch (fich.getDT()) {	// XXX
+	// Create the header
+	switch (fich.getDT()) {
 	case YSF_DT_VD_MODE1:
 		buffer[0U] = '0';
 		buffer[1U] = '0';
 		buffer[2U] = '0';
+		// Copy the audio
+		::memcpy(buffer + 35U + 0U,  data + 35U + 9U,  9U);
+		::memcpy(buffer + 35U + 9U,  data + 35U + 27U, 9U);
+		::memcpy(buffer + 35U + 18U, data + 35U + 45U, 9U);
+		::memcpy(buffer + 35U + 27U, data + 35U + 63U, 9U);
+		::memcpy(buffer + 35U + 36U, data + 35U + 81U, 9U);
 		break;
 	case YSF_DT_DATA_FR_MODE:
 		buffer[0U] = '1';
 		buffer[1U] = '1';
 		buffer[2U] = '1';
+		// Copy the audio
+		::memcpy(buffer + 35U, data + 45U, 130U);
 		break;
 	case YSF_DT_VD_MODE2:
 		buffer[0U] = '2';
 		buffer[1U] = '2';
 		buffer[2U] = '2';
+		// Copy the audio
+		::memcpy(buffer + 35U, data + 45U, 130U);
 		break;
 	case YSF_DT_VOICE_FR_MODE:
 		buffer[0U] = '3';
 		buffer[1U] = '3';
 		buffer[2U] = '3';
+		// Copy the audio
+		::memcpy(buffer + 35U + 0U,  data + 35U + 9U,  18U);
+		::memcpy(buffer + 35U + 18U, data + 35U + 27U, 18U);
+		::memcpy(buffer + 35U + 36U, data + 35U + 45U, 18U);
+		::memcpy(buffer + 35U + 54U, data + 35U + 63U, 18U);
+		::memcpy(buffer + 35U + 72U, data + 35U + 81U, 18U);
 		break;
 	default:
 		return;
 	}
 
 	// Copy the raw DCH
-
-	// Copy the audio
-	::memcpy(buffer + 35U, data + 45U, 130U);	// XXX
 
 	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
 		// Set the correct DG-ID for this destination

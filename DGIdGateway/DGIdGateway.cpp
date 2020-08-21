@@ -240,7 +240,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
-		} else if (type == "IMRS") {
+/*		} else if (type == "IMRS") {
 			if (imrs != NULL) {
 				std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
 				std::vector<IMRSDest*> dests;
@@ -260,6 +260,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 			}
+*/
 		} else if (type == "Parrot") {
 			in_addr address    = CUDPSocket::lookup((*it)->m_address);
 			unsigned int port  = (*it)->m_port;
@@ -361,7 +362,8 @@ int CDGIdGateway::run()
 							dgIdNetwork[dgId]->link();
 						}
 
-						LogDebug("DG-ID set to %u via RF", dgId);
+						std::string desc = dgIdNetwork[dgId]->getDesc();
+						LogDebug("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
 					}
 
@@ -407,7 +409,8 @@ int CDGIdGateway::run()
 							inactivityTimer.start();
 
 							if (currentDGId == 0U) {
-								LogDebug("DG-ID set to %u via Network", i);
+								std::string desc = dgIdNetwork[i]->getDesc();
+								LogDebug("DG-ID set to %u (%s) via Network", i, desc.c_str());
 								currentDGId = i;
 							}
 						}
@@ -437,7 +440,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[currentDGId]->unlink();
 			}
 
-			LogDebug("DG-ID set to 0 via timeout");
+			LogDebug("DG-ID set to 0 (None) via timeout");
 
 			currentDGId = 0U;
 			inactivityTimer.stop();
