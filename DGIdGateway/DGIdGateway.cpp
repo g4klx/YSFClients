@@ -53,6 +53,11 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 #include <clocale>
 #include <cmath>
 
+const unsigned char DT_VD_MODE1      = 0x01U;
+const unsigned char DT_VD_MODE2      = 0x02U;
+const unsigned char DT_VOICE_FR_MODE = 0x04U;
+const unsigned char DT_DATA_FR_MODE  = 0x08U;
+
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
@@ -224,7 +229,7 @@ int CDGIdGateway::run()
 			unsigned int id          = m_conf.getId();
 
 			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, debug);
-			dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
+			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -235,7 +240,7 @@ int CDGIdGateway::run()
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_address, reflector->m_port, m_callsign, debug);;
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -256,7 +261,7 @@ int CDGIdGateway::run()
 				imrs->addDGId(dgid, name, dests, debug);
 
 				dgIdNetwork[dgid] = imrs;
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = true;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -268,7 +273,7 @@ int CDGIdGateway::run()
 
 			if (address.s_addr != INADDR_NONE) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", address, port, m_callsign, debug);
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2 | YSF_DT_VOICE_FR_MODE | YSF_DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -280,7 +285,7 @@ int CDGIdGateway::run()
 
 			if (address.s_addr != INADDR_NONE) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", address, port, m_callsign, debug);
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -292,7 +297,7 @@ int CDGIdGateway::run()
 
 			if (address.s_addr != INADDR_NONE) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", address, port, m_callsign, debug);
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VD_MODE1 | YSF_DT_VD_MODE2;
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -304,7 +309,7 @@ int CDGIdGateway::run()
 
 			if (address.s_addr != INADDR_NONE) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", address, port, m_callsign, debug);
-				dgIdNetwork[dgid]->m_modes       = YSF_DT_VOICE_FR_MODE;
+				dgIdNetwork[dgid]->m_modes       = DT_VOICE_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
@@ -372,7 +377,10 @@ int CDGIdGateway::run()
 
 					if (currentDGId != 0U && dgIdNetwork[currentDGId] != NULL) {
 						// Only allow the wanted modes through
-						if ((dgIdNetwork[currentDGId]->m_modes & dt) != 0U) {
+						if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
+						    (dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
+						    (dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
+						    (dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
 							// Set the DG-ID to zero for compatibility
 							fich.setDGId(0U);
 							fich.encode(buffer + 35U);
