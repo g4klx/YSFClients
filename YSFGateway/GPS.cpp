@@ -241,6 +241,9 @@ void CGPS::transmitGPS(const unsigned char* source)
 	char radio[10U];
 
 	switch (m_buffer[4U]) {
+	case 0x20U:
+		::strcpy(radio, "DR-2X");
+		break;
 	case 0x24U:
 		::strcpy(radio, "FT-1D");
 		break;
