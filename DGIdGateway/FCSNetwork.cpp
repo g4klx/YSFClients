@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ const char* FCS_VERSION = "MMDVM";
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CFCSNetwork::CFCSNetwork(unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
+CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_address(),
 m_ping(NULL),
 m_info(NULL),
-m_reflector(),
+m_reflector(reflector),
 m_print(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
@@ -52,12 +52,20 @@ m_state(FCS_UNLINKED)
 	::memset(m_ping + 4U, ' ', 6U);
 	::memcpy(m_ping + 4U, callsign.c_str(), callsign.size());
 	::memset(m_ping + 10U, 0x00U, 15U);
+	::memcpy(m_ping + 10U, reflector.c_str(), 8U);
+
+	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 }
 
 CFCSNetwork::~CFCSNetwork()
 {
 	delete[] m_info;
 	delete[] m_ping;
+}
+
+std::string CFCSNetwork::getDesc(unsigned int dgId)
+{
+	return "FCS: " + m_reflector;
 }
 
 bool CFCSNetwork::open()
@@ -74,22 +82,13 @@ bool CFCSNetwork::open()
 	m_addresses["FCS232"] = CUDPSocket::lookup("fcs232.xreflector.net");
 	m_addresses["FCS260"] = CUDPSocket::lookup("fcs260.xreflector.net");
 	m_addresses["FCS262"] = CUDPSocket::lookup("fcs262.xreflector.net");
-	
 
 	LogMessage("Opening FCS network connection");
 
 	return m_socket.open();
 }
 
-void CFCSNetwork::clearDestination()
-{
-	m_pingTimer.stop();
-	m_resetTimer.stop();
-
-	m_state = FCS_UNLINKED;
-}
-
-void CFCSNetwork::write(const unsigned char* data)
+void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -107,43 +106,36 @@ void CFCSNetwork::write(const unsigned char* data)
 	m_socket.write(buffer, 130U, m_address, FCS_PORT);
 }
 
-bool CFCSNetwork::writeLink(const std::string& reflector)
+void CFCSNetwork::link()
 {
-	if (m_state != FCS_LINKED) {
-		std::string name = reflector.substr(0U, 6U);
-		if (m_addresses.count(name) == 0U) {
-			LogError("Unknown FCS reflector - %s", name.c_str());
-			return false;
-		}
+	if (m_state == FCS_LINKING || m_state == FCS_LINKED)
+		return;
 
-		m_address = m_addresses[name];
-		if (m_address.s_addr == INADDR_NONE) {
-			LogError("FCS reflector %s has no address", name.c_str());
-			return false;
-		}
+	std::string name = m_reflector.substr(0U, 6U);
+	if (m_addresses.count(name) == 0U) {
+		LogError("Unknown FCS reflector - %s", name.c_str());
+		return;
 	}
 
-	m_reflector = reflector;
-	::memcpy(m_ping + 10U, reflector.c_str(), 8U);
-
-	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
+	m_address = m_addresses[name];
+	if (m_address.s_addr == INADDR_NONE) {
+		LogError("FCS reflector %s has no address", name.c_str());
+		return;
+	}
 
 	m_state = FCS_LINKING;
 
 	m_pingTimer.start();
 
 	writePing();
-
-	return true;
 }
 
-void CFCSNetwork::writeUnlink(unsigned int count)
+void CFCSNetwork::unlink()
 {
 	if (m_state != FCS_LINKED)
 		return;
 
-	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, FCS_PORT);
+	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, FCS_PORT);
 }
 
 void CFCSNetwork::clock(unsigned int ms)
@@ -197,7 +189,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	}
 }
 
-unsigned int CFCSNetwork::read(unsigned char* data)
+unsigned int CFCSNetwork::read(unsigned int dgid, unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -207,7 +199,6 @@ unsigned int CFCSNetwork::read(unsigned char* data)
 	unsigned char len = 0U;
 	m_buffer.getData(&len, 1U);
 
-	// Pass pings up to the gateway to reset the lost timer.
 	if (len != 130U) {
 		m_buffer.getData(data, len);
 
