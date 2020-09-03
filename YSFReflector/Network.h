@@ -31,25 +31,26 @@ public:
 	CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug);
 	~CNetwork();
 
-	bool open(const std::string& bindaddr);
+	bool open();
 
-	bool writeData(const unsigned char* data, const in_addr& address, unsigned int port);
-	bool writePoll(const in_addr& address, unsigned int port);
+	bool writeData(const unsigned char* data, const sockaddr_storage& addr, unsigned int addrLen);
+	bool writePoll(const sockaddr_storage& addr, unsigned int addrLen);
 
-	unsigned int readData(unsigned char* data, unsigned int length, in_addr& address, unsigned int& port);
+	unsigned int readData(unsigned char* data, unsigned int length, sockaddr_storage& addr, unsigned int& addrLen);
 
 	void close();
 
 	void setCount(unsigned int count);
 
 private:
-	CUDPSocket   m_socket;
-    unsigned int m_id;
-	std::string  m_name;
-	std::string  m_description;
-	std::string  m_callsign;
-	bool         m_debug;
+	CUDPSocket     m_socket;
+	unsigned int   m_id;
+	std::string    m_name;
+	std::string    m_description;
+	std::string    m_callsign;
+	bool           m_debug;
 	unsigned char* m_status;
 };
 
 #endif
+

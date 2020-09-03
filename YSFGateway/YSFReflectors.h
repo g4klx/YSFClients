@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2019 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -37,21 +37,21 @@ public:
 	m_name(),
 	m_desc(),
 	m_count("000"),
-	m_address(),
-	m_port(0U),
+	m_addr(),
+	m_addrLen(0U),
 	m_type(YT_YSF),
 	m_wiresX(false)
 	{
 	}
 
-	std::string  m_id;
-	std::string  m_name;
-	std::string  m_desc;
-	std::string  m_count;
-	in_addr      m_address;
-	unsigned int m_port;
-	YSF_TYPE     m_type;
-	bool         m_wiresX;
+	std::string      m_id;
+	std::string      m_name;
+	std::string      m_desc;
+	std::string      m_count;
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
+	YSF_TYPE         m_type;
+	bool             m_wiresX;
 };
 
 class CYSFReflectors {

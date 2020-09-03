@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -40,11 +40,11 @@ public:
 	void close();
 
 private:
-	CUDPSocket   m_socket;
-	in_addr      m_address;
-	unsigned int m_port;
+	CUDPSocket       m_socket;
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
 
-	bool writePoll(const in_addr& address, unsigned int port);
+	bool writePoll(const sockaddr_storage& addr, unsigned int addrLen);
 };
 
 #endif

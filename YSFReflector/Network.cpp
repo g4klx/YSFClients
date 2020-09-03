@@ -19,6 +19,7 @@
 #include "YSFDefines.h"
 #include "Network.h"
 #include "Utils.h"
+#include "Log.h"
 
 #include <cstdio>
 #include <cassert>
@@ -44,27 +45,24 @@ CNetwork::~CNetwork()
 	delete[] m_status;
 }
 
-bool CNetwork::open(const std::string& bindaddr)
+bool CNetwork::open()
 {
-	if (bindaddr.length() > 0)
-		::fprintf(stdout, "Opening YSF network connection on address %s\n", bindaddr.c_str());
-	else 
-		::fprintf(stdout, "Opening YSF network connection on all interfaces\n");
+	LogInfo("Opening YSF network connection");
 
-	return m_socket.open(bindaddr);
+	return m_socket.open();
 }
 
-bool CNetwork::writeData(const unsigned char* data, const in_addr& address, unsigned int port)
+bool CNetwork::writeData(const unsigned char* data, const sockaddr_storage& addr, unsigned int addrLen)
 {
 	assert(data != NULL);
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	return m_socket.write(data, 155U, address, port);
+	return m_socket.write(data, 155U, addr, addrLen);
 }
 
-bool CNetwork::writePoll(const in_addr& address, unsigned int port)
+bool CNetwork::writePoll(const sockaddr_storage& addr, unsigned int addrLen)
 {
 	unsigned char buffer[20U];
 
@@ -87,21 +85,21 @@ bool CNetwork::writePoll(const in_addr& address, unsigned int port)
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Poll Sent", buffer, 14U);
 
-	return m_socket.write(buffer, 14U, address, port);
+	return m_socket.write(buffer, 14U, addr, addrLen);
 }
 
-unsigned int CNetwork::readData(unsigned char* data, unsigned int length, in_addr& address, unsigned int& port)
+unsigned int CNetwork::readData(unsigned char* data, unsigned int length, sockaddr_storage& addr, unsigned int& addrLen)
 {
 	assert(data != NULL);
 	assert(length > 0U);
 
-	int len = m_socket.read(data, length, address, port);
+	int len = m_socket.read(data, length, addr, addrLen);
 	if (len <= 0)
 		return 0U;
 
 	// Handle incoming status requests
 	if (::memcmp(data, "YSFS", 4U) == 0) {
-		m_socket.write(m_status, 42U, address, port);
+		m_socket.write(m_status, 42U, addr, addrLen);
 		return 0U;
 	}
 
@@ -138,5 +136,5 @@ void CNetwork::close()
 {
 	m_socket.close();
 
-	::fprintf(stdout, "Closing YSF network connection\n");
+	LogInfo("Closing YSF network connection");
 }

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ const unsigned int BUFFER_LENGTH = 200U;
 CYSFNetwork::CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
-m_address(),
-m_port(0U),
+m_addr(),
+m_addrLen(0U),
 m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
@@ -57,8 +57,8 @@ m_linked(false)
 CYSFNetwork::CYSFNetwork(unsigned int port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
-m_address(),
-m_port(0U),
+m_addr(),
+m_addrLen(0U),
 m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
@@ -91,19 +91,18 @@ bool CYSFNetwork::open()
 	return m_socket.open();
 }
 
-void CYSFNetwork::setDestination(const std::string& name, const in_addr& address, unsigned int port)
+void CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen)
 {
 	m_name    = name;
-	m_address = address;
-	m_port    = port;
+	m_addr    = addr;
+	m_addrLen = addrLen;
 	m_linked  = false;
 }
 
 void CYSFNetwork::clearDestination()
 {
-	m_address.s_addr = INADDR_NONE;
-	m_port           = 0U;
-	m_linked         = false;
+	m_addrLen = 0U;
+	m_linked  = false;
 
 	m_pollTimer.stop();
 }
@@ -112,57 +111,56 @@ void CYSFNetwork::write(const unsigned char* data)
 {
 	assert(data != NULL);
 
-	if (m_port == 0U)
+	if (m_addrLen == 0U)
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	m_socket.write(data, 155U, m_address, m_port);
+	m_socket.write(data, 155U, m_addr, m_addrLen);
 }
 
 void CYSFNetwork::writePoll(unsigned int count)
 {
-	if (m_port == 0U)
+	if (m_addrLen == 0U)
 		return;
 
 	m_pollTimer.start();
 
 	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_poll, 14U, m_address, m_port);
+		m_socket.write(m_poll, 14U, m_addr, m_addrLen);
 }
 
 void CYSFNetwork::writeUnlink(unsigned int count)
 {
 	m_pollTimer.stop();
 
-	if (m_port == 0U)
+	if (m_addrLen == 0U)
 		return;
 
 	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_unlink, 14U, m_address, m_port);
+		m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
 
 	m_linked = false;
 }
 
 void CYSFNetwork::clock(unsigned int ms)
 {
-	unsigned char buffer[BUFFER_LENGTH];
-	in_addr address;
-	unsigned int port;
-
 	m_pollTimer.clock(ms);
 	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
 		writePoll();
 
-	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
+	unsigned char buffer[BUFFER_LENGTH];
+	sockaddr_storage addr;
+	unsigned int addrLen;
+	int length = m_socket.read(buffer, BUFFER_LENGTH, addr, addrLen);
 	if (length <= 0)
 		return;
 
-	if (m_port == 0U)
+	if (m_addrLen == 0U)
 		return;
 
-	if (address.s_addr != m_address.s_addr || port != m_port)
+	if (!CUDPSocket::match(addr, m_addr))
 		return;
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {

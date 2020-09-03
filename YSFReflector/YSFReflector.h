@@ -42,16 +42,16 @@ class CYSFRepeater {
 public:
 	CYSFRepeater() :
 	m_callsign(),
-	m_address(),
-	m_port(0U),
+	m_addr(),
+	m_addrLen(0U),
 	m_timer(1000U, 60U)
 	{
 	}
 
-	std::string  m_callsign;
-	in_addr      m_address;
-	unsigned int m_port;
-	CTimer       m_timer;
+	std::string      m_callsign;
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
+	CTimer           m_timer;
 };
 
 class CYSFReflector
@@ -66,7 +66,7 @@ private:
 	CConf                      m_conf;
 	std::vector<CYSFRepeater*> m_repeaters;
 
-	CYSFRepeater* findRepeater(const in_addr& address, unsigned int port) const;
+	CYSFRepeater* findRepeater(const sockaddr_storage& addr) const;
 	void dumpRepeaters() const;
 };
 
