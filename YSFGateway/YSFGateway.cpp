@@ -184,14 +184,16 @@ int CYSFGateway::run()
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
-	bool debug            = m_conf.getNetworkDebug();
-	in_addr rptAddress    = CUDPSocket::lookup(m_conf.getRptAddress());
-	unsigned int rptPort  = m_conf.getRptPort();
+	bool debug = m_conf.getNetworkDebug();
+	sockaddr_storage rptAddr;
+	unsigned int rptAddrLen;
+	CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen);
+
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();
-
 	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
-	rptNetwork.setDestination("MMDVM", rptAddress, rptPort);
+
+	rptNetwork.setDestination("MMDVM", rptAddr, rptAddrLen);
 
 	ret = rptNetwork.open();
 	if (!ret) {
@@ -550,7 +552,7 @@ bool CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 			m_ysfNetwork->writePoll(3U);
 
 			m_current = reflector->m_id;
@@ -660,7 +662,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = id;
@@ -825,7 +827,7 @@ void CYSFGateway::startupLinking()
 
 				m_wiresX->setReflector(reflector);
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = m_startup;
@@ -869,10 +871,10 @@ void CYSFGateway::readFCSRoomsFile(const std::string& filename)
 void CYSFGateway::processRemoteCommands()
 {
 	unsigned char buffer[200U];
-	in_addr address;
-	unsigned int port;
+	sockaddr_storage addr;
+	unsigned int addrLen;
 
-	int res = m_remoteSocket->read(buffer, 200U, address, port);
+	int res = m_remoteSocket->read(buffer, 200U, addr, addrLen);
 	if (res > 0) {
 		buffer[res] = '\0';
 		if (::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) {
@@ -893,7 +895,7 @@ void CYSFGateway::processRemoteCommands()
 
 				LogMessage("Connect by remote command to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
+				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = id;

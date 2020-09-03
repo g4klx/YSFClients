@@ -164,7 +164,7 @@ void CYSFReflector::run()
 
 	CNetwork network(m_conf.getNetworkPort(), m_conf.getId(), m_conf.getName(), m_conf.getDescription(), m_conf.getNetworkDebug());
 
-	ret = network.open(m_conf.getNetworkBindAddr());
+	ret = network.open();
 	if (!ret) {
 		::LogFinalise();
 		return;
@@ -191,29 +191,29 @@ void CYSFReflector::run()
 
 	for (;;) {
 		unsigned char buffer[200U];
-		in_addr address;
-		unsigned int port;
+		sockaddr_storage addr;
+		unsigned int addrLen;
 
-		unsigned int len = network.readData(buffer, 200U, address, port);
+		unsigned int len = network.readData(buffer, 200U, addr, addrLen);
 		if (len > 0U) {
-			CYSFRepeater* rpt = findRepeater(address, port);
+			CYSFRepeater* rpt = findRepeater(addr);
 			if (::memcmp(buffer, "YSFP", 4U) == 0) {
 				if (rpt == NULL) {
 					rpt = new CYSFRepeater;
 					rpt->m_callsign = std::string((char*)(buffer + 4U), 10U);
-					rpt->m_address  = address;
-					rpt->m_port     = port;
+					rpt->m_addr     = addr;
+					rpt->m_addrLen  = addrLen;
 					m_repeaters.push_back(rpt);
 					network.setCount(m_repeaters.size());
-					LogMessage("Adding %s (%s:%u)", rpt->m_callsign.c_str(), ::inet_ntoa(address), port);
+					LogMessage("Adding %s", rpt->m_callsign.c_str());
 				}
 				rpt->m_timer.start();
-				network.writePoll(address, port);
+				network.writePoll(addr, addrLen);
 			} else if (::memcmp(buffer + 0U, "YSFU", 4U) == 0 && rpt != NULL) {
-				LogMessage("Removing %s (%s:%u) unlinked", rpt->m_callsign.c_str(), ::inet_ntoa(address), port);
+				LogMessage("Removing %s unlinked", rpt->m_callsign.c_str());
 				for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 					CYSFRepeater* itRpt = *it;
-					if (itRpt->m_address.s_addr == rpt->m_address.s_addr && itRpt->m_port == rpt->m_port) {
+					if (CUDPSocket::match(itRpt->m_addr, rpt->m_addr)) {
 						m_repeaters.erase(it);
 						delete itRpt;
 						break;
@@ -257,8 +257,8 @@ void CYSFReflector::run()
 				watchdogTimer.start();
 
 				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-					if ((*it)->m_address.s_addr != address.s_addr || (*it)->m_port != port)
-						network.writeData(buffer, (*it)->m_address, (*it)->m_port);
+					if (!CUDPSocket::match((*it)->m_addr, addr))
+						network.writeData(buffer, (*it)->m_addr, (*it)->m_addrLen);
 				}
 
 				if ((buffer[34U] & 0x01U) == 0x01U) {
@@ -274,7 +274,7 @@ void CYSFReflector::run()
 		pollTimer.clock(ms);
 		if (pollTimer.hasExpired()) {
 			for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it)
-				network.writePoll((*it)->m_address, (*it)->m_port);
+				network.writePoll((*it)->m_addr, (*it)->m_addrLen);
 			pollTimer.start();
 		}
 
@@ -285,7 +285,7 @@ void CYSFReflector::run()
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 			CYSFRepeater* itRpt = *it;
 			if (itRpt->m_timer.hasExpired()) {
-				LogMessage("Removing %s (%s:%u) disappeared", itRpt->m_callsign.c_str(), ::inet_ntoa(itRpt->m_address), itRpt->m_port);
+				LogMessage("Removing %s disappeared", itRpt->m_callsign.c_str());
 				m_repeaters.erase(it);
 				delete itRpt;
 				network.setCount(m_repeaters.size());
@@ -314,10 +314,10 @@ void CYSFReflector::run()
 	::LogFinalise();
 }
 
-CYSFRepeater* CYSFReflector::findRepeater(const in_addr& address, unsigned int port) const
+CYSFRepeater* CYSFReflector::findRepeater(const sockaddr_storage& addr) const
 {
 	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-		if (address.s_addr == (*it)->m_address.s_addr && (*it)->m_port == port)
+		if (CUDPSocket::match(addr, (*it)->m_addr))
 			return *it;
 	}
 
@@ -335,10 +335,8 @@ void CYSFReflector::dumpRepeaters() const
 
 	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 		std::string callsign = (*it)->m_callsign;
-		in_addr address      = (*it)->m_address;
-		unsigned int port    = (*it)->m_port;
 		unsigned int timer   = (*it)->m_timer.getTimer();
 		unsigned int timeout = (*it)->m_timer.getTimeout();
-		LogMessage("    %s: %s:%u %u/%u", callsign.c_str(), ::inet_ntoa(address), port, timer, timeout);
+		LogMessage("    %s: %u/%u", callsign.c_str(), timer, timeout);
 	}
 }
