@@ -29,15 +29,15 @@ public:
 	CYSFReflector() :
 	m_id(),
 	m_name(),
-	m_address(),
-	m_port(0U)
+	m_addr(),
+	m_addrLen(0U)
 	{
 	}
 
-	std::string  m_id;
-	std::string  m_name;
-	in_addr      m_address;
-	unsigned int m_port;
+	std::string      m_id;
+	std::string      m_name;
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
 };
 
 class CYSFReflectors {

@@ -26,8 +26,6 @@
 #include <cassert>
 #include <cstring>
 
-const unsigned int IMRS_PORT = 21110U;
-
 
 CIMRSNetwork::CIMRSNetwork() :
 m_socket(IMRS_PORT),
@@ -134,7 +132,7 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 		if (ptr->m_debug)
 			CUtils::dump(1U, "IMRS Network Data Sent", buffer, 165U);
 
-		m_socket.write(buffer, 165U, (*it)->m_address, IMRS_PORT);
+		m_socket.write(buffer, 165U, (*it)->m_addr, (*it)->m_addrLen);
 	}
 }
 
@@ -150,20 +148,19 @@ void CIMRSNetwork::clock(unsigned int ms)
 {
 	unsigned char buffer[500U];
 
-	in_addr address;
-	unsigned int port;
-	int length = m_socket.read(buffer, 500U, address, port);
+	sockaddr_storage addr;
+	unsigned int addrLen;
+	int length = m_socket.read(buffer, 500U, addr, addrLen);
 	if (length <= 0)
 		return;
 
-	LogDebug("IMRS Network Data Reecived from port %u", port);
 	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
 	return;
 
-	if (port != IMRS_PORT)
-		return;
+	// if (port != IMRS_PORT)
+	//	return;
 
-	IMRSDGId* ptr = find(address);
+	IMRSDGId* ptr = find(addr);
 	if (ptr == NULL)
 		return;
 
@@ -201,11 +198,11 @@ void CIMRSNetwork::close()
 	m_socket.close();
 }
 
-IMRSDGId* CIMRSNetwork::find(in_addr address) const
+IMRSDGId* CIMRSNetwork::find(const sockaddr_storage& addr) const
 {
 	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.begin(); it1 != m_dgIds.end(); ++it1) {
 		for (std::vector<IMRSDest*>::const_iterator it2 = (*it1)->m_destinations.begin(); it2 != (*it1)->m_destinations.end(); ++it2) {
-			if (address.s_addr == (*it2)->m_address.s_addr)
+			if (CUDPSocket::match(addr, (*it2)->m_addr))
 				return *it1;
 		}
 	}

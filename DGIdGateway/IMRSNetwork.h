@@ -28,8 +28,9 @@
 #include <string>
 
 struct IMRSDest {
-	in_addr      m_address;
-	unsigned int m_dgId;
+	sockaddr_storage m_addr;
+	unsigned int     m_addrLen;
+	unsigned int     m_dgId;
 };
 
 class IMRSDGId {
@@ -76,7 +77,7 @@ private:
 	CUDPSocket             m_socket;
 	std::vector<IMRSDGId*> m_dgIds;
 
-	IMRSDGId* find(in_addr address) const;
+	IMRSDGId* find(const sockaddr_storage& address) const;
 	IMRSDGId* find(unsigned int dgId) const;
 };
 

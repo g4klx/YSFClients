@@ -32,7 +32,8 @@ const unsigned int BUFFER_LENGTH = 200U;
 CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
 m_socket(port),
 m_debug(debug),
-m_address(),
+m_addr(),
+m_addrLen(0U),
 m_ping(NULL),
 m_info(NULL),
 m_reflector(reflector),
@@ -72,16 +73,48 @@ bool CFCSNetwork::open()
 {
 	LogMessage("Resolving FCS00x addresses");
 
-	m_addresses["FCS001"] = CUDPSocket::lookup("fcs001.xreflector.net");
-	m_addresses["FCS002"] = CUDPSocket::lookup("fcs002.xreflector.net");
-	m_addresses["FCS003"] = CUDPSocket::lookup("fcs003.xreflector.net");
-	m_addresses["FCS004"] = CUDPSocket::lookup("fcs004.xreflector.net");
-	m_addresses["FCS005"] = CUDPSocket::lookup("fcs005.xreflector.net");
-	m_addresses["FCS222"] = CUDPSocket::lookup("fcs222.xreflector.net");
-	m_addresses["FCS224"] = CUDPSocket::lookup("fcs224.xreflector.net");
-	m_addresses["FCS232"] = CUDPSocket::lookup("fcs232.xreflector.net");
-	m_addresses["FCS260"] = CUDPSocket::lookup("fcs260.xreflector.net");
-	m_addresses["FCS262"] = CUDPSocket::lookup("fcs262.xreflector.net");
+	sockaddr_storage addr;
+	unsigned int addrLen;
+
+	CUDPSocket::lookup("fcs001.xreflector.net", FCS_PORT, addr, addrLen);
+	std::pair<sockaddr_storage, unsigned int> entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS001"] = entry;
+
+	CUDPSocket::lookup("fcs002.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS002"] = entry;
+
+	CUDPSocket::lookup("fcs003.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS003"] = entry;
+
+	CUDPSocket::lookup("fcs004.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS004"] = entry;
+
+	CUDPSocket::lookup("fcs005.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS005"] = entry;
+
+	CUDPSocket::lookup("fcs222.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS222"] = entry;
+
+	CUDPSocket::lookup("fcs224.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS224"] = entry;
+
+	CUDPSocket::lookup("fcs232.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS232"] = entry;
+
+	CUDPSocket::lookup("fcs260.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS260"] = entry;
+
+	CUDPSocket::lookup("fcs262.xreflector.net", FCS_PORT, addr, addrLen);
+	entry = std::make_pair(addr, addrLen);
+	m_addresses["FCS262"] = entry;
 
 	LogMessage("Opening FCS network connection");
 
@@ -103,7 +136,7 @@ void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", buffer, 130U);
 
-	m_socket.write(buffer, 130U, m_address, FCS_PORT);
+	m_socket.write(buffer, 130U, m_addr, m_addrLen);
 }
 
 void CFCSNetwork::link()
@@ -117,11 +150,9 @@ void CFCSNetwork::link()
 		return;
 	}
 
-	m_address = m_addresses[name];
-	if (m_address.s_addr == INADDR_NONE) {
-		LogError("FCS reflector %s has no address", name.c_str());
-		return;
-	}
+	std::pair<sockaddr_storage, unsigned int> entry = m_addresses[name];
+	m_addr    = entry.first;
+	m_addrLen = entry.second;
 
 	m_state = FCS_LINKING;
 
@@ -135,7 +166,7 @@ void CFCSNetwork::unlink()
 	if (m_state != FCS_LINKED)
 		return;
 
-	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_address, FCS_PORT);
+	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_addr, m_addrLen);
 }
 
 void CFCSNetwork::clock(unsigned int ms)
@@ -154,16 +185,16 @@ void CFCSNetwork::clock(unsigned int ms)
 
 	unsigned char buffer[BUFFER_LENGTH];
 
-	in_addr address;
-	unsigned int port;
-	int length = m_socket.read(buffer, BUFFER_LENGTH, address, port);
+	sockaddr_storage addr;
+	unsigned int addrLen;
+	int length = m_socket.read(buffer, BUFFER_LENGTH, addr, addrLen);
 	if (length <= 0)
 		return;
 
 	if (m_state == FCS_UNLINKED)
 		return;
 
-	if (address.s_addr != m_address.s_addr || port != FCS_PORT)
+	if (!CUDPSocket::match(addr, m_addr))
 		return;
 
 	if (m_debug)
@@ -242,7 +273,7 @@ void CFCSNetwork::writeInfo()
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
 
-	m_socket.write(m_info, 100U, m_address, FCS_PORT);
+	m_socket.write(m_info, 100U, m_addr, m_addrLen);
 }
 
 void CFCSNetwork::writePing()
@@ -253,5 +284,5 @@ void CFCSNetwork::writePing()
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Sent", m_ping, 25U);
 
-	m_socket.write(m_ping, 25U, m_address, FCS_PORT);
+	m_socket.write(m_ping, 25U, m_addr, m_addrLen);
 }

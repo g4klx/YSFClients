@@ -57,18 +57,15 @@ bool CYSFReflectors::load()
 			char* p6 = ::strtok(NULL, "\r\n");
 
 			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
-				std::string host = std::string(p4);
+				std::string host  = std::string(p4);
+				unsigned int port = (unsigned int)::atoi(p5);
 
-				in_addr address = CUDPSocket::lookup(host);
-				if (address.s_addr != INADDR_NONE) {
-					CYSFReflector* refl = new CYSFReflector;
-					refl->m_id      = std::string(p1);
-					refl->m_name    = std::string(p2);
-					refl->m_address = address;
-					refl->m_port    = (unsigned int)::atoi(p5);
+				CYSFReflector* refl = new CYSFReflector;
+				CUDPSocket::lookup(host, port, refl->m_addr, refl->m_addrLen);
+				refl->m_id   = std::string(p1);
+				refl->m_name = std::string(p2);
 
-					m_reflectors.push_back(refl);
-				}
+				m_reflectors.push_back(refl);
 			}
 		}
 

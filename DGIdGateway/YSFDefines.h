@@ -49,4 +49,6 @@ const unsigned char YSF_MR_BUSY     = 0x02U;
 
 const unsigned int FCS_PORT = 62500U;
 
+const unsigned int IMRS_PORT = 21110U;
+
 #endif

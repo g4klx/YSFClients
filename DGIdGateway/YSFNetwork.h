@@ -30,8 +30,8 @@
 
 class CYSFNetwork : public CDGIdNetwork {
 public:
-	CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug);
-	CYSFNetwork(unsigned int localPort, const std::string& name, const in_addr& address, unsigned int port, const std::string& callsign, bool debug);
+	CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug);
+	CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug);
 	virtual ~CYSFNetwork();
 
 	virtual std::string getDesc(unsigned int dgId);
@@ -53,8 +53,8 @@ public:
 private:
 	CUDPSocket                 m_socket;
 	bool                       m_debug;
-	in_addr                    m_address;
-	unsigned int               m_port;
+	sockaddr_storage           m_addr;
+	unsigned int               m_addrLen;
 	unsigned char*             m_poll;
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;

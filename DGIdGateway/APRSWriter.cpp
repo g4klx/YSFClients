@@ -36,8 +36,8 @@ m_longitude(0.0F),
 m_height(0),
 m_desc(),
 m_suffix(suffix),
-m_aprsAddress(),
-m_aprsPort(port),
+m_aprsAddr(),
+m_aprsAddrLen(),
 m_aprsSocket()
 #if defined(USE_GPSD)
 ,m_gpsdEnabled(false),
@@ -55,7 +55,7 @@ m_gpsdData()
 		m_callsign.append(rptSuffix.substr(0U, 1U));
 	}
 
-	m_aprsAddress = CUDPSocket::lookup(address);
+	CUDPSocket::lookup(address, port, m_aprsAddr, m_aprsAddrLen);
 }
 
 CAPRSWriter::~CAPRSWriter()
@@ -176,7 +176,7 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
 }
 
 void CAPRSWriter::clock(unsigned int ms)
@@ -275,7 +275,7 @@ void CAPRSWriter::sendIdFrameFixed()
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
 }
 
 #if defined(USE_GPSD)
@@ -376,6 +376,6 @@ void CAPRSWriter::sendIdFrameMobile()
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddress, m_aprsPort);
+	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
 }
 #endif

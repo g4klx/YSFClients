@@ -59,13 +59,14 @@ public:
 private:
 	CUDPSocket                     m_socket;
 	bool                           m_debug;
-	in_addr                        m_address;
+	sockaddr_storage               m_addr;
+	unsigned int                   m_addrLen;
 	unsigned char*                 m_ping;
 	unsigned char*                 m_info;
 	std::string                    m_reflector;
 	std::string                    m_print;
 	CRingBuffer<unsigned char>     m_buffer;
-	std::map<std::string, in_addr> m_addresses;
+	std::map<std::string, std::pair<sockaddr_storage, unsigned int>> m_addresses;
 	unsigned char                  m_n;
 	CTimer                         m_pingTimer;
 	CTimer                         m_resetTimer;
