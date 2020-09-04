@@ -64,7 +64,6 @@ private:
 	std::string                    m_reflector;
 	std::string                    m_print;
 	CRingBuffer<unsigned char>     m_buffer;
-	std::map<std::string, in_addr> m_addresses;
 	unsigned char                  m_n;
 	CTimer                         m_pingTimer;
 	CTimer                         m_resetTimer;
