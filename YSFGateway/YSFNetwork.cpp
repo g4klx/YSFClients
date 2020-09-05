@@ -62,7 +62,9 @@ m_addrLen(0U),
 m_poll(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
-m_pollTimer(1000U, 5U)
+m_pollTimer(1000U, 5U),
+m_name(),
+m_linked(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);

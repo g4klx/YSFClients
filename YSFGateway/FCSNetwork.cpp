@@ -36,6 +36,7 @@ m_addr(),
 m_addrLen(),
 m_ping(NULL),
 m_options(NULL),
+m_opt(),
 m_info(NULL),
 m_reflector(),
 m_print(),
@@ -123,8 +124,6 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 			char url[30U];
 			::sprintf(url, "%s.xreflector.net", name.c_str());
 
-			sockaddr_storage addr;
-			unsigned int addrLen;
 			if (CUDPSocket::lookup(url, FCS_PORT, m_addr, m_addrLen) != 0) {
 				LogWarning("Unknown FCS reflector - %s", name.c_str());
 				return false;
@@ -299,5 +298,5 @@ void CFCSNetwork::writeOptions()
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Options Sent", m_options, 50U);
 
-	m_socket.write(m_options, 50U, m_address, FCS_PORT);
+	m_socket.write(m_options, 50U, m_addr, m_addrLen);
 }

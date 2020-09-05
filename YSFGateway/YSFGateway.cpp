@@ -187,7 +187,10 @@ int CYSFGateway::run()
 	bool debug = m_conf.getNetworkDebug();
 	sockaddr_storage rptAddr;
 	unsigned int rptAddrLen;
-	CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen);
+	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
+		::fprintf(stderr, "YSFGateway: cannot find the address of the MMDVM Host");
+		return 1;
+	}
 
 	std::string myAddress = m_conf.getMyAddress();
 	unsigned int myPort   = m_conf.getMyPort();

@@ -102,49 +102,69 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-  FILE* fp = ::fopen(m_file.c_str(), "rt");
-  if (fp == NULL) {
-    ::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-    return false;
-  }
-
-  SECTION section = SECTION_NONE;
-
-  char buffer[BUFFER_SIZE];
-  while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
-    if (buffer[0U] == '#')
-      continue;
-
-    if (buffer[0U] == '[') {
-      if (::strncmp(buffer, "[General]", 9U) == 0)
-        section = SECTION_GENERAL;
-	  else if (::strncmp(buffer, "[Info]", 6U) == 0)
-		  section = SECTION_INFO;
-	  else if (::strncmp(buffer, "[Log]", 5U) == 0)
-		  section = SECTION_LOG;
-	  else if (::strncmp(buffer, "[APRS]", 6U) == 0)
-		  section = SECTION_APRS;
-	  else if (::strncmp(buffer, "[Network]", 9U) == 0)
-		  section = SECTION_NETWORK;
-	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
-		  section = SECTION_YSF_NETWORK;
-	  else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-		  section = SECTION_FCS_NETWORK;
-	  else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
-		  section = SECTION_GPSD;
-	  else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
-		  section = SECTION_REMOTE_COMMANDS;
-	  else
-	  	  section = SECTION_NONE;
-
-	  continue;
+    FILE* fp = ::fopen(m_file.c_str(), "rt");
+    if (fp == NULL) {
+	::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+	return false;
     }
 
-    char* key = ::strtok(buffer, " \t=\r\n");
-    if (key == NULL)
-      continue;
+    SECTION section = SECTION_NONE;
 
-    char* value = ::strtok(NULL, "\r\n");
+    char buffer[BUFFER_SIZE];
+    while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
+	if (buffer[0U] == '#')
+		continue;
+
+	if (buffer[0U] == '[') {
+		if (::strncmp(buffer, "[General]", 9U) == 0)
+			section = SECTION_GENERAL;
+		else if (::strncmp(buffer, "[Info]", 6U) == 0)
+			section = SECTION_INFO;
+		else if (::strncmp(buffer, "[Log]", 5U) == 0)
+			section = SECTION_LOG;
+		else if (::strncmp(buffer, "[APRS]", 6U) == 0)
+			section = SECTION_APRS;
+		else if (::strncmp(buffer, "[Network]", 9U) == 0)
+			section = SECTION_NETWORK;
+		else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
+			section = SECTION_YSF_NETWORK;
+		else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
+			section = SECTION_FCS_NETWORK;
+		else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
+			section = SECTION_GPSD;
+		else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
+			section = SECTION_REMOTE_COMMANDS;
+		else
+			section = SECTION_NONE;
+
+		continue;
+	}
+
+	char* key = ::strtok(buffer, " \t=\r\n");
+	if (key == NULL)
+		continue;
+
+	char* value = ::strtok(NULL, "\r\n");
+	if (value == NULL)
+		continue;
+
+	// Remove quotes from the value
+	size_t len = ::strlen(value);
+	if (len > 1U && *value == '"' && value[len - 1U] == '"') {
+		value[len - 1U] = '\0';
+		value++;
+	} else {
+		char *p;
+
+		// if value is not quoted, remove after # (to make comment)
+		if ((p = strchr(value, '#')) != NULL)
+			*p = '\0';
+
+		// remove trailing tab/space
+		for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
+			*p = '\0';
+	}
+
 	if (section == SECTION_GENERAL) {
 		if (::strcmp(key, "Callsign") == 0) {
 			// Convert the callsign to upper case
