@@ -83,6 +83,7 @@ bool CFCSNetwork::open()
 	m_addresses["FCS260"] = CUDPSocket::lookup("fcs260.xreflector.net");
 	m_addresses["FCS262"] = CUDPSocket::lookup("fcs262.xreflector.net");
 	m_addresses["FCS310"] = CUDPSocket::lookup("fcs310.xreflector.net");
+	*/
 	m_addresses["FCS999"] = CUDPSocket::lookup("fcs999.xreflector.net");
 	
 	LogMessage("Opening FCS network connection");
@@ -135,9 +136,9 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 				LogError("Unknown FCS reflector - %s", name.c_str());
 				return false;
 			}
-    } else {
+    		} else {
 			m_address = m_addresses[name];
-    }
+   		}
 
 		if (m_address.s_addr == INADDR_NONE) {
 			LogError("FCS reflector %s has no address", name.c_str());
