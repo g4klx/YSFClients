@@ -155,12 +155,12 @@ unsigned int CConf::getLogFileLevel() const
 
 std::string CConf::getLogFilePath() const
 {
-  return m_logFilePath;
+	return m_logFilePath;
 }
 
 std::string CConf::getLogFileRoot() const
 {
-  return m_logFileRoot;
+	return m_logFileRoot;
 }
 
 unsigned int CConf::getNetworkPort() const
