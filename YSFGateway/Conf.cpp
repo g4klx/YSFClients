@@ -70,6 +70,7 @@ m_aprsPort(0U),
 m_aprsSuffix(),
 m_aprsDescription(),
 m_networkStartup(),
+m_networkOptions(),
 m_networkInactivityTimeout(0U),
 m_networkRevert(false),
 m_networkDebug(false),
@@ -214,6 +215,8 @@ bool CConf::read()
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
+		else if (::strcmp(key, "Options") == 0)
+			m_networkOptions = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Revert") == 0)
@@ -415,6 +418,11 @@ std::string CConf::getAPRSDescription() const
 std::string CConf::getNetworkStartup() const
 {
 	return m_networkStartup;
+}
+
+std::string CConf::getNetworkOptions() const
+{
+	return m_networkOptions;
 }
 
 unsigned int CConf::getNetworkInactivityTimeout() const
