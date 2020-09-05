@@ -67,6 +67,7 @@ public:
 
   // The Network section
   std::string  getNetworkStartup() const;
+  std::string  getNetworkOptions() const;
   unsigned int getNetworkInactivityTimeout() const;
   bool         getNetworkRevert() const;
   bool         getNetworkDebug() const;
@@ -134,6 +135,7 @@ private:
   std::string  m_aprsDescription;
 
   std::string  m_networkStartup;
+  std::string  m_networkOptions;
   unsigned int m_networkInactivityTimeout;
   bool         m_networkRevert;
   bool         m_networkDebug;

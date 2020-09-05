@@ -88,6 +88,26 @@ bool CConf::read()
 		  continue;
 
 	  char* value = ::strtok(NULL, "\r\n");
+	  if (value == NULL)
+		  continue;
+
+	  // Remove quotes from the value
+	  size_t len = ::strlen(value);
+	  if (len > 1U && *value == '"' && value[len - 1U] == '"') {
+		  value[len - 1U] = '\0';
+		  value++;
+	  } else {
+		  char *p;
+
+		  // if value is not quoted, remove after # (to make comment)
+		  if ((p = strchr(value, '#')) != NULL)
+			  *p = '\0';
+
+		  // remove trailing tab/space
+		  for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
+			  *p = '\0';
+	  }
+
 	  if (section == SECTION_GENERAL) {
 		  if (::strcmp(key, "Daemon") == 0)
 			  m_daemon = ::atoi(value) == 1;
@@ -152,12 +172,12 @@ unsigned int CConf::getLogFileLevel() const
 
 std::string CConf::getLogFilePath() const
 {
-  return m_logFilePath;
+	return m_logFilePath;
 }
 
 std::string CConf::getLogFileRoot() const
 {
-  return m_logFileRoot;
+	return m_logFileRoot;
 }
 
 unsigned int CConf::getNetworkPort() const

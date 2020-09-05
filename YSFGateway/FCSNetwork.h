@@ -41,6 +41,8 @@ public:
 
 	bool open();
 
+	void setOptions(const std::string& options);
+
 	void clearDestination();
 
 	void write(const unsigned char* data);
@@ -61,6 +63,8 @@ private:
 	sockaddr_storage               m_addr;
 	unsigned int                   m_addrLen;
 	unsigned char*                 m_ping;
+	unsigned char*                 m_options;
+	std::string                    m_opt;
 	unsigned char*                 m_info;
 	std::string                    m_reflector;
 	std::string                    m_print;
@@ -71,6 +75,7 @@ private:
 	CTimer                         m_resetTimer;
 	FCS_STATE                      m_state;
 
+	void writeOptions();
 	void writeInfo();
 	void writePing();
 };

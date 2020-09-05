@@ -37,7 +37,7 @@ m_height(0),
 m_desc(),
 m_suffix(suffix),
 m_aprsAddr(),
-m_aprsAddrLen(),
+m_aprsAddrLen(0U),
 m_aprsSocket()
 #if defined(USE_GPSD)
 ,m_gpsdEnabled(false),
@@ -55,7 +55,8 @@ m_gpsdData()
 		m_callsign.append(rptSuffix.substr(0U, 1U));
 	}
 
-	CUDPSocket::lookup(address, port, m_aprsAddr, m_aprsAddrLen);
+	if (CUDPSocket::lookup(address, port, m_aprsAddr, m_aprsAddrLen) != 0)
+		m_aprsAddrLen = 0U;
 }
 
 CAPRSWriter::~CAPRSWriter()
@@ -90,6 +91,11 @@ void CAPRSWriter::setGPSDLocation(const std::string& address, const std::string&
 
 bool CAPRSWriter::open()
 {
+	if (m_aprsAddrLen == 0U) {
+		LogError("Unable to lookup the adress of the APRS-IS server");
+		return false;
+	}
+
 #if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
@@ -103,7 +109,7 @@ bool CAPRSWriter::open()
 		LogMessage("Connected to GPSD");
 	}
 #endif
-	bool ret = m_aprsSocket.open();
+	bool ret = m_aprsSocket.open(m_aprsAddr);
 	if (!ret)
 		return false;
 

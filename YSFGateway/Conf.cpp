@@ -70,6 +70,7 @@ m_aprsPort(0U),
 m_aprsSuffix(),
 m_aprsDescription(),
 m_networkStartup(),
+m_networkOptions(),
 m_networkInactivityTimeout(0U),
 m_networkRevert(false),
 m_networkDebug(false),
@@ -102,49 +103,69 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-  FILE* fp = ::fopen(m_file.c_str(), "rt");
-  if (fp == NULL) {
-    ::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-    return false;
-  }
-
-  SECTION section = SECTION_NONE;
-
-  char buffer[BUFFER_SIZE];
-  while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
-    if (buffer[0U] == '#')
-      continue;
-
-    if (buffer[0U] == '[') {
-      if (::strncmp(buffer, "[General]", 9U) == 0)
-        section = SECTION_GENERAL;
-	  else if (::strncmp(buffer, "[Info]", 6U) == 0)
-		  section = SECTION_INFO;
-	  else if (::strncmp(buffer, "[Log]", 5U) == 0)
-		  section = SECTION_LOG;
-	  else if (::strncmp(buffer, "[APRS]", 6U) == 0)
-		  section = SECTION_APRS;
-	  else if (::strncmp(buffer, "[Network]", 9U) == 0)
-		  section = SECTION_NETWORK;
-	  else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
-		  section = SECTION_YSF_NETWORK;
-	  else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-		  section = SECTION_FCS_NETWORK;
-	  else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
-		  section = SECTION_GPSD;
-	  else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
-		  section = SECTION_REMOTE_COMMANDS;
-	  else
-	  	  section = SECTION_NONE;
-
-	  continue;
+    FILE* fp = ::fopen(m_file.c_str(), "rt");
+    if (fp == NULL) {
+	::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+	return false;
     }
 
-    char* key = ::strtok(buffer, " \t=\r\n");
-    if (key == NULL)
-      continue;
+    SECTION section = SECTION_NONE;
 
-    char* value = ::strtok(NULL, "\r\n");
+    char buffer[BUFFER_SIZE];
+    while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
+	if (buffer[0U] == '#')
+		continue;
+
+	if (buffer[0U] == '[') {
+		if (::strncmp(buffer, "[General]", 9U) == 0)
+			section = SECTION_GENERAL;
+		else if (::strncmp(buffer, "[Info]", 6U) == 0)
+			section = SECTION_INFO;
+		else if (::strncmp(buffer, "[Log]", 5U) == 0)
+			section = SECTION_LOG;
+		else if (::strncmp(buffer, "[APRS]", 6U) == 0)
+			section = SECTION_APRS;
+		else if (::strncmp(buffer, "[Network]", 9U) == 0)
+			section = SECTION_NETWORK;
+		else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
+			section = SECTION_YSF_NETWORK;
+		else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
+			section = SECTION_FCS_NETWORK;
+		else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
+			section = SECTION_GPSD;
+		else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
+			section = SECTION_REMOTE_COMMANDS;
+		else
+			section = SECTION_NONE;
+
+		continue;
+	}
+
+	char* key = ::strtok(buffer, " \t=\r\n");
+	if (key == NULL)
+		continue;
+
+	char* value = ::strtok(NULL, "\r\n");
+	if (value == NULL)
+		continue;
+
+	// Remove quotes from the value
+	size_t len = ::strlen(value);
+	if (len > 1U && *value == '"' && value[len - 1U] == '"') {
+		value[len - 1U] = '\0';
+		value++;
+	} else {
+		char *p;
+
+		// if value is not quoted, remove after # (to make comment)
+		if ((p = strchr(value, '#')) != NULL)
+			*p = '\0';
+
+		// remove trailing tab/space
+		for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
+			*p = '\0';
+	}
+
 	if (section == SECTION_GENERAL) {
 		if (::strcmp(key, "Callsign") == 0) {
 			// Convert the callsign to upper case
@@ -214,6 +235,8 @@ bool CConf::read()
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
+		else if (::strcmp(key, "Options") == 0)
+			m_networkOptions = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Revert") == 0)
@@ -379,12 +402,12 @@ unsigned int CConf::getLogFileLevel() const
 
 std::string CConf::getLogFilePath() const
 {
-  return m_logFilePath;
+	return m_logFilePath;
 }
 
 std::string CConf::getLogFileRoot() const
 {
-  return m_logFileRoot;
+	return m_logFileRoot;
 }
 
 bool CConf::getAPRSEnabled() const
@@ -417,6 +440,11 @@ std::string CConf::getNetworkStartup() const
 	return m_networkStartup;
 }
 
+std::string CConf::getNetworkOptions() const
+{
+	return m_networkOptions;
+}
+
 unsigned int CConf::getNetworkInactivityTimeout() const
 {
 	return m_networkInactivityTimeout;
@@ -439,7 +467,7 @@ bool CConf::getYSFNetworkEnabled() const
 
 unsigned int CConf::getYSFNetworkPort() const
 {
-  return m_ysfNetworkPort;
+	return m_ysfNetworkPort;
 }
 
 std::string CConf::getYSFNetworkHosts() const
