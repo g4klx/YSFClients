@@ -109,6 +109,11 @@ void CFCSNetwork::write(const unsigned char* data)
 	unsigned char buffer[130U];
 	::memset(buffer + 0U, ' ', 130U);
 	::memcpy(buffer + 0U, data + 35U, 120U);
+	
+	// OE1KBC 2020-09-05 frame# was missing
+	::memcpy(buffer + 120U, data + 34U, 1U);
+	//
+	
 	::memcpy(buffer + 121U, m_reflector.c_str(), 8U);
 
 	if (m_debug)
