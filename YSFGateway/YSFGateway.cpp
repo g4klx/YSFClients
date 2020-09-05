@@ -89,6 +89,7 @@ m_fcsNetwork(NULL),
 m_linkType(LINK_NONE),
 m_current(),
 m_startup(),
+m_options(),
 m_exclude(false),
 m_inactivityTimer(1000U),
 m_lostTimer(1000U, 120U),
@@ -259,6 +260,7 @@ int CYSFGateway::run()
 	}
 
 	m_startup   = m_conf.getNetworkStartup();
+	m_options   = m_conf.getNetworkOptions();
 	bool revert = m_conf.getNetworkRevert();
 	bool wiresXCommandPassthrough = m_conf.getWiresXCommandPassthrough();
 
@@ -808,6 +810,8 @@ void CYSFGateway::startupLinking()
 			m_linkType = LINK_NONE;
 
 			bool ok = m_fcsNetwork->writeLink(m_startup);
+			m_fcsNetwork->setOptions(m_options);
+
 			if (ok) {
 				LogMessage("Automatic (re-)connection to %s", m_startup.c_str());
 
@@ -827,6 +831,8 @@ void CYSFGateway::startupLinking()
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+
+				m_ysfNetwork->setOptions(m_options);
 
 				m_wiresX->setReflector(reflector);
 

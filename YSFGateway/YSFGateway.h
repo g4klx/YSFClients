@@ -59,6 +59,7 @@ private:
 	LINK_TYPE       m_linkType;
 	std::string     m_current;
 	std::string     m_startup;
+	std::string     m_options;
 	bool            m_exclude;
 	CTimer          m_inactivityTimer;
 	CTimer          m_lostTimer;
