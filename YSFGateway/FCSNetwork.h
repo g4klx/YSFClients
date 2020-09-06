@@ -74,7 +74,7 @@ private:
 	CTimer                         m_resetTimer;
 	FCS_STATE                      m_state;
 
-	void writeOptions();
+	void writeOptions(const std::string& reflector);
 	void writeInfo();
 	void writePing();
 };
