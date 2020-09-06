@@ -31,6 +31,7 @@ struct DGIdData {
 	unsigned int m_dgId;
 	std::string  m_type;
 	bool         m_static;
+	std::string  m_options;
 	std::string  m_name;
 	std::string  m_address;
 	unsigned int m_port;

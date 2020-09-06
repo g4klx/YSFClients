@@ -182,7 +182,10 @@ int CDGIdGateway::run()
 
 	sockaddr_storage rptAddr;
 	unsigned int rptAddrLen;
-	CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen);
+	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
+		LogError("Unable to resolve the address of the host");
+		return 1;
+	}
 
 	bool debug            = m_conf.getDebug();
 	std::string myAddress = m_conf.getMyAddress();
@@ -229,8 +232,9 @@ int CDGIdGateway::run()
 			unsigned int rxFrequency = m_conf.getRxFrequency();
 			std::string locator      = calculateLocator();
 			unsigned int id          = m_conf.getId();
+			std::string options      = (*it)->m_options;
 
-			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, debug);
+			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, options, debug);
 			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -254,10 +258,17 @@ int CDGIdGateway::run()
 				std::string name = (*it)->m_name;
 
 				for (std::vector<IMRSDestination*>::const_iterator it = destinations.begin(); it != destinations.end(); ++it) {
-					IMRSDest* dest = new IMRSDest;
-					CUDPSocket::lookup((*it)->m_address, IMRS_PORT, dest->m_addr, dest->m_addrLen);
-					dest->m_dgId = (*it)->m_dgId;
-					dests.push_back(dest);
+					sockaddr_storage addr;
+					unsigned int addrLen;
+					if (CUDPSocket::lookup((*it)->m_address, IMRS_PORT, addr, addrLen) == 0) {
+						IMRSDest* dest = new IMRSDest;
+						dest->m_dgId    = (*it)->m_dgId;
+						dest->m_addr    = addr;
+						dest->m_addrLen = addrLen;
+						dests.push_back(dest);
+					} else {
+						LogWarning("Unable to resolve the address for %s", (*it)->m_address.c_str());
+					}
 				}
 
 				imrs->addDGId(dgid, name, dests, debug);
@@ -273,49 +284,57 @@ int CDGIdGateway::run()
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
-			CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen);
-
-			dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, debug);
-			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
-			dgIdNetwork[dgid]->m_static      = statc;
-			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			} else {
+				LogWarning("Unable to resolve the address for the YSF Parrot");
+			}
 		} else if (type == "YSF2DMR") {
 			unsigned int local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
-			CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen);
-
-			dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, debug);
-			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
-			dgIdNetwork[dgid]->m_static      = statc;
-			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			} else {
+				LogWarning("Unable to resolve the address for YSF2DMR");
+			}
 		} else if (type == "YSF2NXDN") {
 			unsigned int local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
-			CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen);
-
-			dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, debug);
-			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
-			dgIdNetwork[dgid]->m_static      = statc;
-			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			} else {
+				LogWarning("Unable to resolve the address for YSF2NXDN");
+			}
 		} else if (type == "YSF2P25") {
 			unsigned int local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
-			CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen);
-
-			dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, debug);
-			dgIdNetwork[dgid]->m_modes       = DT_VOICE_FR_MODE;
-			dgIdNetwork[dgid]->m_static      = statc;
-			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VOICE_FR_MODE;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			} else {
+				LogWarning("Unable to resolve the address for YSF2P25");
+			}
 		}
 		
 		if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid] != imrs) {

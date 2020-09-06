@@ -60,12 +60,18 @@ bool CYSFReflectors::load()
 				std::string host  = std::string(p4);
 				unsigned int port = (unsigned int)::atoi(p5);
 
-				CYSFReflector* refl = new CYSFReflector;
-				CUDPSocket::lookup(host, port, refl->m_addr, refl->m_addrLen);
-				refl->m_id   = std::string(p1);
-				refl->m_name = std::string(p2);
-
-				m_reflectors.push_back(refl);
+				sockaddr_storage addr;
+				unsigned int addrLen;
+				if (CUDPSocket::lookup(host, port, addr, addrLen) == 0) {
+					CYSFReflector* refl = new CYSFReflector;
+					refl->m_id      = std::string(p1);
+					refl->m_name    = std::string(p2);
+					refl->m_addr    = addr;
+					refl->m_addrLen = addrLen;
+					m_reflectors.push_back(refl);
+				} else {
+					LogWarning("Unable to resolve the address for %s", host.c_str());
+				}
 			}
 		}
 
