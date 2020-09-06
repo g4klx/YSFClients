@@ -41,7 +41,7 @@ public:
 	void write(const unsigned char* data);
 
 	void writePoll(unsigned int count = 1U);
-	void setOptions(const std::string& options = NULL);
+	void setOptions(const std::string& options = "");
 	void writeUnlink(unsigned int count = 1U);
 
 	unsigned int read(unsigned char* data);
@@ -57,6 +57,7 @@ private:
 	unsigned int               m_port;
 	unsigned char*             m_poll;
 	unsigned char*             m_options;
+	std::string                m_opt;
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_pollTimer;

@@ -99,14 +99,18 @@ unsigned int CNetwork::readData(unsigned char* data, unsigned int length, in_add
 	if (len <= 0)
 		return 0U;
 
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Received", data, len);
+
+	// Throw away any options messages
+	if (::memcmp(data, "YSFO", 4U) == 0)
+		return 0U;
+
 	// Handle incoming status requests
 	if (::memcmp(data, "YSFS", 4U) == 0) {
 		m_socket.write(m_status, 42U, address, port);
 		return 0U;
 	}
-
-	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Received", data, len);
 
 	return len;
 }

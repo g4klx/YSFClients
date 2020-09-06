@@ -34,6 +34,7 @@ m_address(),
 m_port(0U),
 m_poll(NULL),
 m_options(NULL),
+m_opt(),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -66,6 +67,7 @@ m_address(),
 m_port(0U),
 m_poll(NULL),
 m_options(NULL),
+m_opt(),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U)
@@ -92,6 +94,8 @@ m_pollTimer(1000U, 5U)
 CYSFNetwork::~CYSFNetwork()
 {
 	delete[] m_poll;
+	delete[] m_unlink;
+	delete[] m_options;
 }
 
 bool CYSFNetwork::open()
@@ -141,22 +145,23 @@ void CYSFNetwork::writePoll(unsigned int count)
 	for (unsigned int i = 0U; i < count; i++)
 		m_socket.write(m_poll, 14U, m_address, m_port);
 
-	if (m_options != NULL)
+	if (!m_opt.empty())
 		m_socket.write(m_options, 50U, m_address, m_port);
 }
 
 void CYSFNetwork::setOptions(const std::string& options)
 {
-	std::string opt = options;
-
-	if (opt.size() < 1)
+	if (options.empty()) {
+		m_opt.clear();
 		return;
-
-	opt.resize(50, ' ');
-
-	for (unsigned int i = 0U; i < (50 - 4 - YSF_CALLSIGN_LENGTH); i++) {
-		m_options[i + 4U + YSF_CALLSIGN_LENGTH] = opt.at(i);
 	}
+
+	m_opt = options;
+
+	m_opt.resize(50, ' ');
+
+	for (unsigned int i = 0U; i < (50U - 4U - YSF_CALLSIGN_LENGTH); i++)
+		m_options[i + 4U + YSF_CALLSIGN_LENGTH] = m_opt.at(i);
 }
 
 void CYSFNetwork::writeUnlink(unsigned int count)
@@ -200,7 +205,7 @@ void CYSFNetwork::clock(unsigned int ms)
 
 		m_linked = true;
 
-		if (m_options != NULL)
+		if (!m_opt.empty())
 			m_socket.write(m_options, 50U, m_address, m_port);
 	}
 
