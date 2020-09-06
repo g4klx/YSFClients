@@ -26,7 +26,8 @@
 #include <cstring>
 
 CNetwork::CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug) :
-m_socket(port),
+m_socket(),
+m_port(port),
 m_id(id),
 m_name(name),
 m_description(description),
@@ -49,7 +50,14 @@ bool CNetwork::open()
 {
 	LogInfo("Opening YSF network connection");
 
-	return m_socket.open();
+	bool status = false;
+	unsigned int af[] = {AF_INET, AF_INET6};
+
+	for (int i = 0; i < UDP_SOCKET_MAX &&
+	       i < (sizeof(af) / sizeof(unsigned int)); i++)
+		status |= m_socket.open(i, af[i], "", m_port);
+
+	return status;
 }
 
 bool CNetwork::writeData(const unsigned char* data, const sockaddr_storage& addr, unsigned int addrLen)
