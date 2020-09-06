@@ -53,8 +53,7 @@ bool CNetwork::open()
 	bool status = false;
 	unsigned int af[] = {AF_INET, AF_INET6};
 
-	for (int i = 0; i < UDP_SOCKET_MAX &&
-	       i < (sizeof(af) / sizeof(unsigned int)); i++)
+	for (unsigned int i = 0U; i < UDP_SOCKET_MAX && i < (sizeof(af) / sizeof(unsigned int)); i++)
 		status |= m_socket.open(i, af[i], "", m_port);
 
 	return status;
