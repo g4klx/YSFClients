@@ -33,6 +33,7 @@ m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
+m_options(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -49,17 +50,18 @@ m_linked(true)
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U]   = node.at(i);
-		m_unlink[i + 4U] = node.at(i);
+		m_poll[i + 4U]    = node.at(i);
+		m_unlink[i + 4U]  = node.at(i);
 	}
 }
 
-CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, const std::string& options, bool debug) :
 m_socket(localPort),
 m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
+m_options(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -76,14 +78,30 @@ m_linked(false)
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U]   = node.at(i);
-		m_unlink[i + 4U] = node.at(i);
+		m_poll[i + 4U]    = node.at(i);
+		m_unlink[i + 4U]  = node.at(i);
+	}
+
+	std::string opt = options;
+	if (!opt.empty()) {
+		m_options = new unsigned char[50U];
+		::memcpy(m_options + 0U, "YSFO", 4U);
+
+		for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++)
+			m_options[i + 4U] = node.at(i);
+
+		opt.resize(50, ' ');
+
+		for (unsigned int i = 0U; i < (50U - 4U - YSF_CALLSIGN_LENGTH); i++)
+			m_options[i + 4U + YSF_CALLSIGN_LENGTH] = opt.at(i);
 	}
 }
 
 CYSFNetwork::~CYSFNetwork()
 {
 	delete[] m_poll;
+	delete[] m_unlink;
+	delete[] m_options;
 }
 
 std::string CYSFNetwork::getDesc(unsigned int dgId)
@@ -126,6 +144,9 @@ void CYSFNetwork::writePoll()
 	m_pollTimer.start();
 
 	m_socket.write(m_poll, 14U, m_addr, m_addrLen);
+
+	if (m_options != NULL)
+		m_socket.write(m_options, 50U, m_addr, m_addrLen);
 }
 
 void CYSFNetwork::unlink()
@@ -163,6 +184,9 @@ void CYSFNetwork::clock(unsigned int ms)
 			LogMessage("Linked to %s", m_name.c_str());
 
 		m_linked = true;
+
+		if (m_options != NULL)
+			m_socket.write(m_options, 50U, m_addr, m_addrLen);
 	}
 
 	if (m_debug)
