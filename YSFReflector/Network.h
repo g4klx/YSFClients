@@ -44,6 +44,7 @@ public:
 
 private:
 	CUDPSocket     m_socket;
+	unsigned short m_port;
 	unsigned int   m_id;
 	std::string    m_name;
 	std::string    m_description;

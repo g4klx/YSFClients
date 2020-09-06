@@ -1,6 +1,6 @@
-CC      = gcc
-CXX     = g++
-CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
+CC      = cc
+CXX     = c++
+CFLAGS  = -g -O3 -Wall -std=c++0x -pthread -DHAVE_LOG_H -DUDP_SOCKET_MAX=2
 LIBS    = -lpthread
 LDFLAGS = -g
 
