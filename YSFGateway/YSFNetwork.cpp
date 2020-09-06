@@ -98,9 +98,14 @@ CYSFNetwork::~CYSFNetwork()
 
 bool CYSFNetwork::open()
 {
+	if (m_addrLen == 0U) {
+		LogError("Unable to resolve the address of the YSF network");
+		return false;
+	}
+
 	LogMessage("Opening YSF network connection");
 
-	return m_socket.open();
+	return m_socket.open(m_addr);
 }
 
 void CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen)
