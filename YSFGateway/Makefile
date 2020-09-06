@@ -1,5 +1,5 @@
-CC      = gcc
-CXX     = g++
+CC      = cc
+CXX     = c++
 
 # Use the following CFLAGS and LIBS if you don't want to use gpsd.
 CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
