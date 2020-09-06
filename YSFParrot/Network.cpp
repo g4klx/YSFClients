@@ -89,6 +89,10 @@ unsigned int CNetwork::read(unsigned char* data)
 		return 0U;
 	}
 
+	// Throw away incoming options messages
+	if (::memcmp(data, "YSFO", 4U) == 0)
+		return 0U;
+
 	// Handle incoming unlinks
 	if (::memcmp(data, "YSFU", 4U) == 0)
 		return 0U;
