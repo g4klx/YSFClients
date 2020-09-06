@@ -194,14 +194,14 @@ void CFCSNetwork::clock(unsigned int ms)
 			LogMessage("Linked to %s", m_print.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
-		writeOptions();
+		writeOptions(m_print);
 	}
 
 	if (length == 10 && m_state == FCS_LINKING) {
 		LogMessage("Linked to %s", m_print.c_str());
 		m_state = FCS_LINKED;
 		writeInfo();
-		writeOptions();
+		writeOptions(m_print);
 	}
 
 	if (length == 7 || length == 10 || length == 130) {
@@ -279,7 +279,7 @@ void CFCSNetwork::writePing()
 	m_socket.write(m_ping, 25U, m_address, FCS_PORT);
 }
 
-void CFCSNetwork::writeOptions()
+void CFCSNetwork::writeOptions(const std::string& reflector)
 {
 	if (m_state != FCS_LINKED)
 		return;
@@ -288,7 +288,8 @@ void CFCSNetwork::writeOptions()
 		return;
 
 	::memset(m_options + 14U, 0x20U, 36U);
-	::memcpy(m_options + 14U, m_opt.c_str(), m_opt.size());
+	::memcpy(m_options + 4U, (reflector.substr(0,6)+reflector.substr(7,2)).c_str(), 8U);
+	::memcpy(m_options + 12U, m_opt.c_str(), m_opt.size());
 
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Options Sent", m_options, 50U);
