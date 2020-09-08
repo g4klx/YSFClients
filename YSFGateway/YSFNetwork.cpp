@@ -197,6 +197,13 @@ void CYSFNetwork::clock(unsigned int ms)
 	if (address.s_addr != m_address.s_addr || port != m_port)
 		return;
 
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
+
+	// Throw away any options messages
+	if (::memcmp(buffer, "YSFO", 4U) == 0)
+		return;
+
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {
 		if (strcmp(m_name.c_str(),"MMDVM")== 0)
 			LogMessage("Link successful to %s", m_name.c_str());
@@ -208,9 +215,6 @@ void CYSFNetwork::clock(unsigned int ms)
 		if (!m_opt.empty())
 			m_socket.write(m_options, 50U, m_address, m_port);
 	}
-
-	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
 
 	unsigned char len = length;
 	m_buffer.addData(&len, 1U);
