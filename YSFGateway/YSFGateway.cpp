@@ -724,7 +724,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			m_ysfNetwork->clearDestination();
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
@@ -735,7 +735,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			m_fcsNetwork->clearDestination();
 
 			m_current.clear();
-			m_inactivityTimer.stop();
+			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
