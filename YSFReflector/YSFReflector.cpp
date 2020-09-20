@@ -79,10 +79,12 @@ CYSFReflector::CYSFReflector(const std::string& file) :
 m_conf(file),
 m_repeaters()
 {
+	CUDPSocket::startup();
 }
 
 CYSFReflector::~CYSFReflector()
 {
+	CUDPSocket::shutdown();
 }
 
 void CYSFReflector::run()
