@@ -92,10 +92,12 @@ m_conf(configFile),
 m_writer(NULL),
 m_gps(NULL)
 {
+	CUDPSocket::startup();
 }
 
 CDGIdGateway::~CDGIdGateway()
 {
+	CUDPSocket::shutdown();
 }
 
 int CDGIdGateway::run()
