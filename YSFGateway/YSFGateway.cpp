@@ -96,10 +96,12 @@ m_lostTimer(1000U, 120U),
 m_fcsNetworkEnabled(false),
 m_remoteSocket(NULL)
 {
+	CUDPSocket::startup();
 }
 
 CYSFGateway::~CYSFGateway()
 {
+	CUDPSocket::shutdown();
 }
 
 int CYSFGateway::run()
