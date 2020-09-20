@@ -37,7 +37,7 @@
 #include <gps.h>
 #endif
 #else
-#include <winsock.h>
+#include <ws2tcpip.h>
 #endif
 
 class CAPRSWriter {
