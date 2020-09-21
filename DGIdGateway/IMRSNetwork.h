@@ -61,6 +61,8 @@ public:
 
 	virtual bool open();
 
+	virtual DGID_STATUS getStatus();
+
 	virtual void link();
 
 	virtual void write(unsigned int dgId, const unsigned char* data);
@@ -76,6 +78,7 @@ public:
 private:
 	CUDPSocket             m_socket;
 	std::vector<IMRSDGId*> m_dgIds;
+	DGID_STATUS            m_state;
 
 	IMRSDGId* find(const sockaddr_storage& address) const;
 	IMRSDGId* find(unsigned int dgId) const;

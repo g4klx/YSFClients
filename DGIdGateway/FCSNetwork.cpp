@@ -44,7 +44,7 @@ m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
 m_pingTimer(1000U, 0U, 800U),
 m_resetTimer(1000U, 1U),
-m_state(FCS_UNLINKED)
+m_state(DS_NOTOPEN)
 {
 	m_info = new unsigned char[100U];
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
@@ -86,19 +86,32 @@ bool CFCSNetwork::open()
 {
 	if (m_addrLen == 0U) {
 		LogError("Unable to resolve the address of %s", m_reflector.c_str());
+		m_state = DS_NOTOPEN;
 		return false;
 	}
 
 	LogMessage("Opening FCS network connection");
 
-	return m_socket.open(m_addr);
+	bool ret = m_socket.open(m_addr);
+	if (!ret) {
+		m_state = DS_NOTOPEN;
+		return false;
+	} else {
+		m_state = DS_NOTLINKED;
+		return true;
+	}
+}
+
+DGID_STATUS CFCSNetwork::getStatus()
+{
+	return m_state;
 }
 
 void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
 
-	if (m_state != FCS_LINKED)
+	if (m_state != DS_LINKED)
 		return;
 
 	unsigned char buffer[130U];
@@ -115,10 +128,10 @@ void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 
 void CFCSNetwork::link()
 {
-	if (m_state == FCS_LINKING || m_state == FCS_LINKED)
+	if (m_state != DS_NOTLINKED)
 		return;
 
-	m_state = FCS_LINKING;
+	m_state = DS_LINKING;
 
 	m_pingTimer.start();
 
@@ -127,14 +140,21 @@ void CFCSNetwork::link()
 
 void CFCSNetwork::unlink()
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != DS_LINKED)
 		return;
 
 	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_addr, m_addrLen);
+
+	m_pingTimer.stop();
+
+	m_state = DS_NOTLINKED;
 }
 
 void CFCSNetwork::clock(unsigned int ms)
 {
+	if (m_state == DS_NOTOPEN)
+		return;
+
 	m_pingTimer.clock(ms);
 	if (m_pingTimer.isRunning() && m_pingTimer.hasExpired()) {
 		writePing();
@@ -155,7 +175,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (m_state == FCS_UNLINKED)
+	if (m_state == DS_NOTLINKED)
 		return;
 
 	if (!CUDPSocket::match(addr, m_addr))
@@ -165,16 +185,16 @@ void CFCSNetwork::clock(unsigned int ms)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
 	if (length == 7) {
-		if (m_state == FCS_LINKING)
+		if (m_state == DS_LINKING)
 			LogMessage("Linked to %s", m_print.c_str());
-		m_state = FCS_LINKED;
+		m_state = DS_LINKED;
 		writeInfo();
 		writeOptions(m_print);
 	}
 
-	if (length == 10 && m_state == FCS_LINKING) {
+	if (length == 10 && m_state == DS_LINKING) {
 		LogMessage("Linked to %s", m_print.c_str());
-		m_state = FCS_LINKED;
+		m_state = DS_LINKED;
 		writeInfo();
 		writeOptions(m_print);
 	}
@@ -229,11 +249,13 @@ void CFCSNetwork::close()
 	m_socket.close();
 
 	LogMessage("Closing FCS network connection");
+
+	m_state = DS_NOTOPEN;
 }
 
 void CFCSNetwork::writeInfo()
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != DS_LINKED)
 		return;
 
 	if (m_debug)
@@ -244,7 +266,7 @@ void CFCSNetwork::writeInfo()
 
 void CFCSNetwork::writePing()
 {
-	if (m_state == FCS_UNLINKED)
+	if (m_state != DS_LINKING && m_state != DS_LINKED)
 		return;
 
 	if (m_debug)
@@ -255,7 +277,7 @@ void CFCSNetwork::writePing()
 
 void CFCSNetwork::writeOptions(const std::string& reflector)
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != DS_LINKED)
 		return;
 
 	if (m_opt.size() < 1)
@@ -270,4 +292,3 @@ void CFCSNetwork::writeOptions(const std::string& reflector)
 
 	m_socket.write(m_options, 50U, m_addr, m_addrLen);
 }
-

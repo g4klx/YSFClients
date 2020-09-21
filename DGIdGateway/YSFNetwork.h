@@ -40,6 +40,8 @@ public:
 
 	virtual bool open();
 
+	virtual DGID_STATUS getStatus();
+
 	virtual void link();
 
 	virtual void write(unsigned int dgId, const unsigned char* data);
@@ -63,7 +65,7 @@ private:
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_pollTimer;
 	std::string                m_name;
-	bool                       m_linked;
+	DGID_STATUS                m_state;
 
 	void writePoll();
 };

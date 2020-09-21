@@ -29,7 +29,8 @@
 
 CIMRSNetwork::CIMRSNetwork() :
 m_socket(IMRS_PORT),
-m_dgIds()
+m_dgIds(),
+m_state(DS_NOTOPEN)
 {
 }
 
@@ -61,7 +62,19 @@ bool CIMRSNetwork::open()
 {
 	LogMessage("Opening IMRS network connection");
 
-	return m_socket.open();
+	bool ret = m_socket.open();
+	if (!ret) {
+		m_state = DS_NOTOPEN;
+		return false;
+	} else {
+		m_state = DS_NOTLINKED;
+		return true;
+	}
+}
+
+DGID_STATUS CIMRSNetwork::getStatus()
+{
+	return m_state;
 }
 
 void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
@@ -196,6 +209,8 @@ void CIMRSNetwork::close()
 	LogMessage("Closing IMRS network connection");
 
 	m_socket.close();
+
+	m_state = DS_NOTOPEN;
 }
 
 IMRSDGId* CIMRSNetwork::find(const sockaddr_storage& addr) const

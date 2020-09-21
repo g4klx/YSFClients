@@ -21,6 +21,13 @@
 
 #include <string>
 
+enum DGID_STATUS {
+	DS_NOTOPEN,
+	DS_NOTLINKED,
+	DS_LINKING,
+	DS_LINKED
+};
+
 class CDGIdNetwork {
 public:
 	virtual ~CDGIdNetwork() = 0;
@@ -30,6 +37,8 @@ public:
 	virtual bool open() = 0;
 
 	virtual void link() = 0;
+
+	virtual DGID_STATUS getStatus() = 0;
 
 	virtual void write(unsigned int dgId, const unsigned char* data) = 0;
 

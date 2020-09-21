@@ -28,12 +28,6 @@
 #include <cstdint>
 #include <string>
 
-enum FCS_STATE {
-	FCS_UNLINKED,
-	FCS_LINKING,
-	FCS_LINKED
-};
-
 class CFCSNetwork : public CDGIdNetwork {
 public:
 	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, const std::string& options, bool debug);
@@ -42,6 +36,8 @@ public:
 	virtual std::string getDesc(unsigned int dgId);
 
 	virtual bool open();
+
+	virtual DGID_STATUS getStatus();
 
 	virtual void link();
 
@@ -70,7 +66,7 @@ private:
 	unsigned char                  m_n;
 	CTimer                         m_pingTimer;
 	CTimer                         m_resetTimer;
-	FCS_STATE                      m_state;
+	DGID_STATUS                    m_state;
 
 	void writeOptions(const std::string& reflector);
 	void writeInfo();

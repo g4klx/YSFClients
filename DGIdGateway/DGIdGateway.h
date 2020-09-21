@@ -42,6 +42,7 @@ private:
 
 	std::string calculateLocator();
 	void createGPS();
+	void sendPips(unsigned int n);
 };
 
 #endif

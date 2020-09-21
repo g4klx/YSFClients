@@ -363,6 +363,8 @@ int CDGIdGateway::run()
 
 	LogMessage("Starting DGIdGateway-%s", VERSION);
 
+	DGID_STATUS state = DS_NOTLINKED;
+
 	for (;;) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
@@ -394,6 +396,7 @@ int CDGIdGateway::run()
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogDebug("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
+						state = DS_NOTLINKED;
 					}
 
 					if (m_gps != NULL)
@@ -444,6 +447,7 @@ int CDGIdGateway::run()
 								std::string desc = dgIdNetwork[i]->getDesc(i);
 								LogDebug("DG-ID set to %u (%s) via Network", i, desc.c_str());
 								currentDGId = i;
+								state = DS_LINKED;
 							}
 						}
 					}
@@ -474,8 +478,19 @@ int CDGIdGateway::run()
 
 			LogDebug("DG-ID set to 0 (None) via timeout");
 
+			state = DS_NOTLINKED;
 			currentDGId = 0U;
 			inactivityTimer.stop();
+			sendPips(2U);
+		}
+
+		if (dgIdNetwork[currentDGId] != NULL) {
+			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
+			if (state != DS_LINKED && netState == DS_LINKED)
+				sendPips(1U);
+			else if (state == DS_LINKED && netState != DS_LINKED)
+				sendPips(3U);
+			state = netState;
 		}
 
 		if (ms < 5U)
@@ -602,3 +617,7 @@ std::string CDGIdGateway::calculateLocator()
 	return locator;
 }
 
+void CDGIdGateway::sendPips(unsigned int n)
+{
+
+}
