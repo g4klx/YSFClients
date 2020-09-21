@@ -201,6 +201,8 @@ int CDGIdGateway::run()
 		return 1;
 	}
 
+	rptNetwork.link();
+
 	std::string fileName = m_conf.getYSFNetHosts();
 	CYSFReflectors* reflectors = new CYSFReflectors(fileName);
 	reflectors->load();
@@ -381,6 +383,7 @@ int CDGIdGateway::run()
 	LogMessage("Starting DGIdGateway-%s", VERSION);
 
 	DGID_STATUS state = DS_NOTLINKED;
+	unsigned int nPips = 0U;
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -411,7 +414,7 @@ int CDGIdGateway::run()
 						}
 
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
-						LogDebug("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
 						state = DS_NOTLINKED;
 					}
@@ -440,6 +443,10 @@ int CDGIdGateway::run()
 				if ((buffer[34U] & 0x01U) == 0x01U) {
 					if (m_gps != NULL)
 						m_gps->reset();
+					if (nPips > 0U) {
+						sendPips(nPips);
+						nPips = 0U;
+					}
 				}
 			}
 		}
@@ -462,7 +469,7 @@ int CDGIdGateway::run()
 
 							if (currentDGId == 0U) {
 								std::string desc = dgIdNetwork[i]->getDesc(i);
-								LogDebug("DG-ID set to %u (%s) via Network", i, desc.c_str());
+								LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
 								currentDGId = i;
 								state = DS_LINKED;
 							}
@@ -493,20 +500,20 @@ int CDGIdGateway::run()
 				dgIdNetwork[currentDGId]->unlink();
 			}
 
-			LogDebug("DG-ID set to 0 (None) via timeout");
+			LogMessage("DG-ID set to 0 (None) via timeout");
 
 			state = DS_NOTLINKED;
 			currentDGId = 0U;
 			inactivityTimer.stop();
-			sendPips(2U);
+			nPips = 2U;
 		}
 
 		if (dgIdNetwork[currentDGId] != NULL) {
 			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
 			if (state != DS_LINKED && netState == DS_LINKED)
-				sendPips(1U);
+				nPips = 1U;
 			else if (state == DS_LINKED && netState != DS_LINKED)
-				sendPips(3U);
+				nPips = 3U;
 			state = netState;
 		}
 
@@ -514,6 +521,7 @@ int CDGIdGateway::run()
 			CThread::sleep(5U);
 	}
 
+	rptNetwork.unlink();
 	rptNetwork.close();
 
 	if (m_gps != NULL) {

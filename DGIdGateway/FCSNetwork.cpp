@@ -147,6 +147,8 @@ void CFCSNetwork::unlink()
 
 	m_pingTimer.stop();
 
+	LogMessage("Unlinked from %s", m_print.c_str());
+
 	m_state = DS_NOTLINKED;
 }
 

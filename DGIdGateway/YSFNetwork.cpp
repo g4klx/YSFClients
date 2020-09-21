@@ -189,6 +189,8 @@ void CYSFNetwork::unlink()
 
 	m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
 
+	LogMessage("Unlinked from %s", m_name.c_str());
+
 	m_state = DS_NOTLINKED;
 }
 
