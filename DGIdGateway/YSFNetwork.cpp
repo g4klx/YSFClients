@@ -152,9 +152,9 @@ void CYSFNetwork::link()
 	if (m_state != DS_NOTLINKED)
 		return;
 
-	writePoll();
-
 	m_state = DS_LINKING;
+
+	writePoll();
 }
 
 void CYSFNetwork::writePoll()
@@ -164,10 +164,17 @@ void CYSFNetwork::writePoll()
 
 	m_pollTimer.start();
 
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", m_poll, 14U);
+
 	m_socket.write(m_poll, 14U, m_addr, m_addrLen);
 
-	if (m_options != NULL)
+	if (m_options != NULL) {
+		if (m_debug)
+			CUtils::dump(1U, "YSF Network Data Sent", m_options, 50U);
+
 		m_socket.write(m_options, 50U, m_addr, m_addrLen);
+	}
 }
 
 void CYSFNetwork::unlink()
@@ -176,6 +183,9 @@ void CYSFNetwork::unlink()
 		return;
 
 	m_pollTimer.stop();
+
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", m_unlink, 14U);
 
 	m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
 

@@ -241,6 +241,8 @@ int CDGIdGateway::run()
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+			LogMessage("Added FCS:%s to DG-ID %u", name.c_str(), dgid);
 		} else if (type == "YSF") {
 			std::string name    = (*it)->m_name;
 			unsigned int local  = (*it)->m_local;
@@ -248,11 +250,15 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, options, debug);;
+				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, options, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YSF:%s to DG-ID %u", name.c_str(), dgid);
+			} else {
+				LogWarning("Unknown YSF reflector: %s", name.c_str());
 			}
 		} else if (type == "IMRS") {
 			if (imrs != NULL) {
@@ -269,6 +275,8 @@ int CDGIdGateway::run()
 						dest->m_addr    = addr;
 						dest->m_addrLen = addrLen;
 						dests.push_back(dest);
+
+						LogMessage("Added IMRS:%s to DG-ID %u", name.c_str(), dgid);
 					} else {
 						LogWarning("Unable to resolve the address for %s", (*it)->m_address.c_str());
 					}
@@ -293,6 +301,8 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added Parrot to DG-ID %u", dgid);
 			} else {
 				LogWarning("Unable to resolve the address for the YSF Parrot");
 			}
@@ -307,6 +317,8 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YSF2DMR to DG-ID %u", dgid);
 			} else {
 				LogWarning("Unable to resolve the address for YSF2DMR");
 			}
@@ -321,6 +333,8 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YSF2NXDN to DG-ID %u", dgid);
 			} else {
 				LogWarning("Unable to resolve the address for YSF2NXDN");
 			}
@@ -335,6 +349,8 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YSF2P25 to DG-ID %u", dgid);
 			} else {
 				LogWarning("Unable to resolve the address for YSF2P25");
 			}
@@ -343,10 +359,11 @@ int CDGIdGateway::run()
 		if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid] != imrs) {
 			bool ret = dgIdNetwork[dgid]->open();
 			if (!ret) {
+				LogWarning("\tUnable to open connection");
 				delete dgIdNetwork[dgid];
 				dgIdNetwork[dgid] = NULL;
-			}
-			if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid]->m_static) {
+			} else if (dgIdNetwork[dgid]->m_static) {
+				LogMessage("\tLinking at startup");
 				dgIdNetwork[dgid]->link();
 				dgIdNetwork[dgid]->link();
 				dgIdNetwork[dgid]->link();
