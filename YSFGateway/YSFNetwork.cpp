@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -202,6 +202,10 @@ void CYSFNetwork::clock(unsigned int ms)
 
 	// Throw away any options messages
 	if (::memcmp(buffer, "YSFO", 4U) == 0)
+		return;
+
+	// Throw away any info messages
+	if (::memcmp(buffer, "YSFI", 4U) == 0)
 		return;
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {

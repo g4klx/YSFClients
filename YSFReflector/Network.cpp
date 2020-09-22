@@ -106,6 +106,10 @@ unsigned int CNetwork::readData(unsigned char* data, unsigned int length, in_add
 	if (::memcmp(data, "YSFO", 4U) == 0)
 		return 0U;
 
+	// Throw away any info messages
+	if (::memcmp(data, "YSFI", 4U) == 0)
+		return 0U;
+
 	// Handle incoming status requests
 	if (::memcmp(data, "YSFS", 4U) == 0) {
 		m_socket.write(m_status, 42U, address, port);
