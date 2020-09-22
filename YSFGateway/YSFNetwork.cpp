@@ -209,6 +209,10 @@ void CYSFNetwork::clock(unsigned int ms)
 	if (::memcmp(buffer, "YSFO", 4U) == 0)
 		return;
 
+	// Throw away any info messages
+	if (::memcmp(buffer, "YSFI", 4U) == 0)
+		return;
+
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {
 		if (strcmp(m_name.c_str(),"MMDVM")== 0)
 			LogMessage("Link successful to %s", m_name.c_str());
