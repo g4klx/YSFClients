@@ -29,14 +29,12 @@ const char* FCS_VERSION = "MMDVM";
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, const std::string& options, bool debug) :
+CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_addr(),
 m_addrLen(0U),
 m_ping(NULL),
-m_options(NULL),
-m_opt(options),
 m_info(NULL),
 m_reflector(reflector),
 m_print(),
@@ -59,11 +57,6 @@ m_state(DS_NOTOPEN)
 
 	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 
-	m_options = new unsigned char[50U];
-	::memcpy(m_options + 0U, "FCSO", 4U);
-	::memset(m_options + 4U, ' ', 46U);
-	::memcpy(m_options + 4U, callsign.c_str(), callsign.size());
-
 	char url[50U];
 	::sprintf(url, "%s.xreflector.net", reflector.c_str());
 	if (CUDPSocket::lookup(std::string(url), FCS_PORT, m_addr, m_addrLen) != 0)
@@ -74,12 +67,16 @@ CFCSNetwork::~CFCSNetwork()
 {
 	delete[] m_info;
 	delete[] m_ping;
-	delete[] m_options;
 }
 
 std::string CFCSNetwork::getDesc(unsigned int dgId)
 {
 	return "FCS: " + m_reflector;
+}
+
+unsigned int CFCSNetwork::getDGId()
+{
+	return 0U;
 }
 
 bool CFCSNetwork::open()
@@ -177,6 +174,8 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
+	CUtils::dump(1U, "FCS Network Data Received", buffer, length);
+
 	if (m_state == DS_NOTLINKED)
 		return;
 
@@ -191,14 +190,12 @@ void CFCSNetwork::clock(unsigned int ms)
 			LogMessage("Linked to %s", m_print.c_str());
 		m_state = DS_LINKED;
 		writeInfo();
-		writeOptions(m_print);
 	}
 
 	if (length == 10 && m_state == DS_LINKING) {
 		LogMessage("Linked to %s", m_print.c_str());
 		m_state = DS_LINKED;
 		writeInfo();
-		writeOptions(m_print);
 	}
 
 	if (length == 7 || length == 10 || length == 130) {
@@ -275,22 +272,4 @@ void CFCSNetwork::writePing()
 		CUtils::dump(1U, "FCS Network Data Sent", m_ping, 25U);
 
 	m_socket.write(m_ping, 25U, m_addr, m_addrLen);
-}
-
-void CFCSNetwork::writeOptions(const std::string& reflector)
-{
-	if (m_state != DS_LINKED)
-		return;
-
-	if (m_opt.size() < 1)
-		return;
-
-	::memset(m_options + 14U, 0x20U, 36U);
-	::memcpy(m_options + 4U, (reflector.substr(0, 6) + reflector.substr(7, 2)).c_str(), 8U);
-	::memcpy(m_options + 12U, m_opt.c_str(), m_opt.size());
-
-	if (m_debug)
-		CUtils::dump(1U, "FCS Network Options Sent", m_options, 50U);
-
-	m_socket.write(m_options, 50U, m_addr, m_addrLen);
 }

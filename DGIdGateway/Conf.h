@@ -31,11 +31,11 @@ struct DGIdData {
 	unsigned int m_dgId;
 	std::string  m_type;
 	bool         m_static;
-	std::string  m_options;
 	std::string  m_name;
 	std::string  m_address;
 	unsigned int m_port;
 	unsigned int m_local;
+	unsigned int m_netDGId;
 	std::vector<IMRSDestination*> m_destinations;
 	unsigned int m_rfHangTime;
 	unsigned int m_netHangTime;

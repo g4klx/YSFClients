@@ -58,6 +58,11 @@ std::string CIMRSNetwork::getDesc(unsigned int dgId)
 	return "IMRS: " + ptr->m_name;
 }
 
+unsigned int CIMRSNetwork::getDGId()
+{
+	return 0U;
+}
+
 bool CIMRSNetwork::open()
 {
 	LogMessage("Opening IMRS network connection");

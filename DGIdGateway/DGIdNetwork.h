@@ -34,6 +34,8 @@ public:
 
 	virtual std::string getDesc(unsigned int dgId) = 0;
 
+	virtual unsigned int getDGId() = 0;
+
 	virtual bool open() = 0;
 
 	virtual void link() = 0;

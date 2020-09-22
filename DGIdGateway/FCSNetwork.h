@@ -30,10 +30,12 @@
 
 class CFCSNetwork : public CDGIdNetwork {
 public:
-	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, const std::string& options, bool debug);
+	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
 	virtual ~CFCSNetwork();
 
 	virtual std::string getDesc(unsigned int dgId);
+
+	virtual unsigned int getDGId();
 
 	virtual bool open();
 
@@ -57,8 +59,6 @@ private:
 	sockaddr_storage               m_addr;
 	unsigned int                   m_addrLen;
 	unsigned char*                 m_ping;
-	unsigned char*                 m_options;
-	std::string                    m_opt;
 	unsigned char*                 m_info;
 	std::string                    m_reflector;
 	std::string                    m_print;
@@ -68,7 +68,6 @@ private:
 	CTimer                         m_resetTimer;
 	DGID_STATUS                    m_state;
 
-	void writeOptions(const std::string& reflector);
 	void writeInfo();
 	void writePing();
 };

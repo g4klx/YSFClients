@@ -31,12 +31,13 @@
 class CYSFNetwork : public CDGIdNetwork {
 public:
 	CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug);
-	CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, const std::string& options, bool debug);
+	CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int dgId, bool debug);
+	CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug);
 	virtual ~CYSFNetwork();
 
-	void setOptions(const std::string& options);
-
 	virtual std::string getDesc(unsigned int dgId);
+
+	virtual unsigned int getDGId();
 
 	virtual bool open();
 
@@ -66,6 +67,9 @@ private:
 	CTimer                     m_pollTimer;
 	std::string                m_name;
 	DGID_STATUS                m_state;
+	unsigned int               m_pollCount;
+	bool                       m_ycs;
+	unsigned int               m_dgId;
 
 	void writePoll();
 };

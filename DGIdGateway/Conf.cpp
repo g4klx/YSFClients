@@ -250,6 +250,10 @@ bool CConf::read()
 				dgIdData->m_rfHangTime  = m_fcsRFHangTime;
 				dgIdData->m_netHangTime = m_fcsNetHangTime;
 				dgIdData->m_debug       = m_fcsNetDebug;
+			} else if (::strcmp(value, "YCS") == 0) {
+				dgIdData->m_rfHangTime  = m_ysfRFHangTime;
+				dgIdData->m_netHangTime = m_ysfNetHangTime;
+				dgIdData->m_debug       = m_ysfNetDebug;
 			} else {
 				dgIdData->m_rfHangTime  = m_rfHangTime;
 				dgIdData->m_netHangTime = m_netHangTime;
@@ -261,8 +265,6 @@ bool CConf::read()
 			dgIdData->m_netHangTime = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Static") == 0)
 			dgIdData->m_static = ::atoi(value) == 1;
-		else if (::strcmp(key, "Options") == 0)
-			dgIdData->m_options = value;
 		else if (::strcmp(key, "Address") == 0)
 			dgIdData->m_address = value;
 		else if (::strcmp(key, "Name") == 0)
@@ -271,6 +273,8 @@ bool CConf::read()
 			dgIdData->m_port = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Local") == 0)
 			dgIdData->m_local = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "DGId") == 0)
+			dgIdData->m_netDGId = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Destination") == 0) {
 			char* p1 = ::strtok(value, ",");
 			char* p2 = ::strtok(NULL, "\r\n");

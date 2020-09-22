@@ -236,9 +236,8 @@ int CDGIdGateway::run()
 			unsigned int rxFrequency = m_conf.getRxFrequency();
 			std::string locator      = calculateLocator();
 			unsigned int id          = m_conf.getId();
-			std::string options      = (*it)->m_options;
 
-			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, options, debug);
+			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, debug);
 			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -248,11 +247,10 @@ int CDGIdGateway::run()
 		} else if (type == "YSF") {
 			std::string name    = (*it)->m_name;
 			unsigned int local  = (*it)->m_local;
-			std::string options = (*it)->m_options;
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, options, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -261,6 +259,23 @@ int CDGIdGateway::run()
 				LogMessage("Added YSF:%s to DG-ID %u", name.c_str(), dgid);
 			} else {
 				LogWarning("Unknown YSF reflector: %s", name.c_str());
+			}
+		} else if (type == "YCS") {
+			std::string name   = (*it)->m_name;
+			unsigned int local = (*it)->m_local;
+
+			CYSFReflector* reflector = reflectors->findByName(name);
+			if (reflector != NULL) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, (*it)->m_netDGId, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YCS:%s:%u to DG-ID %u", name.c_str(), (*it)->m_netDGId, dgid);
+			}
+			else {
+				LogWarning("Unknown YCS reflector: %s", name.c_str());
 			}
 		} else if (type == "IMRS") {
 			if (imrs != NULL) {
@@ -298,7 +313,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, "", debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -314,7 +329,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, "", debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -330,7 +345,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, "", debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -346,7 +361,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, "", debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VOICE_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -428,8 +443,8 @@ int CDGIdGateway::run()
 						    (dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
 						    (dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
 						    (dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
-							// Set the DG-ID to zero for compatibility
-							fich.setDGId(0U);
+							unsigned int dgId = dgIdNetwork[currentDGId]->getDGId();
+							fich.setDGId(dgId);
 							fich.encode(buffer + 35U);
 
 							dgIdNetwork[currentDGId]->write(currentDGId, buffer);
@@ -644,5 +659,5 @@ std::string CDGIdGateway::calculateLocator()
 
 void CDGIdGateway::sendPips(unsigned int n)
 {
-
+	LogMessage("*** %u bleep!", n);
 }

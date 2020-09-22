@@ -59,6 +59,8 @@ public:
 
 	virtual std::string getDesc(unsigned int dgId);
 
+	virtual unsigned int getDGId();
+
 	virtual bool open();
 
 	virtual DGID_STATUS getStatus();
