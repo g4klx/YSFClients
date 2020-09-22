@@ -188,14 +188,24 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length == 7) {
 		if (m_state == DS_LINKING)
 			LogMessage("Linked to %s", m_print.c_str());
+
 		m_state = DS_LINKED;
-		writeInfo();
+
+		if (m_debug)
+			CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
+
+		m_socket.write(m_info, 100U, m_addr, m_addrLen);
 	}
 
 	if (length == 10 && m_state == DS_LINKING) {
 		LogMessage("Linked to %s", m_print.c_str());
+
 		m_state = DS_LINKED;
-		writeInfo();
+
+		if (m_debug)
+			CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
+
+		m_socket.write(m_info, 100U, m_addr, m_addrLen);
 	}
 
 	if (length == 7 || length == 10 || length == 130) {
@@ -250,17 +260,6 @@ void CFCSNetwork::close()
 	LogMessage("Closing FCS network connection");
 
 	m_state = DS_NOTOPEN;
-}
-
-void CFCSNetwork::writeInfo()
-{
-	if (m_state != DS_LINKED)
-		return;
-
-	if (m_debug)
-		CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
-
-	m_socket.write(m_info, 100U, m_addr, m_addrLen);
 }
 
 void CFCSNetwork::writePing()

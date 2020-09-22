@@ -159,6 +159,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="UDPSocket.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="YCSNetwork.cpp" />
     <ClCompile Include="YSFConvolution.cpp" />
     <ClCompile Include="YSFFICH.cpp" />
     <ClCompile Include="YSFNetwork.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Version.h" />
+    <ClInclude Include="YCSNetwork.h" />
     <ClInclude Include="YSFConvolution.h" />
     <ClInclude Include="YSFDefines.h" />
     <ClInclude Include="YSFFICH.h" />

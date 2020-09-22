@@ -12,8 +12,8 @@ LIBS    = -lm -lpthread
 LDFLAGS = -g
 
 OBJECTS = APRSWriter.o Conf.o CRC.o DGIdGateway.o DGIdNetwork.o FCSNetwork.o Golay24128.o GPS.o IMRSNetwork.o \
-	  Log.o StopWatch.o Sync.o Thread.o Timer.o UDPSocket.o Utils.o YSFConvolution.o YSFFICH.o YSFNetwork.o \
-	  YSFPayload.o YSFReflectors.o
+	  Log.o StopWatch.o Sync.o Thread.o Timer.o UDPSocket.o Utils.o YCSNetwork.o YSFConvolution.o YSFFICH.o \
+	  YSFNetwork.o YSFPayload.o YSFReflectors.o
 
 all:		DGIdGateway
 

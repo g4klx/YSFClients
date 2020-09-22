@@ -16,8 +16,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef	FCSNetwork_H
-#define	FCSNetwork_H
+#ifndef	YCSNetwork_H
+#define	YCSNetwork_H
 
 #include "DGIdNetwork.h"
 #include "YSFDefines.h"
@@ -28,10 +28,10 @@
 #include <cstdint>
 #include <string>
 
-class CFCSNetwork : public CDGIdNetwork {
+class CYCSNetwork : public CDGIdNetwork {
 public:
-	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
-	virtual ~CFCSNetwork();
+	CYCSNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& description, unsigned int id, unsigned int dgId, bool debug);
+	virtual ~CYCSNetwork();
 
 	virtual std::string getDesc(unsigned int dgId);
 
@@ -54,21 +54,21 @@ public:
 	virtual void close();
 
 private:
-	CUDPSocket                     m_socket;
-	bool                           m_debug;
-	sockaddr_storage               m_addr;
-	unsigned int                   m_addrLen;
-	unsigned char*                 m_ping;
-	unsigned char*                 m_info;
-	std::string                    m_reflector;
-	std::string                    m_print;
-	CRingBuffer<unsigned char>     m_buffer;
-	unsigned char                  m_n;
-	CTimer                         m_pingTimer;
-	CTimer                         m_resetTimer;
-	DGID_STATUS                    m_state;
+	CUDPSocket                 m_socket;
+	bool                       m_debug;
+	sockaddr_storage           m_addr;
+	unsigned int               m_addrLen;
+	unsigned char*             m_poll;
+	unsigned char*             m_options;
+	unsigned char*             m_info;
+	unsigned char*             m_unlink;
+	CRingBuffer<unsigned char> m_buffer;
+	CTimer                     m_pollTimer;
+	std::string                m_name;
+	DGID_STATUS                m_state;
+	unsigned int               m_dgId;
 
-	void writePing();
+	void writePoll();
 };
 
 #endif

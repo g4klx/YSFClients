@@ -21,6 +21,7 @@
 #include "DGIdNetwork.h"
 #include "IMRSNetwork.h"
 #include "YSFNetwork.h"
+#include "YCSNetwork.h"
 #include "FCSNetwork.h"
 #include "UDPSocket.h"
 #include "StopWatch.h"
@@ -271,7 +272,7 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, rxFrequency, txFrequency, locator, description, id, (*it)->m_netDGId, debug);
+				dgIdNetwork[dgid] = new CYCSNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, rxFrequency, txFrequency, locator, description, id, (*it)->m_netDGId, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;

@@ -17,7 +17,7 @@
  */
 
 #include "YSFDefines.h"
-#include "YSFNetwork.h"
+#include "YCSNetwork.h"
 #include "Utils.h"
 #include "Log.h"
 
@@ -27,44 +27,20 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
-m_socket(localAddress, localPort),
-m_debug(debug),
-m_addr(addr),
-m_addrLen(addrLen),
-m_poll(NULL),
-m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer"),
-m_pollTimer(1000U, 5U),
-m_name(name),
-m_state(DS_NOTOPEN)
-{
-	m_poll = new unsigned char[14U];
-	::memcpy(m_poll + 0U, "YSFP", 4U);
-
-	m_unlink = new unsigned char[14U];
-	::memcpy(m_unlink + 0U, "YSFU", 4U);
-
-	std::string node = callsign;
-	node.resize(YSF_CALLSIGN_LENGTH, ' ');
-
-	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U]    = node.at(i);
-		m_unlink[i + 4U]  = node.at(i);
-	}
-}
-
-CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
+CYCSNetwork::CYCSNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& description, unsigned int id, unsigned int dgId, bool debug) :
 m_socket(localPort),
 m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
+m_options(NULL),
+m_info(NULL),
 m_unlink(NULL),
-m_buffer(1000U, "YSF Network Buffer"),
+m_buffer(1000U, "YCS Network Buffer"),
 m_pollTimer(1000U, 5U),
 m_name(name),
-m_state(DS_NOTOPEN)
+m_state(DS_NOTOPEN),
+m_dgId(dgId)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -72,40 +48,63 @@ m_state(DS_NOTOPEN)
 	m_unlink = new unsigned char[14U];
 	::memcpy(m_unlink + 0U, "YSFU", 4U);
 
+	m_options = new unsigned char[50U];
+	::memcpy(m_options + 0U, "YSFO", 4U);
+
+	m_info = new unsigned char[80U];
+	::memcpy(m_info + 0U, "YSFI", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
 		m_poll[i + 4U]    = node.at(i);
 		m_unlink[i + 4U]  = node.at(i);
+		m_options[i + 4U] = node.at(i);
+		m_info[i + 4U]    = node.at(i);
 	}
+
+	char text[101U];
+	::sprintf(text, "%u                                                           ", dgId);
+
+	for (unsigned int i = 0U; i < (50U - 4U - YSF_CALLSIGN_LENGTH); i++)
+		m_options[i + 4U + YSF_CALLSIGN_LENGTH] = text[i];
+
+	std::string desc = description;
+	desc.resize(20U, ' ');
+
+	sprintf(text, "%9u%9u%.6s%sMMDVM       %07u   ", rxFrequency, txFrequency, locator.c_str(), desc.c_str(), id);
+	for (unsigned int i = 0U; i < (80U - 4U - YSF_CALLSIGN_LENGTH); i++)
+		m_info[i + 4U + YSF_CALLSIGN_LENGTH] = text[i];
 }
 
-CYSFNetwork::~CYSFNetwork()
+CYCSNetwork::~CYCSNetwork()
 {
 	delete[] m_poll;
 	delete[] m_unlink;
+	delete[] m_options;
+	delete[] m_info;
 }
 
-std::string CYSFNetwork::getDesc(unsigned int dgId)
+std::string CYCSNetwork::getDesc(unsigned int dgId)
 {
-	return "YSF: " + m_name;
+	return "YCS: " + m_name;
 }
 
-unsigned int CYSFNetwork::getDGId()
+unsigned int CYCSNetwork::getDGId()
 {
-	return 0U;
+	return m_dgId;
 }
 
-bool CYSFNetwork::open()
+bool CYCSNetwork::open()
 {
 	if (m_addrLen == 0U) {
-		LogError("Unable to resolve the address of the YSF network");
+		LogError("Unable to resolve the address of the YCS network");
 		m_state = DS_NOTOPEN;
 		return false;
 	}
 
-	LogMessage("Opening YSF network connection");
+	LogMessage("Opening YCS network connection");
 
 	bool ret = m_socket.open(m_addr);
 	if (!ret) {
@@ -117,12 +116,12 @@ bool CYSFNetwork::open()
 	}
 }
 
-DGID_STATUS CYSFNetwork::getStatus()
+DGID_STATUS CYCSNetwork::getStatus()
 {
 	return m_state;
 }
 
-void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
+void CYCSNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -130,12 +129,12 @@ void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 		return;
 
 	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
+		CUtils::dump(1U, "YCS Network Data Sent", data, 155U);
 
 	m_socket.write(data, 155U, m_addr, m_addrLen);
 }
 
-void CYSFNetwork::link()
+void CYCSNetwork::link()
 {
 	if (m_state != DS_NOTLINKED)
 		return;
@@ -145,7 +144,7 @@ void CYSFNetwork::link()
 	writePoll();
 }
 
-void CYSFNetwork::writePoll()
+void CYCSNetwork::writePoll()
 {
 	if (m_state != DS_LINKING && m_state != DS_LINKED)
 		return;
@@ -153,12 +152,12 @@ void CYSFNetwork::writePoll()
 	m_pollTimer.start();
 
 	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Sent", m_poll, 14U);
+		CUtils::dump(1U, "YCS Network Data Sent", m_poll, 14U);
 
 	m_socket.write(m_poll, 14U, m_addr, m_addrLen);
 }
 
-void CYSFNetwork::unlink()
+void CYCSNetwork::unlink()
 {
 	if (m_state != DS_LINKED)
 		return;
@@ -166,7 +165,7 @@ void CYSFNetwork::unlink()
 	m_pollTimer.stop();
 
 	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Sent", m_unlink, 14U);
+		CUtils::dump(1U, "YCS Network Data Sent", m_unlink, 14U);
 
 	m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
 
@@ -175,7 +174,7 @@ void CYSFNetwork::unlink()
 	m_state = DS_NOTLINKED;
 }
 
-void CYSFNetwork::clock(unsigned int ms)
+void CYCSNetwork::clock(unsigned int ms)
 {
 	if (m_state == DS_NOTOPEN)
 		return;
@@ -198,7 +197,7 @@ void CYSFNetwork::clock(unsigned int ms)
 		return;
 
 	if (m_debug)
-		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
+		CUtils::dump(1U, "YCS Network Data Received", buffer, length);
 
 	// Throw away any options messages
 	if (::memcmp(buffer, "YSFO", 4U) == 0)
@@ -209,12 +208,19 @@ void CYSFNetwork::clock(unsigned int ms)
 		return;
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && m_state == DS_LINKING) {
-		if (strcmp(m_name.c_str(),"MMDVM")== 0)
-			LogMessage("Link successful to %s", m_name.c_str());
-		else
-			LogMessage("Linked to %s", m_name.c_str());
+		LogMessage("Linked to %s", m_name.c_str());
 
 		m_state = DS_LINKED;
+
+		if (m_debug)
+			CUtils::dump(1U, "YCS Network Data Sent", m_options, 50U);
+
+		m_socket.write(m_options, 50U, m_addr, m_addrLen);
+
+		if (m_debug)
+			CUtils::dump(1U, "YCS Network Data Sent", m_info, 80U);
+
+		m_socket.write(m_info, 80U, m_addr, m_addrLen);
 	}
 
 	unsigned char len = length;
@@ -223,7 +229,7 @@ void CYSFNetwork::clock(unsigned int ms)
 	m_buffer.addData(buffer, length);
 }
 
-unsigned int CYSFNetwork::read(unsigned int dgid, unsigned char* data)
+unsigned int CYCSNetwork::read(unsigned int dgid, unsigned char* data)
 {
 	assert(data != NULL);
 
@@ -238,11 +244,11 @@ unsigned int CYSFNetwork::read(unsigned int dgid, unsigned char* data)
 	return len;
 }
 
-void CYSFNetwork::close()
+void CYCSNetwork::close()
 {
 	m_socket.close();
 
-	LogMessage("Closing YSF network connection");
+	LogMessage("Closing YCS network connection");
 
 	m_state = DS_NOTOPEN;
 }
