@@ -58,7 +58,6 @@ m_power(0U),
 m_latitude(0.0F),
 m_longitude(0.0F),
 m_height(0),
-m_name(),
 m_description(),
 m_logDisplayLevel(0U),
 m_logFileLevel(0U),
@@ -197,8 +196,6 @@ bool CConf::read()
 			m_longitude = float(::atof(value));
 		else if (::strcmp(key, "Height") == 0)
 			m_height = ::atoi(value);
-		else if (::strcmp(key, "Name") == 0)
-			m_name = value;
 		else if (::strcmp(key, "Description") == 0)
 			m_description = value;
 	} else if (section == SECTION_LOG) {
@@ -372,11 +369,6 @@ float CConf::getLongitude() const
 int CConf::getHeight() const
 {
 	return m_height;
-}
-
-std::string CConf::getName() const
-{
-	return m_name;
 }
 
 std::string CConf::getDescription() const

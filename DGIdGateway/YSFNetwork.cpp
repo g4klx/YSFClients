@@ -34,6 +34,7 @@ m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
 m_options(NULL),
+m_info(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -52,6 +53,9 @@ m_dgId(0U)
 	m_options = new unsigned char[50U];
 	::memcpy(m_options + 0U, "YSFO", 4U);
 
+	m_info = new unsigned char[80U];
+	::memcpy(m_info + 0U, "YSFI", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
@@ -59,6 +63,7 @@ m_dgId(0U)
 		m_poll[i + 4U]    = node.at(i);
 		m_unlink[i + 4U]  = node.at(i);
 		m_options[i + 4U] = node.at(i);
+		m_info[i + 4U]    = node.at(i);
 	}
 }
 
@@ -69,6 +74,7 @@ m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
 m_options(NULL),
+m_info(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -87,6 +93,9 @@ m_dgId(0U)
 	m_options = new unsigned char[50U];
 	::memcpy(m_options + 0U, "YSFO", 4U);
 
+	m_info = new unsigned char[80U];
+	::memcpy(m_info + 0U, "YSFI", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
@@ -94,16 +103,18 @@ m_dgId(0U)
 		m_poll[i + 4U]    = node.at(i);
 		m_unlink[i + 4U]  = node.at(i);
 		m_options[i + 4U] = node.at(i);
+		m_info[i + 4U]    = node.at(i);
 	}
 }
 
-CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int dgId, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& description, unsigned int id, unsigned int dgId, bool debug) :
 m_socket(localPort),
 m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_poll(NULL),
 m_options(NULL),
+m_info(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YCS Network Buffer"),
 m_pollTimer(1000U, 5U),
@@ -122,20 +133,31 @@ m_dgId(dgId)
 	m_options = new unsigned char[50U];
 	::memcpy(m_options + 0U, "YSFO", 4U);
 
+	m_info = new unsigned char[80U];
+	::memcpy(m_info + 0U, "YSFI", 4U);
+
 	std::string node = callsign;
 	node.resize(YSF_CALLSIGN_LENGTH, ' ');
 
 	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
-		m_poll[i + 4U] = node.at(i);
-		m_unlink[i + 4U] = node.at(i);
+		m_poll[i + 4U]    = node.at(i);
+		m_unlink[i + 4U]  = node.at(i);
 		m_options[i + 4U] = node.at(i);
+		m_info[i + 4U]    = node.at(i);
 	}
 
 	char text[101U];
-	::sprintf(text, "Options=%u                                           ", dgId);
+	::sprintf(text, "%u                                                           ", dgId);
 
 	for (unsigned int i = 0U; i < (50U - 4U - YSF_CALLSIGN_LENGTH); i++)
 		m_options[i + 4U + YSF_CALLSIGN_LENGTH] = text[i];
+
+	std::string desc = description;
+	desc.resize(20U, ' ');
+
+	sprintf(text, "%9u%9u%.6s%sMMDVM       %07u   ", rxFrequency, txFrequency, locator.c_str(), desc.c_str(), id);
+	for (unsigned int i = 0U; i < (80U - 4U - YSF_CALLSIGN_LENGTH); i++)
+		m_info[i + 4U + YSF_CALLSIGN_LENGTH] = text[i];
 }
 
 CYSFNetwork::~CYSFNetwork()
@@ -143,6 +165,7 @@ CYSFNetwork::~CYSFNetwork()
 	delete[] m_poll;
 	delete[] m_unlink;
 	delete[] m_options;
+	delete[] m_info;
 }
 
 std::string CYSFNetwork::getDesc(unsigned int dgId)
@@ -223,6 +246,11 @@ void CYSFNetwork::writePoll()
 			CUtils::dump(1U, "YSF Network Data Sent", m_options, 50U);
 
 		m_socket.write(m_options, 50U, m_addr, m_addrLen);
+
+		if (m_debug)
+			CUtils::dump(1U, "YSF Network Data Sent", m_info, 80U);
+
+		m_socket.write(m_info, 80U, m_addr, m_addrLen);
 	}
 
 	m_pollCount++;
@@ -274,6 +302,10 @@ void CYSFNetwork::clock(unsigned int ms)
 
 	// Throw away any options messages
 	if (::memcmp(buffer, "YSFO", 4U) == 0)
+		return;
+
+	// Throw away any info messages
+	if (::memcmp(buffer, "YSFI", 4U) == 0)
 		return;
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && m_state == DS_LINKING) {

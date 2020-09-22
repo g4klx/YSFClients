@@ -68,7 +68,6 @@ public:
   float        getLatitude() const;
   float        getLongitude() const;
   int          getHeight() const;
-  std::string  getName() const;
   std::string  getDescription() const;
 
   // The Log section
@@ -115,7 +114,6 @@ private:
   float        m_latitude;
   float        m_longitude;
   int          m_height;
-  std::string  m_name;
   std::string  m_description;
 
   unsigned int m_logDisplayLevel;
