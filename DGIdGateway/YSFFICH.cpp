@@ -177,8 +177,6 @@ void CYSFFICH::setRaw(const unsigned char* bytes)
 void CYSFFICH::getRaw(unsigned char* bytes) const
 {
 	::memcpy(bytes, m_fich, 6U);
-
-	CCRC::addCCITT16(bytes, 6U);
 }
 
 unsigned char CYSFFICH::getFI() const

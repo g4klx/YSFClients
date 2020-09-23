@@ -23,7 +23,9 @@
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
+#include "YSFFICH.h"
 
+#include <cstdint>
 #include <vector>
 #include <string>
 
@@ -38,6 +40,7 @@ public:
 	IMRSDGId() :
 	m_dgId(0U),
 	m_name(),
+	m_seqNo(0U),
 	m_destinations(),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")
@@ -45,6 +48,7 @@ public:
 
 	unsigned int               m_dgId;
 	std::string                m_name;
+	uint16_t                   m_seqNo;
 	std::vector<IMRSDest*>     m_destinations;
 	bool                       m_debug;
 	CRingBuffer<unsigned char> m_buffer;
@@ -84,6 +88,9 @@ private:
 
 	IMRSDGId* find(const sockaddr_storage& address) const;
 	IMRSDGId* find(unsigned int dgId) const;
+
+	bool writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	bool writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 };
 
 #endif

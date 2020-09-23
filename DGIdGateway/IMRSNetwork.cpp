@@ -17,6 +17,7 @@
  */
 
 #include "IMRSNetwork.h"
+#include "YSFPayload.h"
 #include "YSFDefines.h"
 #include "YSFFICH.h"
 #include "Utils.h"
@@ -43,6 +44,7 @@ void CIMRSNetwork::addDGId(unsigned int dgId, const std::string& name, const std
 	IMRSDGId* f = new IMRSDGId;
 	f->m_dgId         = dgId;
 	f->m_name         = name;
+	f->m_seqNo        = 0U;
 	f->m_destinations = destinations;
 	f->m_debug        = debug;
 
@@ -86,8 +88,6 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 {
 	assert(data != NULL);
 
-	return;	// XXX Disable IMRS transmit
-
 	IMRSDGId* ptr = find(dgId);
 	if (ptr == NULL)
 		return;
@@ -95,63 +95,128 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 	CYSFFICH fich;
 	fich.decode(data + 35U);
 
-	unsigned char buffer[200U];
-
-	// Create the header
-	switch (fich.getDT()) {
-	case YSF_DT_VD_MODE1:
-		buffer[0U] = '0';
-		buffer[1U] = '0';
-		buffer[2U] = '0';
-		// Copy the audio
-		::memcpy(buffer + 35U + 0U,  data + 35U + 9U,  9U);
-		::memcpy(buffer + 35U + 9U,  data + 35U + 27U, 9U);
-		::memcpy(buffer + 35U + 18U, data + 35U + 45U, 9U);
-		::memcpy(buffer + 35U + 27U, data + 35U + 63U, 9U);
-		::memcpy(buffer + 35U + 36U, data + 35U + 81U, 9U);
+	switch (fich.getFI()) {
+	case YSF_FI_HEADER:
+	case  YSF_FI_TERMINATOR:
+		writeHeaderTrailer(ptr, fich, data);
 		break;
-	case YSF_DT_DATA_FR_MODE:
-		buffer[0U] = '1';
-		buffer[1U] = '1';
-		buffer[2U] = '1';
-		// Copy the audio
-		::memcpy(buffer + 35U, data + 45U, 130U);
-		break;
-	case YSF_DT_VD_MODE2:
-		buffer[0U] = '2';
-		buffer[1U] = '2';
-		buffer[2U] = '2';
-		// Copy the audio
-		::memcpy(buffer + 35U, data + 45U, 130U);
-		break;
-	case YSF_DT_VOICE_FR_MODE:
-		buffer[0U] = '3';
-		buffer[1U] = '3';
-		buffer[2U] = '3';
-		// Copy the audio
-		::memcpy(buffer + 35U + 0U,  data + 35U + 9U,  18U);
-		::memcpy(buffer + 35U + 18U, data + 35U + 27U, 18U);
-		::memcpy(buffer + 35U + 36U, data + 35U + 45U, 18U);
-		::memcpy(buffer + 35U + 54U, data + 35U + 63U, 18U);
-		::memcpy(buffer + 35U + 72U, data + 35U + 81U, 18U);
+	case YSF_FI_COMMUNICATIONS:
+		writeData(ptr, fich, data);
 		break;
 	default:
-		return;
+		break;
+	}
+}
+
+bool CIMRSNetwork::writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+{
+	assert(ptr != NULL);
+	assert(data != NULL);
+
+	unsigned char buffer[200U];
+	unsigned int length = 0U;
+
+	if (fich.getFI() == YSF_FI_HEADER) {
+		buffer[0U] = 0x11U;
+		ptr->m_seqNo = 0U;
+	} else {
+		buffer[0U] = 0x33U;
 	}
 
-	// Copy the raw DCH
+	// Copy the sequence number (2 bytes)
+	buffer[1U] = (ptr->m_seqNo << 8) & 0xFFU;
+	buffer[2U] = (ptr->m_seqNo << 0) & 0xFFU;
 
 	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
 		// Set the correct DG-ID for this destination
 		fich.setDGId((*it)->m_dgId);
 		// Copy the raw FICH
-		fich.getRaw(buffer + 7U);
+		fich.getRaw(buffer + 3U);
 
 		if (ptr->m_debug)
-			CUtils::dump(1U, "IMRS Network Data Sent", buffer, 165U);
+			CUtils::dump(1U, "IMRS Network Data Sent", buffer, length);
 
-		m_socket.write(buffer, 165U, (*it)->m_addr, (*it)->m_addrLen);
+		m_socket.write(buffer, length, (*it)->m_addr, (*it)->m_addrLen);
 	}
+
+	return true;
+}
+
+bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+{
+	assert(ptr != NULL);
+	assert(data != NULL);
+
+	unsigned char buffer[200U];
+	unsigned int length = 0U;
+
+	buffer[0U] = 0x22U;
+
+	// Copy the sequence number (2 bytes)
+	buffer[1U] = (ptr->m_seqNo << 8) & 0xFFU;
+	buffer[2U] = (ptr->m_seqNo << 0) & 0xFFU;
+
+	unsigned char dt = fich.getDT();
+
+	CYSFPayload payload;
+
+	// Create the header
+	switch (dt) {
+	case YSF_DT_VD_MODE1:
+		// Copy the DCH (10 bytes)
+		payload.readVDMode1Data(data + 35U, buffer + 7U);
+		// Copy the audio
+		::memcpy(buffer + 17U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 9U,  9U);
+		::memcpy(buffer + 17U + 9U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 27U, 9U);
+		::memcpy(buffer + 17U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 9U);
+		::memcpy(buffer + 17U + 27U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 63U, 9U);
+		::memcpy(buffer + 17U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 81U, 9U);
+		length = 62U;
+		break;
+	case YSF_DT_DATA_FR_MODE:
+		// Copy the data
+		::memcpy(buffer + 17U + 0U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U, 90U);
+		length = 107U;
+		break;
+	case YSF_DT_VD_MODE2:
+		// Copy the DCH (10 bytes)
+		payload.readVDMode2Data(data + 35U, buffer + 7U);
+		// Copy the audio
+		::memcpy(buffer + 17U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 5U,  13U);
+		::memcpy(buffer + 17U + 13U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 23U, 13U);
+		::memcpy(buffer + 17U + 26U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 41U, 13U);
+		::memcpy(buffer + 17U + 39U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 59U, 13U);
+		::memcpy(buffer + 17U + 52U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 77U, 13U);
+		length = 82U;
+		break;
+	case YSF_DT_VOICE_FR_MODE:
+		// Copy the audio
+		::memcpy(buffer + 17U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  18U);
+		::memcpy(buffer + 17U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 18U, 18U);
+		::memcpy(buffer + 17U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 36U, 18U);
+		::memcpy(buffer + 17U + 54U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
+		::memcpy(buffer + 17U + 72U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
+		length = 107U;
+		break;
+	default:
+		return false;
+	}
+
+	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
+		// Set the correct DG-ID for this destination
+		fich.setDGId((*it)->m_dgId);
+		// Copy the raw FICH
+		fich.getRaw(buffer + 3U);
+
+		if (ptr->m_debug)
+			CUtils::dump(1U, "IMRS Network Data Sent", buffer, length);
+
+		m_socket.write(buffer, length, (*it)->m_addr, (*it)->m_addrLen);
+	}
+
+	ptr->m_seqNo++;
+
+	return true;
 }
 
 void CIMRSNetwork::link()
@@ -172,11 +237,10 @@ void CIMRSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
-	return;
+	if (addrLen == 0U)
+		return;
 
-	// if (port != IMRS_PORT)
-	//	return;
+	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
 
 	IMRSDGId* ptr = find(addr);
 	if (ptr == NULL)
