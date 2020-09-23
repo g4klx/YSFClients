@@ -50,6 +50,7 @@ m_myAddress(),
 m_myPort(0U),
 m_rfHangTime(60U),
 m_netHangTime(60U),
+m_bleep(true),
 m_debug(false),
 m_daemon(false),
 m_rxFrequency(0U),
@@ -179,6 +180,8 @@ bool CConf::read()
 			m_ysfRFHangTime = m_fcsRFHangTime = m_rfHangTime = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "NetHangTime") == 0)
 			m_ysfNetHangTime = m_fcsNetHangTime = m_netHangTime = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Bleep") == 0)
+			m_bleep = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
 			m_debug = ::atoi(value) == 1;
 		else if (::strcmp(key, "Daemon") == 0)
@@ -329,6 +332,11 @@ std::string CConf::getMyAddress() const
 unsigned int CConf::getMyPort() const
 {
 	return m_myPort;
+}
+
+bool CConf::getBleep() const
+{
+	return m_bleep;
 }
 
 bool CConf::getDebug() const

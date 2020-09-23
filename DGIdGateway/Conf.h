@@ -58,6 +58,7 @@ public:
   unsigned int getRptPort() const;
   std::string  getMyAddress() const;
   unsigned int getMyPort() const;
+  bool         getBleep() const;
   bool         getDebug() const;
   bool         getDaemon() const;
 
@@ -105,6 +106,7 @@ private:
   unsigned int m_myPort;
   unsigned int m_rfHangTime;
   unsigned int m_netHangTime;
+  bool         m_bleep;
   bool         m_debug;
   bool         m_daemon;
 

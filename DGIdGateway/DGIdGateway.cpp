@@ -216,6 +216,7 @@ int CDGIdGateway::run()
 	}
 
 	unsigned int currentDGId = 0U;
+	bool fromRF = false;
 
 	CDGIdNetwork* dgIdNetwork[100U];
 	for (unsigned int i = 0U; i < 100U; i++)
@@ -397,6 +398,7 @@ int CDGIdGateway::run()
 	createGPS();
 
 	CTimer inactivityTimer(1000U);
+	CTimer bleepTimer(1000U, 1U);
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -438,6 +440,7 @@ int CDGIdGateway::run()
 						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
 						state = DS_NOTLINKED;
+						fromRF = true;
 					}
 
 					if (m_gps != NULL)
@@ -464,10 +467,8 @@ int CDGIdGateway::run()
 				if ((buffer[34U] & 0x01U) == 0x01U) {
 					if (m_gps != NULL)
 						m_gps->reset();
-					if (nPips > 0U) {
-						sendPips(nPips);
-						nPips = 0U;
-					}
+					if (nPips > 0U && fromRF)
+						bleepTimer.start();
 				}
 			}
 		}
@@ -493,6 +494,7 @@ int CDGIdGateway::run()
 								LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
 								currentDGId = i;
 								state = DS_LINKED;
+								fromRF = false;
 							}
 						}
 					}
@@ -526,14 +528,25 @@ int CDGIdGateway::run()
 			state = DS_NOTLINKED;
 			currentDGId = 0U;
 			inactivityTimer.stop();
-			sendPips(2U);
+
+			if (fromRF) {
+				sendPips(2U);
+				fromRF = false;
+			}
+		}
+
+		bleepTimer.clock(ms);
+		if (bleepTimer.isRunning() && bleepTimer.hasExpired()) {
+			sendPips(nPips);
+			bleepTimer.stop();
+			nPips = 0U;
 		}
 
 		if (dgIdNetwork[currentDGId] != NULL) {
 			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
-			if (state != DS_LINKED && netState == DS_LINKED)
+			if (fromRF && state != DS_LINKED && netState == DS_LINKED)
 				nPips = 1U;
-			else if (state == DS_LINKED && netState != DS_LINKED)
+			else if (fromRF && state == DS_LINKED && netState != DS_LINKED)
 				nPips = 3U;
 			state = netState;
 		}
@@ -665,5 +678,10 @@ std::string CDGIdGateway::calculateLocator()
 
 void CDGIdGateway::sendPips(unsigned int n)
 {
-	LogMessage("*** %u bleep!", n);
+	if (n == 0U)
+		return;
+
+	bool bleep = m_conf.getBleep();
+	if (bleep)
+		LogMessage("*** %u bleep!", n);
 }
