@@ -245,7 +245,7 @@ int CDGIdGateway::run()
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-			LogMessage("Added FCS:%s to DG-ID %u", name.c_str(), dgid);
+			LogMessage("Added FCS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 		} else if (type == "YSF") {
 			std::string name    = (*it)->m_name;
 			unsigned int local  = (*it)->m_local;
@@ -258,7 +258,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added YSF:%s to DG-ID %u", name.c_str(), dgid);
+				LogMessage("Added YSF:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unknown YSF reflector: %s", name.c_str());
 			}
@@ -279,7 +279,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added YCS:%s:%u to DG-ID %u", name.c_str(), (*it)->m_netDGId, dgid);
+				LogMessage("Added YCS:%s:%u to DG-ID %u%s", name.c_str(), (*it)->m_netDGId, dgid, statc ? " (Static)" : "");
 			}
 			else {
 				LogWarning("Unknown YCS reflector: %s", name.c_str());
@@ -299,8 +299,6 @@ int CDGIdGateway::run()
 						dest->m_addr    = addr;
 						dest->m_addrLen = addrLen;
 						dests.push_back(dest);
-
-						LogMessage("Added IMRS:%s to DG-ID %u", name.c_str(), dgid);
 					} else {
 						LogWarning("Unable to resolve the address for %s", (*it)->m_address.c_str());
 					}
@@ -313,6 +311,8 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = true;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added IMRS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			}
 		} else if (type == "Parrot") {
 			unsigned int local = (*it)->m_local;
@@ -326,7 +326,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added Parrot to DG-ID %u", dgid);
+				LogMessage("Added Parrot to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unable to resolve the address for the YSF Parrot");
 			}
@@ -342,7 +342,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added YSF2DMR to DG-ID %u", dgid);
+				LogMessage("Added YSF2DMR to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unable to resolve the address for YSF2DMR");
 			}
@@ -358,7 +358,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added YSF2NXDN to DG-ID %u", dgid);
+				LogMessage("Added YSF2NXDN to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unable to resolve the address for YSF2NXDN");
 			}
@@ -374,7 +374,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
-				LogMessage("Added YSF2P25 to DG-ID %u", dgid);
+				LogMessage("Added YSF2P25 to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unable to resolve the address for YSF2P25");
 			}
