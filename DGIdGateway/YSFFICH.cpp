@@ -171,12 +171,12 @@ void CYSFFICH::encode(unsigned char* bytes)
 
 void CYSFFICH::setRaw(const unsigned char* bytes)
 {
-	::memcpy(m_fich, bytes, 6U);
+	::memcpy(m_fich, bytes, 4U);
 }
 
 void CYSFFICH::getRaw(unsigned char* bytes) const
 {
-	::memcpy(bytes, m_fich, 6U);
+	::memcpy(bytes, m_fich, 4U);
 }
 
 unsigned char CYSFFICH::getFI() const

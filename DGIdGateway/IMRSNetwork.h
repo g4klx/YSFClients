@@ -23,6 +23,7 @@
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
+#include "YSFDefines.h"
 #include "YSFFICH.h"
 
 #include <cstdint>
@@ -42,13 +43,26 @@ public:
 	m_name(),
 	m_seqNo(0U),
 	m_destinations(),
+	m_source(NULL),
+	m_dest(NULL),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")
-	{}
+	{
+		m_source = new unsigned char[YSF_CALLSIGN_LENGTH];
+		m_dest   = new unsigned char[YSF_CALLSIGN_LENGTH];
+	}
+
+	~IMRSDGId()
+	{
+		delete[] m_source;
+		delete[] m_dest;
+	}
 
 	unsigned int               m_dgId;
 	std::string                m_name;
 	uint16_t                   m_seqNo;
+	unsigned char*             m_source;
+	unsigned char*             m_dest;
 	std::vector<IMRSDest*>     m_destinations;
 	bool                       m_debug;
 	CRingBuffer<unsigned char> m_buffer;
@@ -91,6 +105,9 @@ private:
 
 	bool writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 	bool writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+
+	void readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	void readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 };
 
 #endif

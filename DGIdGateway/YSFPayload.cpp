@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2016 Jonathan Naylor, G4KLX
+*	Copyright (C) 2016,2020 Jonathan Naylor, G4KLX
 *	Copyright (C) 2016 Mathias Weyland, HB9FRV
 *
 *	This program is free software; you can redistribute it and/or modify
@@ -84,6 +84,74 @@ CYSFPayload::~CYSFPayload()
 {
 }
 
+bool CYSFPayload::readHeaderData(const unsigned char* data, unsigned char* dt)
+{
+	assert(data != NULL);
+	assert(dt != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char dch[45U];
+
+	const unsigned char* p1 = data;
+	unsigned char* p2 = dch;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p2, p1, 9U);
+		p1 += 18U; p2 += 9U;
+	}
+
+	CYSFConvolution conv;
+	conv.start();
+
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+		uint8_t s0 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		n++;
+		uint8_t s1 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		conv.decode(s0, s1);
+	}
+
+	unsigned char output[23U];
+	conv.chainback(output, 176U);
+
+	bool valid1 = CCRC::checkCCITT16(output, 22U);
+	if (valid1) {
+		for (unsigned int i = 0U; i < 20U; i++)
+			dt[i] = output[i] ^ WHITENING_DATA[i];
+	}
+
+	p1 = data + 9U;
+	p2 = dch;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p2, p1, 9U);
+		p1 += 18U; p2 += 9U;
+	}
+
+	conv.start();
+
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+		uint8_t s0 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		n++;
+		uint8_t s1 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		conv.decode(s0, s1);
+	}
+
+	conv.chainback(output, 176U);
+
+	bool valid2 = CCRC::checkCCITT16(output, 22U);
+	if (valid2) {
+		for (unsigned int i = 0U; i < 20U; i++)
+			dt[i + 20U] = output[i] ^ WHITENING_DATA[i];
+	}
+
+	return valid1 && valid2;
+}
+
 bool CYSFPayload::readVDMode1Data(const unsigned char* data, unsigned char* dt)
 {
 	assert(data != NULL);
@@ -119,11 +187,7 @@ bool CYSFPayload::readVDMode1Data(const unsigned char* data, unsigned char* dt)
 	bool ret = CCRC::checkCCITT16(output, 22U);
 	if (ret) {
 		for (unsigned int i = 0U; i < 20U; i++)
-			output[i] ^= WHITENING_DATA[i];
-
-		CUtils::dump(1U, "V/D Mode 1 Data", output, 20U);
-
-		::memcpy(dt, output, 20U);
+			dt[i] = output[i] ^ WHITENING_DATA[i];
 	}
 
 	return ret;
@@ -164,11 +228,7 @@ bool CYSFPayload::readVDMode2Data(const unsigned char* data, unsigned char* dt)
 	bool ret = CCRC::checkCCITT16(output, 12U);
 	if (ret) {
 		for (unsigned int i = 0U; i < 10U; i++)
-			output[i] ^= WHITENING_DATA[i];
-
-		CUtils::dump(1U, "V/D Mode 2 Data", output, YSF_CALLSIGN_LENGTH);
-
-		::memcpy(dt, output, YSF_CALLSIGN_LENGTH);
+			dt[i] = output[i] ^ WHITENING_DATA[i];
 	}
 
 	return ret;
@@ -211,11 +271,7 @@ bool CYSFPayload::readDataFRModeData1(const unsigned char* data, unsigned char* 
 	bool ret = CCRC::checkCCITT16(output, 22U);
 	if (ret) {
 		for (unsigned int i = 0U; i < 20U; i++)
-			output[i] ^= WHITENING_DATA[i];
-
-		CUtils::dump(1U, "FR Mode Data 1", output, 20U);
-
-		::memcpy(dt, output, 20U);
+			dt[i] = output[i] ^ WHITENING_DATA[i];
 	}
 
 	return ret;
@@ -258,14 +314,172 @@ bool CYSFPayload::readDataFRModeData2(const unsigned char* data, unsigned char* 
 	bool ret = CCRC::checkCCITT16(output, 22U);
 	if (ret) {
 		for (unsigned int i = 0U; i < 20U; i++)
-			output[i] ^= WHITENING_DATA[i];
-
-		CUtils::dump(1U, "FR Mode Data 2", output, 20U);
-
-		::memcpy(dt, output, 20U);
+			dt[i] = output[i] ^ WHITENING_DATA[i];
 	}
 
 	return ret;
+}
+
+void CYSFPayload::writeHeaderData(const unsigned char* dt, unsigned char* data)
+{
+	assert(dt != NULL);
+	assert(data != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char output[23U];
+	for (unsigned int i = 0U; i < 20U; i++)
+		output[i] = dt[i] ^ WHITENING_DATA[i];
+
+	CCRC::addCCITT16(output, 22U);
+	output[22U] = 0x00U;
+
+	unsigned char convolved[45U];
+
+	CYSFConvolution conv;
+	conv.encode(output, convolved, 180U);
+
+	unsigned char bytes[45U];
+	unsigned int j = 0U;
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+
+		bool s0 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		bool s1 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		WRITE_BIT1(bytes, n, s0);
+
+		n++;
+		WRITE_BIT1(bytes, n, s1);
+	}
+
+	unsigned char* p1 = data + 0U;
+	unsigned char* p2 = bytes;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p1, p2, 9U);
+		p1 += 18U; p2 += 9U;
+	}
+
+	for (unsigned int i = 0U; i < 20U; i++)
+		output[i] = dt[i + 20U] ^ WHITENING_DATA[i];
+
+	CCRC::addCCITT16(output, 22U);
+	output[22U] = 0x00U;
+
+	conv.encode(output, convolved, 180U);
+
+	for (unsigned int i = 0U, j = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+
+		bool s0 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		bool s1 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		WRITE_BIT1(bytes, n, s0);
+
+		n++;
+		WRITE_BIT1(bytes, n, s1);
+	}
+
+	p1 = data + 9U;
+	p2 = bytes;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p1, p2, 9U);
+		p1 += 18U; p2 += 9U;
+	}
+}
+
+void CYSFPayload::writeVDMode1Data(const unsigned char* dt, unsigned char* data)
+{
+	assert(dt != NULL);
+	assert(data != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char output[23U];
+	for (unsigned int i = 0U; i < 20U; i++)
+		output[i] = dt[i] ^ WHITENING_DATA[i];
+
+	CCRC::addCCITT16(output, 22U);
+	output[22U] = 0x00U;
+
+	unsigned char convolved[45U];
+
+	CYSFConvolution conv;
+	conv.encode(output, convolved, 180U);
+
+	unsigned char bytes[45U];
+	unsigned int j = 0U;
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+
+		bool s0 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		bool s1 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		WRITE_BIT1(bytes, n, s0);
+
+		n++;
+		WRITE_BIT1(bytes, n, s1);
+	}
+
+	unsigned char* p1 = data;
+	unsigned char* p2 = bytes;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p1, p2, 9U);
+		p1 += 18U; p2 += 9U;
+	}
+}
+
+void CYSFPayload::writeVDMode2Data(const unsigned char* dt, unsigned char* data)
+{
+	assert(dt != NULL);
+	assert(data != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char output[13U];
+	for (unsigned int i = 0U; i < 10U; i++)
+		output[i] = dt[i] ^ WHITENING_DATA[i];
+
+	CCRC::addCCITT16(output, 12U);
+	output[12U] = 0x00U;
+
+	unsigned char convolved[25U];
+
+	CYSFConvolution conv;
+	conv.encode(output, convolved, 100U);
+
+	unsigned char bytes[25U];
+	unsigned int j = 0U;
+	for (unsigned int i = 0U; i < 100U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_5_20[i];
+
+		bool s0 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		bool s1 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		WRITE_BIT1(bytes, n, s0);
+
+		n++;
+		WRITE_BIT1(bytes, n, s1);
+	}
+
+	unsigned char* p1 = data;
+	unsigned char* p2 = bytes;
+	for (unsigned int i = 0U; i < 5U; i++) {
+		::memcpy(p1, p2, 5U);
+		p1 += 18U; p2 += 5U;
+	}
 }
 
 void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* data)

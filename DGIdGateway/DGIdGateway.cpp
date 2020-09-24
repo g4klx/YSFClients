@@ -225,6 +225,9 @@ int CDGIdGateway::run()
 	std::vector<DGIdData*> dgIdData = m_conf.getDGIdData();
 	for (std::vector<DGIdData*>::const_iterator it = dgIdData.begin(); it != dgIdData.end(); ++it) {
 		unsigned int dgid        = (*it)->m_dgId;
+		if (dgid >= 100U)
+			continue;
+
 		std::string type         = (*it)->m_type;
 		bool statc               = (*it)->m_static;
 		unsigned int rfHangTime  = (*it)->m_rfHangTime;

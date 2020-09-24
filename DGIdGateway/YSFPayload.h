@@ -26,14 +26,19 @@ public:
 	CYSFPayload();
 	~CYSFPayload();
 
+	bool readHeaderData(const unsigned char* data, unsigned char* dt);
+	void writeHeaderData(const unsigned char* dt, unsigned char* data);
+
 	bool readVDMode1Data(const unsigned char* data, unsigned char* dt);
+	void writeVDMode1Data(const unsigned char* dt, unsigned char* data);
 
 	bool readVDMode2Data(const unsigned char* data, unsigned char* dt);
+	void writeVDMode2Data(const unsigned char* dt, unsigned char* data);
 
 	bool readDataFRModeData1(const unsigned char* data, unsigned char* dt);
-	bool readDataFRModeData2(const unsigned char* data, unsigned char* dt);
-
 	void writeDataFRModeData1(const unsigned char* dt, unsigned char* data);
+
+	bool readDataFRModeData2(const unsigned char* data, unsigned char* dt);
 	void writeDataFRModeData2(const unsigned char* dt, unsigned char* data);
 
 private:
