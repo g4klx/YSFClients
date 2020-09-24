@@ -42,9 +42,9 @@ public:
 	m_dgId(0U),
 	m_name(),
 	m_seqNo(0U),
+	m_destinations(),
 	m_source(NULL),
 	m_dest(NULL),
-	m_destinations(),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")
 	{
