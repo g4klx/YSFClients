@@ -35,6 +35,9 @@ public:
 	bool readVDMode2Data(const unsigned char* data, unsigned char* dt);
 	void writeVDMode2Data(const unsigned char* dt, unsigned char* data);
 
+	bool readVoiceFRModeData(const unsigned char* data, unsigned char* dt);
+	void writeVoiceFRModeData(const unsigned char* dt, unsigned char* data);
+
 	bool readDataFRModeData1(const unsigned char* data, unsigned char* dt);
 	void writeDataFRModeData1(const unsigned char* dt, unsigned char* data);
 

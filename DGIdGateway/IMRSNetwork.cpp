@@ -171,6 +171,8 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 	buffer[2U] = (ptr->m_seqNo << 0) & 0xFFU;
 
 	unsigned char dt = fich.getDT();
+	unsigned char ft = fich.getFT();
+	unsigned char fn = fich.getFN();
 
 	CYSFPayload payload;
 
@@ -204,13 +206,22 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 		length = 82U;
 		break;
 	case YSF_DT_VOICE_FR_MODE:
-		// Copy the audio
-		::memcpy(buffer + 17U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  18U);
-		::memcpy(buffer + 17U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 18U, 18U);
-		::memcpy(buffer + 17U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 36U, 18U);
-		::memcpy(buffer + 17U + 54U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
-		::memcpy(buffer + 17U + 72U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
-		length = 107U;
+		if (fn == 0U && ft == 1U) {
+			// Copy the DCH (20 bytes)
+			payload.readVoiceFRModeData(data + 35U, buffer + 7U);
+			// Copy the audio
+			::memcpy(buffer + 27U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
+			::memcpy(buffer + 27U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
+			length = 107U;
+		} else {
+			// Copy the audio
+			::memcpy(buffer + 17U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  18U);
+			::memcpy(buffer + 17U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 18U, 18U);
+			::memcpy(buffer + 17U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 36U, 18U);
+			::memcpy(buffer + 17U + 54U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
+			::memcpy(buffer + 17U + 72U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
+			length = 107U;
+		}
 		break;
 	default:
 		return false;
@@ -261,8 +272,8 @@ void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsign
 
 		buffer[34U] = 0x00U;
 	} else {
-		uint16_t seqNo = (buffer[1U] << 8) + (buffer[2U] << 0);
-		buffer[34U] = 0x01U | ((seqNo - 1U) & 0x7FU) << 1;
+		uint16_t seqNo = (data[1U] << 8) + (data[2U] << 0);
+		buffer[34U] = 0x01U | ((seqNo & 0x7FU) << 1);
 	}
 
 	::memcpy(buffer + 4U, "IMRS      ",   YSF_CALLSIGN_LENGTH);
@@ -298,14 +309,16 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* 
 	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 24U, ptr->m_dest,   YSF_CALLSIGN_LENGTH);
 
-	uint16_t seqNo = (buffer[1U] << 8) + (buffer[2U] << 0);
-	buffer[34U] = ((seqNo - 1U) & 0x7FU) << 1;
+	uint16_t seqNo = (data[1U] << 8) + (data[2U] << 0);
+	buffer[34U] = (seqNo & 0x7FU) << 1;
 
 	::memcpy(buffer + 35U, YSF_SYNC_BYTES, YSF_SYNC_LENGTH_BYTES);
 
 	fich.encode(buffer + 35U);
 
 	unsigned char dt = fich.getDT();
+	unsigned char fn = fich.getFN();
+	unsigned char ft = fich.getFT();
 
 	CYSFPayload payload;
 
@@ -336,12 +349,22 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* 
 		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 77U, data + 17U + 52U, 13U);
 		break;
 	case YSF_DT_VOICE_FR_MODE:
-		// Copy the audio
-		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  data + 17U + 0U,  18U);
-		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 18U, data + 17U + 18U, 18U);
-		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 36U, data + 17U + 36U, 18U);
-		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, data + 17U + 54U, 18U);
-		::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, data + 17U + 72U, 18U);
+		if (fn == 0U && ft == 1U) {
+			// Copy the DCH
+			payload.writeVoiceFRModeData(data + 7U, buffer + 35U);
+			// NULL the unused section
+			::memset(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 0x00U, 9U);
+			// Copy the audio
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, data + 27U + 0U,  18U);
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, data + 27U + 18U, 18U);
+		} else {
+			// Copy the audio
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  data + 17U + 0U,  18U);
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 18U, data + 17U + 18U, 18U);
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 36U, data + 17U + 36U, 18U);
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, data + 17U + 54U, 18U);
+			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, data + 17U + 72U, 18U);
+		}
 		break;
 	default:
 		return;

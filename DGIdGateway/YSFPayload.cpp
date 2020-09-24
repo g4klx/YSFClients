@@ -277,6 +277,41 @@ bool CYSFPayload::readDataFRModeData1(const unsigned char* data, unsigned char* 
 	return ret;
 }
 
+bool CYSFPayload::readVoiceFRModeData(const unsigned char* data, unsigned char* dt)
+{
+	assert(data != NULL);
+	assert(dt != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char dch[45U];
+	::memcpy(dch, data, 45U);
+
+	CYSFConvolution conv;
+	conv.start();
+
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+		uint8_t s0 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		n++;
+		uint8_t s1 = READ_BIT1(dch, n) ? 1U : 0U;
+
+		conv.decode(s0, s1);
+	}
+
+	unsigned char output[23U];
+	conv.chainback(output, 176U);
+
+	bool ret = CCRC::checkCCITT16(output, 22U);
+	if (ret) {
+		for (unsigned int i = 0U; i < 20U; i++)
+			dt[i] = output[i] ^ WHITENING_DATA[i];
+	}
+
+	return ret;
+}
+
 bool CYSFPayload::readDataFRModeData2(const unsigned char* data, unsigned char* dt)
 {
 	assert(data != NULL);
@@ -480,6 +515,45 @@ void CYSFPayload::writeVDMode2Data(const unsigned char* dt, unsigned char* data)
 		::memcpy(p1, p2, 5U);
 		p1 += 18U; p2 += 5U;
 	}
+}
+
+void CYSFPayload::writeVoiceFRModeData(const unsigned char* dt, unsigned char* data)
+{
+	assert(dt != NULL);
+	assert(data != NULL);
+
+	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
+
+	unsigned char output[23U];
+	for (unsigned int i = 0U; i < 20U; i++)
+		output[i] = dt[i] ^ WHITENING_DATA[i];
+
+	CCRC::addCCITT16(output, 22U);
+	output[22U] = 0x00U;
+
+	unsigned char convolved[45U];
+
+	CYSFConvolution conv;
+	conv.encode(output, convolved, 180U);
+
+	unsigned char bytes[45U];
+	unsigned int j = 0U;
+	for (unsigned int i = 0U; i < 180U; i++) {
+		unsigned int n = INTERLEAVE_TABLE_9_20[i];
+
+		bool s0 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		bool s1 = READ_BIT1(convolved, j) != 0U;
+		j++;
+
+		WRITE_BIT1(bytes, n, s0);
+
+		n++;
+		WRITE_BIT1(bytes, n, s1);
+	}
+
+	::memcpy(data, bytes, 45U);
 }
 
 void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* data)
