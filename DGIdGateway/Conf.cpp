@@ -35,6 +35,7 @@ enum SECTION {
   SECTION_APRS,
   SECTION_YSF_NETWORK,
   SECTION_FCS_NETWORK,
+  SECTION_IMRS_NETWORK,
   SECTION_DGID,
   SECTION_GPSD
 };
@@ -76,6 +77,9 @@ m_ysfNetDebug(false),
 m_fcsRFHangTime(60U),
 m_fcsNetHangTime(60U),
 m_fcsNetDebug(false),
+m_imrsRFHangTime(240U),
+m_imrsNetHangTime(240U),
+m_imrsNetDebug(false),
 m_dgIdData(),
 m_gpsdEnabled(false),
 m_gpsdAddress(),
@@ -117,6 +121,8 @@ bool CConf::read()
 		  section = SECTION_YSF_NETWORK;
 	  else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
 		  section = SECTION_FCS_NETWORK;
+	  else if (::strncmp(buffer, "[IMRS Network]", 14U) == 0)
+		  section = SECTION_IMRS_NETWORK;
 	  else if (::strncmp(buffer, "[DGId=", 6U) == 0) {
 		  section = SECTION_DGID;
 		  dgIdData = new DGIdData;
@@ -237,6 +243,13 @@ bool CConf::read()
 			m_fcsNetHangTime = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "Debug") == 0)
 			m_fcsNetDebug = ::atoi(value) == 1;
+	} else if (section == SECTION_IMRS_NETWORK) {
+		if (::strcmp(key, "RFHangTime") == 0)
+			m_imrsRFHangTime = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "NetHangTime") == 0)
+			m_imrsNetHangTime = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Debug") == 0)
+			m_imrsNetDebug = ::atoi(value) == 1;
 	} else if (section == SECTION_DGID) {
 		assert(dgIdData != NULL);
 		if (::strcmp(key, "Type") == 0) {
@@ -254,6 +267,10 @@ bool CConf::read()
 				dgIdData->m_rfHangTime  = m_ysfRFHangTime;
 				dgIdData->m_netHangTime = m_ysfNetHangTime;
 				dgIdData->m_debug       = m_ysfNetDebug;
+			} else if (::strcmp(value, "IMRS") == 0) {
+				dgIdData->m_rfHangTime  = m_imrsRFHangTime;
+				dgIdData->m_netHangTime = m_imrsNetHangTime;
+				dgIdData->m_debug       = m_imrsNetDebug;
 			} else {
 				dgIdData->m_rfHangTime  = m_rfHangTime;
 				dgIdData->m_netHangTime = m_netHangTime;

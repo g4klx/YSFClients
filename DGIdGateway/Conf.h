@@ -138,6 +138,10 @@ private:
   unsigned int m_fcsNetHangTime;
   bool         m_fcsNetDebug;
 
+  unsigned int m_imrsRFHangTime;
+  unsigned int m_imrsNetHangTime;
+  bool         m_imrsNetDebug;
+
   std::vector<DGIdData*> m_dgIdData;
 
   bool         m_gpsdEnabled;

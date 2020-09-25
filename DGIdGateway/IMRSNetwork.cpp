@@ -99,7 +99,7 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 
 	switch (fich.getFI()) {
 	case YSF_FI_HEADER:
-	case  YSF_FI_TERMINATOR:
+	case YSF_FI_TERMINATOR:
 		writeHeaderTrailer(ptr, fich, data);
 		break;
 	case YSF_FI_COMMUNICATIONS:
