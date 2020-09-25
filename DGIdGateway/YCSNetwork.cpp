@@ -200,28 +200,27 @@ void CYCSNetwork::clock(unsigned int ms)
 	if (m_debug)
 		CUtils::dump(1U, "YCS Network Data Received", buffer, length);
 
-	// Throw away any options messages
-	if (::memcmp(buffer, "YSFO", 4U) == 0)
-		return;
+	if (::memcmp(buffer, "YSFP", 4U) == 0) {
+		if (m_state == DS_LINKING) {
+			LogMessage("Linked to %s", m_name.c_str());
 
-	// Throw away any info messages
-	if (::memcmp(buffer, "YSFI", 4U) == 0)
-		return;
+			m_state = DS_LINKED;
 
-	if (::memcmp(buffer, "YSFP", 4U) == 0 && m_state == DS_LINKING) {
-		LogMessage("Linked to %s", m_name.c_str());
+			if (m_debug)
+				CUtils::dump(1U, "YCS Network Data Sent", m_options, 50U);
 
-		m_state = DS_LINKED;
+			m_socket.write(m_options, 50U, m_addr, m_addrLen);
 
-		if (m_debug)
-			CUtils::dump(1U, "YCS Network Data Sent", m_options, 50U);
+			if (m_debug)
+				CUtils::dump(1U, "YCS Network Data Sent", m_info, 80U);
 
-		m_socket.write(m_options, 50U, m_addr, m_addrLen);
+			m_socket.write(m_info, 80U, m_addr, m_addrLen);
+		}
 
-		if (m_debug)
-			CUtils::dump(1U, "YCS Network Data Sent", m_info, 80U);
+		unsigned char len = length;
+		m_buffer.addData(&len, 1U);
 
-		m_socket.write(m_info, 80U, m_addr, m_addrLen);
+		m_buffer.addData(buffer, length);
 	}
 
 	if (::memcmp(buffer, "YSFD", 4U) == 0) {
@@ -234,12 +233,12 @@ void CYCSNetwork::clock(unsigned int ms)
 		unsigned char dgId = fich.getDGId();
 		if (dgId != m_dgId)
 			return;
+
+		unsigned char len = length;
+		m_buffer.addData(&len, 1U);
+
+		m_buffer.addData(buffer, length);
 	}
-
-	unsigned char len = length;
-	m_buffer.addData(&len, 1U);
-
-	m_buffer.addData(buffer, length);
 }
 
 unsigned int CYCSNetwork::read(unsigned int dgid, unsigned char* data)
