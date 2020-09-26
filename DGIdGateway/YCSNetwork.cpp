@@ -28,17 +28,19 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CYCSNetwork::CYCSNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& description, unsigned int id, unsigned int dgId, bool debug) :
+CYCSNetwork::CYCSNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& description, unsigned int id, unsigned int dgId, bool statc, bool debug) :
 m_socket(localPort),
 m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
+m_static(statc),
 m_poll(NULL),
 m_options(NULL),
 m_info(NULL),
 m_unlink(NULL),
 m_buffer(1000U, "YCS Network Buffer"),
-m_pollTimer(1000U, 5U),
+m_sendPollTimer(1000U, 5U),
+m_recvPollTimer(1000U, 60U),
 m_name(name),
 m_state(DS_NOTOPEN),
 m_dgId(dgId)
@@ -142,6 +144,9 @@ void CYCSNetwork::link()
 
 	m_state = DS_LINKING;
 
+	m_sendPollTimer.start();
+	m_recvPollTimer.start();
+
 	writePoll();
 }
 
@@ -149,8 +154,6 @@ void CYCSNetwork::writePoll()
 {
 	if (m_state != DS_LINKING && m_state != DS_LINKED)
 		return;
-
-	m_pollTimer.start();
 
 	if (m_debug)
 		CUtils::dump(1U, "YCS Network Data Sent", m_poll, 14U);
@@ -163,7 +166,8 @@ void CYCSNetwork::unlink()
 	if (m_state != DS_LINKED)
 		return;
 
-	m_pollTimer.stop();
+	m_sendPollTimer.stop();
+	m_recvPollTimer.stop();
 
 	if (m_debug)
 		CUtils::dump(1U, "YCS Network Data Sent", m_unlink, 14U);
@@ -180,9 +184,24 @@ void CYCSNetwork::clock(unsigned int ms)
 	if (m_state == DS_NOTOPEN)
 		return;
 
-	m_pollTimer.clock(ms);
-	if (m_pollTimer.isRunning() && m_pollTimer.hasExpired())
+	m_recvPollTimer.clock(ms);
+	if (m_recvPollTimer.isRunning() && m_recvPollTimer.hasExpired()) {
+		if (m_static) {
+			m_state = DS_LINKING;
+		} else {
+			m_state = DS_NOTLINKED;
+			m_sendPollTimer.stop();
+		}
+
+		LogMessage("Lost link to %s", m_name.c_str());
+		m_recvPollTimer.stop();
+	}
+
+	m_sendPollTimer.clock(ms);
+	if (m_sendPollTimer.isRunning() && m_sendPollTimer.hasExpired()) {
 		writePoll();
+		m_sendPollTimer.start();
+	}
 
 	unsigned char buffer[BUFFER_LENGTH];
 	sockaddr_storage addr;
@@ -201,6 +220,8 @@ void CYCSNetwork::clock(unsigned int ms)
 		CUtils::dump(1U, "YCS Network Data Received", buffer, length);
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {
+		m_recvPollTimer.start();
+
 		if (m_state == DS_LINKING) {
 			LogMessage("Linked to %s", m_name.c_str());
 
@@ -216,14 +237,11 @@ void CYCSNetwork::clock(unsigned int ms)
 
 			m_socket.write(m_info, 80U, m_addr, m_addrLen);
 		}
-
-		unsigned char len = length;
-		m_buffer.addData(&len, 1U);
-
-		m_buffer.addData(buffer, length);
 	}
 
 	if (::memcmp(buffer, "YSFD", 4U) == 0) {
+		m_recvPollTimer.start();
+
 		CYSFFICH fich;
 		bool valid = fich.decode(buffer + 35U);
 		if (!valid)

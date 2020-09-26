@@ -29,18 +29,20 @@ const char* FCS_VERSION = "MMDVM";
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug) :
+CFCSNetwork::CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool statc, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_addr(),
 m_addrLen(0U),
+m_static(statc),
 m_ping(NULL),
 m_info(NULL),
 m_reflector(reflector),
 m_print(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
-m_pingTimer(1000U, 0U, 800U),
+m_sendPollTimer(1000U, 0U, 800U),
+m_recvPollTimer(1000U, 60U),
 m_resetTimer(1000U, 1U),
 m_state(DS_NOTOPEN)
 {
@@ -130,9 +132,10 @@ void CFCSNetwork::link()
 
 	m_state = DS_LINKING;
 
-	m_pingTimer.start();
+	m_sendPollTimer.start();
+	m_recvPollTimer.start();
 
-	writePing();
+	writePoll();
 }
 
 void CFCSNetwork::unlink()
@@ -142,7 +145,8 @@ void CFCSNetwork::unlink()
 
 	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_addr, m_addrLen);
 
-	m_pingTimer.stop();
+	m_sendPollTimer.stop();
+	m_recvPollTimer.stop();
 
 	LogMessage("Unlinked from %s", m_print.c_str());
 
@@ -154,10 +158,23 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (m_state == DS_NOTOPEN)
 		return;
 
-	m_pingTimer.clock(ms);
-	if (m_pingTimer.isRunning() && m_pingTimer.hasExpired()) {
-		writePing();
-		m_pingTimer.start();
+	m_recvPollTimer.clock(ms);
+	if (m_recvPollTimer.isRunning() && m_recvPollTimer.hasExpired()) {
+		if (m_static) {
+			m_state = DS_LINKING;
+		} else {
+			m_state = DS_NOTLINKED;
+			m_sendPollTimer.stop();
+		}
+
+		LogMessage("Lost link to %s", m_print.c_str());
+		m_recvPollTimer.stop();
+	}
+
+	m_sendPollTimer.clock(ms);
+	if (m_sendPollTimer.isRunning() && m_sendPollTimer.hasExpired()) {
+		writePoll();
+		m_sendPollTimer.start();
 	}
 
 	m_resetTimer.clock(ms);
@@ -185,30 +202,24 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
-	if (length == 7) {
-		if (m_state == DS_LINKING)
+	if (length == 7 || length == 10) {
+		m_recvPollTimer.start();
+
+		if (m_state == DS_LINKING) {
 			LogMessage("Linked to %s", m_print.c_str());
 
-		m_state = DS_LINKED;
+			m_state = DS_LINKED;
 
-		if (m_debug)
-			CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
+			if (m_debug)
+				CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
 
-		m_socket.write(m_info, 100U, m_addr, m_addrLen);
+			m_socket.write(m_info, 100U, m_addr, m_addrLen);
+		}
 	}
 
-	if (length == 10 && m_state == DS_LINKING) {
-		LogMessage("Linked to %s", m_print.c_str());
+	if (length == 130) {
+		m_recvPollTimer.start();
 
-		m_state = DS_LINKED;
-
-		if (m_debug)
-			CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
-
-		m_socket.write(m_info, 100U, m_addr, m_addrLen);
-	}
-
-	if (length == 7 || length == 10 || length == 130) {
 		unsigned char len = length;
 		m_buffer.addData(&len, 1U);
 		m_buffer.addData(buffer, len);
@@ -224,16 +235,6 @@ unsigned int CFCSNetwork::read(unsigned int dgid, unsigned char* data)
 
 	unsigned char len = 0U;
 	m_buffer.getData(&len, 1U);
-
-	if (len != 130U) {
-		m_buffer.getData(data, len);
-
-		::memset(data + 0U, ' ', 14U);
-		::memcpy(data + 0U, "YSFP", 4U);
-		::memcpy(data + 4U, m_print.c_str(), 8U);
-
-		return 14U;
-	}
 
 	m_resetTimer.start();
 
@@ -262,7 +263,7 @@ void CFCSNetwork::close()
 	m_state = DS_NOTOPEN;
 }
 
-void CFCSNetwork::writePing()
+void CFCSNetwork::writePoll()
 {
 	if (m_state != DS_LINKING && m_state != DS_LINKED)
 		return;

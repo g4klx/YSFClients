@@ -242,7 +242,7 @@ int CDGIdGateway::run()
 			std::string locator      = calculateLocator();
 			unsigned int id          = m_conf.getId();
 
-			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, debug);
+			dgIdNetwork[dgid] = new CFCSNetwork(name, local, m_callsign, rxFrequency, txFrequency, locator, id, statc, debug);
 			dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -255,7 +255,7 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -276,7 +276,7 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYCSNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, rxFrequency, txFrequency, locator, description, id, (*it)->m_netDGId, debug);
+				dgIdNetwork[dgid] = new CYCSNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, rxFrequency, txFrequency, locator, description, id, (*it)->m_netDGId, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -323,7 +323,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -339,7 +339,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2DMR", addr, addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -355,7 +355,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2NXDN", addr, addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -371,7 +371,7 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, debug);
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSF2P25", addr, addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VOICE_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -416,63 +416,61 @@ int CDGIdGateway::run()
 		memset(buffer, 0U, 200U);
 
 		if (rptNetwork.read(0U, buffer) > 0U) {
-			if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
-				CYSFFICH fich;
-				bool valid = fich.decode(buffer + 35U);
-				if (valid) {
-					unsigned char fi   = fich.getFI();
-					unsigned char dt   = fich.getDT();
-					unsigned char fn   = fich.getFN();
-					unsigned char ft   = fich.getFT();
-					unsigned char dgId = fich.getDGId();
+			CYSFFICH fich;
+			bool valid = fich.decode(buffer + 35U);
+			if (valid) {
+				unsigned char fi = fich.getFI();
+				unsigned char dt = fich.getDT();
+				unsigned char fn = fich.getFN();
+				unsigned char ft = fich.getFT();
+				unsigned char dgId = fich.getDGId();
 
-					if (dgId != 0U && dgId != currentDGId) {
-						if (dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
-							dgIdNetwork[currentDGId]->unlink();
-							dgIdNetwork[currentDGId]->unlink();
-							dgIdNetwork[currentDGId]->unlink();
-						}
-
-						if (dgIdNetwork[dgId] != NULL && !dgIdNetwork[dgId]->m_static) {
-							dgIdNetwork[dgId]->link();
-							dgIdNetwork[dgId]->link();
-							dgIdNetwork[dgId]->link();
-						}
-
-						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
-						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
-						currentDGId = dgId;
-						state = DS_NOTLINKED;
-						fromRF = true;
+				if (dgId != 0U && dgId != currentDGId) {
+					if (dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
+						dgIdNetwork[currentDGId]->unlink();
+						dgIdNetwork[currentDGId]->unlink();
+						dgIdNetwork[currentDGId]->unlink();
 					}
 
-					if (m_gps != NULL)
-						m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
-
-					if (currentDGId != 0U && dgIdNetwork[currentDGId] != NULL) {
-						// Only allow the wanted modes through
-						if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
-						    (dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
-						    (dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
-						    (dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
-							unsigned int dgId = dgIdNetwork[currentDGId]->getDGId();
-							fich.setDGId(dgId);
-							fich.encode(buffer + 35U);
-
-							dgIdNetwork[currentDGId]->write(currentDGId, buffer);
-						}
-
-						inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
-						inactivityTimer.start();
+					if (dgIdNetwork[dgId] != NULL && !dgIdNetwork[dgId]->m_static) {
+						dgIdNetwork[dgId]->link();
+						dgIdNetwork[dgId]->link();
+						dgIdNetwork[dgId]->link();
 					}
+
+					std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
+					LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+					currentDGId = dgId;
+					state = DS_NOTLINKED;
+					fromRF = true;
 				}
 
-				if ((buffer[34U] & 0x01U) == 0x01U) {
-					if (m_gps != NULL)
-						m_gps->reset();
-					if (nPips > 0U && fromRF)
-						bleepTimer.start();
+				if (m_gps != NULL)
+					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
+
+				if (currentDGId != 0U && dgIdNetwork[currentDGId] != NULL) {
+					// Only allow the wanted modes through
+					if ((dt == YSF_DT_VD_MODE1 && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
+						(dt == YSF_DT_DATA_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
+						(dt == YSF_DT_VD_MODE2 && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
+						(dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
+						unsigned int dgId = dgIdNetwork[currentDGId]->getDGId();
+						fich.setDGId(dgId);
+						fich.encode(buffer + 35U);
+
+						dgIdNetwork[currentDGId]->write(currentDGId, buffer);
+					}
+
+					inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
+					inactivityTimer.start();
 				}
+			}
+
+			if ((buffer[34U] & 0x01U) == 0x01U) {
+				if (m_gps != NULL)
+					m_gps->reset();
+				if (nPips > 0U && fromRF)
+					bleepTimer.start();
 			}
 		}
 
@@ -480,25 +478,23 @@ int CDGIdGateway::run()
 			if (dgIdNetwork[i] != NULL) {
 				unsigned int len = dgIdNetwork[i]->read(i, buffer);
 				if (len > 0U && (i == currentDGId || currentDGId == 0U)) {
-					if (::memcmp(buffer + 0U, "YSFD", 4U) == 0) {
-						CYSFFICH fich;
-						bool valid = fich.decode(buffer + 35U);
-						if (valid) {
-							fich.setDGId(i);
-							fich.encode(buffer + 35U);
+					CYSFFICH fich;
+					bool valid = fich.decode(buffer + 35U);
+					if (valid) {
+						fich.setDGId(i);
+						fich.encode(buffer + 35U);
 
-							rptNetwork.write(0U, buffer);
+						rptNetwork.write(0U, buffer);
 
-							inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
-							inactivityTimer.start();
+						inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
+						inactivityTimer.start();
 
-							if (currentDGId == 0U) {
-								std::string desc = dgIdNetwork[i]->getDesc(i);
-								LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
-								currentDGId = i;
-								state = DS_LINKED;
-								fromRF = false;
-							}
+						if (currentDGId == 0U) {
+							std::string desc = dgIdNetwork[i]->getDesc(i);
+							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
+							currentDGId = i;
+							state = DS_LINKED;
+							fromRF = false;
 						}
 					}
 				}
@@ -547,7 +543,10 @@ int CDGIdGateway::run()
 
 		if (dgIdNetwork[currentDGId] != NULL) {
 			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
-			if (fromRF && state != DS_LINKED && netState == DS_LINKED)
+			bool statc = dgIdNetwork[currentDGId]->m_static;
+			if (fromRF && state != DS_LINKED && netState != DS_LINKED && statc)
+				nPips = 3U;
+			else if (fromRF && state != DS_LINKED && netState == DS_LINKED)
 				nPips = 1U;
 			else if (fromRF && state == DS_LINKED && netState != DS_LINKED)
 				nPips = 3U;
