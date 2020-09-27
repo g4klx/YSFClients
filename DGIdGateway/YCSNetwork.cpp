@@ -18,7 +18,6 @@
 
 #include "YSFDefines.h"
 #include "YCSNetwork.h"
-#include "YSFFICH.h"
 #include "Utils.h"
 #include "Log.h"
 
@@ -241,16 +240,6 @@ void CYCSNetwork::clock(unsigned int ms)
 
 	if (::memcmp(buffer, "YSFD", 4U) == 0) {
 		m_recvPollTimer.start();
-
-		CYSFFICH fich;
-		bool valid = fich.decode(buffer + 35U);
-		if (!valid)
-			return;
-
-		// Reject any audio which doesn't match our requested DG-Id
-		unsigned char dgId = fich.getDGId();
-		if (dgId != m_dgId)
-			return;
 
 		unsigned char len = length;
 		m_buffer.addData(&len, 1U);
