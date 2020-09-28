@@ -57,20 +57,22 @@ bool CYSFReflectors::load()
 			char* p6 = ::strtok(NULL, "\r\n");
 
 			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
-				std::string host  = std::string(p4);
+				std::string host = std::string(p4);
 				unsigned int port = (unsigned int)::atoi(p5);
 
-				sockaddr_storage addr;
-				unsigned int addrLen;
-				if (CUDPSocket::lookup(host, port, addr, addrLen) == 0) {
-					CYSFReflector* refl = new CYSFReflector;
-					refl->m_id      = std::string(p1);
-					refl->m_name    = std::string(p2);
-					refl->m_addr    = addr;
-					refl->m_addrLen = addrLen;
-					m_reflectors.push_back(refl);
-				} else {
-					LogWarning("Unable to resolve the address for %s", host.c_str());
+				if (::strstr(p1, "YCS") == NULL && ::strstr(p2, "YCS") == NULL) {
+					sockaddr_storage addr;
+					unsigned int addrLen;
+					if (CUDPSocket::lookup(host, port, addr, addrLen) == 0) {
+						CYSFReflector* refl = new CYSFReflector;
+						refl->m_id = std::string(p1);
+						refl->m_name = std::string(p2);
+						refl->m_addr = addr;
+						refl->m_addrLen = addrLen;
+						m_reflectors.push_back(refl);
+					} else {
+						LogWarning("Unable to resolve the address for %s", host.c_str());
+					}
 				}
 			}
 		}

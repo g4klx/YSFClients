@@ -21,7 +21,6 @@
 #include "DGIdNetwork.h"
 #include "IMRSNetwork.h"
 #include "YSFNetwork.h"
-#include "YCSNetwork.h"
 #include "FCSNetwork.h"
 #include "UDPSocket.h"
 #include "StopWatch.h"
@@ -264,28 +263,6 @@ int CDGIdGateway::run()
 				LogMessage("Added YSF:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			} else {
 				LogWarning("Unknown YSF reflector: %s", name.c_str());
-			}
-		} else if (type == "YCS") {
-			std::string name         = (*it)->m_name;
-			unsigned int local       = (*it)->m_local;
-			unsigned int txFrequency = m_conf.getTxFrequency();
-			unsigned int rxFrequency = m_conf.getRxFrequency();
-			std::string locator      = calculateLocator();
-			std::string description  = m_conf.getDescription();
-			unsigned int id          = m_conf.getId();
-
-			CYSFReflector* reflector = reflectors->findByName(name);
-			if (reflector != NULL) {
-				dgIdNetwork[dgid] = new CYCSNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, rxFrequency, txFrequency, locator, description, id, (*it)->m_netDGId, statc, debug);
-				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
-				dgIdNetwork[dgid]->m_static      = statc;
-				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
-				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
-
-				LogMessage("Added YCS:%s:%u to DG-ID %u%s", name.c_str(), (*it)->m_netDGId, dgid, statc ? " (Static)" : "");
-			}
-			else {
-				LogWarning("Unknown YCS reflector: %s", name.c_str());
 			}
 		} else if (type == "IMRS") {
 			if (imrs != NULL) {

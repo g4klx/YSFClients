@@ -74,9 +74,6 @@
     <ClCompile Include="YSFReflectors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="YCSNetwork.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APRSWriter.h">
@@ -149,9 +146,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="YSFReflectors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="YCSNetwork.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

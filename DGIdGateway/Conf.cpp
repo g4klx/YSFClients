@@ -263,10 +263,6 @@ bool CConf::read()
 				dgIdData->m_rfHangTime  = m_fcsRFHangTime;
 				dgIdData->m_netHangTime = m_fcsNetHangTime;
 				dgIdData->m_debug       = m_fcsNetDebug;
-			} else if (::strcmp(value, "YCS") == 0) {
-				dgIdData->m_rfHangTime  = m_ysfRFHangTime;
-				dgIdData->m_netHangTime = m_ysfNetHangTime;
-				dgIdData->m_debug       = m_ysfNetDebug;
 			} else if (::strcmp(value, "IMRS") == 0) {
 				dgIdData->m_rfHangTime  = m_imrsRFHangTime;
 				dgIdData->m_netHangTime = m_imrsNetHangTime;
