@@ -63,6 +63,7 @@ public:
 	void setYSF2DMR(const std::string& address, unsigned int port);
 	void setYSF2NXDN(const std::string& address, unsigned int port);
 	void setYSF2P25(const std::string& address, unsigned int port);
+	void setYSF2PCM(const std::string& address, unsigned int port);
 	void addFCSRoom(const std::string& id, const std::string& name);
 
 	bool load();
@@ -88,6 +89,8 @@ private:
 	unsigned int                m_YSF2NXDNPort;
 	std::string                 m_YSF2P25Address;
 	unsigned int                m_YSF2P25Port;
+	std::string                 m_YSF2PCMAddress;
+	unsigned int                m_YSF2PCMPort;
 	std::vector<std::pair<std::string, std::string>> m_fcsRooms;
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;

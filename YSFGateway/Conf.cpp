@@ -50,6 +50,7 @@ m_myAddress(),
 m_myPort(0U),
 m_wiresXMakeUpper(true),
 m_wiresXCommandPassthrough(false),
+m_wiresXCommandBypass(false),
 m_debug(false),
 m_daemon(false),
 m_rxFrequency(0U),
@@ -85,6 +86,8 @@ m_ysfNetworkYSF2NXDNAddress("127.0.0.1"),
 m_ysfNetworkYSF2NXDNPort(0U),
 m_ysfNetworkYSF2P25Address("127.0.0.1"),
 m_ysfNetworkYSF2P25Port(0U),
+m_ysfNetworkYSF2PCMAddress("127.0.0.1"),
+m_ysfNetworkYSF2PCMPort(0U),
 m_fcsNetworkEnabled(false),
 m_fcsNetworkFile(),
 m_fcsNetworkPort(0U),
@@ -170,6 +173,8 @@ bool CConf::read()
 			m_wiresXMakeUpper = ::atoi(value) == 1;
 		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
 			m_wiresXCommandPassthrough = ::atoi(value) == 1;
+		else if (::strcmp(key, "WiresXCommandBypass") == 0)
+			m_wiresXCommandBypass = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
 			m_debug = ::atoi(value) == 1;
 		else if (::strcmp(key, "Daemon") == 0)
@@ -245,6 +250,10 @@ bool CConf::read()
 			m_ysfNetworkYSF2P25Address = value;
 		else if (::strcmp(key, "YSF2P25Port") == 0)
 			m_ysfNetworkYSF2P25Port = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "YSF2PCMAddress") == 0)
+			m_ysfNetworkYSF2PCMAddress = value;
+		else if (::strcmp(key, "YSF2PCMPort") == 0)
+			m_ysfNetworkYSF2PCMPort = (unsigned int)::atoi(value);
 	} else if (section == SECTION_FCS_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_fcsNetworkEnabled = ::atoi(value) == 1;
@@ -315,6 +324,11 @@ bool CConf::getWiresXMakeUpper() const
 bool CConf::getWiresXCommandPassthrough() const
 {
 	return m_wiresXCommandPassthrough;
+}
+
+bool CConf::getWiresXCommandBypass() const
+{
+	return m_wiresXCommandBypass;
 }
 
 bool CConf::getDebug() const
@@ -490,6 +504,16 @@ std::string CConf::getYSFNetworkYSF2P25Address() const
 unsigned int CConf::getYSFNetworkYSF2P25Port() const
 {
 	return m_ysfNetworkYSF2P25Port;
+}
+
+std::string CConf::getYSFNetworkYSF2PCMAddress() const
+{
+	return m_ysfNetworkYSF2PCMAddress;
+}
+
+unsigned int CConf::getYSFNetworkYSF2PCMPort() const
+{
+	return m_ysfNetworkYSF2PCMPort;
 }
 
 

@@ -39,6 +39,7 @@ public:
   unsigned int getMyPort() const;
   bool         getWiresXMakeUpper() const;
   bool         getWiresXCommandPassthrough() const;
+  bool         getWiresXCommandBypass() const;
   bool         getDebug() const;
   bool         getDaemon() const;
 
@@ -84,6 +85,8 @@ public:
   unsigned int getYSFNetworkYSF2NXDNPort() const;
   std::string  getYSFNetworkYSF2P25Address() const;
   unsigned int getYSFNetworkYSF2P25Port() const;
+  std::string  getYSFNetworkYSF2PCMAddress() const;
+  unsigned int getYSFNetworkYSF2PCMPort() const;
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
@@ -110,6 +113,7 @@ private:
   unsigned int m_myPort;
   bool         m_wiresXMakeUpper;
   bool         m_wiresXCommandPassthrough;
+  bool         m_wiresXCommandBypass;
   bool         m_debug;
   bool         m_daemon;
 
@@ -150,6 +154,8 @@ private:
   unsigned int m_ysfNetworkYSF2NXDNPort;
   std::string  m_ysfNetworkYSF2P25Address;
   unsigned int m_ysfNetworkYSF2P25Port;
+  std::string  m_ysfNetworkYSF2PCMAddress;
+  unsigned int m_ysfNetworkYSF2PCMPort;
 
   bool         m_fcsNetworkEnabled;
   std::string  m_fcsNetworkFile;

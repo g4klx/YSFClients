@@ -522,7 +522,12 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	port = m_conf.getYSFNetworkYSF2P25Port();
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
-
+		
+	address = m_conf.getYSFNetworkYSF2PCMAddress();
+	port = m_conf.getYSFNetworkYSF2PCMPort();
+	if (port > 0U)
+		m_wiresX->setYSF2PCM(address, port);
+		
 	std::string filename = m_conf.getFCSNetworkFile();
 	if (m_fcsNetworkEnabled)
 		readFCSRoomsFile(filename);
@@ -538,6 +543,11 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, dontProcessWiresXLocal);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
+			CYSFReflector* reflector = m_wiresX->getReflector();
+			if(m_conf.getWiresXCommandBypass()){
+				LogMessage("Bypassing connect request to %5.5s - \"%s\" from %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+				return;
+			}
 			if (m_linkType == LINK_YSF)
 				m_ysfNetwork->writeUnlink(3U);
 
@@ -546,7 +556,6 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 				m_fcsNetwork->clearDestination();
 			}
 
-			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_address, reflector->m_port);
@@ -565,6 +574,11 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 		}
 		break;
 	case WXS_CONNECT_FCS: {
+			CYSFReflector* reflector = m_wiresX->getReflector();
+			if(m_conf.getWiresXCommandBypass()){
+				LogMessage("Bypassing connect request to %s - \"%s\" from %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+				return;
+			}
 			if (m_linkType == LINK_YSF) {
 				m_ysfNetwork->writeUnlink(3U);
 				m_ysfNetwork->clearDestination();
@@ -578,7 +592,6 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 
-			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
 			std::string name = reflector->m_name;
@@ -595,6 +608,10 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, u
 		}
 		break;
 	case WXS_DISCONNECT:
+		if(m_conf.getWiresXCommandBypass()){
+				LogMessage("Bypassing disconnect from %10.10s", buffer + 14U);
+				return;
+			}
 		if (m_linkType == LINK_YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 			if ( (wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {

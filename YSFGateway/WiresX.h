@@ -54,6 +54,7 @@ public:
 	void setYSF2DMR(const std::string& address, unsigned int port);
 	void setYSF2NXDN(const std::string& address, unsigned int port);
 	void setYSF2P25(const std::string& address, unsigned int port);
+	void setYSF2PCM(const std::string& address, unsigned int port);
 	void addFCSRoom(const std::string& id, const std::string& name);
 
 	bool start();
