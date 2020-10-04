@@ -528,6 +528,10 @@ int CDGIdGateway::run()
 			else if (fromRF && state == DS_LINKED && netState != DS_LINKED)
 				nPips = 3U;
 			state = netState;
+		} else {
+			if (fromRF && state == DS_LINKED)
+				nPips = 2U;
+			state = DS_NOTLINKED;
 		}
 
 		if (ms < 5U)
