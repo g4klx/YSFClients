@@ -415,10 +415,15 @@ int CDGIdGateway::run()
 						dgIdNetwork[dgId]->link();
 					}
 
-					std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
-					LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+					if (dgIdNetwork[dgId] != NULL) {
+						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
+						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						state = DS_NOTLINKED;
+					} else {
+						LogMessage("DG-ID set to %u (None) via RF", dgId);
+					}
+
 					currentDGId = dgId;
-					state = DS_NOTLINKED;
 					fromRF = true;
 				}
 
