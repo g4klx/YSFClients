@@ -421,6 +421,7 @@ int CDGIdGateway::run()
 						state = DS_NOTLINKED;
 					} else {
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
+						state = DS_NOTOPEN;
 					}
 
 					currentDGId = dgId;
@@ -534,7 +535,7 @@ int CDGIdGateway::run()
 				nPips = 3U;
 			state = netState;
 		} else {
-			if (fromRF && state == DS_LINKED)
+			if (fromRF && state != DS_NOTLINKED)
 				nPips = 2U;
 			state = DS_NOTLINKED;
 		}
