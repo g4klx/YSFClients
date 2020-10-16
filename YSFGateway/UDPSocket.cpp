@@ -207,12 +207,13 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, in_addr& addres
 		LogError("Error returned from recvfrom, err: %lu", ::GetLastError());
 #else
 		LogError("Error returned from recvfrom, err: %d", errno);
-#endif
+
 		if ((len == -1) && (errno == ENOTSOCK)) {
 			LogInfo("Re-opening UDP port on %u", m_port);
 			close();
 			open();
 		}
+#endif
 
 		return -1;
 	}
