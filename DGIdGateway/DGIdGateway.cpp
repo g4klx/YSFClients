@@ -53,6 +53,8 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 #include <clocale>
 #include <cmath>
 
+const unsigned int UNSET_DGID = 999U;
+
 const unsigned char DT_VD_MODE1      = 0x01U;
 const unsigned char DT_VD_MODE2      = 0x02U;
 const unsigned char DT_VOICE_FR_MODE = 0x04U;
@@ -218,7 +220,7 @@ int CDGIdGateway::run()
 		imrs = NULL;
 	}
 
-	unsigned int currentDGId = 0U;
+	unsigned int currentDGId = UNSET_DGID;
 	bool fromRF = false;
 
 	CDGIdNetwork* dgIdNetwork[100U];
@@ -297,6 +299,22 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
 				LogMessage("Added IMRS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
+			}
+		} else if (type == "Gateway") {
+			unsigned int local = (*it)->m_local;
+
+			sockaddr_storage addr;
+			unsigned int     addrLen;
+			if (CUDPSocket::lookup((*it)->m_address, (*it)->m_port, addr, addrLen) == 0) {
+				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSFGateway", addr, addrLen, m_callsign, statc, debug);
+				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
+				dgIdNetwork[dgid]->m_static      = statc;
+				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
+				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+
+				LogMessage("Added YSF Gateway to DG-ID %u%s", dgid, statc ? " (Static)" : "");
+			} else {
+				LogWarning("Unable to resolve the address for the YSF Gateway");
 			}
 		} else if (type == "Parrot") {
 			unsigned int local = (*it)->m_local;
@@ -406,8 +424,8 @@ int CDGIdGateway::run()
 				unsigned char ft = fich.getFT();
 				unsigned char dgId = fich.getDGId();
 
-				if (dgId != 0U && dgId != currentDGId) {
-					if (dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
+				if (dgId != currentDGId) {
+					if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
 						dgIdNetwork[currentDGId]->unlink();
 						dgIdNetwork[currentDGId]->unlink();
 						dgIdNetwork[currentDGId]->unlink();
@@ -435,7 +453,7 @@ int CDGIdGateway::run()
 				if (m_gps != NULL)
 					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
 
-				if (currentDGId != 0U && dgIdNetwork[currentDGId] != NULL) {
+				if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL) {
 					// Only allow the wanted modes through
 					if ((dt == YSF_DT_VD_MODE1 && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
 						(dt == YSF_DT_DATA_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
@@ -461,10 +479,10 @@ int CDGIdGateway::run()
 			}
 		}
 
-		for (unsigned int i = 1U; i < 100U; i++) {
+		for (unsigned int i = 0U; i < 100U; i++) {
 			if (dgIdNetwork[i] != NULL) {
 				unsigned int len = dgIdNetwork[i]->read(i, buffer);
-				if (len > 0U && (i == currentDGId || currentDGId == 0U)) {
+				if (len > 0U && (i == currentDGId || currentDGId == UNSET_DGID)) {
 					CYSFFICH fich;
 					bool valid = fich.decode(buffer + 35U);
 					if (valid) {
@@ -476,7 +494,7 @@ int CDGIdGateway::run()
 						inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
 						inactivityTimer.start();
 
-						if (currentDGId == 0U) {
+						if (currentDGId == UNSET_DGID) {
 							std::string desc = dgIdNetwork[i]->getDesc(i);
 							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
 							currentDGId = i;
@@ -493,7 +511,7 @@ int CDGIdGateway::run()
 
 		rptNetwork.clock(ms);
 
-		for (unsigned int i = 1U; i < 100U; i++) {
+		for (unsigned int i = 0U; i < 100U; i++) {
 			if (dgIdNetwork[i] != NULL)
 				dgIdNetwork[i]->clock(ms);
 		}
@@ -509,10 +527,10 @@ int CDGIdGateway::run()
 				dgIdNetwork[currentDGId]->unlink();
 			}
 
-			LogMessage("DG-ID set to 0 (None) via timeout");
+			LogMessage("DG-ID set to None via timeout");
 
 			state = DS_NOTLINKED;
-			currentDGId = 0U;
+			currentDGId = UNSET_DGID;
 			inactivityTimer.stop();
 
 			if (fromRF) {
@@ -557,7 +575,7 @@ int CDGIdGateway::run()
 		delete m_gps;
 	}
 
-	for (unsigned int i = 1U; i < 100U; i++) {
+	for (unsigned int i = 0U; i < 100U; i++) {
 		if (dgIdNetwork[i] != NULL && dgIdNetwork[i] != imrs) {
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->unlink();
