@@ -57,6 +57,7 @@ public:
   unsigned int getLogFileLevel() const;
   std::string  getLogFilePath() const;
   std::string  getLogFileRoot() const;
+  bool         getLogFileRotate() const;
 
   // The APRS section
   bool         getAPRSEnabled() const;
@@ -127,6 +128,7 @@ private:
   unsigned int m_logFileLevel;
   std::string  m_logFilePath;
   std::string  m_logFileRoot;
+  bool         m_logFileRotate;
 
   bool         m_aprsEnabled;
   std::string  m_aprsAddress;
