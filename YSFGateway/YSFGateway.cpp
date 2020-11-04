@@ -203,9 +203,7 @@ int CYSFGateway::run()
 	unsigned int myPort   = m_conf.getMyPort();
 	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
 
-	rptNetwork.setDestination("MMDVM", rptAddr, rptAddrLen);
-
-	ret = rptNetwork.open();
+	ret = rptNetwork.setDestination("MMDVM", rptAddr, rptAddrLen);
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
 		::LogFinalise();
@@ -215,14 +213,7 @@ int CYSFGateway::run()
 	bool ysfNetworkEnabled = m_conf.getYSFNetworkEnabled();
 	if (ysfNetworkEnabled) {
 		unsigned int ysfPort = m_conf.getYSFNetworkPort();
-
 		m_ysfNetwork = new CYSFNetwork(ysfPort, m_callsign, debug);
-		ret = m_ysfNetwork->open();
-		if (!ret) {
-			::LogError("Cannot open the YSF reflector network port");
-			::LogFinalise();
-			return 1;
-		}
 	}
 
 	m_fcsNetworkEnabled = m_conf.getFCSNetworkEnabled();
@@ -431,7 +422,7 @@ int CYSFGateway::run()
 			CThread::sleep(5U);
 	}
 
-	rptNetwork.close();
+	rptNetwork.clearDestination();
 
 	if (m_gps != NULL) {
 		m_writer->close();
@@ -440,7 +431,7 @@ int CYSFGateway::run()
 	}
 
 	if (m_ysfNetwork != NULL) {
-		m_ysfNetwork->close();
+		m_ysfNetwork->clearDestination();
 		delete m_ysfNetwork;
 	}
 

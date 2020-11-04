@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ bool CFCSNetwork::open()
 
 	LogMessage("Opening FCS network connection");
 
-	return m_socket.open();
+	return m_socket.open(addr);
 }
 
 void CFCSNetwork::clearDestination()
@@ -128,7 +128,7 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 				LogWarning("Unknown FCS reflector - %s", name.c_str());
 				return false;
 			}
-    		} else {
+   		} else {
 			std::pair<sockaddr_storage, unsigned int> entry = m_addresses[name];
 			m_addr    = entry.first;
 			m_addrLen = entry.second;

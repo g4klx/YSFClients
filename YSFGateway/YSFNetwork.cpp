@@ -112,12 +112,14 @@ bool CYSFNetwork::open()
 	return m_socket.open(m_addr);
 }
 
-void CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen)
+bool CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen)
 {
 	m_name    = name;
 	m_addr    = addr;
 	m_addrLen = addrLen;
 	m_linked  = false;
+
+	return open();
 }
 
 void CYSFNetwork::clearDestination()
@@ -126,6 +128,8 @@ void CYSFNetwork::clearDestination()
 	m_linked  = false;
 
 	m_pollTimer.stop();
+
+	close();
 }
 
 void CYSFNetwork::write(const unsigned char* data)

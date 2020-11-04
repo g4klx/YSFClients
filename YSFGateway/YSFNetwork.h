@@ -33,9 +33,7 @@ public:
 	CYSFNetwork(unsigned int port, const std::string& callsign, bool debug);
 	~CYSFNetwork();
 
-	bool open();
-
-	void setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen);
+	bool setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen);
 	void clearDestination();
 
 	void write(const unsigned char* data);
@@ -47,8 +45,6 @@ public:
 	unsigned int read(unsigned char* data);
 
 	void clock(unsigned int ms);
-
-	void close();
 
 private:
 	CUDPSocket                 m_socket;
@@ -63,6 +59,9 @@ private:
 	CTimer                     m_pollTimer;
 	std::string                m_name;
 	bool                       m_linked;
+
+	bool open();
+	void close();
 };
 
 #endif
