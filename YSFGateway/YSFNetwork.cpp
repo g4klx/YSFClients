@@ -102,7 +102,7 @@ CYSFNetwork::~CYSFNetwork()
 
 bool CYSFNetwork::open()
 {
-	if ((m_addr.ss_family != 0) && (m_addrLen == 0U)) {
+	if ((m_addr.ss_family != AF_UNSPEC) && (m_addrLen == 0U)) {
 		LogError("Unable to resolve the address of the YSF network");
 		return false;
 	}
