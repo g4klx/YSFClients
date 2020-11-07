@@ -55,6 +55,8 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 
 const unsigned int UNSET_DGID = 999U;
 
+const unsigned char WIRESX_DGID = 127U;
+
 const unsigned char DT_VD_MODE1      = 0x01U;
 const unsigned char DT_VD_MODE2      = 0x02U;
 const unsigned char DT_VOICE_FR_MODE = 0x04U;
@@ -423,6 +425,9 @@ int CDGIdGateway::run()
 				unsigned char fn = fich.getFN();
 				unsigned char ft = fich.getFT();
 				unsigned char dgId = fich.getDGId();
+
+				if (dgId == WIRESX_DGID)
+					dgId = 0U;
 
 				if (dgId != currentDGId) {
 					if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
