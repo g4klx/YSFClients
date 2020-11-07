@@ -546,7 +546,7 @@ int CDGIdGateway::run()
 			nPips = 0U;
 		}
 
-		if (dgIdNetwork[currentDGId] != NULL) {
+		if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL) {
 			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
 			bool statc = dgIdNetwork[currentDGId]->m_static;
 			if (fromRF && state != DS_LINKED && netState != DS_LINKED && statc)
