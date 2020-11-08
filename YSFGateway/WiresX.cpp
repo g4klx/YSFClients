@@ -39,11 +39,9 @@ const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
 
-const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x7FU};
+const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
 
 const unsigned char NET_HEADER[] = "YSFD                    ALL      ";
-
-const unsigned char WIRESX_DGID = 127U;
 
 CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, CYSFReflectors& reflectors) :
 m_callsign(callsign),
@@ -194,10 +192,6 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 
 	unsigned char dt = fich.getDT();
 	if (dt != YSF_DT_DATA_FR_MODE)
-		return WXS_NONE;
-
-	unsigned char dgId = fich.getDGId();
-	if (dgId != WIRESX_DGID)
 		return WXS_NONE;
 
 	unsigned char fi = fich.getFI();
