@@ -491,8 +491,11 @@ int CDGIdGateway::run()
 					CYSFFICH fich;
 					bool valid = fich.decode(buffer + 35U);
 					if (valid) {
-						fich.setDGId(i);
-						fich.encode(buffer + 35U);
+						unsigned char dgId = fich.getDGId();
+						if (dgId != WIRESX_DGID) {
+							fich.setDGId(i);
+							fich.encode(buffer + 35U);
+						}
 
 						rptNetwork.write(0U, buffer);
 
