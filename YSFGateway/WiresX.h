@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2019 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2019,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "YSFReflectors.h"
 #include "YSFNetwork.h"
+#include "YSFFICH.h"
 #include "Timer.h"
 #include "StopWatch.h"
 #include "RingBuffer.h"
@@ -59,7 +60,7 @@ public:
 	bool start();
 	bool isBusy() const;
 
-	WX_STATUS process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough);
+	WX_STATUS process(const unsigned char* data, const unsigned char* source, const CYSFFICH& fich, bool wiresXCommandPassthrough);
 
 	CYSFReflector* getReflector() const;
 	void setReflector(CYSFReflector* reflector);

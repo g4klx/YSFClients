@@ -45,6 +45,8 @@ public:
 	unsigned char getDGId() const;
 
 	void setFI(unsigned char fi);
+	void setBN(unsigned char bn);
+	void setBT(unsigned char bt);
 	void setFN(unsigned char fn);
 	void setFT(unsigned char ft);
 	void setMR(unsigned char mr);

@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2019 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2019,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -39,9 +39,11 @@ const unsigned char CONN_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char DISC_RESP[] = {0x5DU, 0x41U, 0x5FU, 0x26U};
 const unsigned char ALL_RESP[]  = {0x5DU, 0x46U, 0x5FU, 0x26U};
 
-const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x00U};
+const unsigned char DEFAULT_FICH[] = {0x20U, 0x00U, 0x01U, 0x7FU};
 
 const unsigned char NET_HEADER[] = "YSFD                    ALL      ";
+
+const unsigned char WIRESX_DGID = 127U;
 
 CWiresX::CWiresX(const std::string& callsign, const std::string& suffix, CYSFNetwork* network, CYSFReflectors& reflectors) :
 m_callsign(callsign),
@@ -185,19 +187,26 @@ bool CWiresX::start()
 	return true;
 }
 
-WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool wiresXCommandPassthrough)
+WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, const CYSFFICH& fich, bool wiresXCommandPassthrough)
 {
 	assert(data != NULL);
 	assert(source != NULL);
 
+	unsigned char dt = fich.getDT();
 	if (dt != YSF_DT_DATA_FR_MODE)
 		return WXS_NONE;
 
+	unsigned char dgId = fich.getDGId();
+	if (dgId != WIRESX_DGID)
+		return WXS_NONE;
+
+	unsigned char fi = fich.getFI();
 	if (fi != YSF_FI_COMMUNICATIONS)
 		return WXS_NONE;
 
 	CYSFPayload payload;
 
+	unsigned char fn = fich.getFN();
 	if (fn == 0U)
 		return WXS_NONE;
 
@@ -215,6 +224,7 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 			return WXS_NONE;
 	}
 
+	unsigned char ft = fich.getFT();
 	if (fn == ft) {
 		bool valid = false;
 
@@ -503,7 +513,7 @@ void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNe
 	CSync::add(buffer + 35U);
 
 	CYSFFICH fich;
-	fich.load(DEFAULT_FICH);
+	fich.setRaw(DEFAULT_FICH);
 	fich.setFI(YSF_FI_HEADER);
 	fich.setBT(bt);
 	fich.setFT(ft);

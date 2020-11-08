@@ -420,10 +420,6 @@ int CDGIdGateway::run()
 			CYSFFICH fich;
 			bool valid = fich.decode(buffer + 35U);
 			if (valid) {
-				unsigned char fi = fich.getFI();
-				unsigned char dt = fich.getDT();
-				unsigned char fn = fich.getFN();
-				unsigned char ft = fich.getFT();
 				unsigned char dgId = fich.getDGId();
 
 				if (dgId == WIRESX_DGID)
@@ -456,17 +452,21 @@ int CDGIdGateway::run()
 				}
 
 				if (m_gps != NULL)
-					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
+					m_gps->data(buffer + 14U, buffer + 35U, fich);
 
 				if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL) {
 					// Only allow the wanted modes through
-					if ((dt == YSF_DT_VD_MODE1 && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
-						(dt == YSF_DT_DATA_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
-						(dt == YSF_DT_VD_MODE2 && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
+					unsigned char dt = fich.getDT();
+					if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
+						(dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
+						(dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
 						(dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
-						unsigned int dgId = dgIdNetwork[currentDGId]->getDGId();
-						fich.setDGId(dgId);
-						fich.encode(buffer + 35U);
+						unsigned char origDGId = fich.getDGId();
+						if (origDGId != WIRESX_DGID) {
+							unsigned int newDGId = dgIdNetwork[currentDGId]->getDGId();
+							fich.setDGId(newDGId);
+							fich.encode(buffer + 35U);
+						}
 
 						dgIdNetwork[currentDGId]->write(currentDGId, buffer);
 					}

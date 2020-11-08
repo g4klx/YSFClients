@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define	GPS_H
 
 #include "APRSWriter.h"
+#include "YSFFICH.h"
 
 #include <string>
 
@@ -28,7 +29,7 @@ public:
 	CGPS(CAPRSWriter* writer);
 	~CGPS();
 
-	void data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft);
+	void data(const unsigned char* source, const unsigned char* data, const CYSFFICH& fich);
 
 	void reset();
 

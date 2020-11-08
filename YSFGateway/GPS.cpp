@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -45,15 +45,20 @@ CGPS::~CGPS()
 	delete[] m_buffer;
 }
 
-void CGPS::data(const unsigned char* source, const unsigned char* data, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft)
+void CGPS::data(const unsigned char* source, const unsigned char* data, const CYSFFICH& fich)
 {
 	if (m_sent)
 		return;
 
+	unsigned char fi = fich.getFI();
 	if (fi != YSF_FI_COMMUNICATIONS)
 		return;
 
 	CYSFPayload payload;
+
+	unsigned char dt = fich.getDT();
+	unsigned char fn = fich.getFN();
+	unsigned char ft = fich.getFT();
 
 	if (dt == YSF_DT_VD_MODE1) {
 		if (fn == 0U || fn == 1U || fn == 2U)

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016,2017,2019,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -52,12 +52,22 @@ const unsigned int INTERLEAVE_TABLE[] = {
   32U, 72U, 112U, 152U, 192U,
   34U, 74U, 114U, 154U, 194U,
   36U, 76U, 116U, 156U, 196U,
-  38U, 78U, 118U, 158U, 198U};
+  38U, 78U, 118U, 158U, 198U };
 
-CYSFFICH::CYSFFICH() :
+CYSFFICH::CYSFFICH(const CYSFFICH& fich) :
 m_fich(NULL)
 {
-	m_fich  = new unsigned char[6U];
+	m_fich = new unsigned char[6U];
+
+	::memcpy(m_fich, fich.m_fich, 6U);
+}
+
+CYSFFICH::CYSFFICH() :
+	m_fich(NULL)
+{
+	m_fich = new unsigned char[6U];
+
+	memset(m_fich, 0x00U, 6U);
 }
 
 CYSFFICH::~CYSFFICH()
@@ -159,6 +169,16 @@ void CYSFFICH::encode(unsigned char* bytes)
 	}
 }
 
+void CYSFFICH::setRaw(const unsigned char* bytes)
+{
+	::memcpy(m_fich, bytes, 4U);
+}
+
+void CYSFFICH::getRaw(unsigned char* bytes) const
+{
+	::memcpy(bytes, m_fich, 4U);
+}
+
 unsigned char CYSFFICH::getFI() const
 {
 	return (m_fich[0U] >> 6) & 0x03U;
@@ -167,6 +187,16 @@ unsigned char CYSFFICH::getFI() const
 unsigned char CYSFFICH::getCM() const
 {
 	return (m_fich[0U] >> 2) & 0x03U;
+}
+
+unsigned char CYSFFICH::getBN() const
+{
+	return m_fich[0U] & 0x03U;
+}
+
+unsigned char CYSFFICH::getBT() const
+{
+	return (m_fich[1U] >> 6) & 0x03U;
 }
 
 unsigned char CYSFFICH::getFN() const
@@ -184,11 +214,19 @@ unsigned char CYSFFICH::getDT() const
 	return m_fich[2U] & 0x03U;
 }
 
-void CYSFFICH::load(const unsigned char* fich)
+unsigned char CYSFFICH::getMR() const
 {
-	assert(fich != NULL);
+	return (m_fich[2U] >> 3) & 0x03U;
+}
 
-	::memcpy(m_fich, fich, 4U);
+bool CYSFFICH::getDev() const
+{
+	return (m_fich[2U] & 0x40U) == 0x40U;
+}
+
+unsigned char CYSFFICH::getDGId() const
+{
+	return m_fich[3U] & 0x7FU;
 }
 
 void CYSFFICH::setFI(unsigned char fi)
@@ -219,4 +257,40 @@ void CYSFFICH::setFT(unsigned char ft)
 {
 	m_fich[1U] &= 0xF8U;
 	m_fich[1U] |= ft & 0x07U;
+}
+
+void CYSFFICH::setMR(unsigned char mr)
+{
+	m_fich[2U] &= 0xC7U;
+	m_fich[2U] |= (mr << 3) & 0x38U;
+}
+
+void CYSFFICH::setVoIP(bool on)
+{
+	if (on)
+		m_fich[2U] |= 0x04U;
+	else
+		m_fich[2U] &= 0xFBU;
+}
+
+void CYSFFICH::setDev(bool on)
+{
+	if (on)
+		m_fich[2U] |= 0x40U;
+	else
+		m_fich[2U] &= 0xBFU;
+}
+
+void CYSFFICH::setDGId(unsigned char id)
+{
+	m_fich[3U] &= 0x80U;
+	m_fich[3U] |= id & 0x7FU;
+}
+
+CYSFFICH& CYSFFICH::operator=(const CYSFFICH& fich)
+{
+	if (&fich != this)
+		::memcpy(m_fich, fich.m_fich, 6U);
+
+	return *this;
 }

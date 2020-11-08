@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016,2017,2019,2020 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 class CYSFFICH {
 public:
+	CYSFFICH(const CYSFFICH& fich);
 	CYSFFICH();
 	~CYSFFICH();
 
@@ -28,19 +29,32 @@ public:
 
 	void encode(unsigned char* bytes);
 
+	void setRaw(const unsigned char* bytes);
+
+	void getRaw(unsigned char* bytes) const;
+
 	unsigned char getFI() const;
 	unsigned char getCM() const;
+	unsigned char getBN() const;
+	unsigned char getBT() const;
 	unsigned char getFN() const;
 	unsigned char getFT() const;
 	unsigned char getDT() const;
+	unsigned char getMR() const;
+	bool getDev() const;
+	unsigned char getDGId() const;
 
 	void setFI(unsigned char fi);
 	void setBN(unsigned char bn);
 	void setBT(unsigned char bt);
 	void setFN(unsigned char fn);
 	void setFT(unsigned char ft);
+	void setMR(unsigned char mr);
+	void setVoIP(bool set);
+	void setDev(bool set);
+	void setDGId(unsigned char id);
 
-	void load(const unsigned char* fich);
+	CYSFFICH& operator=(const CYSFFICH& fich);
 
 private:
 	unsigned char* m_fich;

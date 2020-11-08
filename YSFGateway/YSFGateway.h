@@ -23,6 +23,7 @@
 #include "YSFReflectors.h"
 #include "FCSNetwork.h"
 #include "APRSWriter.h"
+#include "YSFFICH.h"
 #include "WiresX.h"
 #include "Timer.h"
 #include "Conf.h"
@@ -68,7 +69,7 @@ private:
 
 	void startupLinking();
 	std::string calculateLocator();
-	bool processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
+	bool processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();

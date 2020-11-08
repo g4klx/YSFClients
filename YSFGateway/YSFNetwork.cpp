@@ -119,7 +119,13 @@ bool CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage
 	m_addrLen = addrLen;
 	m_linked  = false;
 
-	return open();
+	bool ret = open();
+	if (ret) {
+		m_pollTimer.start();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void CYSFNetwork::clearDestination()
@@ -152,6 +158,9 @@ void CYSFNetwork::writePoll(unsigned int count)
 
 	m_pollTimer.start();
 
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", m_poll, 14U);
+
 	for (unsigned int i = 0U; i < count; i++)
 		m_socket.write(m_poll, 14U, m_addr, m_addrLen);
 
@@ -180,6 +189,9 @@ void CYSFNetwork::writeUnlink(unsigned int count)
 
 	if (m_addrLen == 0U)
 		return;
+
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", m_unlink, 14U);
 
 	for (unsigned int i = 0U; i < count; i++)
 		m_socket.write(m_unlink, 14U, m_addr, m_addrLen);

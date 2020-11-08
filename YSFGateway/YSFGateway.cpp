@@ -122,8 +122,7 @@ int CYSFGateway::run()
 		if (pid == -1) {
 			::fprintf(stderr, "Couldn't fork() , exiting\n");
 			return -1;
-		}
-		else if (pid != 0) {
+		} else if (pid != 0) {
 			exit(EXIT_SUCCESS);
 		}
 
@@ -191,7 +190,7 @@ int CYSFGateway::run()
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
-	bool debug = m_conf.getNetworkDebug();
+	bool debug = m_conf.getDebug();
 	sockaddr_storage rptAddr;
 	unsigned int rptAddrLen;
 	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
@@ -277,22 +276,19 @@ int CYSFGateway::run()
 			bool valid = fich.decode(buffer + 35U);
 			m_exclude = false;
 			if (valid) {
-				unsigned char fi = fich.getFI();
 				unsigned char dt = fich.getDT();
-				unsigned char fn = fich.getFN();
-				unsigned char ft = fich.getFT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
 				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
-					m_exclude = processWiresX(buffer, fi, dt, fn, ft, true, wiresXCommandPassthrough);
+					m_exclude = processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
 					processDTMF(buffer, dt);
-					m_exclude = processWiresX(buffer, fi, dt, fn, ft, false, wiresXCommandPassthrough);
+					m_exclude = processWiresX(buffer, fich, false, wiresXCommandPassthrough);
 				}
 
 				if (m_gps != NULL)
-					m_gps->data(buffer + 14U, buffer + 35U, fi, dt, fn, ft);
+					m_gps->data(buffer + 14U, buffer + 35U, fich);
 			}
 
 			if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && !m_exclude) {
@@ -534,13 +530,13 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-bool CYSFGateway::processWiresX(const unsigned char* buffer, unsigned char fi, unsigned char dt, unsigned char fn, unsigned char ft, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
+bool CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
 {
 	bool ret=true;
 	
 	assert(buffer != NULL);
 
-	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fi, dt, fn, ft, dontProcessWiresXLocal);
+	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, dontProcessWiresXLocal);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
 			if (m_linkType == LINK_YSF)

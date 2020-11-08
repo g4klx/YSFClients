@@ -63,9 +63,9 @@ m_fich(NULL)
 }
 
 CYSFFICH::CYSFFICH() :
-m_fich(NULL)
+	m_fich(NULL)
 {
-	m_fich  = new unsigned char[6U];
+	m_fich = new unsigned char[6U];
 
 	memset(m_fich, 0x00U, 6U);
 }
@@ -233,6 +233,18 @@ void CYSFFICH::setFI(unsigned char fi)
 {
 	m_fich[0U] &= 0x3FU;
 	m_fich[0U] |= (fi << 6) & 0xC0U;
+}
+
+void CYSFFICH::setBN(unsigned char bn)
+{
+	m_fich[0U] &= 0xFCU;
+	m_fich[0U] |= bn & 0x03U;
+}
+
+void CYSFFICH::setBT(unsigned char bt)
+{
+	m_fich[1U] &= 0x3FU;
+	m_fich[1U] |= (bt << 6) & 0xC0U;
 }
 
 void CYSFFICH::setFN(unsigned char fn)
