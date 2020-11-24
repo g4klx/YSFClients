@@ -160,6 +160,34 @@ bool CUDPSocket::isNone(const sockaddr_storage& addr)
 	return ((addr.ss_family == AF_INET) && (in->sin_addr.s_addr == htonl(INADDR_NONE)));
 }
 
+char* CUDPSocket::display(const sockaddr_storage& addr, char* buffer, unsigned int length)
+{
+	assert(buffer != NULL);
+	assert(length > INET6_ADDRSTRLEN);
+
+	switch (addr.ss_family) {
+	case AF_INET: {
+		struct sockaddr_in* in4 = (struct sockaddr_in*)&addr;
+		::inet_ntop(AF_INET, &in4, buffer, length);
+		::sprintf(buffer + ::strlen(buffer), ":%u", in4->sin_port);
+	}
+				break;
+
+	case AF_INET6: {
+		struct sockaddr_in6* in6 = (struct sockaddr_in6*)&addr;
+		::inet_ntop(AF_INET6, &in6, buffer, length);
+		::sprintf(buffer + ::strlen(buffer), ":%u", in6->sin6_port);
+	}
+				 break;
+
+	default:
+		::strcpy(buffer, "Unknown");
+		break;
+	}
+
+	return buffer;
+}
+
 bool CUDPSocket::open(const sockaddr_storage& address)
 {
 	return open(address.ss_family);
