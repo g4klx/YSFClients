@@ -693,7 +693,7 @@
 40861;US-SOMN-----FAPG;SO MN;216.114.243.235;42000;005;http://
 12461;US-South-MS-Net;South MS Net;50.246.136.107;42000;000;http://50.246.136.107:42001
 29364;US-South-Texas;South Texas;76.183.98.122;42011;003;http://ae5jo.bounceme.net
-43389;US-SOUTHEASTLINK;Provided by: L;45.32.214.224;42000;015;http://selink.lmarc.net/YSFDash/index.php
+43389;US-SOUTHEASTLINK;LMARC.NET;3.229.129.202;42000;015;http://ysfsel.lmarc.net/YSFDash/index.php
 73102;US-Southwest-USA;Southwest USA;24.121.39.190;42000;007;http://24.121.39.190:8888/index.php
 18503;US-SpaceCityChat;Huntsville_AL;108.209.70.215;42000;000;http://kk4lpo.ddnsgeek.com
 04743;US-TechFirst;TechFirst YSF;173.171.244.230;42000;003;http://41611.asnode.org:8184/ysf/
