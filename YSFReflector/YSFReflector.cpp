@@ -215,7 +215,7 @@ void CYSFReflector::run()
 				if (rpt == NULL) {
 					rpt = new CYSFRepeater;
 					rpt->m_callsign = std::string((char*)(buffer + 4U), 10U);
-					::memcpy(&rpt->m_addr, &addr, sizeof(sockaddr_storage));
+					::memcpy(&rpt->m_addr, &addr, sizeof(struct sockaddr_storage));
 					rpt->m_addrLen  = addrLen;
 					m_repeaters.push_back(rpt);
 					network.setCount(m_repeaters.size());
