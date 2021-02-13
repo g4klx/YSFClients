@@ -200,12 +200,16 @@ void CYSFReflector::run()
 	unsigned char dst[YSF_CALLSIGN_LENGTH];
 
 	for (;;) {
+		bool blocked;
+
 		unsigned char buffer[200U];
 		sockaddr_storage addr;
 		unsigned int addrLen;
 
 		unsigned int len = network.readData(buffer, 200U, addr, addrLen);
 		if (len > 0U) {
+			blocked = false;
+
 			CYSFRepeater* rpt = findRepeater(addr);
 			if (::memcmp(buffer, "YSFP", 4U) == 0) {
 				if (rpt == NULL) {
@@ -271,18 +275,21 @@ void CYSFReflector::run()
 					}
 				} else {
 					LogDebug("Data from %10.10s at %10.10s blocked", buffer + 14U, buffer + 4U);
+					blocked = true;
 				}
 
-				watchdogTimer.start();
+				if (!blocked) {
+					watchdogTimer.start();
 
-				for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-					if (!CUDPSocket::match((*it)->m_addr, addr))
-						network.writeData(buffer, (*it)->m_addr, (*it)->m_addrLen);
-				}
+					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
+						if (!CUDPSocket::match((*it)->m_addr, addr))
+							network.writeData(buffer, (*it)->m_addr, (*it)->m_addrLen);
+					}
 
-				if ((buffer[34U] & 0x01U) == 0x01U) {
-					LogMessage("Received end of transmission");
-					watchdogTimer.stop();
+					if ((buffer[34U] & 0x01U) == 0x01U) {
+						LogMessage("Received end of transmission");
+						watchdogTimer.stop();
+					}
 				}
 			}
 		}
