@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2020,2021 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,9 +16,35 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#if !defined(VERSION_H)
-#define	VERSION_H
+#if !defined(BLOCKLIST_H)
+#define	BLOCKLIST_H
 
-const char* VERSION = "20210213";
+#include "Timer.h"
+
+#include <cstdint>
+#include <string>
+#include <vector>
+
+class CBlockList
+{
+public:
+	CBlockList(const std::string& file, unsigned int time);
+	~CBlockList();
+
+	bool start();
+
+	bool check(const unsigned char* callsign) const;
+
+	void clock(unsigned int ms);
+
+private:
+	std::string              m_file;
+	unsigned int             m_time;
+	std::vector<std::string> m_callsigns;
+	CTimer                   m_timer;
+	uint16_t                 m_checksum;
+
+	bool loadFile();
+};
 
 #endif

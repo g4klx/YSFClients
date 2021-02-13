@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -49,6 +49,10 @@ public:
   unsigned int getNetworkPort() const;
   bool         getNetworkDebug() const;
 
+  // The Block List section
+  std::string  getBlockListFile() const;
+  unsigned int getBlockListTime() const;
+
 private:
   std::string  m_file;
   bool         m_daemon;
@@ -65,6 +69,9 @@ private:
 
   unsigned int m_networkPort;
   bool         m_networkDebug;
+
+  std::string  m_blockListFile;
+  unsigned int m_blockListTime;
 };
 
 #endif

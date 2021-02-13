@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2018,2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2018,2020,2021 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 */
 
 #include "YSFReflector.h"
+#include "BlockList.h"
 #include "StopWatch.h"
 #include "Network.h"
 #include "Version.h"
@@ -175,7 +176,10 @@ void CYSFReflector::run()
 		::LogFinalise();
 		return;
 	}
-	
+
+	CBlockList blockList(m_conf.getBlockListFile(), m_conf.getBlockListTime());
+	blockList.start();
+
 	network.setCount(0);
 	
 	CStopWatch stopWatch;
@@ -231,37 +235,42 @@ void CYSFReflector::run()
 				}
 				network.setCount(m_repeaters.size());
 			} else if (::memcmp(buffer + 0U, "YSFD", 4U) == 0 && rpt != NULL) {
-				if (!watchdogTimer.isRunning()) {
-					::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
+				// Is this user allowed?
+				if (blockList.check(buffer + 14U)) {
+					if (!watchdogTimer.isRunning()) {
+						::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
 
-					if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-						::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-					else
-						::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
-
-					if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-						::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-					else
-						::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
-
-					LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
-				} else {
-					if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
-						bool changed = false;
-
-						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
 							::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-							changed = true;
-						}
+						else
+							::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
 
-						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
 							::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-							changed = true;
-						}
+						else
+							::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
 
-						if (changed)
-							LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+						LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+					} else {
+						if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
+							bool changed = false;
+
+							if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+								::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
+								changed = true;
+							}
+
+							if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+								::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
+								changed = true;
+							}
+
+							if (changed)
+								LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
+						}
 					}
+				} else {
+					LogDebug("Data from %10.10s at %10.10s blocked", buffer + 14U, buffer + 4U);
 				}
 
 				watchdogTimer.start();
@@ -316,6 +325,8 @@ void CYSFReflector::run()
 			dumpRepeaters();
 			dumpTimer.start();
 		}
+
+		blockList.clock(ms);
 
 		if (ms < 5U)
 			CThread::sleep(5U);

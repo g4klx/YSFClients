@@ -4,7 +4,7 @@ CFLAGS  = -g -O3 -Wall -std=c++0x -pthread -DHAVE_LOG_H -DUDP_SOCKET_MAX=2
 LIBS    = -lpthread
 LDFLAGS = -g
 
-OBJECTS = Conf.o Log.o Network.o StopWatch.o Thread.o Timer.o UDPSocket.o Utils.o YSFReflector.o
+OBJECTS = BlockList.o Conf.o Log.o Network.o StopWatch.o Thread.o Timer.o UDPSocket.o Utils.o YSFReflector.o
 
 all:		YSFReflector
 

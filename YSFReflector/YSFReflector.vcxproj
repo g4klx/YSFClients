@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BlockList.h" />
     <ClInclude Include="Conf.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Network.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="YSFReflector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BlockList.cpp" />
     <ClCompile Include="Conf.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="Network.cpp" />
