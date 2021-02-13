@@ -215,7 +215,7 @@ void CYSFReflector::run()
 				if (rpt == NULL) {
 					rpt = new CYSFRepeater;
 					rpt->m_callsign = std::string((char*)(buffer + 4U), 10U);
-					rpt->m_addr     = addr;
+					::memcpy(&rpt->m_addr, &addr, sizeof(sockaddr_storage));
 					rpt->m_addrLen  = addrLen;
 					m_repeaters.push_back(rpt);
 					network.setCount(m_repeaters.size());
@@ -230,10 +230,9 @@ void CYSFReflector::run()
 				LogMessage("Removing %s (%s) unlinked", rpt->m_callsign.c_str(), CUDPSocket::display(addr, buff, 80U));
 
 				for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-					CYSFRepeater* itRpt = *it;
-					if (CUDPSocket::match(itRpt->m_addr, rpt->m_addr)) {
+					if (CUDPSocket::match((*it)->m_addr, rpt->m_addr)) {
 						m_repeaters.erase(it);
-						delete itRpt;
+						delete *it;
 						break;
 					}
 				}
@@ -309,13 +308,13 @@ void CYSFReflector::run()
 			(*it)->m_timer.clock(ms);
 
 		for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-			CYSFRepeater* itRpt = *it;
-			if (itRpt->m_timer.hasExpired()) {
+			if ((*it)->m_timer.hasExpired()) {
 				char buff[80U];
-				LogMessage("Removing %s (%s) disappeared", itRpt->m_callsign.c_str(), CUDPSocket::display(itRpt->m_addr, buff, 80U));
+				LogMessage("Removing %s (%s) disappeared", (*it)->m_callsign.c_str(),
+														   CUDPSocket::display((*it)->m_addr, buff, 80U));
 
 				m_repeaters.erase(it);
-				delete itRpt;
+				delete *it;
 				network.setCount(m_repeaters.size());
 				break;
 			}
@@ -364,12 +363,10 @@ void CYSFReflector::dumpRepeaters() const
 	LogMessage("Currently linked repeaters/gateways:");
 
 	for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
-		std::string callsign  = (*it)->m_callsign;
-		sockaddr_storage addr = (*it)->m_addr;
-		unsigned int timer    = (*it)->m_timer.getTimer();
-		unsigned int timeout  = (*it)->m_timer.getTimeout();
-
 		char buffer[80U];
-		LogMessage("    %s: %s %u/%u", callsign.c_str(), CUDPSocket::display(addr, buffer, 80U), timer, timeout);
+		LogMessage("    %s: %s %u/%u", (*it)->m_callsign.c_str(),
+									   CUDPSocket::display((*it)->m_addr, buffer, 80U),
+									   (*it)->m_timer.getTimer(),
+									   (*it)->m_timer.getTimeout());
 	}
 }
