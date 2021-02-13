@@ -24,6 +24,7 @@
 
 #include <cstdio>
 #include <cassert>
+#include <cstring>
 
 const int BUFFER_SIZE = 500;
 
