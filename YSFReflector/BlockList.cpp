@@ -54,6 +54,9 @@ bool CBlockList::check(const unsigned char* callsign) const
 {
 	assert(callsign != NULL);
 
+	if (m_callsigns.empty())
+		return false;
+
 	std::string call = std::string((char*)callsign, YSF_CALLSIGN_LENGTH);
 	std::for_each(call.begin(), call.end(), [](char& c) {
 		c = std::toupper(c);
@@ -62,10 +65,10 @@ bool CBlockList::check(const unsigned char* callsign) const
 	for (std::vector<std::string>::const_iterator it = m_callsigns.cbegin(); it != m_callsigns.cend(); ++it) {
 		const std::string blocked = *it;
 		if (call.find(blocked) != std::string::npos)
-			return false;
+			return true;
 	}
 
-	return true;
+	return false;
 }
 
 void CBlockList::clock(unsigned int ms)
