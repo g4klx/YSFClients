@@ -84,8 +84,11 @@ void CBlockList::clock(unsigned int ms)
 bool CBlockList::loadFile()
 {
 	FILE* fp = ::fopen(m_file.c_str(), "rt");
-	if (fp == NULL)
+	if (fp == NULL) {
+		m_callsigns.clear();
+		LogInfo("Loaded %u callsigns from the block list", m_callsigns.size());
 		return false;
+	}
 
 	char buffer[BUFFER_SIZE];
 
@@ -112,7 +115,6 @@ bool CBlockList::loadFile()
 
 	// Read the callsigns into the array
 	m_callsigns.clear();
-	unsigned int n = 0U;
 
 	while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
 		char* p;
@@ -129,13 +131,12 @@ bool CBlockList::loadFile()
 			});
 
 			m_callsigns.push_back(callsign);
-			n++;
 		}
 	}
 
 	::fclose(fp);
 
-	LogInfo("Loaded %u callsigns from the block list", n);
+	LogInfo("Loaded %u callsigns from the block list", m_callsigns.size());
 
 	return true;
 }

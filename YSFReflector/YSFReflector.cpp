@@ -200,7 +200,6 @@ void CYSFReflector::run()
 	unsigned char dst[YSF_CALLSIGN_LENGTH];
 
 	bool blocked = false;
-	bool checked = false;
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -237,58 +236,49 @@ void CYSFReflector::run()
 				}
 				network.setCount(m_repeaters.size());
 			} else if (::memcmp(buffer + 0U, "YSFD", 4U) == 0 && rpt != NULL) {
-				// Check for a change of user
-				if (watchdogTimer.isRunning() && ::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
-					if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0)
-						checked = false;
+				if (!watchdogTimer.isRunning()) {
+					::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
 
-					if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0)
-						checked = false;
-				}
+					if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
+						::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
+					else
+						::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
 
-				// Is this user allowed?
-				if (!checked) {
-					blocked = blockList.check(buffer + 14U);
-					checked = true;
+					if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
+						::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
+					else
+						::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
 
+					blocked = blockList.check(src);
 					if (blocked)
-						LogDebug("Data from %10.10s at %10.10s blocked", buffer + 14U, buffer + 4U);
+						LogMessage("Data from %10.10s at %10.10s blocked", src, tag);
+					else
+						LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, tag);
+				} else {
+					if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
+						bool changed = false;
+
+						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+							::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
+							changed = true;
+						}
+
+						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
+							::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
+							changed = true;
+						}
+
+						if (changed) {
+							blocked = blockList.check(src);
+							if (blocked)
+								LogMessage("Data from %10.10s at %10.10s blocked", src, tag);
+							else
+								LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, tag);
+						}
+					}
 				}
 
 				if (!blocked) {
-					if (!watchdogTimer.isRunning()) {
-						::memcpy(tag, buffer + 4U, YSF_CALLSIGN_LENGTH);
-
-						if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-							::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-						else
-							::memcpy(src, "??????????", YSF_CALLSIGN_LENGTH);
-
-						if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0)
-							::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-						else
-							::memcpy(dst, "??????????", YSF_CALLSIGN_LENGTH);
-
-						LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
-					} else {
-						if (::memcmp(tag, buffer + 4U, YSF_CALLSIGN_LENGTH) == 0) {
-							bool changed = false;
-
-							if (::memcmp(buffer + 14U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(src, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
-								::memcpy(src, buffer + 14U, YSF_CALLSIGN_LENGTH);
-								changed = true;
-							}
-
-							if (::memcmp(buffer + 24U, "          ", YSF_CALLSIGN_LENGTH) != 0 && ::memcmp(dst, "??????????", YSF_CALLSIGN_LENGTH) == 0) {
-								::memcpy(dst, buffer + 24U, YSF_CALLSIGN_LENGTH);
-								changed = true;
-							}
-
-							if (changed)
-								LogMessage("Received data from %10.10s to %10.10s at %10.10s", src, dst, buffer + 4U);
-						}
-					}
-
 					watchdogTimer.start();
 
 					for (std::vector<CYSFRepeater*>::const_iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
@@ -297,9 +287,6 @@ void CYSFReflector::run()
 					}
 
 					if ((buffer[34U] & 0x01U) == 0x01U) {
-						blocked = false;
-						checked = false;
-
 						LogMessage("Received end of transmission");
 						watchdogTimer.stop();
 					}
@@ -336,9 +323,6 @@ void CYSFReflector::run()
 
 		watchdogTimer.clock(ms);
 		if (watchdogTimer.isRunning() && watchdogTimer.hasExpired()) {
-			checked = false;
-			blocked = false;
-
 			LogMessage("Network watchdog has expired");
 			watchdogTimer.stop();
 		}
