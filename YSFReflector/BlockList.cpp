@@ -85,8 +85,10 @@ bool CBlockList::loadFile()
 {
 	FILE* fp = ::fopen(m_file.c_str(), "rt");
 	if (fp == NULL) {
-		m_callsigns.clear();
-		LogInfo("Loaded %u callsigns from the block list", m_callsigns.size());
+		if (!m_callsigns.empty()) {
+			m_callsigns.clear();
+			LogInfo("Loaded %u callsigns from the block list", m_callsigns.size());
+		}
 		return false;
 	}
 
