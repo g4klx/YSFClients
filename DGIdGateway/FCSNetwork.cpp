@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ m_state(DS_NOTOPEN)
 	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 
 	char url[50U];
-	::sprintf(url, "%s.xreflector.net", reflector.c_str());
+	::sprintf(url, "%.6s.xreflector.net", reflector.c_str());
 	if (CUDPSocket::lookup(std::string(url), FCS_PORT, m_addr, m_addrLen) != 0)
 		m_addrLen = 0U;
 }
