@@ -59,10 +59,10 @@ public:
 	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper);
 	~CYSFReflectors();
 
-	void setParrot(const std::string& address, unsigned int port);	
-	void setYSF2DMR(const std::string& address, unsigned int port);
-	void setYSF2NXDN(const std::string& address, unsigned int port);
-	void setYSF2P25(const std::string& address, unsigned int port);
+	void setParrot(const std::string& address, unsigned short port);	
+	void setYSF2DMR(const std::string& address, unsigned short port);
+	void setYSF2NXDN(const std::string& address, unsigned short port);
+	void setYSF2P25(const std::string& address, unsigned short port);
 	void addFCSRoom(const std::string& id, const std::string& name);
 
 	bool load();
@@ -81,13 +81,13 @@ public:
 private:
 	std::string                 m_hostsFile;
 	std::string                 m_parrotAddress;
-	unsigned int                m_parrotPort;
+	unsigned short              m_parrotPort;
 	std::string                 m_YSF2DMRAddress;
-	unsigned int                m_YSF2DMRPort;
+	unsigned short              m_YSF2DMRPort;
 	std::string                 m_YSF2NXDNAddress;
-	unsigned int                m_YSF2NXDNPort;
+	unsigned short              m_YSF2NXDNPort;
 	std::string                 m_YSF2P25Address;
-	unsigned int                m_YSF2P25Port;
+	unsigned short              m_YSF2P25Port;
 	std::vector<std::pair<std::string, std::string>> m_fcsRooms;
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;

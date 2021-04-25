@@ -33,8 +33,8 @@ struct DGIdData {
 	bool         m_static;
 	std::string  m_name;
 	std::string  m_address;
-	unsigned int m_port;
-	unsigned int m_local;
+	unsigned short m_port;
+	unsigned short m_local;
 	unsigned int m_netDGId;
 	std::vector<IMRSDestination*> m_destinations;
 	unsigned int m_rfHangTime;
@@ -55,9 +55,9 @@ public:
   std::string  getSuffix() const;
   unsigned int getId() const;
   std::string  getRptAddress() const;
-  unsigned int getRptPort() const;
+  unsigned short getRptPort() const;
   std::string  getMyAddress() const;
-  unsigned int getMyPort() const;
+  unsigned short getMyPort() const;
   bool         getBleep() const;
   bool         getDebug() const;
   bool         getDaemon() const;
@@ -81,7 +81,7 @@ public:
   // The APRS section
   bool         getAPRSEnabled() const;
   std::string  getAPRSAddress() const;
-  unsigned int getAPRSPort() const;
+  unsigned short getAPRSPort() const;
   std::string  getAPRSSuffix() const;
   std::string  getAPRSDescription() const;
 
@@ -102,9 +102,9 @@ private:
   std::string  m_suffix;
   unsigned int m_id;
   std::string  m_rptAddress;
-  unsigned int m_rptPort;
+  unsigned short m_rptPort;
   std::string  m_myAddress;
-  unsigned int m_myPort;
+  unsigned short m_myPort;
   unsigned int m_rfHangTime;
   unsigned int m_netHangTime;
   bool         m_bleep;
@@ -127,7 +127,7 @@ private:
 
   bool         m_aprsEnabled;
   std::string  m_aprsAddress;
-  unsigned int m_aprsPort;
+  unsigned short m_aprsPort;
   std::string  m_aprsSuffix;
   std::string  m_aprsDescription;
 

@@ -137,7 +137,7 @@ bool CConf::read()
 			  m_logFileRotate = ::atoi(value) == 1;
 	  } else if (section == SECTION_NETWORK) {
 		  if (::strcmp(key, "Port") == 0)
-			  m_networkPort = (unsigned int)::atoi(value);
+			  m_networkPort = (unsigned short)::atoi(value);
 		  else if (::strcmp(key, "Debug") == 0)
 			  m_networkDebug = ::atoi(value) == 1;
 	  } else if (section == SECTION_BLOCKLIST) {
@@ -198,7 +198,7 @@ bool CConf::getLogFileRotate() const
 	return m_logFileRotate;
 }
 
-unsigned int CConf::getNetworkPort() const
+unsigned short CConf::getNetworkPort() const
 {
 	return m_networkPort;
 }

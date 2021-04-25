@@ -46,7 +46,7 @@ public:
   bool         getLogFileRotate() const;
 
   // The Network section
-  unsigned int getNetworkPort() const;
+  unsigned short getNetworkPort() const;
   bool         getNetworkDebug() const;
 
   // The Block List section
@@ -67,7 +67,7 @@ private:
   std::string  m_logFileRoot;
   bool         m_logFileRotate;
 
-  unsigned int m_networkPort;
+  unsigned short m_networkPort;
   bool         m_networkDebug;
 
   std::string  m_blockListFile;

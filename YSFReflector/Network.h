@@ -28,7 +28,7 @@
 
 class CNetwork {
 public:
-	CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug);
+	CNetwork(unsigned short port, unsigned int id, const std::string& name, const std::string& description, bool debug);
 	~CNetwork();
 
 	bool open();

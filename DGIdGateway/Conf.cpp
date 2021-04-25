@@ -178,11 +178,11 @@ bool CConf::read()
 		else if (::strcmp(key, "RptAddress") == 0)
 			m_rptAddress = value;
 		else if (::strcmp(key, "RptPort") == 0)
-			m_rptPort = (unsigned int)::atoi(value);
+			m_rptPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "LocalAddress") == 0)
 			m_myAddress = value;
 		else if (::strcmp(key, "LocalPort") == 0)
-			m_myPort = (unsigned int)::atoi(value);
+			m_myPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "RFHangTime") == 0)
 			m_ysfRFHangTime = m_fcsRFHangTime = m_rfHangTime = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "NetHangTime") == 0)
@@ -225,7 +225,7 @@ bool CConf::read()
 		else if (::strcmp(key, "Address") == 0)
 			m_aprsAddress = value;
 		else if (::strcmp(key, "Port") == 0)
-			m_aprsPort = (unsigned int)::atoi(value);
+			m_aprsPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "Suffix") == 0)
 			m_aprsSuffix = value;
 		else if (::strcmp(key, "Description") == 0)
@@ -286,7 +286,7 @@ bool CConf::read()
 		else if (::strcmp(key, "Name") == 0)
 			dgIdData->m_name = value;
 		else if (::strcmp(key, "Port") == 0)
-			dgIdData->m_port = (unsigned int)::atoi(value);
+			dgIdData->m_port = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "Local") == 0)
 			dgIdData->m_local = (unsigned int)::atoi(value);
 		else if (::strcmp(key, "DGId") == 0)
@@ -335,7 +335,7 @@ std::string CConf::getRptAddress() const
 	return m_rptAddress;
 }
 
-unsigned int CConf::getRptPort() const
+unsigned short CConf::getRptPort() const
 {
 	return m_rptPort;
 }
@@ -345,7 +345,7 @@ std::string CConf::getMyAddress() const
 	return m_myAddress;
 }
 
-unsigned int CConf::getMyPort() const
+unsigned short CConf::getMyPort() const
 {
 	return m_myPort;
 }
@@ -435,7 +435,7 @@ std::string CConf::getAPRSAddress() const
 	return m_aprsAddress;
 }
 
-unsigned int CConf::getAPRSPort() const
+unsigned short CConf::getAPRSPort() const
 {
 	return m_aprsPort;
 }

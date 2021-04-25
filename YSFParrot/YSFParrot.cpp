@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	unsigned int port = ::atoi(argv[1U]);
+	unsigned short port = (unsigned short)::atoi(argv[1U]);
 	if (port == 0U) {
 		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[1U]);
 		return 1;
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-CYSFParrot::CYSFParrot(unsigned int port) :
+CYSFParrot::CYSFParrot(unsigned short port) :
 m_port(port)
 {
 	CUDPSocket::startup();

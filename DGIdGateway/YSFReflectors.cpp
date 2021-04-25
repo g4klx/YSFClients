@@ -58,7 +58,7 @@ bool CYSFReflectors::load()
 
 			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
 				std::string host = std::string(p4);
-				unsigned int port = (unsigned int)::atoi(p5);
+				unsigned short port = (unsigned short)::atoi(p5);
 
 				if (::strstr(p1, "YCS") == NULL && ::strstr(p2, "YCS") == NULL) {
 					sockaddr_storage addr;

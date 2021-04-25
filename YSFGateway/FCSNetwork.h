@@ -36,7 +36,7 @@ enum FCS_STATE {
 
 class CFCSNetwork {
 public:
-	CFCSNetwork(unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
+	CFCSNetwork(unsigned short port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool debug);
 	~CFCSNetwork();
 
 	bool open();
