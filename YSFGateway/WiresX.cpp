@@ -153,22 +153,22 @@ void CWiresX::setInfo(const std::string& name, unsigned int txFrequency, unsigne
 		m_header[i + 14U] = m_node.at(i);
 }
 
-void CWiresX::setParrot(const std::string& address, unsigned int port)
+void CWiresX::setParrot(const std::string& address, unsigned short port)
 {
 	m_reflectors.setParrot(address, port);
 }
 
-void CWiresX::setYSF2DMR(const std::string& address, unsigned int port)
+void CWiresX::setYSF2DMR(const std::string& address, unsigned short port)
 {
 	m_reflectors.setYSF2DMR(address, port);
 }
 
-void CWiresX::setYSF2NXDN(const std::string& address, unsigned int port)
+void CWiresX::setYSF2NXDN(const std::string& address, unsigned short port)
 {
 	m_reflectors.setYSF2NXDN(address, port);
 }
 
-void CWiresX::setYSF2P25(const std::string& address, unsigned int port)
+void CWiresX::setYSF2P25(const std::string& address, unsigned short port)
 {
 	m_reflectors.setYSF2P25(address, port);
 }

@@ -199,7 +199,7 @@ int CYSFGateway::run()
 	}
 
 	std::string myAddress = m_conf.getMyAddress();
-	unsigned int myPort   = m_conf.getMyPort();
+	unsigned short myPort = m_conf.getMyPort();
 	CYSFNetwork rptNetwork(myAddress, myPort, m_callsign, debug);
 
 	ret = rptNetwork.setDestination("MMDVM", rptAddr, rptAddrLen);
@@ -211,7 +211,7 @@ int CYSFGateway::run()
 
 	bool ysfNetworkEnabled = m_conf.getYSFNetworkEnabled();
 	if (ysfNetworkEnabled) {
-		unsigned int ysfPort = m_conf.getYSFNetworkPort();
+		unsigned short ysfPort = m_conf.getYSFNetworkPort();
 		m_ysfNetwork = new CYSFNetwork(ysfPort, m_callsign, debug);
 	}
 
@@ -222,7 +222,7 @@ int CYSFGateway::run()
 		std::string locator = calculateLocator();
 		unsigned int id = m_conf.getId();
 
-		unsigned int fcsPort = m_conf.getFCSNetworkPort();
+		unsigned short fcsPort = m_conf.getFCSNetworkPort();
 
 		m_fcsNetwork = new CFCSNetwork(fcsPort, m_callsign, rxFrequency, txFrequency, locator, id, debug);
 		ret = m_fcsNetwork->open();
@@ -454,7 +454,7 @@ void CYSFGateway::createGPS()
 		return;
 
 	std::string address = m_conf.getAPRSAddress();
-	unsigned int port   = m_conf.getAPRSPort();
+	unsigned short port = m_conf.getAPRSPort();
 	std::string suffix  = m_conf.getAPRSSuffix();
 	bool debug          = m_conf.getDebug();
 
@@ -503,7 +503,7 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->setInfo(name, txFrequency, rxFrequency);
 
 	std::string address = m_conf.getYSFNetworkParrotAddress();
-	unsigned int port = m_conf.getYSFNetworkParrotPort();
+	unsigned short port = m_conf.getYSFNetworkParrotPort();
 	if (port > 0U)
 		m_wiresX->setParrot(address, port);
 

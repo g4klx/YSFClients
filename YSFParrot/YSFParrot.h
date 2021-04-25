@@ -22,13 +22,13 @@
 class CYSFParrot
 {
 public:
-	CYSFParrot(unsigned int port);
+	CYSFParrot(unsigned short port);
 	~CYSFParrot();
 
 	void run();
 
 private:
-	unsigned int m_port;
+	unsigned short m_port;
 };
 
 #endif

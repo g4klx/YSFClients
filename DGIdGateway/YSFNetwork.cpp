@@ -27,7 +27,7 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
 m_socket(localAddress, localPort),
 m_debug(debug),
 m_addr(addr),
@@ -56,7 +56,7 @@ m_state(DS_NOTOPEN)
 	}
 }
 
-CYSFNetwork::CYSFNetwork(unsigned int localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool statc, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool statc, bool debug) :
 m_socket(localPort),
 m_debug(debug),
 m_addr(addr),

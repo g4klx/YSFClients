@@ -199,7 +199,7 @@ int CDGIdGateway::run()
 
 	bool debug            = m_conf.getDebug();
 	std::string myAddress = m_conf.getMyAddress();
-	unsigned int myPort   = m_conf.getMyPort();
+	unsigned short myPort   = m_conf.getMyPort();
 
 	CYSFNetwork rptNetwork(myAddress, myPort, "MMDVM", rptAddr, rptAddrLen, m_callsign, debug);
 	ret = rptNetwork.open();
@@ -243,7 +243,7 @@ int CDGIdGateway::run()
 		
 		if (type == "FCS") {
 			std::string name         = (*it)->m_name;
-			unsigned int local       = (*it)->m_local;
+			unsigned short local     = (*it)->m_local;
 			unsigned int txFrequency = m_conf.getTxFrequency();
 			unsigned int rxFrequency = m_conf.getRxFrequency();
 			std::string locator      = calculateLocator();
@@ -303,7 +303,7 @@ int CDGIdGateway::run()
 				LogMessage("Added IMRS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			}
 		} else if (type == "Gateway") {
-			unsigned int local = (*it)->m_local;
+			unsigned short local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
@@ -319,7 +319,7 @@ int CDGIdGateway::run()
 				LogWarning("Unable to resolve the address for the YSF Gateway");
 			}
 		} else if (type == "Parrot") {
-			unsigned int local = (*it)->m_local;
+			unsigned short local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
@@ -335,7 +335,7 @@ int CDGIdGateway::run()
 				LogWarning("Unable to resolve the address for the YSF Parrot");
 			}
 		} else if (type == "YSF2DMR") {
-			unsigned int local = (*it)->m_local;
+			unsigned short local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
@@ -351,7 +351,7 @@ int CDGIdGateway::run()
 				LogWarning("Unable to resolve the address for YSF2DMR");
 			}
 		} else if (type == "YSF2NXDN") {
-			unsigned int local = (*it)->m_local;
+			unsigned short local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
@@ -367,7 +367,7 @@ int CDGIdGateway::run()
 				LogWarning("Unable to resolve the address for YSF2NXDN");
 			}
 		} else if (type == "YSF2P25") {
-			unsigned int local = (*it)->m_local;
+			unsigned short local = (*it)->m_local;
 
 			sockaddr_storage addr;
 			unsigned int     addrLen;
@@ -609,7 +609,7 @@ void CDGIdGateway::createGPS()
 		return;
 
 	std::string address = m_conf.getAPRSAddress();
-	unsigned int port   = m_conf.getAPRSPort();
+	unsigned short port = m_conf.getAPRSPort();
 	std::string suffix  = m_conf.getAPRSSuffix();
 	bool debug          = m_conf.getDebug();
 

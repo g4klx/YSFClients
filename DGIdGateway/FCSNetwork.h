@@ -30,7 +30,7 @@
 
 class CFCSNetwork : public CDGIdNetwork {
 public:
-	CFCSNetwork(const std::string& reflector, unsigned int port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool statc, bool debug);
+	CFCSNetwork(const std::string& reflector, unsigned short port, const std::string& callsign, unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, unsigned int id, bool statc, bool debug);
 	virtual ~CFCSNetwork();
 
 	virtual std::string getDesc(unsigned int dgId);

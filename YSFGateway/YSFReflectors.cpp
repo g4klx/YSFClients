@@ -76,25 +76,25 @@ static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 	return false;
 }
 
-void CYSFReflectors::setParrot(const std::string& address, unsigned int port)
+void CYSFReflectors::setParrot(const std::string& address, unsigned short port)
 {
 	m_parrotAddress = address;
 	m_parrotPort    = port;
 }
 
-void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned int port)
+void CYSFReflectors::setYSF2DMR(const std::string& address, unsigned short port)
 {
 	m_YSF2DMRAddress = address;
 	m_YSF2DMRPort    = port;
 }
 
-void CYSFReflectors::setYSF2NXDN(const std::string& address, unsigned int port)
+void CYSFReflectors::setYSF2NXDN(const std::string& address, unsigned short port)
 {
 	m_YSF2NXDNAddress = address;
 	m_YSF2NXDNPort    = port;
 }
 
-void CYSFReflectors::setYSF2P25(const std::string& address, unsigned int port)
+void CYSFReflectors::setYSF2P25(const std::string& address, unsigned short port)
 {
 	m_YSF2P25Address = address;
 	m_YSF2P25Port    = port;
@@ -128,7 +128,7 @@ bool CYSFReflectors::load()
 
 			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
 				std::string host  = std::string(p4);
-				unsigned int port = (unsigned int)::atoi(p5);
+				unsigned short port = (unsigned short)::atoi(p5);
 
 				sockaddr_storage addr;
 				unsigned int addrLen;

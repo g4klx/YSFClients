@@ -24,7 +24,7 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CNetwork::CNetwork(unsigned int port) :
+CNetwork::CNetwork(unsigned short port) :
 m_socket(port),
 m_addr(),
 m_addrLen(0U)

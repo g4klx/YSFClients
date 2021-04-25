@@ -183,11 +183,11 @@ bool CConf::read()
 		else if (::strcmp(key, "RptAddress") == 0)
 			m_rptAddress = value;
 		else if (::strcmp(key, "RptPort") == 0)
-			m_rptPort = (unsigned int)::atoi(value);
+			m_rptPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "LocalAddress") == 0)
 			m_myAddress = value;
 		else if (::strcmp(key, "LocalPort") == 0)
-			m_myPort = (unsigned int)::atoi(value);
+			m_myPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "WiresXMakeUpper") == 0)
 			m_wiresXMakeUpper = ::atoi(value) == 1;
 		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
@@ -230,7 +230,7 @@ bool CConf::read()
 		else if (::strcmp(key, "Address") == 0)
 			m_aprsAddress = value;
 		else if (::strcmp(key, "Port") == 0)
-			m_aprsPort = (unsigned int)::atoi(value);
+			m_aprsPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "Suffix") == 0)
 			m_aprsSuffix = value;
 		else if (::strcmp(key, "Description") == 0)
@@ -250,7 +250,7 @@ bool CConf::read()
 		if (::strcmp(key, "Enable") == 0)
 			m_ysfNetworkEnabled = ::atoi(value) == 1;
 		else if (::strcmp(key, "Port") == 0)
-			m_ysfNetworkPort = (unsigned int)::atoi(value);
+			m_ysfNetworkPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "Hosts") == 0)
 			m_ysfNetworkHosts = value;
 		else if (::strcmp(key, "ReloadTime") == 0)
@@ -258,26 +258,26 @@ bool CConf::read()
 		else if (::strcmp(key, "ParrotAddress") == 0)
 			m_ysfNetworkParrotAddress = value;
 		else if (::strcmp(key, "ParrotPort") == 0)
-			m_ysfNetworkParrotPort = (unsigned int)::atoi(value);
+			m_ysfNetworkParrotPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "YSF2DMRAddress") == 0)
 			m_ysfNetworkYSF2DMRAddress = value;
 		else if (::strcmp(key, "YSF2DMRPort") == 0)
-			m_ysfNetworkYSF2DMRPort = (unsigned int)::atoi(value);
+			m_ysfNetworkYSF2DMRPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "YSF2NXDNAddress") == 0)
 			m_ysfNetworkYSF2NXDNAddress = value;
 		else if (::strcmp(key, "YSF2NXDNPort") == 0)
-			m_ysfNetworkYSF2NXDNPort = (unsigned int)::atoi(value);
+			m_ysfNetworkYSF2NXDNPort = (unsigned short)::atoi(value);
 		else if (::strcmp(key, "YSF2P25Address") == 0)
 			m_ysfNetworkYSF2P25Address = value;
 		else if (::strcmp(key, "YSF2P25Port") == 0)
-			m_ysfNetworkYSF2P25Port = (unsigned int)::atoi(value);
+			m_ysfNetworkYSF2P25Port = (unsigned short)::atoi(value);
 	} else if (section == SECTION_FCS_NETWORK) {
 		if (::strcmp(key, "Enable") == 0)
 			m_fcsNetworkEnabled = ::atoi(value) == 1;
 		else if (::strcmp(key, "Rooms") == 0)
 			m_fcsNetworkFile = value;
 		else if (::strcmp(key, "Port") == 0)
-			m_fcsNetworkPort = (unsigned int)::atoi(value);
+			m_fcsNetworkPort = (unsigned short)::atoi(value);
 	} else if (section == SECTION_GPSD) {
 		if (::strcmp(key, "Enable") == 0)
 			m_gpsdEnabled = ::atoi(value) == 1;
@@ -289,7 +289,7 @@ bool CConf::read()
 		if (::strcmp(key, "Enable") == 0)
 			m_remoteCommandsEnabled = ::atoi(value) == 1;
 		else if (::strcmp(key, "Port") == 0)
-			m_remoteCommandsPort = (unsigned int)::atoi(value);
+			m_remoteCommandsPort = (unsigned short)::atoi(value);
 	}
   }
 
@@ -318,7 +318,7 @@ std::string CConf::getRptAddress() const
 	return m_rptAddress;
 }
 
-unsigned int CConf::getRptPort() const
+unsigned short CConf::getRptPort() const
 {
 	return m_rptPort;
 }
@@ -328,7 +328,7 @@ std::string CConf::getMyAddress() const
 	return m_myAddress;
 }
 
-unsigned int CConf::getMyPort() const
+unsigned short CConf::getMyPort() const
 {
 	return m_myPort;
 }
@@ -428,7 +428,7 @@ std::string CConf::getAPRSAddress() const
 	return m_aprsAddress;
 }
 
-unsigned int CConf::getAPRSPort() const
+unsigned short CConf::getAPRSPort() const
 {
 	return m_aprsPort;
 }
@@ -473,7 +473,7 @@ bool CConf::getYSFNetworkEnabled() const
 	return m_ysfNetworkEnabled;
 }
 
-unsigned int CConf::getYSFNetworkPort() const
+unsigned short CConf::getYSFNetworkPort() const
 {
 	return m_ysfNetworkPort;
 }
@@ -493,7 +493,7 @@ std::string CConf::getYSFNetworkParrotAddress() const
 	return m_ysfNetworkParrotAddress;
 }
 
-unsigned int CConf::getYSFNetworkParrotPort() const
+unsigned short CConf::getYSFNetworkParrotPort() const
 {
 	return m_ysfNetworkParrotPort;
 }
@@ -503,7 +503,7 @@ std::string CConf::getYSFNetworkYSF2DMRAddress() const
 	return m_ysfNetworkYSF2DMRAddress;
 }
 
-unsigned int CConf::getYSFNetworkYSF2DMRPort() const
+unsigned short CConf::getYSFNetworkYSF2DMRPort() const
 {
 	return m_ysfNetworkYSF2DMRPort;
 }
@@ -513,7 +513,7 @@ std::string CConf::getYSFNetworkYSF2NXDNAddress() const
 	return m_ysfNetworkYSF2NXDNAddress;
 }
 
-unsigned int CConf::getYSFNetworkYSF2NXDNPort() const
+unsigned short CConf::getYSFNetworkYSF2NXDNPort() const
 {
 	return m_ysfNetworkYSF2NXDNPort;
 }
@@ -523,7 +523,7 @@ std::string CConf::getYSFNetworkYSF2P25Address() const
 	return m_ysfNetworkYSF2P25Address;
 }
 
-unsigned int CConf::getYSFNetworkYSF2P25Port() const
+unsigned short CConf::getYSFNetworkYSF2P25Port() const
 {
 	return m_ysfNetworkYSF2P25Port;
 }
@@ -539,7 +539,7 @@ std::string CConf::getFCSNetworkFile() const
 	return m_fcsNetworkFile;
 }
 
-unsigned int CConf::getFCSNetworkPort() const
+unsigned short CConf::getFCSNetworkPort() const
 {
 	return m_fcsNetworkPort;
 }
@@ -564,7 +564,7 @@ bool CConf::getRemoteCommandsEnabled() const
 	return m_remoteCommandsEnabled;
 }
 
-unsigned int CConf::getRemoteCommandsPort() const
+unsigned short CConf::getRemoteCommandsPort() const
 {
 	return m_remoteCommandsPort;
 }

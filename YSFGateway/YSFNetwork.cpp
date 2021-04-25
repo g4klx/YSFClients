@@ -27,7 +27,7 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
-CYSFNetwork::CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(const std::string& address, unsigned short port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
 m_addr(),
@@ -60,7 +60,7 @@ m_linked(false)
 	}
 }
 
-CYSFNetwork::CYSFNetwork(unsigned int port, const std::string& callsign, bool debug) :
+CYSFNetwork::CYSFNetwork(unsigned short port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
 m_addr(),

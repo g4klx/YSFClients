@@ -25,7 +25,7 @@
 #include <cassert>
 #include <cstring>
 
-CNetwork::CNetwork(unsigned int port, unsigned int id, const std::string& name, const std::string& description, bool debug) :
+CNetwork::CNetwork(unsigned short port, unsigned int id, const std::string& name, const std::string& description, bool debug) :
 m_socket(),
 m_port(port),
 m_id(id),

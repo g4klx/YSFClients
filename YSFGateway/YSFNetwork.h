@@ -29,8 +29,8 @@
 
 class CYSFNetwork {
 public:
-	CYSFNetwork(const std::string& address, unsigned int port, const std::string& callsign, bool debug);
-	CYSFNetwork(unsigned int port, const std::string& callsign, bool debug);
+	CYSFNetwork(const std::string& address, unsigned short port, const std::string& callsign, bool debug);
+	CYSFNetwork(unsigned short port, const std::string& callsign, bool debug);
 	~CYSFNetwork();
 
 	bool setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen);
