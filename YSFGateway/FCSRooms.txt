@@ -1,5 +1,5 @@
 # xreflector.net - FCS_Hosts.txt
-# Last Update: 13.03.2021 15:50 UTC
+# Last Update: 26.06.2021 17:50 UTC
 #
 FCS00100;Repeater;FCS001 - Repeater;;;
 FCS00101;Deutschland;FCS001 - Deutschland;;;
