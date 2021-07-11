@@ -743,6 +743,7 @@
 40861;US-SOMN-----FAPG;SO MN;216.114.243.235;42000;007;http://
 12461;US-South-MS-Net;South MS Net;50.246.136.107;42000;000;http://50.246.136.107:42001
 29364;US-South-Texas;South Texas;76.183.98.122;42011;004;http://ae5jo.bounceme.net
+54635;US-SWLA337;SWLA Link;ysf.kc5jmj.com;42000;001;http://ysf.kc5jmj.com
 43389;US-SOUTHEASTLINK;Provided by: L;66.42.93.25;42000;016;http://ysfsel.lmarc.net/YSFDash/index.php
 73102;US-Southwest-USA;Southwest USA;24.121.39.190;42000;016;http://24.121.39.190:8888/index.php
 18503;US-SpaceCityChat;Huntsville_AL;108.209.70.215;42000;002;http://kk4lpo.ddnsgeek.com
