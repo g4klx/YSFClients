@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2006-2016,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2006-2016,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -166,23 +166,23 @@ char* CUDPSocket::display(const sockaddr_storage& addr, char* buffer, unsigned i
 	assert(length > INET6_ADDRSTRLEN);
 
 	switch (addr.ss_family) {
-	case AF_INET: {
-		struct sockaddr_in* in4 = (struct sockaddr_in*)&addr;
-		::inet_ntop(AF_INET, &in4, buffer, length);
-		::sprintf(buffer + ::strlen(buffer), ":%u", in4->sin_port);
-	}
-				break;
+		case AF_INET: {
+				struct sockaddr_in* in4 = (struct sockaddr_in*)&addr;
+				::inet_ntop(AF_INET, &in4->sin_addr, buffer, length);
+				::sprintf(buffer + ::strlen(buffer), ":%u", in4->sin_port);
+			}
+			break;
 
-	case AF_INET6: {
-		struct sockaddr_in6* in6 = (struct sockaddr_in6*)&addr;
-		::inet_ntop(AF_INET6, &in6, buffer, length);
-		::sprintf(buffer + ::strlen(buffer), ":%u", in6->sin6_port);
-	}
-				 break;
+		case AF_INET6: {
+				struct sockaddr_in6* in6 = (struct sockaddr_in6*)&addr;
+				::inet_ntop(AF_INET6, &in6->sin6_addr, buffer, length);
+				::sprintf(buffer + ::strlen(buffer), ":%u", in6->sin6_port);
+			}
+			break;
 
-	default:
-		::strcpy(buffer, "Unknown");
-		break;
+		default:
+			::strcpy(buffer, "Unknown");
+			break;
 	}
 
 	return buffer;
