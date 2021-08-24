@@ -229,8 +229,8 @@ void CYSFReflector::run()
 
 				for (std::vector<CYSFRepeater*>::iterator it = m_repeaters.begin(); it != m_repeaters.end(); ++it) {
 					if (CUDPSocket::match((*it)->m_addr, rpt->m_addr)) {
-						m_repeaters.erase(it);
 						delete *it;
+						m_repeaters.erase(it);
 						break;
 					}
 				}
@@ -314,8 +314,8 @@ void CYSFReflector::run()
 				LogMessage("Removing %s (%s) disappeared", (*it)->m_callsign.c_str(),
 														   CUDPSocket::display((*it)->m_addr, buff, 80U));
 
-				m_repeaters.erase(it);
 				delete *it;
+				m_repeaters.erase(it);
 				network.setCount(m_repeaters.size());
 				break;
 			}
