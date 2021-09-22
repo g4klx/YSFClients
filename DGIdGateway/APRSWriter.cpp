@@ -158,12 +158,15 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	case 0x24U:
 	case 0x28U:
 	case 0x30U:
+	case 0x33U:
 		symbol = '[';
 		break;
 	case 0x25U:
 	case 0x29U:
+	case 0x31U:
 		symbol = '>';
 		break;
+	case 0x20U:
 	case 0x26U:
 		symbol = 'r';
 		break;
