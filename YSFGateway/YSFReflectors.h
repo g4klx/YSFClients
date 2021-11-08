@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2021 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -94,6 +94,8 @@ private:
 	std::vector<CYSFReflector*> m_search;
 	bool                        m_makeUpper;
 	CTimer                      m_timer;
+
+	bool findById(unsigned int id) const;
 };
 
 #endif

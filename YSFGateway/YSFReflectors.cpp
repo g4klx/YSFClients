@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2021 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -252,13 +252,19 @@ bool CYSFReflectors::load()
 		}
 	}
 
-	unsigned int id = 10U;
-	for (std::vector<std::pair<std::string, std::string>>::const_iterator it = m_fcsRooms.cbegin(); it != m_fcsRooms.cend(); ++it, id++) {
+	unsigned int id = 9U;
+	for (std::vector<std::pair<std::string, std::string>>::const_iterator it1 = m_fcsRooms.cbegin(); it1 != m_fcsRooms.cend(); ++it1) {
+		bool used;
+		do {
+			id++;
+			used = findById(id);
+		} while (used);
+
 		char text[10U];
 		::sprintf(text, "%05u", id);
 
-		std::string name = it->first;
-		std::string desc = it->second;
+		std::string name = it1->first;
+		std::string desc = it1->second;
 
 		CYSFReflector* refl = new CYSFReflector;
 		refl->m_id      = text;
@@ -301,6 +307,19 @@ CYSFReflector* CYSFReflectors::findById(const std::string& id)
 	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
 
 	return NULL;
+}
+
+bool CYSFReflectors::findById(unsigned int id) const
+{
+	char text[10U];
+	::sprintf(text, "%05u", id);
+
+	for (std::vector<CYSFReflector*>::const_iterator it = m_newReflectors.cbegin(); it != m_newReflectors.cend(); ++it) {
+		if (text == (*it)->m_id)
+			return true;
+	}
+
+	return false;
 }
 
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
