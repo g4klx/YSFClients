@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,15 +25,28 @@
 #include "RingBuffer.h"
 #include "YSFDefines.h"
 #include "YSFFICH.h"
+#include "Timer.h"
 
 #include <cstdint>
 #include <vector>
 #include <string>
 
-struct IMRSDest {
+class IMRSDest {
+public:
+	IMRSDest() :
+	m_addr(),
+	m_addrLen(0U),
+	m_dgId(0U),
+	m_state(DS_NOTLINKED),
+	m_timer(1000U, 5U)
+	{
+	}
+
 	sockaddr_storage m_addr;
 	unsigned int     m_addrLen;
 	unsigned int     m_dgId;
+	DGID_STATUS      m_state;
+	CTimer           m_timer;
 };
 
 class IMRSDGId {
@@ -98,16 +111,19 @@ public:
 private:
 	CUDPSocket             m_socket;
 	std::vector<IMRSDGId*> m_dgIds;
-	DGID_STATUS            m_state;
 
-	IMRSDGId* find(const sockaddr_storage& address) const;
+	bool      find(const sockaddr_storage& addr, IMRSDGId*& ptr, IMRSDest*& dest) const;
 	IMRSDGId* find(unsigned int dgId) const;
 
-	bool writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	bool writeConnect(const IMRSDest& dest, bool debug);
+	bool writeHeader(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 	bool writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	bool writeTerminator(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	bool writePing(const IMRSDest& dest, bool debug);
 
-	void readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
-	void readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
+	void readHeader(IMRSDGId* ptr, const unsigned char* data);
+	void readData(IMRSDGId* ptr, const unsigned char* data);
+	void readTerminator(IMRSDGId* ptr, const unsigned char* data);
 };
 
 #endif

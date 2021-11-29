@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -27,11 +27,13 @@
 #include <cassert>
 #include <cstring>
 
+static unsigned char PING[]    = {0x00U, 0x00U, 0x07U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U};
+static unsigned char CONNECT[] = {0x00U, 0x2CU, 0x08U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x04U, 0x00U, 0x00U};
+
 
 CIMRSNetwork::CIMRSNetwork() :
 m_socket(IMRS_PORT),
-m_dgIds(),
-m_state(DS_NOTOPEN)
+m_dgIds()
 {
 }
 
@@ -69,19 +71,21 @@ bool CIMRSNetwork::open()
 {
 	LogMessage("Opening IMRS network connection");
 
-	bool ret = m_socket.open();
-	if (!ret) {
-		m_state = DS_NOTOPEN;
-		return false;
-	} else {
-		m_state = DS_NOTLINKED;
-		return true;
-	}
+	return m_socket.open();
 }
 
 DGID_STATUS CIMRSNetwork::getStatus()
 {
-	return m_state;
+	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.cbegin(); it1 != m_dgIds.cend(); ++it1) {
+		std::vector<IMRSDest*> dests = (*it1)->m_destinations;
+		for (std::vector<IMRSDest*>::const_iterator it2 = dests.cbegin(); it2 != dests.cend(); ++it2) {
+			IMRSDest* dest = *it2;
+			if (dest->m_state == DS_LINKED)
+				return DS_LINKED;
+		}
+	}
+
+	return DS_NOTLINKED;
 }
 
 void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
@@ -99,8 +103,10 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 
 	switch (fich.getFI()) {
 	case YSF_FI_HEADER:
+		writeHeader(ptr, fich, data);
+		break;
 	case YSF_FI_TERMINATOR:
-		writeHeaderTrailer(ptr, fich, data);
+		writeTerminator(ptr, fich, data);
 		break;
 	case YSF_FI_COMMUNICATIONS:
 		writeData(ptr, fich, data);
@@ -110,12 +116,12 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 	}
 }
 
-bool CIMRSNetwork::writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+bool CIMRSNetwork::writeHeader(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
 {
 	assert(ptr != NULL);
 	assert(data != NULL);
 
-	unsigned char buffer[200U];
+	unsigned char buffer[100U];
 
 	if (fich.getFI() == YSF_FI_HEADER) {
 		buffer[0U] = 0x11U;
@@ -132,24 +138,17 @@ bool CIMRSNetwork::writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsig
 	CYSFPayload payload;
 	payload.readHeaderData(data + 35U, buffer + 7U);
 
-	fich.getRaw(buffer + 3U);
-	CUtils::dump(1U, "IMRS Network Data Sent", buffer, 47U);
-
-	readHeaderTrailer(ptr, fich, buffer);
-
-#ifdef notdef
-	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
+	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
 		// Set the correct DG-ID for this destination
 		fich.setDGId((*it)->m_dgId);
 		// Copy the raw FICH
 		fich.getRaw(buffer + 3U);
 
 		if (ptr->m_debug)
-			CUtils::dump(1U, "IMRS Network Data Sent", buffer, 47U);
+			CUtils::dump(1U, "IMRS Network Header Sent", buffer, 91U);
 
-		m_socket.write(buffer, 47U, (*it)->m_addr, (*it)->m_addrLen);
+		m_socket.write(buffer, 91U, (*it)->m_addr, (*it)->m_addrLen);
 	}
-#endif
 
 	ptr->m_seqNo++;
 
@@ -227,13 +226,7 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 		return false;
 	}
 
-	fich.getRaw(buffer + 3U);
-	CUtils::dump(1U, "IMRS Network Data Sent", buffer, length);
-
-	readData(ptr, fich, buffer);
-
-#ifdef notdef
-	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.begin(); it != ptr->m_destinations.end(); ++it) {
+	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
 		// Set the correct DG-ID for this destination
 		fich.setDGId((*it)->m_dgId);
 		// Copy the raw FICH
@@ -244,14 +237,53 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 
 		m_socket.write(buffer, length, (*it)->m_addr, (*it)->m_addrLen);
 	}
-#endif
 
 	ptr->m_seqNo++;
 
 	return true;
 }
 
-void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+bool CIMRSNetwork::writeTerminator(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+{
+	assert(ptr != NULL);
+	assert(data != NULL);
+
+	unsigned char buffer[40U];
+
+	if (fich.getFI() == YSF_FI_HEADER) {
+		buffer[0U] = 0x11U;
+		ptr->m_seqNo = 0U;
+	}
+	else {
+		buffer[0U] = 0x33U;
+	}
+
+	// Copy the sequence number LE (2 bytes)
+	buffer[1U] = (ptr->m_seqNo << 0) & 0xFFU;
+	buffer[2U] = (ptr->m_seqNo << 8) & 0xFFU;
+
+	// Copy CSD1 and CSD2 (40 bytes)
+	CYSFPayload payload;
+	payload.readHeaderData(data + 35U, buffer + 7U);
+
+	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
+		// Set the correct DG-ID for this destination
+		fich.setDGId((*it)->m_dgId);
+		// Copy the raw FICH
+		fich.getRaw(buffer + 3U);
+
+		if (ptr->m_debug)
+			CUtils::dump(1U, "IMRS Network Terminator Sent", buffer, 31U);
+
+		m_socket.write(buffer, 31U, (*it)->m_addr, (*it)->m_addrLen);
+	}
+
+	ptr->m_seqNo++;
+
+	return true;
+}
+
+void CIMRSNetwork::readHeader(IMRSDGId* ptr, const unsigned char* data)
 {
 	assert(ptr != NULL);
 	assert(data != NULL);
@@ -260,21 +292,15 @@ void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsign
 
 	::memcpy(buffer + 0U, "YSFD", 4U);
 
-	unsigned char fi = fich.getFI();
-	if (fi == YSF_FI_HEADER) {
-		::memcpy(ptr->m_source, data + 17U + YSF_CALLSIGN_LENGTH, YSF_CALLSIGN_LENGTH);
+	::memcpy(ptr->m_source, data + 17U + YSF_CALLSIGN_LENGTH, YSF_CALLSIGN_LENGTH);
 
-		unsigned char cm = fich.getCM();
-		if (cm == YSF_CM_GROUP1 || cm == YSF_CM_GROUP2)
-			::memcpy(ptr->m_dest, "ALL       ", YSF_CALLSIGN_LENGTH);
-		else
-			::memcpy(ptr->m_dest, data + 17U + 0U, YSF_CALLSIGN_LENGTH);
+	unsigned char cm = fich.getCM();
+	if (cm == YSF_CM_GROUP1 || cm == YSF_CM_GROUP2)
+		::memcpy(ptr->m_dest, "ALL       ", YSF_CALLSIGN_LENGTH);
+	else
+		::memcpy(ptr->m_dest, data + 17U + 0U, YSF_CALLSIGN_LENGTH);
 
-		buffer[34U] = 0x00U;
-	} else {
-		uint16_t seqNo = (data[1U] << 0) + (data[2U] << 8);
-		buffer[34U] = 0x01U | ((seqNo & 0x7FU) << 1);
-	}
+	buffer[34U] = 0x00U;
 
 	::memcpy(buffer + 4U, "IMRS      ",   YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
@@ -296,7 +322,7 @@ void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsign
 #endif
 }
 
-void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
+void CIMRSNetwork::readData(IMRSDGId* ptr, const unsigned char* data)
 {
 	assert(ptr != NULL);
 	assert(data != NULL);
@@ -379,16 +405,90 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* 
 #endif
 }
 
+void CIMRSNetwork::readTerminator(IMRSDGId* ptr, const unsigned char* data)
+{
+	assert(ptr != NULL);
+	assert(data != NULL);
+
+	unsigned char buffer[155U];
+
+	::memcpy(buffer + 0U, "YSFD", 4U);
+
+	uint16_t seqNo = (data[1U] << 0) + (data[2U] << 8);
+	buffer[34U] = 0x01U | ((seqNo & 0x7FU) << 1);
+
+	::memcpy(buffer + 4U, "IMRS      ", YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 24U, ptr->m_dest, YSF_CALLSIGN_LENGTH);
+
+	::memcpy(buffer + 35U, YSF_SYNC_BYTES, YSF_SYNC_LENGTH_BYTES);
+
+	fich.encode(buffer + 35U);
+
+	CYSFPayload payload;
+	payload.writeHeaderData(data + 7U, buffer + 35U);
+
+	CUtils::dump("YSF Data Transmitted", buffer, 155U);
+
+#ifdef notdef
+	unsigned char len = 155U;
+	ptr->m_buffer.addData(&len, 1U);
+	ptr->m_buffer.addData(buffer, len);
+#endif
+}
+
 void CIMRSNetwork::link()
 {
+	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.cbegin(); it1 != m_dgIds.cend(); ++it1) {
+		std::vector<IMRSDest*> dests = (*it1)->m_destinations;
+		bool debug = (*it1)->m_debug;
+		for (std::vector<IMRSDest*>::const_iterator it2 = dests.cbegin(); it2 != dests.cend(); ++it2) {
+			IMRSDest* dest = *it2;
+			dest->m_state = DS_LINKING;
+			dest->m_timer.start();
+			writeConnect(*dest, debug);
+		}
+	}
 }
 
 void CIMRSNetwork::unlink()
 {
+	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.cbegin(); it1 != m_dgIds.cend(); ++it1) {
+		std::vector<IMRSDest*> dests = (*it1)->m_destinations;
+		for (std::vector<IMRSDest*>::const_iterator it2 = dests.cbegin(); it2 != dests.cend(); ++it2) {
+			IMRSDest* dest = *it2;
+			dest->m_state = DS_NOTLINKED;
+			dest->m_timer.stop();
+		}
+	}
 }
 
 void CIMRSNetwork::clock(unsigned int ms)
 {
+	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.cbegin(); it1 != m_dgIds.cend(); ++it1) {
+		std::vector<IMRSDest*> dests = (*it1)->m_destinations;
+		bool debug = (*it1)->m_debug;
+		for (std::vector<IMRSDest*>::const_iterator it2 = dests.cbegin(); it2 != dests.cend(); ++it2) {
+			IMRSDest* dest = *it2;
+			switch (dest->m_state) {
+			case DS_LINKING:
+				dest->m_timer.clock(ms);
+				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired())
+					writeConnect(*dest, debug);
+				break;
+
+			case DS_LINKED:
+				dest->m_timer.clock(ms);
+				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired())
+					writePing(*dest, debug);
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+
 	unsigned char buffer[500U];
 
 	sockaddr_storage addr;
@@ -402,26 +502,37 @@ void CIMRSNetwork::clock(unsigned int ms)
 
 	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
 
-	IMRSDGId* ptr = find(addr);
-	if (ptr == NULL)
+	IMRSDGId* ptr  = NULL;
+	IMRSDest* dest = NULL;
+
+	bool ret = find(addr, ptr, dest);
+	if (!ret)
 		return;
 
 	if (ptr->m_debug)
 		CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
 
-	CYSFFICH fich;
-	fich.setRaw(buffer + 3U);
-
-	unsigned char fi = fich.getFI();
-	switch (fi) {
-	case YSF_FI_HEADER:
-	case YSF_FI_TERMINATOR:
-		readHeaderTrailer(ptr, fich, buffer);
+	switch (length) {
+	case 16:	// PING received
+		writeConnect(*dest, ptr->m_debug);
 		break;
-	case YSF_FI_COMMUNICATIONS:
-		readData(ptr, fich, buffer);
+	case 31:	// TERMINATOR received
+		readTerminator(ptr, buffer);
+		break;
+	case 60:	// PONG/CONNECT received
+		if (dest->m_state != DS_LINKED) {
+			dest->m_state = DS_LINKED;
+			dest->m_timer.start();
+		}
+		break;
+	case 91:	// HEADER received
+		readHeader(ptr, buffer);
+		break;
+	case 181:	// V/D MODE 2 DATA received
+		readData(ptr, buffer);
 		break;
 	default:
+		LogWarning("Unknown IMRS packet received");
 		break;
 	}
 }
@@ -450,28 +561,52 @@ void CIMRSNetwork::close()
 	LogMessage("Closing IMRS network connection");
 
 	m_socket.close();
-
-	m_state = DS_NOTOPEN;
 }
 
-IMRSDGId* CIMRSNetwork::find(const sockaddr_storage& addr) const
+bool CIMRSNetwork::find(const sockaddr_storage& addr, IMRSDGId*& ptr, IMRSDest*& dest) const
 {
-	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.begin(); it1 != m_dgIds.end(); ++it1) {
-		for (std::vector<IMRSDest*>::const_iterator it2 = (*it1)->m_destinations.begin(); it2 != (*it1)->m_destinations.end(); ++it2) {
-			if (CUDPSocket::match(addr, (*it2)->m_addr))
-				return *it1;
+	for (std::vector<IMRSDGId*>::const_iterator it1 = m_dgIds.cbegin(); it1 != m_dgIds.cend(); ++it1) {
+		for (std::vector<IMRSDest*>::const_iterator it2 = (*it1)->m_destinations.cbegin(); it2 != (*it1)->m_destinations.cend(); ++it2) {
+			if (CUDPSocket::match(addr, (*it2)->m_addr)) {
+				ptr  = *it1;
+				dest = *it2;
+				return true;
+			}
 		}
 	}
 
-	return NULL;
+	return false;
 }
 
 IMRSDGId* CIMRSNetwork::find(unsigned int dgId) const
 {
-	for (std::vector<IMRSDGId*>::const_iterator it = m_dgIds.begin(); it != m_dgIds.end(); ++it) {
+	for (std::vector<IMRSDGId*>::const_iterator it = m_dgIds.cbegin(); it != m_dgIds.cend(); ++it) {
 		if (dgId == (*it)->m_dgId)
 			return *it;
 	}
 
 	return NULL;
+}
+
+bool CIMRSNetwork::writeConnect(const IMRSDest& dest, bool debug)
+{
+	unsigned char buffer[60U];
+
+	::memset(buffer, 0x00U, 60U);
+	::memcpy(buffer + 0U, CONNECT, 20U);
+
+	// XXX TODO
+
+	if (debug)
+		CUtils::dump(1U, "IMRS Connect Sent", buffer, 60U);
+
+	return m_socket.write(buffer, 60U, dest.m_addr, dest.m_addrLen);
+}
+
+bool CIMRSNetwork::writePing(const IMRSDest& dest, bool debug)
+{
+	if (debug)
+		CUtils::dump(1U, "IMRS Ping Sent", PING, 16U);
+
+	return m_socket.write(PING, 16U, dest.m_addr, dest.m_addrLen);
 }
