@@ -30,6 +30,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <random>
 
 class IMRSDest {
 public:
@@ -111,6 +112,8 @@ public:
 private:
 	CUDPSocket             m_socket;
 	std::vector<IMRSDGId*> m_dgIds;
+	std::mt19937           m_random;
+	uint16_t               m_streamId;
 
 	bool      find(const sockaddr_storage& addr, IMRSDGId*& ptr, IMRSDest*& dest) const;
 	IMRSDGId* find(unsigned int dgId) const;

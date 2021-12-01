@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2016,2017,2019,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2016,2017,2019,2020,2021 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "YSFDefines.h"
 #include "Golay24128.h"
 #include "YSFFICH.h"
+#include "Utils.h"
 #include "CRC.h"
 #include "Log.h"
 
@@ -171,12 +172,30 @@ void CYSFFICH::encode(unsigned char* bytes)
 
 void CYSFFICH::setRaw(const unsigned char* bytes)
 {
+	assert(bytes != NULL);
+
 	::memcpy(m_fich, bytes, 4U);
 }
 
 void CYSFFICH::getRaw(unsigned char* bytes) const
 {
+	assert(bytes != NULL);
+
 	::memcpy(bytes, m_fich, 4U);
+}
+
+void CYSFFICH::setASCII(const unsigned char* bytes)
+{
+	assert(bytes != NULL);
+
+	CUtils::fromHex(m_fich, bytes, 8U);
+}
+
+void CYSFFICH::getASCII(unsigned char* bytes) const
+{
+	assert(bytes != NULL);
+
+	CUtils::toHex(bytes, m_fich, 4U);
 }
 
 unsigned char CYSFFICH::getFI() const

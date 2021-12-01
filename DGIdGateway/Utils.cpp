@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2009,2014,2015,2016 Jonathan Naylor, G4KLX
+ *	Copyright (C) 2009,2014,2015,2016,2021 Jonathan Naylor, G4KLX
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -143,4 +143,49 @@ void CUtils::bitsToByteLE(const bool* bits, unsigned char& byte)
 	byte |= bits[5U] ? 0x20U : 0x00U;
 	byte |= bits[6U] ? 0x40U : 0x00U;
 	byte |= bits[7U] ? 0x80U : 0x00U;
+}
+
+void CUtils::toHex(unsigned char* out, const unsigned char* in, unsigned int length)
+{
+	assert(out != NULL);
+	assert(in != NULL);
+
+	unsigned int n = 0U;
+	for (unsigned int i = 0U; i < length; i++) {
+		out[n++] = "0123456789ABCDEF"[(in[i] >> 4) & 0x0FU];
+		out[n++] = "0123456789ABCDEF"[(in[i] >> 0) & 0x0FU];
+	}
+}
+
+void CUtils::fromHex(unsigned char* out, const unsigned char* in, unsigned int length)
+{
+	assert(out != NULL);
+	assert(in != NULL);
+
+	unsigned int n = 0U;
+	for (unsigned int i = 0U; i < length; i++) {
+		out[i] = 0U;
+
+		if ((in[n] >= '0') && (in[n] <= '9'))
+			out[i] += (in[n] - '0') << 4;
+
+		if ((in[n] >= 'A') && (in[n] <= 'F'))
+			out[i] += (in[n] - 'A' + 10U) << 4;
+
+		if ((in[n] >= 'a') && (in[n] <= 'f'))
+			out[i] += (in[n] - 'a' + 10U) << 4;
+
+		n++;
+
+		if ((in[n] >= '0') && (in[n] <= '9'))
+			out[i] += (in[n] - '0') << 0;
+
+		if ((in[n] >= 'A') && (in[n] <= 'F'))
+			out[i] += (in[n] - 'A' + 10U) << 0;
+
+		if ((in[n] >= 'a') && (in[n] <= 'f'))
+			out[i] += (in[n] - 'a' + 10U) << 0;
+
+		n++;
+	}
 }
