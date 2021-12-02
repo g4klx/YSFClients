@@ -56,27 +56,39 @@ public:
 	m_dgId(0U),
 	m_name(),
 	m_seqNo(0U),
+	m_origin(NULL),
 	m_source(NULL),
 	m_dest(NULL),
+	m_csd1(NULL),
+	m_csd2(NULL),
 	m_destinations(),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")
 	{
+		m_origin = new unsigned char[YSF_CALLSIGN_LENGTH];
 		m_source = new unsigned char[YSF_CALLSIGN_LENGTH];
 		m_dest   = new unsigned char[YSF_CALLSIGN_LENGTH];
+		m_csd1   = new unsigned char[2U * YSF_CALLSIGN_LENGTH];
+		m_csd2   = new unsigned char[2U * YSF_CALLSIGN_LENGTH];
 	}
 
 	~IMRSDGId()
 	{
+		delete[] m_origin;
 		delete[] m_source;
 		delete[] m_dest;
+		delete[] m_csd1;
+		delete[] m_csd2;
 	}
 
 	unsigned int               m_dgId;
 	std::string                m_name;
 	uint16_t                   m_seqNo;
+	unsigned char*             m_origin;
 	unsigned char*             m_source;
 	unsigned char*             m_dest;
+	unsigned char*             m_csd1;
+	unsigned char*             m_csd2;
 	std::vector<IMRSDest*>     m_destinations;
 	bool                       m_debug;
 	CRingBuffer<unsigned char> m_buffer;

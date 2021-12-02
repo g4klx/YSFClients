@@ -163,51 +163,60 @@ bool CIMRSNetwork::writeHeader(IMRSDGId* ptr, CYSFFICH& fich, const unsigned cha
 	// Set the sequence number in ASCII hex
 	CUtils::toHex(buffer + 19U, (unsigned char*)&ptr->m_seqNo, 2U);
 
-	// Set the Destination Radio Id
-	::memcpy(buffer + 31U, "*****", 5U);
+	// Will contain CSD1 and CSD2
+	unsigned char dat[4U * YSF_CALLSIGN_LENGTH];
 
-	// Set the Source Radio Id
-	::memcpy(buffer + 36U, DUMMY_ID, 5U);
+	CYSFPayload payload;
+	payload.readHeaderData(data + 35U, dat);
+
+	unsigned char cm = fich.getCM();
+
+	// Set the Destination Radio Id and Source Radio Id
+	if (cm != YSF_CM_RADIO_ID) {
+		::memcpy(buffer + 31U, "*****", YSF_RADIO_ID_LENGTH);
+		::memcpy(buffer + 36U, DUMMY_ID, YSF_RADIO_ID_LENGTH);
+	} else {
+		::memcpy(buffer + 31U, dat + 0U, YSF_RADIO_ID_LENGTH);
+		::memcpy(buffer + 36U, dat + 5U, YSF_RADIO_ID_LENGTH);
+	}
 
 	// Set the Source Callsign
-	::memcpy(buffer + 41U, buffer + 14U, YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 41U, dat + 10U, YSF_CALLSIGN_LENGTH);
 
 	// Set the Downlink Callsign
-	::memcpy(buffer + 51U, "          ", YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 51U, dat + 20U, YSF_CALLSIGN_LENGTH);
 
 	// Set the Uplink Callsign
 	::memcpy(buffer + 61U, buffer + 4U, YSF_CALLSIGN_LENGTH);
 
 	// Set the Downlink Radio Id
-	::memcpy(buffer + 66U, "     ", 5U);
+	::memcpy(buffer + 66U, "     ", YSF_RADIO_ID_LENGTH);
 
 	// Set the Uplink Radio Id
-	::memcpy(buffer + 71U, "     ", 5U);
+	::memcpy(buffer + 71U, "     ", YSF_RADIO_ID_LENGTH);
 
 	// Set the VOIP Station Id
-	::memcpy(buffer + 76U, "     ", 5U);
+	::memcpy(buffer + 76U, "     ", YSF_RADIO_ID_LENGTH);
 
 	// Set unknown Radio Id
-	::memcpy(buffer + 81U, "     ", 5U);
+	::memcpy(buffer + 81U, "     ", YSF_RADIO_ID_LENGTH);
 
 	// Set the Transmission Source Radio Id
-	::memcpy(buffer + 86U, DUMMY_ID, 5U);
-
-	// Copy CSD1 and CSD2 (40 bytes)
-	// CYSFPayload payload;
-	// payload.readHeaderData(data + 35U, buffer + 7U);
+	::memcpy(buffer + 86U, DUMMY_ID, YSF_RADIO_ID_LENGTH);
 
 	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
-		// Set the correct DG-ID for this destination
-		fich.setDGId((*it)->m_dgId);
-
-		// Set the new FICH in ASCII hex
-		fich.getASCII(buffer + 23U);
-
 		if (ptr->m_debug)
 			CUtils::dump(1U, "IMRS Network Header Sent", buffer, 91U);
 
-		m_socket.write(buffer, 91U, (*it)->m_addr, (*it)->m_addrLen);
+		if ((*it)->m_state == DS_LINKED) {
+			// Set the correct DG-ID for this destination
+			fich.setDGId((*it)->m_dgId);
+
+			// Set the new FICH in ASCII hex
+			fich.getASCII(buffer + 23U);
+
+			m_socket.write(buffer, 91U, (*it)->m_addr, (*it)->m_addrLen);
+		}
 	}
 
 	ptr->m_seqNo++;
@@ -251,27 +260,13 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 	unsigned char ft = fich.getFT();
 	unsigned char fn = fich.getFN();
 
-	// Create the header
 	switch (dt) {
-	case YSF_DT_VD_MODE1:
-		// Copy the DCH (20 bytes)
-		// payload.readVDMode1Data(data + 35U, buffer + 7U);
-		// Copy the audio as ASCII hex
-		CUtils::toHex(buffer + 51U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 9U,  9U);
-		CUtils::toHex(buffer + 51U + 18U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 27U, 9U);
-		CUtils::toHex(buffer + 51U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 9U);
-		CUtils::toHex(buffer + 51U + 54U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 63U, 9U);
-		CUtils::toHex(buffer + 51U + 72U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 81U, 9U);
-		length = 90U;
-		break;
 	case YSF_DT_DATA_FR_MODE:
 		// Copy the data as ASCII hex
 		CUtils::toHex(buffer + 51U + 0U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U, 90U);
 		length = 231U;
 		break;
 	case YSF_DT_VD_MODE2:
-		// Copy the DCH (10 bytes)
-		// payload.readVDMode2Data(data + 35U, buffer + 7U);
 		// Copy the audio as ASCII hex
 		CUtils::toHex(buffer + 51U + 0U,   data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 5U,  13U);
 		CUtils::toHex(buffer + 51U + 26U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 23U, 13U);
@@ -282,12 +277,10 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 		break;
 	case YSF_DT_VOICE_FR_MODE:
 		if (fn == 0U && ft == 1U) {
-			// Copy the DCH (20 bytes)
-			// payload.readVoiceFRModeData(data + 35U, buffer + 7U);
 			// Copy the audio as ASCII hex
-			CUtils::toHex(buffer + 27U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
-			CUtils::toHex(buffer + 27U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
-			length = 231U;
+			CUtils::toHex(buffer + 51U + 0U,  data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, 18U);
+			CUtils::toHex(buffer + 51U + 36U, data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, 18U);
+			length = 123U;
 		} else {
 			// Copy the audio as ASCII hex
 			CUtils::toHex(buffer + 51U + 0U,   data + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U,  18U);
@@ -305,16 +298,18 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 	buffer[1U] = length - 16U;
 
 	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
-		// Set the correct DG-ID for this destination
-		fich.setDGId((*it)->m_dgId);
-
-		// Set the new FICH in ASCII hex
-		fich.getASCII(buffer + 23U);
-
 		if (ptr->m_debug)
 			CUtils::dump(1U, "IMRS Network Data Sent", buffer, length);
 
-		m_socket.write(buffer, length, (*it)->m_addr, (*it)->m_addrLen);
+		if ((*it)->m_state == DS_LINKED) {
+			// Set the correct DG-ID for this destination
+			fich.setDGId((*it)->m_dgId);
+
+			// Set the new FICH in ASCII hex
+			fich.getASCII(buffer + 23U);
+
+			m_socket.write(buffer, length, (*it)->m_addr, (*it)->m_addrLen);
+		}
 	}
 
 	ptr->m_seqNo++;
@@ -349,16 +344,18 @@ bool CIMRSNetwork::writeTerminator(IMRSDGId* ptr, CYSFFICH& fich, const unsigned
 	CUtils::toHex(buffer + 19U, (unsigned char*)&ptr->m_seqNo, 2U);
 
 	for (std::vector<IMRSDest*>::const_iterator it = ptr->m_destinations.cbegin(); it != ptr->m_destinations.cend(); ++it) {
-		// Set the correct DG-ID for this destination
-		fich.setDGId((*it)->m_dgId);
-
-		// Set the new FICH in ASCII hex
-		fich.getASCII(buffer + 23U);
-
 		if (ptr->m_debug)
 			CUtils::dump(1U, "IMRS Network Terminator Sent", buffer, 31U);
 
-		m_socket.write(buffer, 31U, (*it)->m_addr, (*it)->m_addrLen);
+		if ((*it)->m_state == DS_LINKED) {
+			// Set the correct DG-ID for this destination
+			fich.setDGId((*it)->m_dgId);
+
+			// Set the new FICH in ASCII hex
+			fich.getASCII(buffer + 23U);
+
+			m_socket.write(buffer, 31U, (*it)->m_addr, (*it)->m_addrLen);
+		}
 	}
 
 	return true;
@@ -373,30 +370,50 @@ void CIMRSNetwork::readHeader(IMRSDGId* ptr, const unsigned char* data)
 
 	::memcpy(buffer + 0U, "YSFD", 4U);
 
+	::memcpy(ptr->m_origin, data + 61U, YSF_CALLSIGN_LENGTH);
 	::memcpy(ptr->m_source, data + 41U, YSF_CALLSIGN_LENGTH);
 
 	// Get the FICH from ASCII hex
 	CYSFFICH fich;
 	fich.setASCII(data + 23U);
+	fich.encode(buffer + 35U);
 
 	unsigned char cm = fich.getCM();
-	if (cm == YSF_CM_GROUP1 || cm == YSF_CM_GROUP2)
+	if (cm == YSF_CM_GROUP1 || cm == YSF_CM_RADIO_ID)
 		::memcpy(ptr->m_dest, "ALL       ", YSF_CALLSIGN_LENGTH);
 	else
 		::memcpy(ptr->m_dest, data + 51U, YSF_CALLSIGN_LENGTH);
 
 	buffer[34U] = (data[11U] & 0x7FU) << 1;
 
-	::memcpy(buffer + 4U, "IMRS      ",   YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 4U,  ptr->m_origin, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 24U, ptr->m_dest,   YSF_CALLSIGN_LENGTH);
 
 	::memcpy(buffer + 35U, YSF_SYNC_BYTES, YSF_SYNC_LENGTH_BYTES);
 
-	fich.encode(buffer + 35U);
+	if (cm != YSF_CM_RADIO_ID) {
+		::memcpy(ptr->m_csd1 + 0U, "**********", YSF_CALLSIGN_LENGTH);
+	} else {
+		::memcpy(ptr->m_csd1 + 0U, buffer + 31U, YSF_RADIO_ID_LENGTH);
+		::memcpy(ptr->m_csd1 + 5U, buffer + 36U, YSF_RADIO_ID_LENGTH);
+	}
 
-	// CYSFPayload payload;
-	// payload.writeHeaderData(data + 7U, buffer + 35U);
+	// Set the Source Callsign
+	::memcpy(ptr->m_csd1 + 10U, buffer + 41U, YSF_CALLSIGN_LENGTH);
+
+	// Set the Downlink Callsign
+	::memcpy(ptr->m_csd2 + 0U,  buffer + 51U, YSF_CALLSIGN_LENGTH);
+
+	// Set the Uplink Callsign
+	::memcpy(ptr->m_csd2 + 10U, buffer + 61U, YSF_CALLSIGN_LENGTH);
+
+	unsigned char dat[4U * YSF_CALLSIGN_LENGTH];
+	::memcpy(dat + 0U,  ptr->m_csd1, 2U * YSF_CALLSIGN_LENGTH);
+	::memcpy(dat + 20U, ptr->m_csd2, 2U * YSF_CALLSIGN_LENGTH);
+
+	CYSFPayload payload;
+	payload.writeHeaderData(dat, buffer + 35U);
 
 	CUtils::dump("YSF Data Transmitted", buffer, 155U);
 
@@ -414,7 +431,7 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, const unsigned char* data)
 
 	::memcpy(buffer + 0U, "YSFD", 4U);
 
-	::memcpy(buffer + 4U,  "IMRS      ",  YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 4U,  ptr->m_origin, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 24U, ptr->m_dest,   YSF_CALLSIGN_LENGTH);
 
@@ -435,23 +452,41 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, const unsigned char* data)
 
 	// Create the header
 	switch (dt) {
-	case YSF_DT_VD_MODE1:
-		// Copy the DCH
-		payload.writeVDMode1Data(data + 7U, buffer + 35U);
-		// Copy the audio
-		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 9U,  data + 51U + 0U,  18U);
-		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 27U, data + 51U + 18U, 18U);
-		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, data + 51U + 36U, 18U);
-		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 63U, data + 51U + 54U, 18U);
-		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 81U, data + 51U + 72U, 18U);
-		break;
 	case YSF_DT_DATA_FR_MODE:
+		// Copy the DCH
+		if (fn == 0U) {
+			unsigned char dat[4U * YSF_CALLSIGN_LENGTH];
+			::memcpy(dat + 0U,  ptr->m_csd1, 2U * YSF_CALLSIGN_LENGTH);
+			::memcpy(dat + 20U, ptr->m_csd2, 2U * YSF_CALLSIGN_LENGTH);
+			payload.writeVDMode2Data(dat, buffer + 35U);
+		} else {
+			payload.writeVDMode2Data((unsigned char*)"                                        ", buffer + 35U);
+		}
+
 		// Copy the data
 		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 0U, data + 51U + 0U, 180U);
 		break;
+
 	case YSF_DT_VD_MODE2:
 		// Copy the DCH
-		payload.writeVDMode2Data(data + 7U, buffer + 35U);
+		switch (fn) {
+		case 0U:
+			payload.writeVDMode2Data(ptr->m_csd1 + 0U, buffer + 35U);
+			break;
+		case 1U:
+			payload.writeVDMode2Data(ptr->m_csd1 + 10U, buffer + 35U);
+			break;
+		case 2U:
+			payload.writeVDMode2Data(ptr->m_csd2 + 0U, buffer + 35U);
+			break;
+		case 3U:
+			payload.writeVDMode2Data(ptr->m_csd2 + 10U, buffer + 35U);
+			break;
+		default:
+			payload.writeVDMode2Data((unsigned char*)"          ", buffer + 35U);
+			break;
+		}
+
 		// Copy the audio
 		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 5U,  data + 51U + 0U,   26U);
 		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 23U, data + 51U + 26U,  26U);
@@ -459,12 +494,15 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, const unsigned char* data)
 		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 59U, data + 51U + 78U,  26U);
 		CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 77U, data + 51U + 104U, 26U);
 		break;
+
 	case YSF_DT_VOICE_FR_MODE:
 		if (fn == 0U && ft == 1U) {
 			// Copy the DCH
-			payload.writeVoiceFRModeData(data + 7U, buffer + 35U);
+			payload.writeVoiceFRModeData((unsigned char*)"                    ", buffer + 35U);
+
 			// NULL the unused section
-			CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 0x00U, 9U);
+			::memset(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 0x00U, 9U);
+
 			// Copy the audio
 			CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, data + 51U + 0U,  36U);
 			CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, data + 51U + 36U, 36U);
@@ -477,6 +515,7 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, const unsigned char* data)
 			CUtils::fromHex(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 72U, data + 51U + 144U, 36U);
 		}
 		break;
+
 	default:
 		return;
 	}
@@ -499,9 +538,9 @@ void CIMRSNetwork::readTerminator(IMRSDGId* ptr, const unsigned char* data)
 
 	buffer[34U] = 0x01U | ((data[11U] & 0x7FU) << 1);
 
-	::memcpy(buffer + 4U, "IMRS      ", YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 4U,  ptr->m_origin, YSF_CALLSIGN_LENGTH);
 	::memcpy(buffer + 14U, ptr->m_source, YSF_CALLSIGN_LENGTH);
-	::memcpy(buffer + 24U, ptr->m_dest, YSF_CALLSIGN_LENGTH);
+	::memcpy(buffer + 24U, ptr->m_dest,   YSF_CALLSIGN_LENGTH);
 
 	::memcpy(buffer + 35U, YSF_SYNC_BYTES, YSF_SYNC_LENGTH_BYTES);
 
@@ -618,7 +657,8 @@ void CIMRSNetwork::clock(unsigned int ms)
 	case 91:	// HEADER received
 		readHeader(ptr, buffer);
 		break;
-	case 181:	// V/D MODE 2 DATA received
+	case 181:	// DATA received
+	case 231:	// ???
 		readData(ptr, buffer);
 		break;
 	default:
