@@ -283,10 +283,11 @@ int CYSFGateway::run()
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
-					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
-						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
+					reflector = m_wiresX->getReflector(); //reflector may have changed
+					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
+						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
 				if (m_gps != NULL)
