@@ -14,4 +14,4 @@ The MMDVM .ini file should have the IP address and port number of the client in 
 
 They build on 32-bit and 64-bit Linux as well as on Windows using Visual Studio 2019 on x86 and x64.
 
-This software is licenced under the GPL v2 and is intended for amateur and educational use only. Use of this software for commercial purposes is strictly forbidden.
+This software is licenced under the GPL v2 and is primarily intended for amateur and educational use.
