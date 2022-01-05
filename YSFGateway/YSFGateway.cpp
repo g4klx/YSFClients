@@ -47,6 +47,7 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cstring>
 #include <clocale>
 #include <cmath>
+#include <algorithm>
 
 int main(int argc, char** argv)
 {
@@ -880,6 +881,8 @@ void CYSFGateway::processRemoteCommands()
 		buffer[res] = '\0';
 		if (::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) {
 			std::string id = std::string((char*)(buffer + 7U));
+			// Left trim
+			id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector == NULL)
 				reflector = m_reflectors->findByName(id);
@@ -909,6 +912,8 @@ void CYSFGateway::processRemoteCommands()
 			}
 		} else if (::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) {
 			std::string raw = std::string((char*)(buffer + 7U));
+			// Left trim
+			raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			std::string id = "FCS00";
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {
