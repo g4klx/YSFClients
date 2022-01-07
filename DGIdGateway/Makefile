@@ -23,9 +23,22 @@ DGIdGateway:	$(OBJECTS)
 %.o: %.cpp
 		$(CXX) $(CFLAGS) -c -o $@ $<
 
+DGIdGateway.o: GitVersion.h FORCE
+
+.PHONY: GitVersion.h
+
+FORCE:
+
 install:
 		install -m 755 DGIdGateway /usr/local/bin/
 
 clean:
-		$(RM) DGIdGateway *.o *.d *.bak *~
- 
+		$(RM) DGIdGateway *.o *.d *.bak *~ GitVersion.h
+
+GitVersion.h:
+ifneq ("$(wildcard ../.git/index)","")
+	echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > $@
+else
+	echo "const char *gitversion = \"0000000000000000000000000000000000000000\";" > $@
+endif
+

@@ -23,6 +23,7 @@
 #include "Version.h"
 #include "Thread.h"
 #include "Timer.h"
+#include "GitVersion.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -30,21 +31,29 @@
 
 int main(int argc, char** argv)
 {
-	if (argc == 1) {
-		::fprintf(stderr, "Usage: YSFParrot [-d|--debug] <port>\n");
-		return 1;
+	if (argc > 1) {
+		for (int currentArg = 1; currentArg < argc; ++currentArg) {
+			std::string arg = argv[currentArg];
+			if ((arg == "-v") || (arg == "--version")) {
+				::fprintf(stdout, "YSFParrot version %s git #%.7s\n", VERSION, gitversion);
+				return 0;
+			} else if (arg.substr(0, 1) == "-") {
+				::fprintf(stderr, "Usage: YSFParrot [-v|--version] [-d|--debug] <port>\n");
+				return 1;
+			} else {
+        			unsigned short port = (unsigned short)::atoi(argv[1U]);
+        			if (port == 0U) {
+                			::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[1U]);
+                			return 1;
+        			}
+
+        			CYSFParrot parrot(port);
+        			parrot.run();
+
+ 			       return 0;
+			}
+		}
 	}
-
-	unsigned short port = (unsigned short)::atoi(argv[1U]);
-	if (port == 0U) {
-		::fprintf(stderr, "YSFParrot: invalid port number - %s\n", argv[1U]);
-		return 1;
-	}
-
-	CYSFParrot parrot(port);
-	parrot.run();
-
-	return 0;
 }
 
 CYSFParrot::CYSFParrot(unsigned short port) :
@@ -77,7 +86,8 @@ void CYSFParrot::run()
 	unsigned int count = 0U;
 	bool playing = false;
 
-	::fprintf(stdout, "Starting YSFParrot-%s\n", VERSION);
+	::fprintf(stdout, "YSFParrot-%s is starting", VERSION);
+	::fprintf(stdout, "Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
 	for (;;) {
 		unsigned char buffer[200U];
