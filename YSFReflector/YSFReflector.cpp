@@ -23,6 +23,7 @@
 #include "Version.h"
 #include "Thread.h"
 #include "Log.h"
+#include "GitVersion.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -58,7 +59,7 @@ int main(int argc, char** argv)
 		for (int currentArg = 1; currentArg < argc; ++currentArg) {
 			std::string arg = argv[currentArg];
 			if ((arg == "-v") || (arg == "--version")) {
-				::fprintf(stdout, "YSFReflector version %s\n", VERSION);
+				::fprintf(stdout, "YSFReflector version %s git #%.7s\n", VERSION, gitversion);
 				return 0;
 			} else if (arg.substr(0, 1) == "-") {
 				::fprintf(stderr, "Usage: YSFReflector [-v|--version] [filename]\n");
@@ -191,7 +192,8 @@ void CYSFReflector::run()
 	CTimer pollTimer(1000U, 5U);
 	pollTimer.start();
 
-	LogMessage("Starting YSFReflector-%s", VERSION);
+	LogMessage("YSFReflector-%s is starting", VERSION);
+	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
 	CTimer watchdogTimer(1000U, 0U, 1500U);
 
