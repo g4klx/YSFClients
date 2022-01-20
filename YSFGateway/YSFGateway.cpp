@@ -881,8 +881,8 @@ void CYSFGateway::processRemoteCommands()
 	int res = m_remoteSocket->read(buffer, 200U, addr, addrLen);
 	if (res > 0) {
 		buffer[res] = '\0';
-		if (::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) {
-			std::string id = std::string((char*)(buffer + 7U));
+		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string id = std::string((char*)(buffer + 8U));
 			// Left trim
 			id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			CYSFReflector* reflector = m_reflectors->findById(id);
@@ -912,8 +912,8 @@ void CYSFGateway::processRemoteCommands()
 				LogWarning("Invalid YSF reflector id/name - \"%s\"", id.c_str());
 				return;
 			}
-		} else if (::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) {
-			std::string raw = std::string((char*)(buffer + 7U));
+		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string raw = std::string((char*)(buffer + 8U));
 			// Left trim
 			raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			std::string id = "FCS00";
