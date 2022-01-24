@@ -977,6 +977,13 @@ void CYSFGateway::processRemoteCommands()
 				m_lostTimer.stop();
 				m_linkType = LINK_NONE;
 			}
+		} else if (::memcmp(buffer + 0U, "status", 6U) == 0) {
+			std::string state = std::string("ysf:") + (((m_ysfNetwork == NULL) && (m_fcsNetwork == NULL)) ? "n/a" : ((m_linkType != LINK_NONE) ? "conn" : "disc"));
+			m_remoteSocket->write((unsigned char*)state.c_str(), (unsigned int)state.length(), addr, addrLen);
+		} else if (::memcmp(buffer + 0U, "host", 4U) == 0) {
+			std::string ref = ((((m_ysfNetwork == NULL) && (m_fcsNetwork == NULL)) || (m_linkType == LINK_NONE)) ? "NONE" : m_current);
+			std::string host = std::string("ysf:\"") + ref + "\"";
+			m_remoteSocket->write((unsigned char*)host.c_str(), (unsigned int)host.length(), addr, addrLen);
 		} else {
 			CUtils::dump("Invalid remote command received", buffer, res);
 		}
