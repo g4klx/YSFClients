@@ -199,7 +199,7 @@ int CDGIdGateway::run()
 
 	bool debug            = m_conf.getDebug();
 	std::string myAddress = m_conf.getMyAddress();
-	unsigned short myPort   = m_conf.getMyPort();
+	unsigned short myPort = m_conf.getMyPort();
 
 	CYSFNetwork rptNetwork(myAddress, myPort, "MMDVM", rptAddr, rptAddrLen, m_callsign, debug);
 	ret = rptNetwork.open();
@@ -296,7 +296,7 @@ int CDGIdGateway::run()
 
 				dgIdNetwork[dgid] = imrs;
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
-				dgIdNetwork[dgid]->m_static      = true;
+				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
 
@@ -384,7 +384,7 @@ int CDGIdGateway::run()
 			}
 		}
 		
-		if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid] != imrs) {
+		if (dgIdNetwork[dgid] != NULL) {
 			bool ret = dgIdNetwork[dgid]->open();
 			if (!ret) {
 				LogWarning("\tUnable to open connection");
