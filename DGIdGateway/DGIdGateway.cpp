@@ -427,13 +427,7 @@ int CDGIdGateway::run()
 				if (dgId == WIRESX_DGID)
 					dgId = 0U;
 
-				if (dgId != currentDGId) {
-					if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
-						dgIdNetwork[currentDGId]->unlink();
-						dgIdNetwork[currentDGId]->unlink();
-						dgIdNetwork[currentDGId]->unlink();
-					}
-
+				if (currentDGId == UNSET_DGID) {
 					if (dgIdNetwork[dgId] != NULL && !dgIdNetwork[dgId]->m_static) {
 						dgIdNetwork[dgId]->link();
 						dgIdNetwork[dgId]->link();
@@ -443,13 +437,13 @@ int CDGIdGateway::run()
 					if (dgIdNetwork[dgId] != NULL) {
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						currentDGId = dgId;
 						state = DS_NOTLINKED;
 					} else {
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
 						state = DS_NOTOPEN;
 					}
 
-					currentDGId = dgId;
 					fromRF = true;
 				}
 
