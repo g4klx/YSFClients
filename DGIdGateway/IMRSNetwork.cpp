@@ -41,12 +41,15 @@ static const char* DATA3 = "2A2A2A2A2A4835215245";
 static const char* DUMMY_ID = "G0gBJ";
 
 
-CIMRSNetwork::CIMRSNetwork() :
+CIMRSNetwork::CIMRSNetwork(const std::string& callsign) :
 m_socket(IMRS_PORT),
+m_callsign(callsign),
 m_dgIds(),
 m_random(),
 m_streamId(0U)
 {
+	m_callsign.resize(YSF_CALLSIGN_LENGTH, ' ');
+
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	m_random = mt;
@@ -595,14 +598,18 @@ void CIMRSNetwork::clock(unsigned int ms)
 			switch (dest->m_state) {
 			case DS_LINKING:
 				dest->m_timer.clock(ms);
-				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired())
+				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired()) {
 					writeConnect(*dest, debug);
+					dest->m_timer.start();
+				}
 				break;
 
 			case DS_LINKED:
 				dest->m_timer.clock(ms);
-				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired())
+				if (dest->m_timer.isRunning() && dest->m_timer.hasExpired()) {
 					writePing(*dest, debug);
+					dest->m_timer.start();
+				}
 				break;
 
 			default:
@@ -725,7 +732,14 @@ bool CIMRSNetwork::writeConnect(const IMRSDest& dest, bool debug)
 	::memset(buffer, 0x00U, 60U);
 	::memcpy(buffer + 0U, CONNECT, 20U);
 
-	// XXX TODO
+	// A dummy MAC address
+	::memcpy(buffer + 20U, "\x01\x02\x03\x04\x05\x06", 6U);
+
+	// The callsign of the gateway/repeater/hotspot
+	::memcpy(buffer + 26U, m_callsign.c_str(), YSF_CALLSIGN_LENGTH);
+
+	// A dummy radio id
+	::memcpy(buffer + 36U, DUMMY_ID, YSF_RADIO_ID_LENGTH);
 
 	if (debug)
 		CUtils::dump(1U, "IMRS Connect Sent", buffer, 60U);
@@ -737,6 +751,6 @@ bool CIMRSNetwork::writePing(const IMRSDest& dest, bool debug)
 {
 	if (debug)
 		CUtils::dump(1U, "IMRS Ping Sent", PING, 16U);
-
+	 
 	return m_socket.write(PING, 16U, dest.m_addr, dest.m_addrLen);
 }

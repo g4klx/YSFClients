@@ -96,7 +96,7 @@ public:
 
 class CIMRSNetwork : public CDGIdNetwork {
 public:
-	CIMRSNetwork();
+	CIMRSNetwork(const std::string& callsign);
 	virtual ~CIMRSNetwork();
 
 	void addDGId(unsigned int dgId, const std::string& name, const std::vector<IMRSDest*>& destinations, bool debug);
@@ -123,6 +123,7 @@ public:
 
 private:
 	CUDPSocket             m_socket;
+	std::string            m_callsign;
 	std::vector<IMRSDGId*> m_dgIds;
 	std::mt19937           m_random;
 	uint16_t               m_streamId;
