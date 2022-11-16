@@ -191,7 +191,8 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	CUtils::dump(1U, "FCS Network Data Received", buffer, length);
+	if (m_debug)
+		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
 	if (m_state == DS_NOTLINKED)
 		return;
