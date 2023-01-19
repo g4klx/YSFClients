@@ -902,6 +902,7 @@
 15783;US-Truck-Travel;Truck Travel;74.91.121.182;42002;014;http://travel.atruckerslife.com
 55817;US-Uni-Link;UniversityLink;128.83.129.92;42000;003;http://repeaters.as.utexas.edu/ysf/
 03732;US-US-WNY-XRX;XRX Club;98.3.125.21;42003;002;http://
+48010;US-WNY-DIGITAL;XLX reflector;209.251.60.131;42000;005;http://ysf.wny-digital.network
 59623;US-UTAHLINK;UT LINK;73.65.205.80;42002;002;http://w7rss.sytes.net
 99539;US-VaDigital;YSF Reflector;3.19.122.217;42000;007;http://ysf.vadigital.network
 12018;US-Val-County-ID;Val CO ID YSF;68.14.214.57;42300;002;http://68.14.214.57:42400/
@@ -1155,7 +1156,7 @@
 43287;XLX870;XLX reflector;185.78.196.103;42000;002;http://185.78.196.103:81
 53251;XLX882;XLX reflector;172.105.19.52;42000;001;http://xlx882.va3por.net/
 60479;XLX889;XLX reflector;18.188.148.180;42000;001;http://xlx.hdgrouponline.com
-48010;XLX891;XLX reflector;209.251.60.131;42000;005;http://ysf.wnydmr.network
+48010;XLX891;XLX reflector;209.251.60.131;42000;005;http://ysf.wny-digital.network
 44904;XLX899;XLX reflector;77.68.30.160;42000;011;https://2e0lxy.uk/
 71144;XLX905;XLX reflector;94.199.173.123;42000;048;http://xlx905.oe9.at
 28688;XLX910;XLX reflector;138.128.240.100;42007;030;http://xlx910.zapto.org
