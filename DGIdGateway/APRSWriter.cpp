@@ -368,17 +368,21 @@ void CAPRSWriter::sendIdFrameMobile()
 	::sprintf(lon, "%08.2lf", longitude);
 
 	std::string server = m_callsign;
+	std::string symbol = m_symbol;
 	size_t pos = server.find_first_of('-');
 	if (pos == std::string::npos)
 		server.append("-S");
 	else
 		server.append("S");
 
+        if (symbol.empty())
+                symbol.append("D&");
+
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&",
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%c%c%s%c%c",
 		m_callsign.c_str(), server.c_str(),
-		lat, (rawLatitude < 0.0F)  ? 'S' : 'N',
-		lon, (rawLongitude < 0.0F) ? 'W' : 'E');
+		lat, (rawLatitude < 0.0F)  ? 'S' : 'N', symbol[0],
+		lon, (rawLongitude < 0.0F) ? 'W' : 'E', symbol[1]);
 
 	if (bearingSet && velocitySet)
 		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
