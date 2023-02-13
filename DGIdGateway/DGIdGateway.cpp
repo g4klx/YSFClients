@@ -614,8 +614,9 @@ void CDGIdGateway::createGPS()
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
 	std::string desc         = m_conf.getAPRSDescription();
+	std::string symbol  = m_conf.getAPRSSymbol();
 
-	m_writer->setInfo(txFrequency, rxFrequency, desc);
+	m_writer->setInfo(txFrequency, rxFrequency, desc, symbol);
 
 	bool enabled = m_conf.getGPSDEnabled();
 	if (enabled) {
