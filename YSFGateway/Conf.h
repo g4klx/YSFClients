@@ -65,6 +65,7 @@ public:
   unsigned short getAPRSPort() const;
   std::string  getAPRSSuffix() const;
   std::string  getAPRSDescription() const;
+  std::string  getAPRSSymbol() const;
 
   // The Network section
   std::string  getNetworkStartup() const;
@@ -135,6 +136,7 @@ private:
   unsigned short m_aprsPort;
   std::string  m_aprsSuffix;
   std::string  m_aprsDescription;
+  std::string  m_aprsSymbol;
 
   std::string  m_networkStartup;
   std::string  m_networkOptions;
