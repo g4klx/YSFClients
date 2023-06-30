@@ -273,7 +273,8 @@ int CYSFGateway::run()
 	for (;;) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
-
+        bool wx_tmp;
+        
 		while (rptNetwork.read(buffer) > 0U) {
 			CYSFFICH fich;
 			bool valid = fich.decode(buffer + 35U);
@@ -282,14 +283,22 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
+                if (reflector != NULL)
+                    wx_tmp = reflector->m_wiresX;
+                else
+                    wx_tmp = 0;
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && wx_tmp) {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
 					reflector = m_wiresX->getReflector(); //reflector may have changed
-					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
+                if (reflector != NULL)
+                    wx_tmp = reflector->m_wiresX;
+                else
+                    wx_tmp = 0;
+					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wx_tmp)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
