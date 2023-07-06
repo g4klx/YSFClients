@@ -17,6 +17,7 @@
  */
 
 #include "APRSWriter.h"
+#include "MQTTConnection.h"
 #include "YSFDefines.h"
 #include "Log.h"
 
@@ -25,7 +26,10 @@
 #include <cstring>
 #include <cmath>
 
-CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& address, unsigned short port, const std::string& suffix, bool debug) :
+// In Log.cpp
+extern CMQTTConnection* m_mqtt;
+
+CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& suffix, bool debug) :
 m_idTimer(1000U),
 m_callsign(callsign),
 m_debug(debug),
@@ -36,10 +40,7 @@ m_longitude(0.0F),
 m_height(0),
 m_desc(),
 m_symbol(),
-m_suffix(suffix),
-m_aprsAddr(),
-m_aprsAddrLen(0U),
-m_aprsSocket()
+m_suffix(suffix)
 #if defined(USE_GPSD)
 ,m_gpsdEnabled(false),
 m_gpsdAddress(),
@@ -48,16 +49,11 @@ m_gpsdData()
 #endif
 {
 	assert(!callsign.empty());
-	assert(!address.empty());
-	assert(port > 0U);
 
 	if (!rptSuffix.empty()) {
 		m_callsign.append("-");
 		m_callsign.append(rptSuffix.substr(0U, 1U));
 	}
-
-	if (CUDPSocket::lookup(address, port, m_aprsAddr, m_aprsAddrLen) != 0)
-		m_aprsAddrLen = 0U;
 }
 
 CAPRSWriter::~CAPRSWriter()
@@ -93,11 +89,6 @@ void CAPRSWriter::setGPSDLocation(const std::string& address, const std::string&
 
 bool CAPRSWriter::open()
 {
-	if (m_aprsAddrLen == 0U) {
-		LogError("Unable to lookup the adress of the APRS-IS server");
-		return false;
-	}
-
 #if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
@@ -111,12 +102,6 @@ bool CAPRSWriter::open()
 		LogMessage("Connected to GPSD");
 	}
 #endif
-	bool ret = m_aprsSocket.open(m_aprsAddr);
-	if (!ret)
-		return false;
-
-	LogMessage("Opened connection to the APRS Gateway");
-
 	m_idTimer.setTimeout(60U);
 	m_idTimer.start();
 
@@ -187,7 +172,7 @@ void CAPRSWriter::write(const unsigned char* source, const char* type, unsigned 
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
+	m_mqtt->publish("aprs-gateway/aprs", output);
 }
 
 void CAPRSWriter::clock(unsigned int ms)
@@ -215,8 +200,6 @@ void CAPRSWriter::clock(unsigned int ms)
 
 void CAPRSWriter::close()
 {
-	m_aprsSocket.close();
-
 #if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
 		::gps_stream(&m_gpsdData, WATCH_DISABLE, NULL);
@@ -290,7 +273,7 @@ void CAPRSWriter::sendIdFrameFixed()
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
+	m_mqtt->publish("aprs-gateway/aprs", output);
 }
 
 #if defined(USE_GPSD)
@@ -399,6 +382,6 @@ void CAPRSWriter::sendIdFrameMobile()
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);
 
-	m_aprsSocket.write((unsigned char*)output, (unsigned int)::strlen(output), m_aprsAddr, m_aprsAddrLen);
+	m_mqtt->publish("aprs-gateway/aprs", output);
 }
 #endif

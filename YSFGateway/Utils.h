@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2009,2014,2015 by Jonathan Naylor, G4KLX
+ *	Copyright (C) 2009,2014,2015,2023 by Jonathan Naylor, G4KLX
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,15 +20,6 @@ class CUtils {
 public:
 	static void dump(const std::string& title, const unsigned char* data, unsigned int length);
 	static void dump(int level, const std::string& title, const unsigned char* data, unsigned int length);
-
-	static void dump(const std::string& title, const bool* bits, unsigned int length);
-	static void dump(int level, const std::string& title, const bool* bits, unsigned int length);
-
-	static void byteToBitsBE(unsigned char byte, bool* bits);
-	static void byteToBitsLE(unsigned char byte, bool* bits);
-
-	static void bitsToByteBE(const bool* bits, unsigned char& byte);
-	static void bitsToByteLE(const bool* bits, unsigned char& byte);
 
 private:
 };

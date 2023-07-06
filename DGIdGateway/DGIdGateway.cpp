@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2023 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "MQTTConnection.h"
 #include "YSFReflectors.h"
 #include "DGIdGateway.h"
 #include "DGIdNetwork.h"
@@ -53,6 +54,9 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 #include <cstring>
 #include <clocale>
 #include <cmath>
+
+// In Log.cpp
+extern CMQTTConnection* m_mqtt;
 
 const unsigned int UNSET_DGID = 999U;
 
@@ -172,29 +176,30 @@ int CDGIdGateway::run()
 #endif
 
 #if !defined(_WIN32) && !defined(_WIN64)
-        ret = ::LogInitialise(m_daemon, m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel(), m_conf.getLogFileRotate());
-#else
-        ret = ::LogInitialise(false, m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel(), m_conf.getLogFileRotate());
-#endif
-	if (!ret) {
-		::fprintf(stderr, "DGIdGateway: unable to open the log file\n");
-		return 1;
-	}
-
-#if !defined(_WIN32) && !defined(_WIN64)
 	if (m_daemon) {
 		::close(STDIN_FILENO);
 		::close(STDOUT_FILENO);
 		::close(STDERR_FILENO);
 	}
 #endif
+	::LogInitialise(m_conf.getLogDisplayLevel(), m_conf.getLogMQTTLevel());
+
+	std::vector<std::pair<std::string, void (*)(const unsigned char*, unsigned int)>> subscriptions;
+	m_mqtt = new CMQTTConnection(m_conf.getMQTTAddress(), m_conf.getMQTTPort(), m_conf.getMQTTName(), subscriptions, m_conf.getMQTTKeepalive());
+	ret = m_mqtt->open();
+	if (!ret) {
+		delete m_mqtt;
+		return 1;
+	}
+
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
 	sockaddr_storage rptAddr;
 	unsigned int rptAddrLen;
 	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
-		LogError("Unable to resolve the address of the host");
+		::LogError("Unable to resolve the address of the host");
+		::LogFinalise();
 		return 1;
 	}
 
@@ -604,12 +609,10 @@ void CDGIdGateway::createGPS()
 	if (!m_conf.getAPRSEnabled())
 		return;
 
-	std::string address = m_conf.getAPRSAddress();
-	unsigned short port = m_conf.getAPRSPort();
 	std::string suffix  = m_conf.getAPRSSuffix();
 	bool debug          = m_conf.getDebug();
 
-	m_writer = new CAPRSWriter(m_callsign, m_suffix, address, port, suffix, debug);
+	m_writer = new CAPRSWriter(m_callsign, m_suffix, suffix, debug);
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();

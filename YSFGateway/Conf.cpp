@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015-2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015-2020,2023 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -27,16 +27,17 @@
 const int BUFFER_SIZE = 500;
 
 enum SECTION {
-  SECTION_NONE,
-  SECTION_GENERAL,
-  SECTION_INFO,
-  SECTION_LOG,
-  SECTION_APRS,
-  SECTION_NETWORK,
-  SECTION_YSF_NETWORK,
-  SECTION_FCS_NETWORK,
-  SECTION_GPSD,
-  SECTION_REMOTE_COMMANDS
+	SECTION_NONE,
+	SECTION_GENERAL,
+	SECTION_INFO,
+	SECTION_LOG,
+	SECTION_APRS,
+	SECTION_MQTT,
+	SECTION_NETWORK,
+	SECTION_YSF_NETWORK,
+	SECTION_FCS_NETWORK,
+	SECTION_GPSD,
+	SECTION_REMOTE_COMMANDS
 };
 
 CConf::CConf(const std::string& file) :
@@ -60,17 +61,16 @@ m_longitude(0.0F),
 m_height(0),
 m_name(),
 m_description(),
-m_aprsSymbol(),
 m_logDisplayLevel(0U),
-m_logFileLevel(0U),
-m_logFilePath(),
-m_logFileRoot(),
-m_logFileRotate(true),
+m_logMQTTLevel(0U),
 m_aprsEnabled(false),
-m_aprsAddress(),
-m_aprsPort(0U),
 m_aprsSuffix(),
 m_aprsDescription(),
+m_aprsSymbol(),
+m_mqttAddress("127.0.0.1"),
+m_mqttPort(1883U),
+m_mqttKeepalive(60U),
+m_mqttName("ysf-gateway"),
 m_networkStartup(),
 m_networkOptions(),
 m_networkInactivityTimeout(0U),
@@ -94,8 +94,7 @@ m_fcsNetworkPort(0U),
 m_gpsdEnabled(false),
 m_gpsdAddress(),
 m_gpsdPort(),
-m_remoteCommandsEnabled(false),
-m_remoteCommandsPort(6073U)
+m_remoteCommandsEnabled(false)
 {
 }
 
@@ -105,205 +104,204 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-    FILE* fp = ::fopen(m_file.c_str(), "rt");
-    if (fp == NULL) {
-	::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-	return false;
-    }
+	FILE* fp = ::fopen(m_file.c_str(), "rt");
+	if (fp == NULL) {
+		::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+		return false;
+  	}
 
-    SECTION section = SECTION_NONE;
+	SECTION section = SECTION_NONE;
 
-    char buffer[BUFFER_SIZE];
-    while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
-	if (buffer[0U] == '#')
-		continue;
+	char buffer[BUFFER_SIZE];
+	while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
+		if (buffer[0U] == '#')
+			continue;
 
-	if (buffer[0U] == '[') {
-		if (::strncmp(buffer, "[General]", 9U) == 0)
-			section = SECTION_GENERAL;
-		else if (::strncmp(buffer, "[Info]", 6U) == 0)
-			section = SECTION_INFO;
-		else if (::strncmp(buffer, "[Log]", 5U) == 0)
-			section = SECTION_LOG;
-		else if (::strncmp(buffer, "[APRS]", 6U) == 0)
-			section = SECTION_APRS;
-		else if (::strncmp(buffer, "[Network]", 9U) == 0)
-			section = SECTION_NETWORK;
-		else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
-			section = SECTION_YSF_NETWORK;
-		else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-			section = SECTION_FCS_NETWORK;
-		else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
-			section = SECTION_GPSD;
-		else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
-			section = SECTION_REMOTE_COMMANDS;
-		else
-			section = SECTION_NONE;
+		if (buffer[0U] == '[') {
+			if (::strncmp(buffer, "[General]", 9U) == 0)
+				section = SECTION_GENERAL;
+			else if (::strncmp(buffer, "[Info]", 6U) == 0)
+				section = SECTION_INFO;
+			else if (::strncmp(buffer, "[Log]", 5U) == 0)
+				section = SECTION_LOG;
+			else if (::strncmp(buffer, "[APRS]", 6U) == 0)
+				section = SECTION_APRS;
+			else if (::strncmp(buffer, "[MQTT]", 6U) == 0)
+				section = SECTION_MQTT;
+			else if (::strncmp(buffer, "[Network]", 9U) == 0)
+				section = SECTION_NETWORK;
+			else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
+				section = SECTION_YSF_NETWORK;
+			else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
+				section = SECTION_FCS_NETWORK;
+			else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
+				section = SECTION_GPSD;
+			else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
+				section = SECTION_REMOTE_COMMANDS;
+			else
+				section = SECTION_NONE;
 
-		continue;
+			continue;
+		}
+
+		char* key = ::strtok(buffer, " \t=\r\n");
+		if (key == NULL)
+			continue;
+
+		char* value = ::strtok(NULL, "\r\n");
+		if (value == NULL)
+			continue;
+
+		// Remove quotes from the value
+		size_t len = ::strlen(value);
+		if (len > 1U && *value == '"' && value[len - 1U] == '"') {
+			value[len - 1U] = '\0';
+			value++;
+		} else {
+			char *p;
+
+			// if value is not quoted, remove after # (to make comment)
+			if ((p = strchr(value, '#')) != NULL)
+				*p = '\0';
+
+			// remove trailing tab/space
+			for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
+				*p = '\0';
+		}
+
+		if (section == SECTION_GENERAL) {
+			if (::strcmp(key, "Callsign") == 0) {
+				// Convert the callsign to upper case
+				for (unsigned int i = 0U; value[i] != 0; i++)
+					value[i] = ::toupper(value[i]);
+				m_callsign = value;
+			} else if (::strcmp(key, "Suffix") == 0) {
+				// Convert the callsign to upper case
+				for (unsigned int i = 0U; value[i] != 0; i++)
+					value[i] = ::toupper(value[i]);
+				m_suffix = value;
+			} else if (::strcmp(key, "Id") == 0)
+				m_id = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "RptAddress") == 0)
+				m_rptAddress = value;
+			else if (::strcmp(key, "RptPort") == 0)
+				m_rptPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "LocalAddress") == 0)
+				m_myAddress = value;
+			else if (::strcmp(key, "LocalPort") == 0)
+				m_myPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "WiresXMakeUpper") == 0)
+				m_wiresXMakeUpper = ::atoi(value) == 1;
+			else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
+				m_wiresXCommandPassthrough = ::atoi(value) == 1;
+			else if (::strcmp(key, "Debug") == 0)
+				m_debug = ::atoi(value) == 1;
+			else if (::strcmp(key, "Daemon") == 0)
+				m_daemon = ::atoi(value) == 1;
+		} else if (section == SECTION_INFO) {
+			if (::strcmp(key, "TXFrequency") == 0)
+				m_txFrequency = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "RXFrequency") == 0)
+				m_rxFrequency = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "Power") == 0)
+				m_power = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "Latitude") == 0)
+				m_latitude = float(::atof(value));
+			else if (::strcmp(key, "Longitude") == 0)
+				m_longitude = float(::atof(value));
+			else if (::strcmp(key, "Height") == 0)
+				m_height = ::atoi(value);
+			else if (::strcmp(key, "Name") == 0)
+				m_name = value;
+			else if (::strcmp(key, "Description") == 0)
+				m_description = value;
+		} else if (section == SECTION_LOG) {
+			if (::strcmp(key, "MQTTLevel") == 0)
+				m_logMQTTLevel = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "DisplayLevel") == 0)
+				m_logDisplayLevel = (unsigned int)::atoi(value);
+		} else if (section == SECTION_APRS) {
+			if (::strcmp(key, "Enable") == 0)
+				m_aprsEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Suffix") == 0)
+				m_aprsSuffix = value;
+			else if (::strcmp(key, "Description") == 0)
+				m_aprsDescription = value;
+		        else if (::strcmp(key, "Symbol") == 0)
+		              	m_aprsSymbol = value;
+		} else if (section == SECTION_MQTT) {
+			if (::strcmp(key, "Address") == 0)
+				m_mqttAddress = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_mqttPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "Keepalive") == 0)
+				m_mqttKeepalive = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "Name") == 0)
+				m_mqttName = value;
+		} else if (section == SECTION_NETWORK) {
+			if (::strcmp(key, "Startup") == 0)
+				m_networkStartup = value;
+			else if (::strcmp(key, "Options") == 0)
+				m_networkOptions = value;
+			else if (::strcmp(key, "InactivityTimeout") == 0)
+				m_networkInactivityTimeout = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "Revert") == 0)
+				m_networkRevert = ::atoi(value) == 1;
+			else if (::strcmp(key, "Debug") == 0)
+				m_networkDebug = ::atoi(value) == 1;
+		} else if (section == SECTION_YSF_NETWORK) {
+			if (::strcmp(key, "Enable") == 0)
+				m_ysfNetworkEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Port") == 0)
+				m_ysfNetworkPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "Hosts") == 0)
+				m_ysfNetworkHosts = value;
+			else if (::strcmp(key, "ReloadTime") == 0)
+				m_ysfNetworkReloadTime = (unsigned int)::atoi(value);
+			else if (::strcmp(key, "ParrotAddress") == 0)
+				m_ysfNetworkParrotAddress = value;
+			else if (::strcmp(key, "ParrotPort") == 0)
+				m_ysfNetworkParrotPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "YSF2DMRAddress") == 0)
+				m_ysfNetworkYSF2DMRAddress = value;
+			else if (::strcmp(key, "YSF2DMRPort") == 0)
+				m_ysfNetworkYSF2DMRPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "YSF2NXDNAddress") == 0)
+				m_ysfNetworkYSF2NXDNAddress = value;
+			else if (::strcmp(key, "YSF2NXDNPort") == 0)
+				m_ysfNetworkYSF2NXDNPort = (unsigned short)::atoi(value);
+			else if (::strcmp(key, "YSF2P25Address") == 0)
+				m_ysfNetworkYSF2P25Address = value;
+			else if (::strcmp(key, "YSF2P25Port") == 0)
+				m_ysfNetworkYSF2P25Port = (unsigned short)::atoi(value);
+		} else if (section == SECTION_FCS_NETWORK) {
+			if (::strcmp(key, "Enable") == 0)
+				m_fcsNetworkEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Rooms") == 0)
+				m_fcsNetworkFile = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_fcsNetworkPort = (unsigned short)::atoi(value);
+		} else if (section == SECTION_GPSD) {
+			if (::strcmp(key, "Enable") == 0)
+				m_gpsdEnabled = ::atoi(value) == 1;
+			else if (::strcmp(key, "Address") == 0)
+				m_gpsdAddress = value;
+			else if (::strcmp(key, "Port") == 0)
+				m_gpsdPort = value;
+		} else if (section == SECTION_REMOTE_COMMANDS) {
+			if (::strcmp(key, "Enable") == 0)
+				m_remoteCommandsEnabled = ::atoi(value) == 1;
+		}
 	}
 
-	char* key = ::strtok(buffer, " \t=\r\n");
-	if (key == NULL)
-		continue;
+	::fclose(fp);
 
-	char* value = ::strtok(NULL, "\r\n");
-	if (value == NULL)
-		continue;
-
-	// Remove quotes from the value
-	size_t len = ::strlen(value);
-	if (len > 1U && *value == '"' && value[len - 1U] == '"') {
-		value[len - 1U] = '\0';
-		value++;
-	} else {
-		char *p;
-
-		// if value is not quoted, remove after # (to make comment)
-		if ((p = strchr(value, '#')) != NULL)
-			*p = '\0';
-
-		// remove trailing tab/space
-		for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
-			*p = '\0';
-	}
-
-	if (section == SECTION_GENERAL) {
-		if (::strcmp(key, "Callsign") == 0) {
-			// Convert the callsign to upper case
-			for (unsigned int i = 0U; value[i] != 0; i++)
-				value[i] = ::toupper(value[i]);
-			m_callsign = value;
-		} else if (::strcmp(key, "Suffix") == 0) {
-			// Convert the callsign to upper case
-			for (unsigned int i = 0U; value[i] != 0; i++)
-				value[i] = ::toupper(value[i]);
-			m_suffix = value;
-		} else if (::strcmp(key, "Id") == 0)
-			m_id = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "RptAddress") == 0)
-			m_rptAddress = value;
-		else if (::strcmp(key, "RptPort") == 0)
-			m_rptPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "LocalAddress") == 0)
-			m_myAddress = value;
-		else if (::strcmp(key, "LocalPort") == 0)
-			m_myPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "WiresXMakeUpper") == 0)
-			m_wiresXMakeUpper = ::atoi(value) == 1;
-		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
-			m_wiresXCommandPassthrough = ::atoi(value) == 1;
-		else if (::strcmp(key, "Debug") == 0)
-			m_debug = ::atoi(value) == 1;
-		else if (::strcmp(key, "Daemon") == 0)
-			m_daemon = ::atoi(value) == 1;
-	} else if (section == SECTION_INFO) {
-		if (::strcmp(key, "TXFrequency") == 0)
-			m_txFrequency = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "RXFrequency") == 0)
-			m_rxFrequency = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Power") == 0)
-			m_power = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Latitude") == 0)
-			m_latitude = float(::atof(value));
-		else if (::strcmp(key, "Longitude") == 0)
-			m_longitude = float(::atof(value));
-		else if (::strcmp(key, "Height") == 0)
-			m_height = ::atoi(value);
-		else if (::strcmp(key, "Name") == 0)
-			m_name = value;
-		else if (::strcmp(key, "Description") == 0)
-			m_description = value;
-	} else if (section == SECTION_LOG) {
-		if (::strcmp(key, "FilePath") == 0)
-			m_logFilePath = value;
-		else if (::strcmp(key, "FileRoot") == 0)
-			m_logFileRoot = value;
-		else if (::strcmp(key, "FileLevel") == 0)
-			m_logFileLevel = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "DisplayLevel") == 0)
-			m_logDisplayLevel = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "FileRotate") == 0)
-			m_logFileRotate = ::atoi(value) == 1;
-	} else if (section == SECTION_APRS) {
-		if (::strcmp(key, "Enable") == 0)
-			m_aprsEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Address") == 0)
-			m_aprsAddress = value;
-		else if (::strcmp(key, "Port") == 0)
-			m_aprsPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "Suffix") == 0)
-			m_aprsSuffix = value;
-		else if (::strcmp(key, "Description") == 0)
-			m_aprsDescription = value;
-                else if (::strcmp(key, "Symbol") == 0)
-                        m_aprsSymbol = value;
-	} else if (section == SECTION_NETWORK) {
-		if (::strcmp(key, "Startup") == 0)
-			m_networkStartup = value;
-		else if (::strcmp(key, "Options") == 0)
-			m_networkOptions = value;
-		else if (::strcmp(key, "InactivityTimeout") == 0)
-			m_networkInactivityTimeout = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "Revert") == 0)
-			m_networkRevert = ::atoi(value) == 1;
-		else if (::strcmp(key, "Debug") == 0)
-			m_networkDebug = ::atoi(value) == 1;
-	} else if (section == SECTION_YSF_NETWORK) {
-		if (::strcmp(key, "Enable") == 0)
-			m_ysfNetworkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Port") == 0)
-			m_ysfNetworkPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "Hosts") == 0)
-			m_ysfNetworkHosts = value;
-		else if (::strcmp(key, "ReloadTime") == 0)
-			m_ysfNetworkReloadTime = (unsigned int)::atoi(value);
-		else if (::strcmp(key, "ParrotAddress") == 0)
-			m_ysfNetworkParrotAddress = value;
-		else if (::strcmp(key, "ParrotPort") == 0)
-			m_ysfNetworkParrotPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "YSF2DMRAddress") == 0)
-			m_ysfNetworkYSF2DMRAddress = value;
-		else if (::strcmp(key, "YSF2DMRPort") == 0)
-			m_ysfNetworkYSF2DMRPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "YSF2NXDNAddress") == 0)
-			m_ysfNetworkYSF2NXDNAddress = value;
-		else if (::strcmp(key, "YSF2NXDNPort") == 0)
-			m_ysfNetworkYSF2NXDNPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "YSF2P25Address") == 0)
-			m_ysfNetworkYSF2P25Address = value;
-		else if (::strcmp(key, "YSF2P25Port") == 0)
-			m_ysfNetworkYSF2P25Port = (unsigned short)::atoi(value);
-	} else if (section == SECTION_FCS_NETWORK) {
-		if (::strcmp(key, "Enable") == 0)
-			m_fcsNetworkEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Rooms") == 0)
-			m_fcsNetworkFile = value;
-		else if (::strcmp(key, "Port") == 0)
-			m_fcsNetworkPort = (unsigned short)::atoi(value);
-	} else if (section == SECTION_GPSD) {
-		if (::strcmp(key, "Enable") == 0)
-			m_gpsdEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Address") == 0)
-			m_gpsdAddress = value;
-		else if (::strcmp(key, "Port") == 0)
-			m_gpsdPort = value;
-	} else if (section == SECTION_REMOTE_COMMANDS) {
-		if (::strcmp(key, "Enable") == 0)
-			m_remoteCommandsEnabled = ::atoi(value) == 1;
-		else if (::strcmp(key, "Port") == 0)
-			m_remoteCommandsPort = (unsigned short)::atoi(value);
-	}
-  }
-
-  ::fclose(fp);
-
-  return true;
+	return true;
 }
 
 std::string CConf::getCallsign() const
 {
-  return m_callsign;
+	return m_callsign;
 }
 
 std::string CConf::getSuffix() const
@@ -401,39 +399,14 @@ unsigned int CConf::getLogDisplayLevel() const
 	return m_logDisplayLevel;
 }
 
-unsigned int CConf::getLogFileLevel() const
+unsigned int CConf::getLogMQTTLevel() const
 {
-	return m_logFileLevel;
-}
-
-std::string CConf::getLogFilePath() const
-{
-	return m_logFilePath;
-}
-
-std::string CConf::getLogFileRoot() const
-{
-	return m_logFileRoot;
-}
-
-bool CConf::getLogFileRotate() const
-{
-	return m_logFileRotate;
+	return m_logMQTTLevel;
 }
 
 bool CConf::getAPRSEnabled() const
 {
 	return m_aprsEnabled;
-}
-
-std::string CConf::getAPRSAddress() const
-{
-	return m_aprsAddress;
-}
-
-unsigned short CConf::getAPRSPort() const
-{
-	return m_aprsPort;
 }
 
 std::string CConf::getAPRSSuffix() const
@@ -449,6 +422,26 @@ std::string CConf::getAPRSDescription() const
 std::string CConf::getAPRSSymbol() const
 {
        return m_aprsSymbol;
+}
+
+std::string CConf::getMQTTAddress() const
+{
+	return m_mqttAddress;
+}
+
+unsigned short CConf::getMQTTPort() const
+{
+	return m_mqttPort;
+}
+
+unsigned int CConf::getMQTTKeepalive() const
+{
+	return m_mqttKeepalive;
+}
+
+std::string CConf::getMQTTName() const
+{
+	return m_mqttName;
 }
 
 std::string CConf::getNetworkStartup() const
@@ -572,7 +565,3 @@ bool CConf::getRemoteCommandsEnabled() const
 	return m_remoteCommandsEnabled;
 }
 
-unsigned short CConf::getRemoteCommandsPort() const
-{
-	return m_remoteCommandsPort;
-}
