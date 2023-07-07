@@ -49,6 +49,17 @@ extern CMQTTConnection* m_mqtt;
 
 static CYSFGateway* gateway = NULL;
 
+static bool m_killed = false;
+static int  m_signal = 0;
+
+#if !defined(_WIN32) && !defined(_WIN64)
+static void sigHandler(int signum)
+{
+	m_killed = true;
+	m_signal = signum;
+}
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -74,11 +85,34 @@ int main(int argc, char** argv)
 		}
 	}
 
-	gateway = new CYSFGateway(std::string(iniFile));
+#if !defined(_WIN32) && !defined(_WIN64)
+	::signal(SIGINT,  sigHandler);
+	::signal(SIGTERM, sigHandler);
+	::signal(SIGHUP,  sigHandler);
+#endif
 
-	int ret = gateway->run();
+	int ret = 0;
 
-	delete gateway;
+	do {
+		m_signal = 0;
+
+		gateway = new CYSFGateway(std::string(iniFile));
+		ret = gateway->run();
+
+		delete gateway;
+
+		if (m_signal == 2)
+			::LogInfo("YSFGateway-%s exited on receipt of SIGINT", VERSION);
+
+		if (m_signal == 15)
+			::LogInfo("YSFGateway-%s exited on receipt of SIGTERM", VERSION);
+
+		if (m_signal == 1)
+			::LogInfo("YSFGateway-%s restarted on receipt of SIGHUP", VERSION);
+
+	} while (m_signal == 1);
+
+	::LogFinalise();
 
 	return ret;
 }
@@ -191,10 +225,8 @@ int CYSFGateway::run()
 
 	m_mqtt = new CMQTTConnection(m_conf.getMQTTAddress(), m_conf.getMQTTPort(), m_conf.getMQTTName(), subscriptions, m_conf.getMQTTKeepalive());
 	ret = m_mqtt->open();
-	if (!ret) {
-		delete m_mqtt;
+	if (!ret)
 		return 1;
-	}
 
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
@@ -204,7 +236,6 @@ int CYSFGateway::run()
 	unsigned int rptAddrLen;
 	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
 		::LogError("Cannot find the address of the MMDVM Host");
-		::LogFinalise();
 		return 1;
 	}
 
@@ -215,7 +246,6 @@ int CYSFGateway::run()
 	ret = rptNetwork.setDestination("MMDVM", rptAddr, rptAddrLen);
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
-		::LogFinalise();
 		return 1;
 	}
 
@@ -238,7 +268,6 @@ int CYSFGateway::run()
 		ret = m_fcsNetwork->open();
 		if (!ret) {
 			::LogError("Cannot open the FCS reflector network port");
-			::LogFinalise();
 			return 1;
 		}
 	}
@@ -439,8 +468,6 @@ int CYSFGateway::run()
 	}
 
 	delete m_wiresX;
-
-	::LogFinalise();
 
 	return 0;
 }

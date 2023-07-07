@@ -58,6 +58,17 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 // In Log.cpp
 extern CMQTTConnection* m_mqtt;
 
+static bool m_killed = false;
+static int  m_signal = 0;
+
+#if !defined(_WIN32) && !defined(_WIN64)
+static void sigHandler(int signum)
+{
+	m_killed = true;
+	m_signal = signum;
+}
+#endif
+
 const unsigned int UNSET_DGID = 999U;
 
 const unsigned char WIRESX_DGID = 127U;
@@ -85,11 +96,34 @@ int main(int argc, char** argv)
 		}
 	}
 
-	CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
+#if !defined(_WIN32) && !defined(_WIN64)
+	::signal(SIGINT,  sigHandler);
+	::signal(SIGTERM, sigHandler);
+	::signal(SIGHUP,  sigHandler);
+#endif
 
-	int ret = gateway->run();
+	int ret = 0;
 
-	delete gateway;
+	do {
+		m_signal = 0;
+
+		CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
+		ret = gateway->run();
+
+		delete gateway;
+
+		if (m_signal == 2)
+			::LogInfo("DGIdGateway-%s exited on receipt of SIGINT", VERSION);
+
+		if (m_signal == 15)
+			::LogInfo("DGIdGateway-%s exited on receipt of SIGTERM", VERSION);
+
+		if (m_signal == 1)
+			::LogInfo("DGIdGateway-%s restarted on receipt of SIGHUP", VERSION);
+
+	} while (m_signal == 1);
+
+	::LogFinalise();
 
 	return ret;
 }
@@ -187,10 +221,8 @@ int CDGIdGateway::run()
 	std::vector<std::pair<std::string, void (*)(const unsigned char*, unsigned int)>> subscriptions;
 	m_mqtt = new CMQTTConnection(m_conf.getMQTTAddress(), m_conf.getMQTTPort(), m_conf.getMQTTName(), subscriptions, m_conf.getMQTTKeepalive());
 	ret = m_mqtt->open();
-	if (!ret) {
+	if (!ret)
 		delete m_mqtt;
-		return 1;
-	}
 
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
@@ -199,7 +231,6 @@ int CDGIdGateway::run()
 	unsigned int rptAddrLen;
 	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
 		::LogError("Unable to resolve the address of the host");
-		::LogFinalise();
 		return 1;
 	}
 
@@ -211,7 +242,6 @@ int CDGIdGateway::run()
 	ret = rptNetwork.open();
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
-		::LogFinalise();
 		return 1;
 	}
 
@@ -598,8 +628,6 @@ int CDGIdGateway::run()
 		imrs->close();
 		delete imrs;
 	}
-
-	::LogFinalise();
 
 	return 0;
 }
