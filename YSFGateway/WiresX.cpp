@@ -373,7 +373,11 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 	std::string id = std::string((char*)data, 5U);
 
-	m_reflector = m_reflectors.findById(id);
+    CYSFReflector* reflector_tmp;
+	reflector_tmp = m_reflectors.findById(id);
+    if (reflector_tmp != NULL)
+	    m_reflector = reflector_tmp;
+        
 	if (m_reflector == NULL)
 		return WXS_NONE;
 

@@ -892,10 +892,11 @@ void CYSFGateway::processRemoteCommands()
 	int res = m_remoteSocket->read(buffer, 200U, addr, addrLen);
 	if (res > 0) {
 		buffer[res] = '\0';
-		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
-			std::string id = std::string((char*)(buffer + 8U));
+		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8) && (m_ysfNetwork != NULL)) {
+			std::string id = std::string((char*)(buffer + 7U));
 			// Left trim
-			id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+			// id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+            id.erase(std::remove_if(id.begin(), id.end(), [](char c) { return !std::isalnum(c); }), id.end());
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector == NULL)
 				reflector = m_reflectors->findByName(id);
@@ -923,10 +924,11 @@ void CYSFGateway::processRemoteCommands()
 				LogWarning("Invalid YSF reflector id/name - \"%s\"", id.c_str());
 				return;
 			}
-		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
-			std::string raw = std::string((char*)(buffer + 8U));
+		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8) && (m_fcsNetwork != NULL)) {
+			std::string raw = std::string((char*)(buffer + 7U));
 			// Left trim
-			raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+			// raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+            raw.erase(std::remove_if(raw.begin(), raw.end(), [](char c) { return !std::isalnum(c); }), raw.end());
 			std::string id = "FCS00";
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {
