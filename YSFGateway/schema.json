@@ -1,0 +1,25 @@
+{
+	"$defs": {
+		"timestamp": {"type": "string"},
+		"reflector": {"type": "string"},
+		"action": {"type": "string", "enum": ["linking", "unlinked", "failed", "relinking"]},
+		"reason": {"type": "string", "enum": ["user", "timer", "remote", "startup"]}
+	},
+
+	"status": {
+		"type": "object",
+		"timestamp": {"$ref": "#/$defs/timestamp"},
+		"message": {"type": "string"},
+		"required": ["timestamp", "message"]
+	},
+	
+	"link": {
+		"type": "object",
+		"timestamp": {"$ref": "#/$defs/timestamp"},
+		"action": {"$ref": "#/$defs/action"},
+		"reason": {"$ref": "#/$defs/reason"},
+		"reflector": {"$ref": "#/defs/reflector"},
+		"required": ["timestamp", "action"]
+	}
+}
+

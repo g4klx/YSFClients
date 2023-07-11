@@ -94,6 +94,7 @@ int main(int argc, char** argv)
 	int ret = 0;
 
 	do {
+		m_killed = false;
 		m_signal = 0;
 
 		gateway = new CYSFGateway(std::string(iniFile));
@@ -290,15 +291,17 @@ int CYSFGateway::run()
 	bool revert = m_conf.getNetworkRevert();
 	bool wiresXCommandPassthrough = m_conf.getWiresXCommandPassthrough();
 
-	startupLinking();
+	linking("startup");
 
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	LogMessage("YSFGateway-%s is starting", VERSION);
-	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
+	LogInfo("YSFGateway-%s is starting", VERSION);
+	LogInfo("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
-	for (;;) {
+	writeJSONStatus("YSFGateway is starting");
+
+	while (!m_killed) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
 
@@ -388,12 +391,14 @@ int CYSFGateway::run()
 			if (revert) {
 				if (m_current != m_startup) {
 					if (m_linkType == LINK_YSF) {
+						writeJSONUnlinked("timer");
 						m_wiresX->processDisconnect();
 						m_ysfNetwork->writeUnlink(3U);
 						m_ysfNetwork->clearDestination();
 					}
 
 					if (m_linkType == LINK_FCS) {
+						writeJSONUnlinked("timer");
 						m_fcsNetwork->writeUnlink(3U);
 						m_fcsNetwork->clearDestination();
 					}
@@ -402,11 +407,12 @@ int CYSFGateway::run()
 					m_lostTimer.stop();
 					m_linkType = LINK_NONE;
 
-					startupLinking();
+					linking("timer");
 				}
 			} else {
 				if (m_linkType == LINK_YSF) {
 					LogMessage("Disconnecting due to inactivity");
+					writeJSONUnlinked("timer");
 					m_wiresX->processDisconnect();
 					m_ysfNetwork->writeUnlink(3U);
 					m_ysfNetwork->clearDestination();
@@ -414,6 +420,7 @@ int CYSFGateway::run()
 
 				if (m_linkType == LINK_FCS) {
 					LogMessage("Disconnecting due to inactivity");
+					writeJSONUnlinked("timer");
 					m_fcsNetwork->writeUnlink(3U);
 					m_fcsNetwork->clearDestination();
 				}
@@ -448,6 +455,9 @@ int CYSFGateway::run()
 		if (ms < 5U)
 			CThread::sleep(5U);
 	}
+
+	LogInfo("YSFGateway is stopping");
+	writeJSONStatus("YSFGateway is stopping");
 
 	rptNetwork.clearDestination();
 
@@ -560,16 +570,20 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, dontProcessWiresXLocal);
 	switch (status) {
 	case WXS_CONNECT_YSF: {
-			if (m_linkType == LINK_YSF)
+			if (m_linkType == LINK_YSF) {
+				writeJSONUnlinked("user");
 				m_ysfNetwork->writeUnlink(3U);
+			}
 
 			if (m_linkType == LINK_FCS) {
+				writeJSONUnlinked("user");
 				m_fcsNetwork->writeUnlink(3U);
 				m_fcsNetwork->clearDestination();
 			}
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+			writeJSONLinking("user", reflector->m_name);
 
 			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 			m_ysfNetwork->writePoll(3U);
@@ -588,12 +602,15 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 		break;
 	case WXS_CONNECT_FCS: {
 			if (m_linkType == LINK_YSF) {
+				writeJSONUnlinked("user");
 				m_ysfNetwork->writeUnlink(3U);
 				m_ysfNetwork->clearDestination();
 			}
 
-			if (m_linkType == LINK_FCS)
+			if (m_linkType == LINK_FCS) {
+				writeJSONUnlinked("user");
 				m_fcsNetwork->writeUnlink(3U);
+			}
 
 			m_current.clear();
 			m_inactivityTimer.start();
@@ -602,6 +619,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+			writeJSONLinking("user", reflector->m_name);
 
 			std::string name = reflector->m_name;
 			name.resize(8U, '0');
@@ -624,6 +642,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 				m_ysfNetwork->write(buffer);
 			}
 
+			writeJSONUnlinked("user");
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
 
@@ -635,6 +654,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
 
+			writeJSONUnlinked("user");
 			m_fcsNetwork->writeUnlink(3U);
 			m_fcsNetwork->clearDestination();
 
@@ -669,15 +689,19 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			if (reflector != NULL) {
 				m_wiresX->processConnect(reflector);
 
-				if (m_linkType == LINK_YSF)
+				if (m_linkType == LINK_YSF) {
+					writeJSONUnlinked("user");
 					m_ysfNetwork->writeUnlink(3U);
+				}
 
 				if (m_linkType == LINK_FCS) {
+					writeJSONUnlinked("user");
 					m_fcsNetwork->writeUnlink(3U);
 					m_fcsNetwork->clearDestination();
 				}
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
+				writeJSONLinking("user", reflector->m_name);
 
 				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 				m_ysfNetwork->writePoll(3U);
@@ -706,12 +730,16 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			}
 
 			if (m_linkType == LINK_YSF) {
+				writeJSONUnlinked("user");
 				m_wiresX->processDisconnect();
 				m_ysfNetwork->writeUnlink(3U);
 				m_ysfNetwork->clearDestination();
 			}
-			if (m_linkType == LINK_FCS)
+
+			if (m_linkType == LINK_FCS) {
+				writeJSONUnlinked("user");
 				m_fcsNetwork->writeUnlink(3U);
+			}
 
 			m_current.clear();
 			m_inactivityTimer.stop();
@@ -722,6 +750,8 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 
 			bool ok = m_fcsNetwork->writeLink(id);
 			if (ok) {
+				writeJSONLinking("user", id);
+
 				m_current = id;
 				m_inactivityTimer.start();
 				m_lostTimer.start();
@@ -736,6 +766,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			m_wiresX->processDisconnect();
 
 			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+			writeJSONUnlinked("user");
 
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
@@ -745,8 +776,10 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
+
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect via DTMF has been requested by %10.10s", buffer + 14U);
+			writeJSONUnlinked("user");
 
 			m_fcsNetwork->writeUnlink(3U);
 			m_fcsNetwork->clearDestination();
@@ -812,7 +845,7 @@ std::string CYSFGateway::calculateLocator()
 	return locator;
 }
 
-void CYSFGateway::startupLinking()
+void CYSFGateway::linking(const std::string& reason)
 {
 	if (!m_startup.empty()) {
 		if (m_startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != NULL) {
@@ -825,6 +858,7 @@ void CYSFGateway::startupLinking()
 			m_fcsNetwork->setOptions(m_options);
 
 			if (ok) {
+				writeJSONLinking(reason, m_startup);
 				LogMessage("Automatic (re-)connection to %s", m_startup.c_str());
 
 				m_current = m_startup;
@@ -842,6 +876,7 @@ void CYSFGateway::startupLinking()
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
 			if (reflector != NULL) {
+				writeJSONLinking(reason, reflector->m_name);
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 				m_ysfNetwork->setOptions(m_options);
@@ -904,15 +939,19 @@ void CYSFGateway::writeCommand(const std::string& command)
 		if (reflector != NULL) {
 			m_wiresX->processConnect(reflector);
 
-			if (m_linkType == LINK_YSF)
+			if (m_linkType == LINK_YSF) {
+				writeJSONUnlinked("remote");
 				m_ysfNetwork->writeUnlink(3U);
+			}
 
 			if (m_linkType == LINK_FCS) {
+				writeJSONUnlinked("remote");
 				m_fcsNetwork->writeUnlink(3U);
 				m_fcsNetwork->clearDestination();
 			}
 
 			LogMessage("Connect by remote command to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+			writeJSONLinking("remote", reflector->m_name);
 
 			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 			m_ysfNetwork->writePoll(3U);
@@ -944,13 +983,16 @@ void CYSFGateway::writeCommand(const std::string& command)
 		}
 
 		if (m_linkType == LINK_YSF) {
+			writeJSONUnlinked("remote");
 			m_wiresX->processDisconnect();
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
 		}
 
-		if (m_linkType == LINK_FCS)
+		if (m_linkType == LINK_FCS) {
+			writeJSONUnlinked("remote");
 			m_fcsNetwork->writeUnlink(3U);
+		}
 
 		m_current.clear();
 		m_inactivityTimer.stop();
@@ -961,6 +1003,8 @@ void CYSFGateway::writeCommand(const std::string& command)
 
 		bool ok = m_fcsNetwork->writeLink(id);
 		if (ok) {
+			writeJSONLinking("remote", id);
+
 			m_current = id;
 			m_inactivityTimer.start();
 			m_lostTimer.start();
@@ -973,6 +1017,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 			m_wiresX->processDisconnect();
 
 			LogMessage("Disconnect by remote command");
+			writeJSONUnlinked("remote");
 
 			m_ysfNetwork->writeUnlink(3U);
 			m_ysfNetwork->clearDestination();
@@ -984,6 +1029,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 		}
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect by remote command");
+			writeJSONUnlinked("remote");
 
 			m_fcsNetwork->writeUnlink(3U);
 			m_fcsNetwork->clearDestination();
@@ -1003,6 +1049,50 @@ void CYSFGateway::writeCommand(const std::string& command)
 	} else {
 		CUtils::dump("Invalid remote command received", (unsigned char*)command.c_str(), command.length());
 	}
+}
+
+void CYSFGateway::writeJSONStatus(const std::string& status)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["message"]   = status;
+
+	WriteJSON("status", json);
+}
+
+void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string& reflector)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "linking";
+	json["reason"]    = reason;
+	json["reflector"] = reflector;
+
+	WriteJSON("link", json);
+}
+
+void CYSFGateway::writeJSONUnlinked(const std::string& reason)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "unlinked";
+	json["reason"]    = reason;
+
+	WriteJSON("link", json);
+}
+
+void CYSFGateway::writeJSONRelinking(const std::string& reflector)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "relinking";
+	json["reflector"] = reflector;
+
+	WriteJSON("link", json);
 }
 
 void CYSFGateway::onCommand(const unsigned char* command, unsigned int length)

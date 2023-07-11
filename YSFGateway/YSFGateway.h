@@ -66,13 +66,18 @@ private:
 	CTimer          m_lostTimer;
 	bool            m_fcsNetworkEnabled;
 
-	void startupLinking();
+	void linking(const std::string& reason);
 	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
 	void readFCSRoomsFile(const std::string& filename);
+
+	void writeJSONStatus(const std::string& status);
+	void writeJSONLinking(const std::string& reason, const std::string& reflector);
+	void writeJSONUnlinked(const std::string& reason);
+	void writeJSONRelinking(const std::string& reflector);
 
 	void writeCommand(const std::string& command);
 

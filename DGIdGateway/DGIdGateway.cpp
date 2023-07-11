@@ -105,6 +105,7 @@ int main(int argc, char** argv)
 	int ret = 0;
 
 	do {
+		m_killed = false;
 		m_signal = 0;
 
 		CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
@@ -443,13 +444,17 @@ int CDGIdGateway::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	LogMessage("DGIdGateway-%s is starting", VERSION);
- 	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
+	LogInfo("DGIdGateway-%s is starting", VERSION);
+ 	LogInfo("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
+
+	writeJSONStatus("DGIdGateway is starting");
 
 	DGID_STATUS state = DS_NOTLINKED;
 	unsigned int nPips = 0U;
 
-	for (;;) {
+	writeJSONUnlinked("startup");
+
+	while (!m_killed) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
 
@@ -472,9 +477,11 @@ int CDGIdGateway::run()
 					if (dgIdNetwork[dgId] != NULL) {
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						writeJSONLinking("user", dgId);
 						currentDGId = dgId;
 						state = DS_NOTLINKED;
 					} else {
+						writeJSONUnlinked("user");
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
 						state = DS_NOTOPEN;
 					}
@@ -536,6 +543,7 @@ int CDGIdGateway::run()
 						if (currentDGId == UNSET_DGID) {
 							std::string desc = dgIdNetwork[i]->getDesc(i);
 							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
+							writeJSONLinking("network", i);
 							currentDGId = i;
 							state = DS_LINKED;
 							fromRF = false;
@@ -561,6 +569,7 @@ int CDGIdGateway::run()
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
 			if (dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
+				writeJSONUnlinked("timer");
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
@@ -604,6 +613,9 @@ int CDGIdGateway::run()
 		if (ms < 5U)
 			CThread::sleep(5U);
 	}
+
+	LogInfo("DGIdGateway is stopping");
+	writeJSONStatus("DGIdGateway is stopping");
 
 	rptNetwork.unlink();
 	rptNetwork.close();
@@ -732,3 +744,48 @@ void CDGIdGateway::sendPips(unsigned int n)
 	if (bleep)
 		LogMessage("*** %u bleep!", n);
 }
+
+void CDGIdGateway::writeJSONStatus(const std::string& status)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["message"]   = status;
+
+	WriteJSON("status", json);
+}
+
+void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "linking";
+	json["reason"]    = reason;
+	json["dg-id"]     = int(id);
+
+	WriteJSON("link", json);
+}
+
+void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "unlinked";
+	json["reason"]    = reason;
+
+	WriteJSON("link", json);
+}
+
+void CDGIdGateway::writeJSONRelinking(unsigned int id)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "relinking";
+	json["dg-id"]     = int(id);
+
+	WriteJSON("link", json);
+}
+
