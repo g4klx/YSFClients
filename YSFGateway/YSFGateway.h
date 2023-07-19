@@ -75,9 +75,9 @@ private:
 	void readFCSRoomsFile(const std::string& filename);
 
 	void writeJSONStatus(const std::string& status);
-	void writeJSONLinking(const std::string& reason, const std::string& reflector);
+	void writeJSONLinking(const std::string& reason, const std::string& protocol, const std::string& reflector);
 	void writeJSONUnlinked(const std::string& reason);
-	void writeJSONRelinking(const std::string& reflector);
+	void writeJSONRelinking(const std::string& protocol, const std::string& reflector);
 
 	void writeCommand(const std::string& command);
 

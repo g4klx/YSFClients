@@ -2,8 +2,9 @@
 	"$defs": {
 		"timestamp": {"type": "string"},
 		"dg-id": {"type": "integer"},
-		"action": {"type": "string", "enum": ["linking", "unlinked", "failed", "relinking"]},
-		"reason": {"type": "string", "enum": ["user", "timer", "remote", "startup"]}
+		"action": {"type": "string", "enum": ["linking", "unlinked", "failed"]},
+		"reason": {"type": "string", "enum": ["user", "timer", "remote", "startup"]},
+		"protocol": {"type": "string", "enum": ["fcs", "ysf", "imrs", "gateway", "parrot", "ysf2dmr", "ysf2nxdn", "ysf2m17"]}
 	},
 
 	"status": {
@@ -19,6 +20,8 @@
 		"action": {"$ref": "#/$defs/action"},
 		"reason": {"$ref": "#/$defs/reason"},
 		"dg-id": {"$ref": "#/defs/dg-id"},
+		"protocol": {"$ref": "#/defs/protocol"},
+		"descrption": {"type": "string"},
 		"required": ["timestamp", "action"]
 	}
 }

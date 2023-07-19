@@ -291,6 +291,7 @@ int CDGIdGateway::run()
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			dgIdNetwork[dgid]->m_protocol    = "fcs";
 
 			LogMessage("Added FCS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 		} else if (type == "YSF") {
@@ -304,6 +305,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf";
 
 				LogMessage("Added YSF:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			} else {
@@ -336,6 +338,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = true;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "imrs";
 
 				LogMessage("Added IMRS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			}
@@ -350,6 +353,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "gateway";
 
 				LogMessage("Added YSF Gateway to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -366,6 +370,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "parrot";
 
 				LogMessage("Added Parrot to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -382,6 +387,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2dmr";
 
 				LogMessage("Added YSF2DMR to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -398,6 +404,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2nxdn";
 
 				LogMessage("Added YSF2NXDN to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -414,6 +421,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2p25";
 
 				LogMessage("Added YSF2P25 to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -475,9 +483,10 @@ int CDGIdGateway::run()
 					}
 
 					if (dgIdNetwork[dgId] != NULL) {
-						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
-						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
-						writeJSONLinking("user", dgId);
+						std::string desc  = dgIdNetwork[dgId]->getDesc(dgId);
+						std::string proto = dgIdNetwork[dgId]->m_protocol;
+						LogMessage("DG-ID set to %u (%s:%s) via RF", dgId, proto.c_str(), desc.c_str());
+						writeJSONLinking("user", dgId, proto, desc);
 						currentDGId = dgId;
 						state = DS_NOTLINKED;
 					} else {
@@ -541,9 +550,10 @@ int CDGIdGateway::run()
 						inactivityTimer.start();
 
 						if (currentDGId == UNSET_DGID) {
-							std::string desc = dgIdNetwork[i]->getDesc(i);
-							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
-							writeJSONLinking("network", i);
+							std::string desc  = dgIdNetwork[i]->getDesc(i);
+							std::string proto = dgIdNetwork[i]->m_protocol;
+							LogMessage("DG-ID set to %u (%s:%s) via Network", i, proto.c_str(), desc.c_str());
+							writeJSONLinking("network", i, proto, desc);
 							currentDGId = i;
 							state = DS_LINKED;
 							fromRF = false;
@@ -755,14 +765,16 @@ void CDGIdGateway::writeJSONStatus(const std::string& status)
 	WriteJSON("status", json);
 }
 
-void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id)
+void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id, const std::string& protocol, const std::string& description)
 {
 	nlohmann::json json;
 
-	json["timestamp"] = CUtils::createTimestamp();
-	json["action"]    = "linking";
-	json["reason"]    = reason;
-	json["dg-id"]     = int(id);
+	json["timestamp"]   = CUtils::createTimestamp();
+	json["action"]      = "linking";
+	json["reason"]      = reason;
+	json["dg-id"]       = int(id);
+	json["protocol"]    = protocol;
+	json["description"] = description;
 
 	WriteJSON("link", json);
 }
@@ -774,17 +786,6 @@ void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
 	json["timestamp"] = CUtils::createTimestamp();
 	json["action"]    = "unlinked";
 	json["reason"]    = reason;
-
-	WriteJSON("link", json);
-}
-
-void CDGIdGateway::writeJSONRelinking(unsigned int id)
-{
-	nlohmann::json json;
-
-	json["timestamp"] = CUtils::createTimestamp();
-	json["action"]    = "relinking";
-	json["dg-id"]     = int(id);
 
 	WriteJSON("link", json);
 }

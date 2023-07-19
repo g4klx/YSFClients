@@ -583,7 +583,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-			writeJSONLinking("user", reflector->m_name);
+			writeJSONLinking("user", "ysf", reflector->m_name);
 
 			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 			m_ysfNetwork->writePoll(3U);
@@ -619,7 +619,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-			writeJSONLinking("user", reflector->m_name);
+			writeJSONLinking("user", "fcs", reflector->m_name);
 
 			std::string name = reflector->m_name;
 			name.resize(8U, '0');
@@ -701,7 +701,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 				}
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
-				writeJSONLinking("user", reflector->m_name);
+				writeJSONLinking("user", "ysf", reflector->m_name);
 
 				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 				m_ysfNetwork->writePoll(3U);
@@ -750,7 +750,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 
 			bool ok = m_fcsNetwork->writeLink(id);
 			if (ok) {
-				writeJSONLinking("user", id);
+				writeJSONLinking("user", "fcs", id);
 
 				m_current = id;
 				m_inactivityTimer.start();
@@ -858,7 +858,7 @@ void CYSFGateway::linking(const std::string& reason)
 			m_fcsNetwork->setOptions(m_options);
 
 			if (ok) {
-				writeJSONLinking(reason, m_startup);
+				writeJSONLinking(reason, "fcs", m_startup);
 				LogMessage("Automatic (re-)connection to %s", m_startup.c_str());
 
 				m_current = m_startup;
@@ -876,7 +876,7 @@ void CYSFGateway::linking(const std::string& reason)
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
 			if (reflector != NULL) {
-				writeJSONLinking(reason, reflector->m_name);
+				writeJSONLinking(reason, "ysf", reflector->m_name);
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
 				m_ysfNetwork->setOptions(m_options);
@@ -951,7 +951,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 			}
 
 			LogMessage("Connect by remote command to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
-			writeJSONLinking("remote", reflector->m_name);
+			writeJSONLinking("remote", "ysf", reflector->m_name);
 
 			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
 			m_ysfNetwork->writePoll(3U);
@@ -1003,7 +1003,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 
 		bool ok = m_fcsNetwork->writeLink(id);
 		if (ok) {
-			writeJSONLinking("remote", id);
+			writeJSONLinking("remote", "fcs", id);
 
 			m_current = id;
 			m_inactivityTimer.start();
@@ -1061,7 +1061,7 @@ void CYSFGateway::writeJSONStatus(const std::string& status)
 	WriteJSON("status", json);
 }
 
-void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string& reflector)
+void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string& protocol, const std::string& reflector)
 {
 	nlohmann::json json;
 
@@ -1069,6 +1069,7 @@ void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string&
 	json["action"]    = "linking";
 	json["reason"]    = reason;
 	json["reflector"] = reflector;
+	json["protocol"]  = protocol;
 
 	WriteJSON("link", json);
 }
@@ -1084,13 +1085,14 @@ void CYSFGateway::writeJSONUnlinked(const std::string& reason)
 	WriteJSON("link", json);
 }
 
-void CYSFGateway::writeJSONRelinking(const std::string& reflector)
+void CYSFGateway::writeJSONRelinking(const std::string& protocol, const std::string& reflector)
 {
 	nlohmann::json json;
 
 	json["timestamp"] = CUtils::createTimestamp();
 	json["action"]    = "relinking";
 	json["reflector"] = reflector;
+	json["protocol"]  = protocol;
 
 	WriteJSON("link", json);
 }
