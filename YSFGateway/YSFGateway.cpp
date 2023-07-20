@@ -539,6 +539,11 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
 
+	address = m_conf.getYSFNetworkYSFDirectAddress();
+	port = m_conf.getYSFNetworkYSFDirectPort();
+	if (port > 0U)
+		m_wiresX->setYSFDirect(address, port);
+
 	std::string filename = m_conf.getFCSNetworkFile();
 	if (m_fcsNetworkEnabled)
 		readFCSRoomsFile(filename);
@@ -952,7 +957,7 @@ void CYSFGateway::processRemoteCommands()
 			m_current.clear();
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
-			m_linkType = LINK_NONE;
+			m_linkType = LINK_FCS;
 
 			LogMessage("Connect by remote command to %s", id.c_str());
 
@@ -961,7 +966,7 @@ void CYSFGateway::processRemoteCommands()
 				m_current = id;
 				m_inactivityTimer.start();
 				m_lostTimer.start();
-				m_linkType = LINK_FCS;
+				m_linkType = LINK_NONE;
 			} else {
 				LogMessage("Unknown reflector - %s", id.c_str());
 			}

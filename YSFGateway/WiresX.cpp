@@ -173,6 +173,11 @@ void CWiresX::setYSF2P25(const std::string& address, unsigned short port)
 	m_reflectors.setYSF2P25(address, port);
 }
 
+void CWiresX::setYSFDirect(const std::string& address, unsigned short port)
+{
+	m_reflectors.setYSFDirect(address, port);
+}
+
 void CWiresX::addFCSRoom(const std::string& id, const std::string& name)
 {
 	m_reflectors.addFCSRoom(id, name);
