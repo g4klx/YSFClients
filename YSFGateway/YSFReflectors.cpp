@@ -267,7 +267,7 @@ bool CYSFReflectors::load()
 		if (CUDPSocket::lookup(m_YSFDirectAddress, m_YSFDirectPort, addr, addrLen) == 0) {
 			CYSFReflector* refl = new CYSFReflector;
 			refl->m_id      = "00006";
-			refl->m_name    = "YSFDirect       ";
+			refl->m_name    = "YSFDIRECT       ";
 			refl->m_desc    = "Link YSFDirect";
 			refl->m_addr    = addr;
 			refl->m_addrLen = addrLen;

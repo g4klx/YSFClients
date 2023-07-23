@@ -840,6 +840,8 @@ void CYSFGateway::startupLinking()
 			m_linkType = LINK_NONE;
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
+            if (reflector == NULL)
+				reflector = m_reflectors->findById(m_startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
