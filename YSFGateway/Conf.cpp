@@ -276,7 +276,7 @@ bool CConf::read()
 			m_ysfNetworkYSF2P25Address = value;
 		else if (::strcmp(key, "YSF2P25Port") == 0)
 			m_ysfNetworkYSF2P25Port = (unsigned short)::atoi(value);
-        else if (::strcmp(key, "YSFDirectAddress") == 0)
+		else if (::strcmp(key, "YSFDirectAddress") == 0)
 			m_ysfNetworkYSFDirectAddress = value;
 		else if (::strcmp(key, "YSFDirectPort") == 0)
 			m_ysfNetworkYSFDirectPort = (unsigned short)::atoi(value);    

@@ -283,10 +283,10 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-                if (reflector != NULL)
-                    wx_tmp = reflector->m_wiresX;
-                else
-                    wx_tmp = 0;
+				if (reflector != NULL)
+					wx_tmp = reflector->m_wiresX;
+				else
+					wx_tmp = false;
 				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && wx_tmp) {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
@@ -294,10 +294,10 @@ int CYSFGateway::run()
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
 					reflector = m_wiresX->getReflector(); //reflector may have changed
-                if (reflector != NULL)
-                    wx_tmp = reflector->m_wiresX;
-                else
-                    wx_tmp = 0;
+					if (reflector != NULL)
+						wx_tmp = reflector->m_wiresX;
+					else
+						wx_tmp = false;
 					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wx_tmp)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
@@ -840,7 +840,7 @@ void CYSFGateway::startupLinking()
 			m_linkType = LINK_NONE;
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
-            if (reflector == NULL)
+			if (reflector == NULL)
 				reflector = m_reflectors->findById(m_startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
@@ -903,7 +903,7 @@ void CYSFGateway::processRemoteCommands()
 			std::string id = std::string((char*)(buffer + 7U));
 			// Left trim
 			// id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-            id.erase(std::remove_if(id.begin(), id.end(), [](char c) { return !std::isalnum(c); }), id.end());
+			id.erase(std::remove_if(id.begin(), id.end(), [](char c) { return !std::isalnum(c); }), id.end());
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector == NULL)
 				reflector = m_reflectors->findByName(id);
@@ -935,7 +935,7 @@ void CYSFGateway::processRemoteCommands()
 			std::string raw = std::string((char*)(buffer + 7U));
 			// Left trim
 			// raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-            raw.erase(std::remove_if(raw.begin(), raw.end(), [](char c) { return !std::isalnum(c); }), raw.end());
+			raw.erase(std::remove_if(raw.begin(), raw.end(), [](char c) { return !std::isalnum(c); }), raw.end());
 			std::string id = "FCS00";
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {

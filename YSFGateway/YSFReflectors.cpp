@@ -260,7 +260,7 @@ bool CYSFReflectors::load()
 		}
 	}
 
-    	// Add the YSFDirect entry
+	// Add the YSFDirect entry
 	if (m_YSFDirectPort > 0U) {
 		sockaddr_storage addr;
 		unsigned int addrLen;
@@ -283,8 +283,8 @@ bool CYSFReflectors::load()
 		}
 	}
 
-    
-    
+
+
 	unsigned int id = 9U;
 	for (std::vector<std::pair<std::string, std::string>>::const_iterator it1 = m_fcsRooms.cbegin(); it1 != m_fcsRooms.cend(); ++it1) {
 		bool used;
