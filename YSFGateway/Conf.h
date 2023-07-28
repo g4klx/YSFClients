@@ -87,6 +87,8 @@ public:
   unsigned short getYSFNetworkYSF2NXDNPort() const;
   std::string  getYSFNetworkYSF2P25Address() const;
   unsigned short getYSFNetworkYSF2P25Port() const;
+  std::string  getYSFNetworkYSFDirectAddress() const;
+  unsigned short getYSFNetworkYSFDirectPort() const;
 
   // The FCS Network section
   bool         getFCSNetworkEnabled() const;
@@ -156,6 +158,8 @@ private:
   unsigned short m_ysfNetworkYSF2NXDNPort;
   std::string  m_ysfNetworkYSF2P25Address;
   unsigned short m_ysfNetworkYSF2P25Port;
+  std::string  m_ysfNetworkYSFDirectAddress;
+  unsigned short m_ysfNetworkYSFDirectPort;
 
   bool         m_fcsNetworkEnabled;
   std::string  m_fcsNetworkFile;
