@@ -36,6 +36,8 @@ m_YSF2NXDNAddress(),
 m_YSF2NXDNPort(0U),
 m_YSF2P25Address(),
 m_YSF2P25Port(0U),
+m_YSFDirectAddress(),
+m_YSFDirectPort(0U),
 m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
@@ -98,6 +100,12 @@ void CYSFReflectors::setYSF2P25(const std::string& address, unsigned short port)
 {
 	m_YSF2P25Address = address;
 	m_YSF2P25Port    = port;
+}
+
+void CYSFReflectors::setYSFDirect(const std::string& address, unsigned short port)
+{
+	m_YSFDirectAddress = address;
+	m_YSFDirectPort    = port;
 }
 
 void CYSFReflectors::addFCSRoom(const std::string& id, const std::string& name)
@@ -251,6 +259,31 @@ bool CYSFReflectors::load()
 			LogWarning("Unable to resolve the address of YSF2P25");
 		}
 	}
+
+	// Add the YSFDirect entry
+	if (m_YSFDirectPort > 0U) {
+		sockaddr_storage addr;
+		unsigned int addrLen;
+		if (CUDPSocket::lookup(m_YSFDirectAddress, m_YSFDirectPort, addr, addrLen) == 0) {
+			CYSFReflector* refl = new CYSFReflector;
+			refl->m_id      = "00006";
+			refl->m_name    = "YSFDIRECT       ";
+			refl->m_desc    = "Link YSFDirect";
+			refl->m_addr    = addr;
+			refl->m_addrLen = addrLen;
+			refl->m_count   = "000";
+			refl->m_type    = YT_YSF;
+			refl->m_wiresX  = true;
+
+			m_newReflectors.push_back(refl);
+
+			LogInfo("Loaded YSFDirect");
+		} else {
+			LogWarning("Unable to resolve the address of YSFDirect");
+		}
+	}
+
+
 
 	unsigned int id = 9U;
 	for (std::vector<std::pair<std::string, std::string>>::const_iterator it1 = m_fcsRooms.cbegin(); it1 != m_fcsRooms.cend(); ++it1) {
