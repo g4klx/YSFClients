@@ -173,11 +173,6 @@ void CWiresX::setYSF2P25(const std::string& address, unsigned short port)
 	m_reflectors.setYSF2P25(address, port);
 }
 
-void CWiresX::setYSFDirect(const std::string& address, unsigned short port)
-{
-	m_reflectors.setYSFDirect(address, port);
-}
-
 void CWiresX::addFCSRoom(const std::string& id, const std::string& name)
 {
 	m_reflectors.addFCSRoom(id, name);
@@ -378,11 +373,7 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 	std::string id = std::string((char*)data, 5U);
 
-	CYSFReflector* reflector_tmp;
-	reflector_tmp = m_reflectors.findById(id);
-	if (reflector_tmp != NULL)
-		m_reflector = reflector_tmp;
-
+	m_reflector = m_reflectors.findById(id);
 	if (m_reflector == NULL)
 		return WXS_NONE;
 
