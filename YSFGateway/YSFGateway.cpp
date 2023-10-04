@@ -273,8 +273,7 @@ int CYSFGateway::run()
 	for (;;) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
-        bool wx_tmp;
-        
+
 		while (rptNetwork.read(buffer) > 0U) {
 			CYSFFICH fich;
 			bool valid = fich.decode(buffer + 35U);
@@ -283,22 +282,14 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (reflector != NULL)
-					wx_tmp = reflector->m_wiresX;
-				else
-					wx_tmp = false;
-				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && wx_tmp) {
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
 					reflector = m_wiresX->getReflector(); //reflector may have changed
-					if (reflector != NULL)
-						wx_tmp = reflector->m_wiresX;
-					else
-						wx_tmp = false;
-					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wx_tmp)
+					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
@@ -538,11 +529,6 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	port = m_conf.getYSFNetworkYSF2P25Port();
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
-
-	address = m_conf.getYSFNetworkYSFDirectAddress();
-	port = m_conf.getYSFNetworkYSFDirectPort();
-	if (port > 0U)
-		m_wiresX->setYSFDirect(address, port);
 
 	std::string filename = m_conf.getFCSNetworkFile();
 	if (m_fcsNetworkEnabled)
@@ -840,8 +826,6 @@ void CYSFGateway::startupLinking()
 			m_linkType = LINK_NONE;
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
-			if (reflector == NULL)
-				reflector = m_reflectors->findById(m_startup);
 			if (reflector != NULL) {
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
@@ -899,11 +883,10 @@ void CYSFGateway::processRemoteCommands()
 	int res = m_remoteSocket->read(buffer, 200U, addr, addrLen);
 	if (res > 0) {
 		buffer[res] = '\0';
-		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8) && (m_ysfNetwork != NULL)) {
-			std::string id = std::string((char*)(buffer + 7U));
+		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string id = std::string((char*)(buffer + 8U));
 			// Left trim
-			// id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-			id.erase(std::remove_if(id.begin(), id.end(), [](char c) { return !std::isalnum(c); }), id.end());
+			id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector == NULL)
 				reflector = m_reflectors->findByName(id);
@@ -931,11 +914,10 @@ void CYSFGateway::processRemoteCommands()
 				LogWarning("Invalid YSF reflector id/name - \"%s\"", id.c_str());
 				return;
 			}
-		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8) && (m_fcsNetwork != NULL)) {
-			std::string raw = std::string((char*)(buffer + 7U));
+		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string raw = std::string((char*)(buffer + 8U));
 			// Left trim
-			// raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-			raw.erase(std::remove_if(raw.begin(), raw.end(), [](char c) { return !std::isalnum(c); }), raw.end());
+			raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 			std::string id = "FCS00";
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {
@@ -959,7 +941,7 @@ void CYSFGateway::processRemoteCommands()
 			m_current.clear();
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
-			m_linkType = LINK_FCS;
+			m_linkType = LINK_NONE;
 
 			LogMessage("Connect by remote command to %s", id.c_str());
 
@@ -968,7 +950,7 @@ void CYSFGateway::processRemoteCommands()
 				m_current = id;
 				m_inactivityTimer.start();
 				m_lostTimer.start();
-				m_linkType = LINK_NONE;
+				m_linkType = LINK_FCS;
 			} else {
 				LogMessage("Unknown reflector - %s", id.c_str());
 			}
