@@ -311,24 +311,16 @@ int CYSFGateway::run()
 			m_exclude = false;
 			if (valid) {
 				unsigned char dt = fich.getDT();
-				bool wx_tmp = false;
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (reflector != NULL)
-					wx_tmp = reflector->m_wiresX;
-
-				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && wx_tmp) {
+				if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
 					reflector = m_wiresX->getReflector(); //reflector may have changed
-					if (reflector != NULL)
-						wx_tmp = reflector->m_wiresX;
-					else
-						wx_tmp = false;
-					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && wx_tmp)
+					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
@@ -562,11 +554,6 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	port = m_conf.getYSFNetworkYSF2P25Port();
 	if (port > 0U)
 		m_wiresX->setYSF2P25(address, port);
-
-	address = m_conf.getYSFNetworkYSFDirectAddress();
-	port = m_conf.getYSFNetworkYSFDirectPort();
-	if (port > 0U)
-		m_wiresX->setYSFDirect(address, port);
 
 	std::string filename = m_conf.getFCSNetworkFile();
 	if (m_fcsNetworkEnabled)
@@ -888,8 +875,6 @@ void CYSFGateway::linking(const std::string& reason)
 			m_linkType = LINK_NONE;
 
 			CYSFReflector* reflector = m_reflectors->findByName(m_startup);
-			if (reflector == NULL)
-				reflector = m_reflectors->findById(m_startup);
 			if (reflector != NULL) {
 				writeJSONLinking(reason, "ysf", reflector->m_name);
 				LogMessage("Automatic (re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
@@ -947,10 +932,8 @@ void CYSFGateway::writeCommand(const std::string& command)
 		// Left trim
 		id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 		CYSFReflector* reflector = m_reflectors->findById(id);
-
 		if (reflector == NULL)
 			reflector = m_reflectors->findByName(id);
-
 		if (reflector != NULL) {
 			m_wiresX->processConnect(reflector);
 
@@ -1042,6 +1025,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 			m_lostTimer.stop();
 			m_linkType = LINK_NONE;
 		}
+
 		if (m_linkType == LINK_FCS) {
 			LogMessage("Disconnect by remote command");
 			writeJSONUnlinked("remote");
