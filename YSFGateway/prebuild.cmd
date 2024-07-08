@@ -8,7 +8,7 @@ set HEADFILE=..\.git\HEAD
 set HASHFILE=0
 if exist %HEADFILE% (
 	for /F "tokens=4 delims=/:" %%a in ('type %HEADFILE%') do set HEADBRANCH=%%a	
-	set HASHFILE=.git\refs\heads\!HEADBRANCH!
+	set HASHFILE=..\.git\refs\heads\!HEADBRANCH!
 	echo Found Git HEAD file: %HEADFILE%   
 	echo Git HEAD branch: !HEADBRANCH!
 	echo Git HASH file: !HASHFILE!

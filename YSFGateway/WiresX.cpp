@@ -830,10 +830,10 @@ void CWiresX::sendAllReply()
 	for (unsigned int i = 0U; i < 10U; i++)
 		data[i + 12U] = m_node.at(i);
 
-	unsigned int total = curr.size();
+	unsigned int total = (unsigned int)curr.size();
 	if (total > 999U) total = 999U;
 
-	unsigned int n = curr.size() - m_start;
+	unsigned int n = (unsigned int)curr.size() - m_start;
 	if (n > 20U) n = 20U;
 
 	::sprintf((char*)(data + 22U), "%03u%03u", 20U, total);
@@ -923,10 +923,10 @@ void CWiresX::sendSearchReply()
 
 	data[22U] = '1';
 
-	unsigned int total = search.size();
+	unsigned int total = (unsigned int)search.size();
 	if (total > 999U) total = 999U;
 
-	unsigned int n = search.size() - m_start;
+	unsigned int n = (unsigned int)search.size() - m_start;
 	if (n > 20U) n = 20U;
 
 	::sprintf((char*)(data + 23U), "%02u%03u", 20U, total);
@@ -960,17 +960,13 @@ void CWiresX::sendSearchReply()
 	}
 
 	unsigned int k = 1029U - offset;
-	for(unsigned int i = 0U; i < k; i++)
- 	{
-		if (i % 50U == 49 && i>0)
-		{
+	for (unsigned int i = 0U; i < k; i++) {
+		if (((i % 50U) == 49U) && (i > 0U))
 			data[i + offset] = 0x0DU;
-		}
 		else
-		{
 			data[i + offset] = 0x20U;
-		}
 	}
+
 	offset += k;
 
 	data[offset + 0U] = 0x03U;			// End of data marker
@@ -1040,7 +1036,7 @@ void CWiresX::sendCategoryReply()
 	for (unsigned int i = 0U; i < 10U; i++)
 		data[i + 12U] = m_node.at(i);
 
-	unsigned int n = m_category.size();
+	unsigned int n = (unsigned int)m_category.size();
 	if (n > 20U)
 		n = 20U;
 
@@ -1075,16 +1071,11 @@ void CWiresX::sendCategoryReply()
 	}
 
 	unsigned int k = 1029U - offset;
-	for(unsigned int i = 0U; i < k; i++)
-	{
-		if (i % 50U == 49 && i>0)
-		{
+	for (unsigned int i = 0U; i < k; i++) {
+		if (((i % 50U) == 49U) && (i > 0U))
 			data[i + offset] = 0x0DU;
-		}
 		else
-		{
 			data[i + offset] = 0x20U;
-		}
 	}
 
 	offset += k;

@@ -36,7 +36,11 @@
 CUDPSocket::CUDPSocket(const std::string& address, unsigned short port) :
 m_localAddress(address),
 m_localPort(port),
+#if defined(_WIN32) || defined(_WIN64)
+m_fd(INVALID_SOCKET),
+#else
 m_fd(-1),
+#endif
 m_af(AF_UNSPEC)
 {
 }
@@ -44,7 +48,11 @@ m_af(AF_UNSPEC)
 CUDPSocket::CUDPSocket(unsigned short port) :
 m_localAddress(),
 m_localPort(port),
+#if defined(_WIN32) || defined(_WIN64)
+m_fd(INVALID_SOCKET),
+#else
 m_fd(-1),
+#endif
 m_af(AF_UNSPEC)
 {
 }
@@ -97,7 +105,9 @@ int CUDPSocket::lookup(const std::string& hostname, unsigned short port, sockadd
 		return err;
 	}
 
-	::memcpy(&addr, res->ai_addr, address_length = res->ai_addrlen);
+	address_length = (unsigned int)res->ai_addrlen;
+
+	::memcpy(&addr, res->ai_addr, address_length);
 
 	::freeaddrinfo(res);
 
@@ -146,7 +156,7 @@ bool CUDPSocket::match(const sockaddr_storage& addr1, const sockaddr_storage& ad
 
 bool CUDPSocket::isNone(const sockaddr_storage& addr)
 {
-	struct sockaddr_in *in = (struct sockaddr_in *)&addr;
+	struct sockaddr_in *in = (struct sockaddr_in*)&addr;
 
 	return ((addr.ss_family == AF_INET) && (in->sin_addr.s_addr == htonl(INADDR_NONE)));
 }
@@ -160,7 +170,11 @@ bool CUDPSocket::open(const sockaddr_storage& address)
 
 bool CUDPSocket::open()
 {
+#if defined(_WIN32) || defined(_WIN64)
+	assert(m_fd == INVALID_SOCKET);
+#else
 	assert(m_fd == -1);
+#endif
 
 	sockaddr_storage addr;
 	unsigned int addrlen;
@@ -191,7 +205,7 @@ bool CUDPSocket::open()
 
 	if (m_localPort > 0U) {
 		int reuse = 1;
-		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == -1) {
+		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) == -1) {
 #if defined(_WIN32) || defined(_WIN64)
 			LogError("Cannot set the UDP socket option, err: %lu", ::GetLastError());
 #else
@@ -217,11 +231,18 @@ bool CUDPSocket::open()
 	return true;
 }
 
-int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storage& address, unsigned int &addressLength)
+int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storage& address, unsigned int& addressLength)
 {
 	assert(buffer != NULL);
 	assert(length > 0U);
-	assert(m_fd >= 0);
+
+#if defined(_WIN32) || defined(_WIN64)
+	if (m_fd == INVALID_SOCKET)
+		return 0;
+#else
+	if (m_fd == -1)
+		return 0;
+#endif
 
 	// Check that the readfrom() won't block
 	struct pollfd pfd;
@@ -254,9 +275,9 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storag
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)
-	int len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&address, &size);
+	int len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, &size);
 #else
-	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&address, &size);
+	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, &size);
 #endif
 	if (len <= 0) {
 #if defined(_WIN32) || defined(_WIN64)
@@ -282,14 +303,18 @@ bool CUDPSocket::write(const unsigned char* buffer, unsigned int length, const s
 {
 	assert(buffer != NULL);
 	assert(length > 0U);
+#if defined(_WIN32) || defined(_WIN64)
+	assert(m_fd != INVALID_SOCKET);
+#else
 	assert(m_fd >= 0);
+#endif
 
 	bool result = false;
 
 #if defined(_WIN32) || defined(_WIN64)
-	int ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&address, addressLength);
+	int ret = ::sendto(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, addressLength);
 #else
-	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&address, addressLength);
+	ssize_t ret = ::sendto(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, addressLength);
 #endif
 
 	if (ret < 0) {
@@ -313,13 +338,15 @@ bool CUDPSocket::write(const unsigned char* buffer, unsigned int length, const s
 
 void CUDPSocket::close()
 {
-	if (m_fd >= 0) {
 #if defined(_WIN32) || defined(_WIN64)
+	if (m_fd != INVALID_SOCKET) {
 		::closesocket(m_fd);
+		m_fd = INVALID_SOCKET;
+	}
 #else
+	if (m_fd >= 0) {
 		::close(m_fd);
-#endif
 		m_fd = -1;
 	}
+#endif
 }
-
