@@ -1212,3 +1212,4 @@
 16664;ysfshico;shico ares;47.26.85.90;42000;002;http://ysfshico.duckdns.org
 47046;YSFxCWERXgarage;CwerxReflector;67.160.251.224;42518;000;http://
 88240;ZOMBIE-ALERT;WiresX #28298;107.141.52.226;42009;028;http://zombiealert.ddns.net
+31947;K0MGS-LINK;K0MGS-LINK;ysf.ddns.me;42005;000;https://missouri.digital
