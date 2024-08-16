@@ -47,7 +47,7 @@ public:
 
 	bool open();
 
-	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc);
+	void setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc, const std::string& symbol);
 
 	void setStaticLocation(float latitude, float longitude, int height);
 
@@ -69,6 +69,7 @@ private:
 	float             m_longitude;
 	int               m_height;
 	std::string       m_desc;
+	std::string       m_symbol;
 	std::string       m_suffix;
 	sockaddr_storage  m_aprsAddr;
 	unsigned int      m_aprsAddrLen;

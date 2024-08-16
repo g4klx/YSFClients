@@ -70,6 +70,7 @@ m_aprsAddress(),
 m_aprsPort(0U),
 m_aprsSuffix(),
 m_aprsDescription(),
+m_aprsSymbol("/r"),
 m_networkStartup(),
 m_networkOptions(),
 m_networkInactivityTimeout(0U),
@@ -235,6 +236,8 @@ bool CConf::read()
 			m_aprsSuffix = value;
 		else if (::strcmp(key, "Description") == 0)
 			m_aprsDescription = value;
+                else if (::strcmp(key, "Symbol") == 0)
+                        m_aprsSymbol = value;
 	} else if (section == SECTION_NETWORK) {
 		if (::strcmp(key, "Startup") == 0)
 			m_networkStartup = value;
@@ -441,6 +444,11 @@ std::string CConf::getAPRSSuffix() const
 std::string CConf::getAPRSDescription() const
 {
 	return m_aprsDescription;
+}
+
+std::string CConf::getAPRSSymbol() const
+{
+       return m_aprsSymbol;
 }
 
 std::string CConf::getNetworkStartup() const

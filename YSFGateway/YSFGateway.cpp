@@ -25,6 +25,7 @@
 #include "Timer.h"
 #include "Utils.h"
 #include "Log.h"
+#include "GitVersion.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -47,6 +48,7 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cstring>
 #include <clocale>
 #include <cmath>
+#include <algorithm>
 
 int main(int argc, char** argv)
 {
@@ -55,7 +57,7 @@ int main(int argc, char** argv)
 		for (int currentArg = 1; currentArg < argc; ++currentArg) {
 			std::string arg = argv[currentArg];
 			if ((arg == "-v") || (arg == "--version")) {
-				::fprintf(stdout, "YSFGateway version %s\n", VERSION);
+				::fprintf(stdout, "YSFGateway version %s git #%.7s\n", VERSION, gitversion);
 				return 0;
 			} else if (arg.substr(0, 1) == "-") {
 				::fprintf(stderr, "Usage: YSFGateway [-v|--version] [filename]\n");
@@ -265,7 +267,8 @@ int CYSFGateway::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	LogMessage("Starting YSFGateway-%s", VERSION);
+	LogMessage("YSFGateway-%s is starting", VERSION);
+	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
 	for (;;) {
 		unsigned char buffer[200U];
@@ -283,10 +286,11 @@ int CYSFGateway::run()
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
 				} else {
-					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
-						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 					processDTMF(buffer, dt);
 					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
+					reflector = m_wiresX->getReflector(); //reflector may have changed
+					if (m_ysfNetwork != NULL && m_linkType == LINK_YSF && reflector->m_wiresX)
+						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
 				if (m_gps != NULL)
@@ -465,8 +469,10 @@ void CYSFGateway::createGPS()
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
 	std::string desc         = m_conf.getAPRSDescription();
+	std::string symbol       = m_conf.getAPRSSymbol();
 
-	m_writer->setInfo(txFrequency, rxFrequency, desc);
+	m_writer->setInfo(txFrequency, rxFrequency, desc, symbol);
+
 
 	bool enabled = m_conf.getGPSDEnabled();
 	if (enabled) {
@@ -877,8 +883,10 @@ void CYSFGateway::processRemoteCommands()
 	int res = m_remoteSocket->read(buffer, 200U, addr, addrLen);
 	if (res > 0) {
 		buffer[res] = '\0';
-		if (::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) {
-			std::string id = std::string((char*)(buffer + 7U));
+		if ((::memcmp(buffer + 0U, "LinkYSF", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string id = std::string((char*)(buffer + 8U));
+			// Left trim
+			id.erase(id.begin(), std::find_if(id.begin(), id.end(), [](unsigned char ch) { return !std::isspace(ch); }));
 			CYSFReflector* reflector = m_reflectors->findById(id);
 			if (reflector == NULL)
 				reflector = m_reflectors->findByName(id);
@@ -906,8 +914,10 @@ void CYSFGateway::processRemoteCommands()
 				LogWarning("Invalid YSF reflector id/name - \"%s\"", id.c_str());
 				return;
 			}
-		} else if (::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) {
-			std::string raw = std::string((char*)(buffer + 7U));
+		} else if ((::memcmp(buffer + 0U, "LinkFCS", 7U) == 0) && (strlen((char*)buffer + 0U) > 8)) {
+			std::string raw = std::string((char*)(buffer + 8U));
+			// Left trim
+			raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), [](unsigned char ch) { return !std::isspace(ch); }));
 			std::string id = "FCS00";
 			std::string idShort = "FCS";
 			if (raw.length() == 3U) {
@@ -969,6 +979,13 @@ void CYSFGateway::processRemoteCommands()
 				m_lostTimer.stop();
 				m_linkType = LINK_NONE;
 			}
+		} else if (::memcmp(buffer + 0U, "status", 6U) == 0) {
+			std::string state = std::string("ysf:") + (((m_ysfNetwork == NULL) && (m_fcsNetwork == NULL)) ? "n/a" : ((m_linkType != LINK_NONE) ? "conn" : "disc"));
+			m_remoteSocket->write((unsigned char*)state.c_str(), (unsigned int)state.length(), addr, addrLen);
+		} else if (::memcmp(buffer + 0U, "host", 4U) == 0) {
+			std::string ref = ((((m_ysfNetwork == NULL) && (m_fcsNetwork == NULL)) || (m_linkType == LINK_NONE)) ? "NONE" : m_current);
+			std::string host = std::string("ysf:\"") + ref + "\"";
+			m_remoteSocket->write((unsigned char*)host.c_str(), (unsigned int)host.length(), addr, addrLen);
 		} else {
 			CUtils::dump("Invalid remote command received", buffer, res);
 		}

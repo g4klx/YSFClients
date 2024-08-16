@@ -84,6 +84,7 @@ public:
   unsigned short getAPRSPort() const;
   std::string  getAPRSSuffix() const;
   std::string  getAPRSDescription() const;
+  std::string  getAPRSSymbol() const;
 
   // The YSF Network section
   std::string  getYSFNetHosts() const;
@@ -130,6 +131,7 @@ private:
   unsigned short m_aprsPort;
   std::string  m_aprsSuffix;
   std::string  m_aprsDescription;
+  std::string  m_aprsSymbol;
 
   std::string  m_ysfNetHosts;
   unsigned int m_ysfRFHangTime;

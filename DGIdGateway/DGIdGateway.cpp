@@ -30,6 +30,7 @@
 #include "Timer.h"
 #include "Utils.h"
 #include "Log.h"
+#include "GitVersion.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -69,7 +70,7 @@ int main(int argc, char** argv)
 		for (int currentArg = 1; currentArg < argc; ++currentArg) {
 			std::string arg = argv[currentArg];
 			if ((arg == "-v") || (arg == "--version")) {
-				::fprintf(stdout, "DGIdGateway version %s\n", VERSION);
+				::fprintf(stdout, "DGIdGateway version %s git #%.7s\n", VERSION, gitversion);
 				return 0;
 			} else if (arg.substr(0, 1) == "-") {
 				::fprintf(stderr, "Usage: DGIdGateway [-v|--version] [filename]\n");
@@ -407,7 +408,8 @@ int CDGIdGateway::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	LogMessage("Starting DGIdGateway-%s", VERSION);
+	LogMessage("DGIdGateway-%s is starting", VERSION);
+ 	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
 	DGID_STATUS state = DS_NOTLINKED;
 	unsigned int nPips = 0U;
@@ -425,13 +427,7 @@ int CDGIdGateway::run()
 				if (dgId == WIRESX_DGID)
 					dgId = 0U;
 
-				if (dgId != currentDGId) {
-					if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
-						dgIdNetwork[currentDGId]->unlink();
-						dgIdNetwork[currentDGId]->unlink();
-						dgIdNetwork[currentDGId]->unlink();
-					}
-
+				if (currentDGId == UNSET_DGID) {
 					if (dgIdNetwork[dgId] != NULL && !dgIdNetwork[dgId]->m_static) {
 						dgIdNetwork[dgId]->link();
 						dgIdNetwork[dgId]->link();
@@ -441,13 +437,13 @@ int CDGIdGateway::run()
 					if (dgIdNetwork[dgId] != NULL) {
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						currentDGId = dgId;
 						state = DS_NOTLINKED;
 					} else {
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
 						state = DS_NOTOPEN;
 					}
 
-					currentDGId = dgId;
 					fromRF = true;
 				}
 
@@ -618,8 +614,9 @@ void CDGIdGateway::createGPS()
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
 	std::string desc         = m_conf.getAPRSDescription();
+	std::string symbol  = m_conf.getAPRSSymbol();
 
-	m_writer->setInfo(txFrequency, rxFrequency, desc);
+	m_writer->setInfo(txFrequency, rxFrequency, desc, symbol);
 
 	bool enabled = m_conf.getGPSDEnabled();
 	if (enabled) {

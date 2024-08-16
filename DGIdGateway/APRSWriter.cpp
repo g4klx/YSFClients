@@ -35,6 +35,7 @@ m_latitude(0.0F),
 m_longitude(0.0F),
 m_height(0),
 m_desc(),
+m_symbol(),
 m_suffix(suffix),
 m_aprsAddr(),
 m_aprsAddrLen(0U),
@@ -63,11 +64,12 @@ CAPRSWriter::~CAPRSWriter()
 {
 }
 
-void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc)
+void CAPRSWriter::setInfo(unsigned int txFrequency, unsigned int rxFrequency, const std::string& desc, const std::string& symbol)
 {
 	m_txFrequency = txFrequency;
 	m_rxFrequency = rxFrequency;
 	m_desc        = desc;
+	m_symbol      = symbol;
 }
 
 void CAPRSWriter::setStaticLocation(float latitude, float longitude, int height)
@@ -232,19 +234,19 @@ void CAPRSWriter::sendIdFrameFixed()
 	char desc[200U];
 	if (m_txFrequency != 0U) {
 		float offset = float(int(m_rxFrequency) - int(m_txFrequency)) / 1000000.0F;
-		::sprintf(desc, "MMDVM Voice %.5LfMHz %c%.4lfMHz%s%s",
+		::sprintf(desc, "MMDVM Voice (C4FM) %.5LfMHz %c%.4lfMHz%s%s",
 			(long double)(m_txFrequency) / 1000000.0F,
 			offset < 0.0F ? '-' : '+',
 			::fabs(offset), m_desc.empty() ? "" : ", ", m_desc.c_str());
 	} else {
-		::sprintf(desc, "MMDVM Voice%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
+		::sprintf(desc, "MMDVM Voice (C4FM)%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
 	}
 
 	const char* band = "4m";
 	if (m_txFrequency >= 1200000000U)
-		band = "1.2";
+		band = "23cm/1.2GHz";
 	else if (m_txFrequency >= 420000000U)
-		band = "440";
+		band = "70cm`";
 	else if (m_txFrequency >= 144000000U)
 		band = "2m";
 	else if (m_txFrequency >= 50000000U)
@@ -268,17 +270,21 @@ void CAPRSWriter::sendIdFrameFixed()
 	::sprintf(lon, "%08.2lf", longitude);
 
 	std::string server = m_callsign;
+	std::string symbol = m_symbol;
 	size_t pos = server.find_first_of('-');
 	if (pos == std::string::npos)
 		server.append("-S");
 	else
 		server.append("S");
 
+        if (symbol.empty())
+                symbol.append("D&");
+
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&/A=%06.0f%s %s\r\n",
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%c%c%s%c%c/A=%06.0f%s %s\r\n",
 		m_callsign.c_str(), server.c_str(),
-		lat, (m_latitude < 0.0F)  ? 'S' : 'N',
-		lon, (m_longitude < 0.0F) ? 'W' : 'E',
+		lat, (m_latitude < 0.0F)  ? 'S' : 'N', symbol[0],
+		lon, (m_longitude < 0.0F) ? 'W' : 'E', symbol[1],
 		float(m_height) * 3.28F, band, desc);
 
 	if (m_debug)
@@ -302,7 +308,11 @@ void CAPRSWriter::sendIdFrameMobile()
 #endif
 
 
+#if GPSD_API_MAJOR_VERSION >= 10
+	if (m_gpsdData.fix.status != STATUS_FIX)
+#else
 	if (m_gpsdData.status != STATUS_FIX)
+#endif
 		return;
 
 	bool latlonSet   = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
@@ -326,19 +336,19 @@ void CAPRSWriter::sendIdFrameMobile()
 	char desc[200U];
 	if (m_txFrequency != 0U) {
 		float offset = float(int(m_rxFrequency) - int(m_txFrequency)) / 1000000.0F;
-		::sprintf(desc, "MMDVM Voice %.5LfMHz %c%.4lfMHz%s%s",
+		::sprintf(desc, "MMDVM Voice (C4FM) %.5LfMHz %c%.4lfMHz%s%s",
 			(long double)(m_txFrequency) / 1000000.0F,
 			offset < 0.0F ? '-' : '+',
 			::fabs(offset), m_desc.empty() ? "" : ", ", m_desc.c_str());
 	} else {
-		::sprintf(desc, "MMDVM Voice%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
+		::sprintf(desc, "MMDVM Voice (C4FM)%s%s", m_desc.empty() ? "" : ", ", m_desc.c_str());
 	}
 
 	const char* band = "4m";
 	if (m_txFrequency >= 1200000000U)
-		band = "1.2";
+		band = "23cm/1.2GHz";
 	else if (m_txFrequency >= 420000000U)
-		band = "440";
+		band = "70cm";
 	else if (m_txFrequency >= 144000000U)
 		band = "2m";
 	else if (m_txFrequency >= 50000000U)
@@ -362,17 +372,21 @@ void CAPRSWriter::sendIdFrameMobile()
 	::sprintf(lon, "%08.2lf", longitude);
 
 	std::string server = m_callsign;
+	std::string symbol = m_symbol;
 	size_t pos = server.find_first_of('-');
 	if (pos == std::string::npos)
 		server.append("-S");
 	else
 		server.append("S");
 
+        if (symbol.empty())
+                symbol.append("D&");
+
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%cD%s%c&",
+	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%c%c%s%c%c",
 		m_callsign.c_str(), server.c_str(),
-		lat, (rawLatitude < 0.0F)  ? 'S' : 'N',
-		lon, (rawLongitude < 0.0F) ? 'W' : 'E');
+		lat, (rawLatitude < 0.0F)  ? 'S' : 'N', symbol[0],
+		lon, (rawLongitude < 0.0F) ? 'W' : 'E', symbol[1]);
 
 	if (bearingSet && velocitySet)
 		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
