@@ -216,7 +216,7 @@ int CDGIdGateway::run()
 	CYSFReflectors* reflectors = new CYSFReflectors(fileName);
 	reflectors->load();
 
-	CIMRSNetwork* imrs = new CIMRSNetwork;
+	CIMRSNetwork* imrs = new CIMRSNetwork(m_callsign);
 	ret = imrs->open();
 	if (!ret) {
 		delete imrs;
@@ -464,7 +464,7 @@ int CDGIdGateway::run()
 							fich.encode(buffer + 35U);
 						}
 
-						dgIdNetwork[currentDGId]->write(currentDGId, buffer);
+						dgIdNetwork[currentDGId]->write(currentDGId, fich, buffer);
 					}
 
 					inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
@@ -493,7 +493,7 @@ int CDGIdGateway::run()
 							fich.encode(buffer + 35U);
 						}
 
-						rptNetwork.write(0U, buffer);
+						rptNetwork.write(0U, fich, buffer);
 
 						inactivityTimer.setTimeout(dgIdNetwork[i]->m_netHangTime);
 						inactivityTimer.start();

@@ -912,8 +912,8 @@
 15783;US-Truck-Travel;Truck Travel;74.91.121.182;42002;009;http://travel.atruckerslife.com
 55817;US-Uni-Link;UniversityLink;128.83.129.92;42000;003;http://repeaters.as.utexas.edu/ysf/
 03732;US-US-WNY-XRX;XRX Club;98.3.125.21;42003;002;http://
-94678;US-US-Z-LINK;Z-LINK.US;65.189.221.27;42000;004;http://
-73458;US-USAF-Cop-Shop;USAF Cop Shop;47.33.119.106;42005;000;http://n6kma3.ddns.net:8087/index.php
+48010;US-WNY-DIGITAL;XLX reflector;209.251.60.131;42000;005;http://ysf.wny-digital.network
+59623;US-UTAHLINK;UT LINK;73.65.205.80;42002;002;http://w7rss.sytes.net
 99539;US-VaDigital;YSF Reflector;3.19.122.217;42000;007;http://ysf.vadigital.network
 12018;US-Val-County-ID;Val CO ID YSF;68.14.214.57;42300;003;http://68.14.214.57:42400/
 81652;US-W2BN-Link;W2BN Talkgroup;150.195.62.6;42002;003;http://w2bn-link.na9x.com
@@ -1168,8 +1168,7 @@
 43287;XLX870;XLX reflector;185.78.196.103;42000;003;http://185.78.196.103:81
 53251;XLX882;XLX reflector;172.105.19.52;42000;001;http://xlx882.va3por.net/
 60479;XLX889;XLX reflector;18.188.148.180;42000;001;http://xlx.hdgrouponline.com
-48010;XLX891;XLX reflector;209.251.60.131;42000;004;http://ysf.wnydmr.network
-38758;XLX893;XLX reflector;153.151.18.132;42000;004;http://893.pgw.jp/xlx/
+48010;XLX891;XLX reflector;209.251.60.131;42000;005;http://ysf.wny-digital.network
 44904;XLX899;XLX reflector;77.68.30.160;42000;011;https://2e0lxy.uk/
 71144;XLX905;XLX reflector;94.199.173.123;42000;050;http://xlx905.oe9.at
 28688;XLX910;XLX reflector;138.128.240.100;42007;032;http://xlx910.mywire.org
@@ -1221,4 +1220,5 @@
 88818;YSF818;YSF818 Reflect;188.166.226.76;42001;002;https://ysf818.hamnew.com
 16664;ysfshico;shico ares;47.26.85.90;42000;002;http://ysfshico.duckdns.org
 47046;YSFxCWERXgarage;CwerxReflector;67.160.251.224;42518;000;http://
-88240;ZOMBIE-ALERT;WiresX #28298;107.141.52.226;42009;031;http://zombiealert.ddns.net
+88240;ZOMBIE-ALERT;WiresX #28298;107.141.52.226;42009;028;http://zombiealert.ddns.net
+31947;K0MGS-LINK;K0MGS-LINK;ysf.ddns.me;42005;000;https://missouri.digital

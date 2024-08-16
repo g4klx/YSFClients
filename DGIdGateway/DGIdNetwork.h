@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2020,2024 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 #ifndef	DGIdNetwork_H
 #define	DGIdNetwork_H
+
+#include "YSFFICH.h"
 
 #include <string>
 
@@ -42,7 +44,7 @@ public:
 
 	virtual DGID_STATUS getStatus() = 0;
 
-	virtual void write(unsigned int dgId, const unsigned char* data) = 0;
+	virtual void write(unsigned int dgId, CYSFFICH& fich, const unsigned char* data) = 0;
 
 	virtual unsigned int read(unsigned int dgid, unsigned char* data) = 0;
 

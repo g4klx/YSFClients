@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2024 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public:
 
 	virtual void link();
 
-	virtual void write(unsigned int dgId, const unsigned char* data);
+	virtual void write(unsigned int dgId, CYSFFICH& fich, const unsigned char* data);
 
 	virtual unsigned int read(unsigned int dgId, unsigned char* data);
 

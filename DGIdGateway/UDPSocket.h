@@ -64,7 +64,7 @@ public:
 
 	static bool isNone(const sockaddr_storage& addr);
 
-	static char* display(const sockaddr_storage& address, char* buffer, unsigned int length);
+	static char* display(const sockaddr_storage& addr, char* buffer, unsigned int length);
 
 private:
 	std::string    m_localAddress;

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021,2024 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "UDPSocket.h"
 #include "RingBuffer.h"
 #include "YSFDefines.h"
-#include "YSFFICH.h"
 #include "Timer.h"
 
 #include <cstdint>
@@ -111,7 +110,7 @@ public:
 
 	virtual void link();
 
-	virtual void write(unsigned int dgId, const unsigned char* data);
+	virtual void write(unsigned int dgId, CYSFFICH& fich, const unsigned char* data);
 
 	virtual unsigned int read(unsigned int dgId, unsigned char* data);
 
@@ -131,7 +130,7 @@ private:
 	bool      find(const sockaddr_storage& addr, IMRSDGId*& ptr, IMRSDest*& dest) const;
 	IMRSDGId* find(unsigned int dgId) const;
 
-	bool writeConnect(const IMRSDest& dest, bool debug);
+	bool writePongConnect(const IMRSDest& dest, bool debug);
 	bool writeHeader(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 	bool writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);
 	bool writeTerminator(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data);

@@ -106,7 +106,7 @@ DGID_STATUS CFCSNetwork::getStatus()
 	return m_state;
 }
 
-void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
+void CFCSNetwork::write(unsigned int dgid, CYSFFICH& fich, const unsigned char* data)
 {
 	assert(data != NULL);
 
