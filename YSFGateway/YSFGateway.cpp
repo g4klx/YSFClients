@@ -50,6 +50,17 @@ const char* DEFAULT_INI_FILE = "/etc/YSFGateway.ini";
 #include <cmath>
 #include <algorithm>
 
+static bool m_killed = false;
+static int  m_signal = 0;
+
+#if !defined(_WIN32) && !defined(_WIN64)
+static void sigHandler(int signum)
+{
+	m_killed = true;
+	m_signal = signum;
+}
+#endif
+
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
@@ -68,11 +79,38 @@ int main(int argc, char** argv)
 		}
 	}
 
-	CYSFGateway* gateway = new CYSFGateway(std::string(iniFile));
+#if !defined(_WIN32) && !defined(_WIN64)
+	::signal(SIGINT,  sigHandler);
+	::signal(SIGTERM, sigHandler);
+	::signal(SIGHUP,  sigHandler);
+#endif
 
-	int ret = gateway->run();
+	int ret = 0;
 
-	delete gateway;
+	do {
+		m_signal = 0;
+		m_killed = false;
+
+		CYSFGateway* gateway = new CYSFGateway(std::string(iniFile));
+		ret = gateway->run();
+
+		delete gateway;
+
+		switch (m_signal) {
+			case 2:
+				::LogInfo("YSFGateway-%s exited on receipt of SIGINT", VERSION);
+				break;
+			case 15:
+				::LogInfo("YSFGateway-%s exited on receipt of SIGTERM", VERSION);
+				break;
+			case 1:
+				::LogInfo("YSFGateway-%s is restarting on receipt of SIGHUP", VERSION);
+				break;
+			default:
+				::LogInfo("YSFGateway-%s exited on receipt of an unknown signal", VERSION);
+				break;
+		}
+	} while (m_signal == 1);
 
 	return ret;
 }
@@ -270,7 +308,7 @@ int CYSFGateway::run()
 	LogMessage("YSFGateway-%s is starting", VERSION);
 	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
-	for (;;) {
+	while (!m_killed) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
 

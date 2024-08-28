@@ -63,6 +63,17 @@ const unsigned char DT_VD_MODE2      = 0x02U;
 const unsigned char DT_VOICE_FR_MODE = 0x04U;
 const unsigned char DT_DATA_FR_MODE  = 0x08U;
 
+static bool m_killed = false;
+static int  m_signal = 0;
+
+#if !defined(_WIN32) && !defined(_WIN64)
+static void sigHandler(int signum)
+{
+	m_killed = true;
+	m_signal = signum;
+}
+#endif
+
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
@@ -81,11 +92,38 @@ int main(int argc, char** argv)
 		}
 	}
 
-	CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
+#if !defined(_WIN32) && !defined(_WIN64)
+	::signal(SIGINT,  sigHandler);
+	::signal(SIGTERM, sigHandler);
+	::signal(SIGHUP,  sigHandler);
+#endif
 
-	int ret = gateway->run();
+	int ret = 0;
 
-	delete gateway;
+	do {
+		m_signal = 0;
+		m_killed = false;
+
+		CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
+		ret = gateway->run();
+
+		delete gateway;
+
+		switch (m_signal) {
+			case 2:
+				::LogInfo("DGIdGateway-%s exited on receipt of SIGINT", VERSION);
+				break;
+			case 15:
+				::LogInfo("DGIdGateway-%s exited on receipt of SIGTERM", VERSION);
+				break;
+			case 1:
+				::LogInfo("DGIdGateway-%s is restarting on receipt of SIGHUP", VERSION);
+				break;
+			default:
+				::LogInfo("DGIdGateway-%s exited on receipt of an unknown signal", VERSION);
+				break;
+		}
+	} while (m_signal == 1);
 
 	return ret;
 }
@@ -414,7 +452,7 @@ int CDGIdGateway::run()
 	DGID_STATUS state = DS_NOTLINKED;
 	unsigned int nPips = 0U;
 
-	for (;;) {
+	while (!m_killed) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
 
