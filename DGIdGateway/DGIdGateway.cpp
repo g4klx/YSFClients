@@ -78,6 +78,7 @@ const unsigned char DT_VD_MODE2      = 0x02U;
 const unsigned char DT_VOICE_FR_MODE = 0x04U;
 const unsigned char DT_DATA_FR_MODE  = 0x08U;
 
+
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
@@ -105,23 +106,28 @@ int main(int argc, char** argv)
 	int ret = 0;
 
 	do {
-		m_killed = false;
 		m_signal = 0;
+		m_killed = false;
 
 		CDGIdGateway* gateway = new CDGIdGateway(std::string(iniFile));
 		ret = gateway->run();
 
 		delete gateway;
 
-		if (m_signal == 2)
-			::LogInfo("DGIdGateway-%s exited on receipt of SIGINT", VERSION);
-
-		if (m_signal == 15)
-			::LogInfo("DGIdGateway-%s exited on receipt of SIGTERM", VERSION);
-
-		if (m_signal == 1)
-			::LogInfo("DGIdGateway-%s restarted on receipt of SIGHUP", VERSION);
-
+		switch (m_signal) {
+			case 2:
+				::LogInfo("DGIdGateway-%s exited on receipt of SIGINT", VERSION);
+				break;
+			case 15:
+				::LogInfo("DGIdGateway-%s exited on receipt of SIGTERM", VERSION);
+				break;
+			case 1:
+				::LogInfo("DGIdGateway-%s is restarting on receipt of SIGHUP", VERSION);
+				break;
+			default:
+				::LogInfo("DGIdGateway-%s exited on receipt of an unknown signal", VERSION);
+				break;
+		}
 	} while (m_signal == 1);
 
 	::LogFinalise();

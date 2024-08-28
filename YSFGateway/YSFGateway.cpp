@@ -67,6 +67,7 @@ static void sigHandler(int signum)
 #include <cmath>
 #include <algorithm>
 
+
 int main(int argc, char** argv)
 {
 	const char* iniFile = DEFAULT_INI_FILE;
@@ -94,23 +95,29 @@ int main(int argc, char** argv)
 	int ret = 0;
 
 	do {
-		m_killed = false;
 		m_signal = 0;
+		m_killed = false;
 
 		gateway = new CYSFGateway(std::string(iniFile));
 		ret = gateway->run();
 
 		delete gateway;
+		gateway = NULL;
 
-		if (m_signal == 2)
-			::LogInfo("YSFGateway-%s exited on receipt of SIGINT", VERSION);
-
-		if (m_signal == 15)
-			::LogInfo("YSFGateway-%s exited on receipt of SIGTERM", VERSION);
-
-		if (m_signal == 1)
-			::LogInfo("YSFGateway-%s restarted on receipt of SIGHUP", VERSION);
-
+		switch (m_signal) {
+			case 2:
+				::LogInfo("YSFGateway-%s exited on receipt of SIGINT", VERSION);
+				break;
+			case 15:
+				::LogInfo("YSFGateway-%s exited on receipt of SIGTERM", VERSION);
+				break;
+			case 1:
+				::LogInfo("YSFGateway-%s is restarting on receipt of SIGHUP", VERSION);
+				break;
+			default:
+				::LogInfo("YSFGateway-%s exited on receipt of an unknown signal", VERSION);
+				break;
+		}
 	} while (m_signal == 1);
 
 	::LogFinalise();
@@ -934,6 +941,7 @@ void CYSFGateway::writeCommand(const std::string& command)
 		CYSFReflector* reflector = m_reflectors->findById(id);
 		if (reflector == NULL)
 			reflector = m_reflectors->findByName(id);
+
 		if (reflector != NULL) {
 			m_wiresX->processConnect(reflector);
 
