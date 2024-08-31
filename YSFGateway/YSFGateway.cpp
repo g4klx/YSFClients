@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020,2023 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2023,2024 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -105,6 +105,8 @@ int main(int argc, char** argv)
 		gateway = NULL;
 
 		switch (m_signal) {
+			case 0:
+				break;
 			case 2:
 				::LogInfo("YSFGateway-%s exited on receipt of SIGINT", VERSION);
 				break;
