@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020,2024 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -257,6 +257,9 @@ void CGPS::transmitGPS(const unsigned char* source)
 		break;
 	case 0x26U:
 		::strcpy(radio, "DR-1X");
+		break;
+	case 0x27U:
+		::strcpy(radio, "FT-991A");
 		break;
 	case 0x28U:
 		::strcpy(radio, "FT-2D");
