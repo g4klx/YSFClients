@@ -1935,7 +1935,7 @@ FCS31229;nn;FCS312 - nn;;;
 FCS31230;nn;FCS312 - nn;;;
 FCS31231;North-America;FCS312 - North-America;;;
 FCS31232;Austria;FCS312 - Austria;;;
-FCS31233;nn;FCS312 - nn;;;
+FCS31233;LKDVM;FCS312 - LKDVM;;;
 FCS31234;Mexico;FCS312 - Mexico;;;
 FCS31235;CQ-UK;FCS312 - CQ-UK;;;
 FCS31236;nn;FCS312 - nn;;;
