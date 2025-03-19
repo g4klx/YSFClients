@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2020,2024 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020,2024,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ const unsigned char LONG_GPS[] = {0x47U, 0x64U};
 
 CGPS::CGPS(CAPRSWriter* writer) :
 m_writer(writer),
-m_buffer(NULL),
+m_buffer(nullptr),
 m_sent(false)
 {
-	assert(writer != NULL);
+	assert(writer != nullptr);
 
 	m_buffer = new unsigned char[300U];
 }
@@ -141,7 +141,7 @@ void CGPS::reset()
 
 void CGPS::transmitGPS(const unsigned char* source)
 {
-	assert(m_writer != NULL);
+	assert(m_writer != nullptr);
 
 	// We don't know who its from!
 	if (::memcmp(source, "          ", YSF_CALLSIGN_LENGTH) == 0)

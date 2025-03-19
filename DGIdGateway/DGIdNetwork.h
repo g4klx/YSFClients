@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,15 +21,16 @@
 
 #include <string>
 
-enum DGID_STATUS {
-	DS_NOTOPEN,
-	DS_NOTLINKED,
-	DS_LINKING,
-	DS_LINKED
+enum class DGID_STATUS {
+	NOTOPEN,
+	NOTLINKED,
+	LINKING,
+	LINKED
 };
 
 class CDGIdNetwork {
 public:
+	CDGIdNetwork();
 	virtual ~CDGIdNetwork() = 0;
 
 	virtual std::string getDesc(unsigned int dgId) = 0;

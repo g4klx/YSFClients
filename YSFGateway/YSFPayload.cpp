@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2016 Jonathan Naylor, G4KLX
+*	Copyright (C) 2016,2025 Jonathan Naylor, G4KLX
 *	Copyright (C) 2016 Mathias Weyland, HB9FRV
 *
 *	This program is free software; you can redistribute it and/or modify
@@ -86,8 +86,8 @@ CYSFPayload::~CYSFPayload()
 
 bool CYSFPayload::readVDMode1Data(const unsigned char* data, unsigned char* dt)
 {
-	assert(data != NULL);
-	assert(dt != NULL);
+	assert(data != nullptr);
+	assert(dt != nullptr);
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
@@ -131,8 +131,8 @@ bool CYSFPayload::readVDMode1Data(const unsigned char* data, unsigned char* dt)
 
 bool CYSFPayload::readVDMode2Data(const unsigned char* data, unsigned char* dt)
 {
-	assert(data != NULL);
-	assert(dt != NULL);
+	assert(data != nullptr);
+	assert(dt != nullptr);
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
@@ -176,8 +176,8 @@ bool CYSFPayload::readVDMode2Data(const unsigned char* data, unsigned char* dt)
 
 bool CYSFPayload::readDataFRModeData1(const unsigned char* data, unsigned char* dt)
 {
-	assert(data != NULL);
-	assert(dt != NULL);
+	assert(data != nullptr);
+	assert(dt != nullptr);
 
 	::memset(dt, ' ', 20U);
 
@@ -223,8 +223,8 @@ bool CYSFPayload::readDataFRModeData1(const unsigned char* data, unsigned char* 
 
 bool CYSFPayload::readDataFRModeData2(const unsigned char* data, unsigned char* dt)
 {
-	assert(data != NULL);
-	assert(dt != NULL);
+	assert(data != nullptr);
+	assert(dt != nullptr);
 
 	::memset(dt, ' ', 20U);
 
@@ -270,8 +270,8 @@ bool CYSFPayload::readDataFRModeData2(const unsigned char* data, unsigned char* 
 
 void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* data)
 {
-	assert(dt != NULL);
-	assert(data != NULL);
+	assert(dt != nullptr);
+	assert(data != nullptr);
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
@@ -287,7 +287,7 @@ void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* d
 	CYSFConvolution conv;
 	conv.encode(output, convolved, 180U);
 
-	unsigned char bytes[45U];
+	unsigned char bytes[45U] = { 0x00U };
 	unsigned int j = 0U;
 	for (unsigned int i = 0U; i < 180U; i++) {
 		unsigned int n = INTERLEAVE_TABLE_9_20[i];
@@ -314,8 +314,8 @@ void CYSFPayload::writeDataFRModeData1(const unsigned char* dt, unsigned char* d
 
 void CYSFPayload::writeDataFRModeData2(const unsigned char* dt, unsigned char* data)
 {
-	assert(dt != NULL);
-	assert(data != NULL);
+	assert(dt != nullptr);
+	assert(data != nullptr);
 
 	data += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
@@ -331,7 +331,7 @@ void CYSFPayload::writeDataFRModeData2(const unsigned char* dt, unsigned char* d
 	CYSFConvolution conv;
 	conv.encode(output, convolved, 180U);
 
-	unsigned char bytes[45U];
+	unsigned char bytes[45U] = { 0x00U };
 	unsigned int j = 0U;
 	for (unsigned int i = 0U; i < 180U; i++) {
 		unsigned int n = INTERLEAVE_TABLE_9_20[i];

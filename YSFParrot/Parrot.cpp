@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <cstring>
 
 CParrot::CParrot(unsigned int timeout) :
-m_data(NULL),
+m_data(nullptr),
 m_length(timeout * 1550U + 1000U),
 m_used(0U),
 m_ptr(0U)
@@ -40,7 +40,7 @@ CParrot::~CParrot()
 
 bool CParrot::write(const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if ((m_length - m_used) < 1000U)
 		return false;
@@ -64,7 +64,7 @@ void CParrot::clear()
 
 unsigned int CParrot::read(unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_used == 0U)
 		return 0U;

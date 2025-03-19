@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 CIMRSNetwork::CIMRSNetwork() :
 m_socket(IMRS_PORT),
 m_dgIds(),
-m_state(DS_NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN)
 {
 }
 
@@ -54,7 +54,7 @@ void CIMRSNetwork::addDGId(unsigned int dgId, const std::string& name, const std
 std::string CIMRSNetwork::getDesc(unsigned int dgId)
 {
 	IMRSDGId* ptr = find(dgId);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		return "IMRS: Unknown";
 
 	return "IMRS: " + ptr->m_name;
@@ -71,10 +71,10 @@ bool CIMRSNetwork::open()
 
 	bool ret = m_socket.open();
 	if (!ret) {
-		m_state = DS_NOTOPEN;
+		m_state = DGID_STATUS::NOTOPEN;
 		return false;
 	} else {
-		m_state = DS_NOTLINKED;
+		m_state = DGID_STATUS::NOTLINKED;
 		return true;
 	}
 }
@@ -86,10 +86,10 @@ DGID_STATUS CIMRSNetwork::getStatus()
 
 void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	IMRSDGId* ptr = find(dgId);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		return;
 
 	CUtils::dump(1U, "YSF Data Received", data, 155U);
@@ -112,8 +112,8 @@ void CIMRSNetwork::write(unsigned int dgId, const unsigned char* data)
 
 bool CIMRSNetwork::writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
 {
-	assert(ptr != NULL);
-	assert(data != NULL);
+	assert(ptr != nullptr);
+	assert(data != nullptr);
 
 	unsigned char buffer[200U];
 
@@ -158,8 +158,8 @@ bool CIMRSNetwork::writeHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsig
 
 bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
 {
-	assert(ptr != NULL);
-	assert(data != NULL);
+	assert(ptr != nullptr);
+	assert(data != nullptr);
 
 	unsigned char buffer[200U];
 	unsigned int length = 0U;
@@ -253,8 +253,8 @@ bool CIMRSNetwork::writeData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char*
 
 void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
 {
-	assert(ptr != NULL);
-	assert(data != NULL);
+	assert(ptr != nullptr);
+	assert(data != nullptr);
 
 	unsigned char buffer[155U];
 
@@ -298,8 +298,8 @@ void CIMRSNetwork::readHeaderTrailer(IMRSDGId* ptr, CYSFFICH& fich, const unsign
 
 void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* data)
 {
-	assert(ptr != NULL);
-	assert(data != NULL);
+	assert(ptr != nullptr);
+	assert(data != nullptr);
 
 	unsigned char buffer[155U];
 
@@ -352,7 +352,7 @@ void CIMRSNetwork::readData(IMRSDGId* ptr, CYSFFICH& fich, const unsigned char* 
 		if (fn == 0U && ft == 1U) {
 			// Copy the DCH
 			payload.writeVoiceFRModeData(data + 7U, buffer + 35U);
-			// NULL the unused section
+			// nullptr the unused section
 			::memset(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 45U, 0x00U, 9U);
 			// Copy the audio
 			::memcpy(buffer + 35U + YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES + 54U, data + 27U + 0U,  18U);
@@ -403,7 +403,7 @@ void CIMRSNetwork::clock(unsigned int ms)
 	CUtils::dump(1U, "IMRS Network Data Received", buffer, length);
 
 	IMRSDGId* ptr = find(addr);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		return;
 
 	if (ptr->m_debug)
@@ -428,10 +428,10 @@ void CIMRSNetwork::clock(unsigned int ms)
 
 unsigned int CIMRSNetwork::read(unsigned int dgId, unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	IMRSDGId* ptr = find(dgId);
-	if (ptr == NULL)
+	if (ptr == nullptr)
 		return 0U;
 
 	if (ptr->m_buffer.isEmpty())
@@ -451,7 +451,7 @@ void CIMRSNetwork::close()
 
 	m_socket.close();
 
-	m_state = DS_NOTOPEN;
+	m_state = DGID_STATUS::NOTOPEN;
 }
 
 IMRSDGId* CIMRSNetwork::find(const sockaddr_storage& addr) const
@@ -463,7 +463,7 @@ IMRSDGId* CIMRSNetwork::find(const sockaddr_storage& addr) const
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 IMRSDGId* CIMRSNetwork::find(unsigned int dgId) const
@@ -473,5 +473,5 @@ IMRSDGId* CIMRSNetwork::find(unsigned int dgId) const
 			return *it;
 	}
 
-	return NULL;
+	return nullptr;
 }

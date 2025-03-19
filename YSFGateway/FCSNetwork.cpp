@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,17 +34,17 @@ m_socket(port),
 m_debug(debug),
 m_addr(),
 m_addrLen(),
-m_ping(NULL),
-m_options(NULL),
+m_ping(nullptr),
+m_options(nullptr),
 m_opt(),
-m_info(NULL),
+m_info(nullptr),
 m_reflector(),
 m_print(),
 m_buffer(1000U, "FCS Network Buffer"),
 m_n(0U),
 m_pingTimer(1000U, 0U, 800U),
 m_resetTimer(1000U, 1U),
-m_state(FCS_UNLINKED)
+m_state(FCS_STATE::UNLINKED)
 {
 	m_info = new unsigned char[100U];
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
@@ -93,14 +93,14 @@ void CFCSNetwork::clearDestination()
 	m_pingTimer.stop();
 	m_resetTimer.stop();
 
-	m_state = FCS_UNLINKED;
+	m_state = FCS_STATE::UNLINKED;
 }
 
 void CFCSNetwork::write(const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
-	if (m_state != FCS_LINKED)
+	if (m_state != FCS_STATE::LINKED)
 		return;
 
 	unsigned char buffer[130U];
@@ -117,7 +117,7 @@ void CFCSNetwork::write(const unsigned char* data)
 
 bool CFCSNetwork::writeLink(const std::string& reflector)
 {
-	if (m_state != FCS_LINKED) {
+	if (m_state != FCS_STATE::LINKED) {
 		std::string name = reflector.substr(0U, 6U);
 		
 		if (m_addresses.count(name) == 0U) {			
@@ -140,7 +140,7 @@ bool CFCSNetwork::writeLink(const std::string& reflector)
 
 	m_print = reflector.substr(0U, 6U) + "-" + reflector.substr(6U);
 
-	m_state = FCS_LINKING;
+	m_state = FCS_STATE::LINKING;
 
 	m_pingTimer.start();
 
@@ -156,7 +156,7 @@ void CFCSNetwork::setOptions(const std::string& options)
 
 void CFCSNetwork::writeUnlink(unsigned int count)
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != FCS_STATE::LINKED)
 		return;
 
 	for (unsigned int i = 0U; i < count; i++)
@@ -185,7 +185,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (m_state == FCS_UNLINKED)
+	if (m_state == FCS_STATE::UNLINKED)
 		return;
 
 	if (!CUDPSocket::match(addr, m_addr))
@@ -195,16 +195,16 @@ void CFCSNetwork::clock(unsigned int ms)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
 	if (length == 7) {
-		if (m_state == FCS_LINKING)
+		if (m_state == FCS_STATE::LINKING)
 			LogMessage("Linked to %s", m_print.c_str());
-		m_state = FCS_LINKED;
+		m_state = FCS_STATE::LINKED;
 		writeInfo();
 		writeOptions(m_print);
 	}
 
-	if (length == 10 && m_state == FCS_LINKING) {
+	if (length == 10 && m_state == FCS_STATE::LINKING) {
 		LogMessage("Linked to %s", m_print.c_str());
-		m_state = FCS_LINKED;
+		m_state = FCS_STATE::LINKED;
 		writeInfo();
 		writeOptions(m_print);
 	}
@@ -218,7 +218,7 @@ void CFCSNetwork::clock(unsigned int ms)
 
 unsigned int CFCSNetwork::read(unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_buffer.isEmpty())
 		return 0U;
@@ -264,7 +264,7 @@ void CFCSNetwork::close()
 
 void CFCSNetwork::writeInfo()
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != FCS_STATE::LINKED)
 		return;
 
 	if (m_debug)
@@ -275,7 +275,7 @@ void CFCSNetwork::writeInfo()
 
 void CFCSNetwork::writePing()
 {
-	if (m_state == FCS_UNLINKED)
+	if (m_state == FCS_STATE::UNLINKED)
 		return;
 
 	if (m_debug)
@@ -286,7 +286,7 @@ void CFCSNetwork::writePing()
 
 void CFCSNetwork::writeOptions(const std::string& reflector)
 {
-	if (m_state != FCS_LINKED)
+	if (m_state != FCS_STATE::LINKED)
 		return;
 
 	if (m_opt.size() < 1)

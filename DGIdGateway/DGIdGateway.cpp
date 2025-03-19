@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020,2024 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2024,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -134,8 +134,8 @@ CDGIdGateway::CDGIdGateway(const std::string& configFile) :
 m_callsign(),
 m_suffix(),
 m_conf(configFile),
-m_writer(NULL),
-m_gps(NULL)
+m_writer(nullptr),
+m_gps(nullptr)
 {
 	CUDPSocket::startup();
 }
@@ -183,7 +183,7 @@ int CDGIdGateway::run()
 		// If we are currently root...
 		if (getuid() == 0) {
 			struct passwd* user = ::getpwnam("mmdvm");
-			if (user == NULL) {
+			if (user == nullptr) {
 				::fprintf(stderr, "Could not get the mmdvm user, exiting\n");
 				return -1;
 			}
@@ -260,7 +260,7 @@ int CDGIdGateway::run()
 	ret = imrs->open();
 	if (!ret) {
 		delete imrs;
-		imrs = NULL;
+		imrs = nullptr;
 	}
 
 	unsigned int currentDGId = UNSET_DGID;
@@ -268,7 +268,7 @@ int CDGIdGateway::run()
 
 	CDGIdNetwork* dgIdNetwork[100U];
 	for (unsigned int i = 0U; i < 100U; i++)
-		dgIdNetwork[i] = NULL; 
+		dgIdNetwork[i] = nullptr; 
 
 	std::vector<DGIdData*> dgIdData = m_conf.getDGIdData();
 	for (std::vector<DGIdData*>::const_iterator it = dgIdData.begin(); it != dgIdData.end(); ++it) {
@@ -302,7 +302,7 @@ int CDGIdGateway::run()
 			unsigned int local  = (*it)->m_local;
 
 			CYSFReflector* reflector = reflectors->findByName(name);
-			if (reflector != NULL) {
+			if (reflector != nullptr) {
 				dgIdNetwork[dgid] = new CYSFNetwork(local, reflector->m_name, reflector->m_addr, reflector->m_addrLen, m_callsign, statc, debug);
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
@@ -314,7 +314,7 @@ int CDGIdGateway::run()
 				LogWarning("Unknown YSF reflector: %s", name.c_str());
 			}
 		} else if (type == "IMRS") {
-			if (imrs != NULL) {
+			if (imrs != nullptr) {
 				std::vector<IMRSDestination*> destinations = (*it)->m_destinations;
 				std::vector<IMRSDest*> dests;
 				std::string name = (*it)->m_name;
@@ -425,12 +425,12 @@ int CDGIdGateway::run()
 			}
 		}
 		
-		if (dgIdNetwork[dgid] != NULL && dgIdNetwork[dgid] != imrs) {
+		if (dgIdNetwork[dgid] != nullptr && dgIdNetwork[dgid] != imrs) {
 			bool ret = dgIdNetwork[dgid]->open();
 			if (!ret) {
 				LogWarning("\tUnable to open connection");
 				delete dgIdNetwork[dgid];
-				dgIdNetwork[dgid] = NULL;
+				dgIdNetwork[dgid] = nullptr;
 			} else if (dgIdNetwork[dgid]->m_static) {
 				LogMessage("\tLinking at startup");
 				dgIdNetwork[dgid]->link();
@@ -451,7 +451,7 @@ int CDGIdGateway::run()
 	LogMessage("DGIdGateway-%s is starting", VERSION);
  	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
 
-	DGID_STATUS state = DS_NOTLINKED;
+	DGID_STATUS state = DGID_STATUS::NOTLINKED;
 	unsigned int nPips = 0U;
 
 	while (!m_killed) {
@@ -468,29 +468,29 @@ int CDGIdGateway::run()
 					dgId = 0U;
 
 				if (currentDGId == UNSET_DGID) {
-					if (dgIdNetwork[dgId] != NULL && !dgIdNetwork[dgId]->m_static) {
+					if (dgIdNetwork[dgId] != nullptr && !dgIdNetwork[dgId]->m_static) {
 						dgIdNetwork[dgId]->link();
 						dgIdNetwork[dgId]->link();
 						dgIdNetwork[dgId]->link();
 					}
 
-					if (dgIdNetwork[dgId] != NULL) {
+					if (dgIdNetwork[dgId] != nullptr) {
 						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
 						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
 						currentDGId = dgId;
-						state = DS_NOTLINKED;
+						state = DGID_STATUS::NOTLINKED;
 					} else {
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
-						state = DS_NOTOPEN;
+						state = DGID_STATUS::NOTOPEN;
 					}
 
 					fromRF = true;
 				}
 
-				if (m_gps != NULL)
+				if (m_gps != nullptr)
 					m_gps->data(buffer + 14U, buffer + 35U, fich);
 
-				if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL) {
+				if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != nullptr) {
 					// Only allow the wanted modes through
 					unsigned char dt = fich.getDT();
 					if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
@@ -513,7 +513,7 @@ int CDGIdGateway::run()
 			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
-				if (m_gps != NULL)
+				if (m_gps != nullptr)
 					m_gps->reset();
 				if (nPips > 0U && fromRF)
 					bleepTimer.start();
@@ -521,7 +521,7 @@ int CDGIdGateway::run()
 		}
 
 		for (unsigned int i = 0U; i < 100U; i++) {
-			if (dgIdNetwork[i] != NULL) {
+			if (dgIdNetwork[i] != nullptr) {
 				unsigned int len = dgIdNetwork[i]->read(i, buffer);
 				if (len > 0U && (i == currentDGId || currentDGId == UNSET_DGID)) {
 					CYSFFICH fich;
@@ -542,7 +542,7 @@ int CDGIdGateway::run()
 							std::string desc = dgIdNetwork[i]->getDesc(i);
 							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
 							currentDGId = i;
-							state = DS_LINKED;
+							state = DGID_STATUS::LINKED;
 							fromRF = false;
 						}
 					}
@@ -556,16 +556,16 @@ int CDGIdGateway::run()
 		rptNetwork.clock(ms);
 
 		for (unsigned int i = 0U; i < 100U; i++) {
-			if (dgIdNetwork[i] != NULL)
+			if (dgIdNetwork[i] != nullptr)
 				dgIdNetwork[i]->clock(ms);
 		}
 
-		if (m_writer != NULL)
+		if (m_writer != nullptr)
 			m_writer->clock(ms);
 
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
-			if (dgIdNetwork[currentDGId] != NULL && !dgIdNetwork[currentDGId]->m_static) {
+			if (dgIdNetwork[currentDGId] != nullptr && !dgIdNetwork[currentDGId]->m_static) {
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
@@ -573,7 +573,7 @@ int CDGIdGateway::run()
 
 			LogMessage("DG-ID set to None via timeout");
 
-			state = DS_NOTLINKED;
+			state = DGID_STATUS::NOTLINKED;
 			currentDGId = UNSET_DGID;
 			inactivityTimer.stop();
 
@@ -590,20 +590,20 @@ int CDGIdGateway::run()
 			nPips = 0U;
 		}
 
-		if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != NULL) {
+		if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != nullptr) {
 			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
 			bool statc = dgIdNetwork[currentDGId]->m_static;
-			if (fromRF && state != DS_LINKED && netState != DS_LINKED && statc)
+			if (fromRF && state != DGID_STATUS::LINKED && netState != DGID_STATUS::LINKED && statc)
 				nPips = 3U;
-			else if (fromRF && state != DS_LINKED && netState == DS_LINKED)
+			else if (fromRF && state != DGID_STATUS::LINKED && netState == DGID_STATUS::LINKED)
 				nPips = 1U;
-			else if (fromRF && state == DS_LINKED && netState != DS_LINKED)
+			else if (fromRF && state == DGID_STATUS::LINKED && netState != DGID_STATUS::LINKED)
 				nPips = 3U;
 			state = netState;
 		} else {
-			if (fromRF && state != DS_NOTLINKED)
+			if (fromRF && state != DGID_STATUS::NOTLINKED)
 				nPips = 2U;
-			state = DS_NOTLINKED;
+			state = DGID_STATUS::NOTLINKED;
 		}
 
 		if (ms < 5U)
@@ -613,14 +613,14 @@ int CDGIdGateway::run()
 	rptNetwork.unlink();
 	rptNetwork.close();
 
-	if (m_gps != NULL) {
+	if (m_gps != nullptr) {
 		m_writer->close();
 		delete m_writer;
 		delete m_gps;
 	}
 
 	for (unsigned int i = 0U; i < 100U; i++) {
-		if (dgIdNetwork[i] != NULL && dgIdNetwork[i] != imrs) {
+		if (dgIdNetwork[i] != nullptr && dgIdNetwork[i] != imrs) {
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->unlink();
 			dgIdNetwork[i]->unlink();
@@ -629,7 +629,7 @@ int CDGIdGateway::run()
 		}
 	}
 
-	if (imrs != NULL) {
+	if (imrs != nullptr) {
 		imrs->close();
 		delete imrs;
 	}
@@ -675,7 +675,7 @@ void CDGIdGateway::createGPS()
 	bool ret = m_writer->open();
 	if (!ret) {
 		delete m_writer;
-		m_writer = NULL;
+		m_writer = nullptr;
 		return;
 	}
 

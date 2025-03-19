@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@
 
 #include <string>
 
-enum LINK_TYPE {
-	LINK_NONE,
-	LINK_YSF,
-	LINK_FCS
+enum class LINK_TYPE {
+	NONE,
+	YSF,
+	FCS
 };
 
 class CYSFGateway

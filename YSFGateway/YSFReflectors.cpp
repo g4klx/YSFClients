@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2021 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2021,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ CYSFReflectors::~CYSFReflectors()
 
 static bool refComparison(const CYSFReflector* r1, const CYSFReflector* r2)
 {
-	assert(r1 != NULL);
-	assert(r2 != NULL);
+	assert(r1 != nullptr);
+	assert(r2 != nullptr);
 
 	std::string name1 = r1->m_name;
 	std::string name2 = r2->m_name;
@@ -113,20 +113,20 @@ bool CYSFReflectors::load()
 	m_newReflectors.clear();
 
 	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
-	if (fp != NULL) {
+	if (fp != nullptr) {
 		char buffer[100U];
-		while (::fgets(buffer, 100U, fp) != NULL) {
+		while (::fgets(buffer, 100U, fp) != nullptr) {
 			if (buffer[0U] == '#')
 				continue;
 
 			char* p1 = ::strtok(buffer, ";\r\n");
-			char* p2 = ::strtok(NULL, ";\r\n");
-			char* p3 = ::strtok(NULL, ";\r\n");
-			char* p4 = ::strtok(NULL, ";\r\n");
-			char* p5 = ::strtok(NULL, ";\r\n");
-			char* p6 = ::strtok(NULL, "\r\n");
+			char* p2 = ::strtok(nullptr, ";\r\n");
+			char* p3 = ::strtok(nullptr, ";\r\n");
+			char* p4 = ::strtok(nullptr, ";\r\n");
+			char* p5 = ::strtok(nullptr, ";\r\n");
+			char* p6 = ::strtok(nullptr, "\r\n");
 
-			if (p1 != NULL && p2 != NULL && p3 != NULL && p4 != NULL && p5 != NULL && p6 != NULL) {
+			if (p1 != nullptr && p2 != nullptr && p3 != nullptr && p4 != nullptr && p5 != nullptr && p6 != nullptr) {
 				std::string host  = std::string(p4);
 				unsigned short port = (unsigned short)::atoi(p5);
 
@@ -141,7 +141,7 @@ bool CYSFReflectors::load()
 					refl->m_addr    = addr;
 					refl->m_addrLen = addrLen;
 					refl->m_count   = std::string(p6);
-					refl->m_type    = YT_YSF;
+					refl->m_type    = YSF_TYPE::YSF;
 					refl->m_wiresX  = (refl->m_name.compare(0, 3, "XLX") == 0);
 
 					refl->m_name.resize(16U, ' ');
@@ -172,7 +172,7 @@ bool CYSFReflectors::load()
 			refl->m_addr    = addr;
 			refl->m_addrLen = addrLen;
 			refl->m_count   = "000";
-			refl->m_type    = YT_YSF;
+			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = false;
 
 			m_newReflectors.push_back(refl);
@@ -195,7 +195,7 @@ bool CYSFReflectors::load()
 			refl->m_addr    = addr;
 			refl->m_addrLen = addrLen;
 			refl->m_count   = "000";
-			refl->m_type    = YT_YSF;
+			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
 
 			m_newReflectors.push_back(refl);
@@ -218,7 +218,7 @@ bool CYSFReflectors::load()
 			refl->m_addr    = addr;
 			refl->m_addrLen = addrLen;
 			refl->m_count   = "000";
-			refl->m_type    = YT_YSF;
+			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
 
 			m_newReflectors.push_back(refl);
@@ -241,7 +241,7 @@ bool CYSFReflectors::load()
 			refl->m_addr    = addr;
 			refl->m_addrLen = addrLen;
 			refl->m_count   = "000";
-			refl->m_type    = YT_YSF;
+			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
 
 			m_newReflectors.push_back(refl);
@@ -272,7 +272,7 @@ bool CYSFReflectors::load()
 		refl->m_desc    = desc;
 		refl->m_addrLen = 0U;
 		refl->m_count   = "000";
-		refl->m_type    = YT_FCS;
+		refl->m_type    = YSF_TYPE::FCS;
 		refl->m_wiresX  = false;
 
 		refl->m_name.resize(16U, ' ');
@@ -306,7 +306,7 @@ CYSFReflector* CYSFReflectors::findById(const std::string& id)
 
 	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
 
-	return NULL;
+	return nullptr;
 }
 
 bool CYSFReflectors::findById(unsigned int id) const
@@ -337,7 +337,7 @@ CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 
 	LogMessage("Trying to find non existent YSF reflector with a name of %s", name.c_str());
 
-	return NULL;
+	return nullptr;
 }
 
 std::vector<CYSFReflector*>& CYSFReflectors::current()

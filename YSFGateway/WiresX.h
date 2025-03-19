@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2019,2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2019,2020,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -28,21 +28,21 @@
 
 #include <string>
 
-enum WX_STATUS {
-	WXS_NONE,
-	WXS_CONNECT_YSF,
-	WXS_CONNECT_FCS,
-	WXS_DISCONNECT
+enum class WX_STATUS {
+	NONE,
+	CONNECT_YSF,
+	CONNECT_FCS,
+	DISCONNECT
 };
 
-enum WXSI_STATUS {
-	WXSI_NONE,
-	WXSI_DX,
-	WXSI_CONNECT,
-	WXSI_DISCONNECT,
-	WXSI_ALL,
-	WXSI_SEARCH,
-	WXSI_CATEGORY
+enum class WXSI_STATUS {
+	NONE,
+	DX,
+	CONNECT,
+	DISCONNECT,
+	ALL,
+	SEARCH,
+	CATEGORY
 };
 
 class CWiresX {
@@ -66,7 +66,7 @@ public:
 	void setReflector(CYSFReflector* reflector);
 
 	void processConnect(CYSFReflector* reflector);
-	void processDisconnect(const unsigned char* source = NULL);
+	void processDisconnect(const unsigned char* source = nullptr);
 
 	void sendConnect(CYSFNetwork* network);
 
@@ -111,7 +111,7 @@ private:
 	void sendSearchNotFoundReply();
 	void sendCategoryReply();
 
-	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = NULL);
+	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = nullptr);
 	void writeData(const unsigned char* data, CYSFNetwork* network, bool isYSF2XX);
 	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ bool CNetwork::write(const unsigned char* data)
 	if (m_addrLen == 0U)
 		return true;
 
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	return m_socket.write(data, 155U, m_addr, m_addrLen);
 }

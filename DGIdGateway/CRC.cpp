@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015,2016,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ const uint16_t CCITT16_TABLE2[] = {
 
 void CCRC::addCCITT16(unsigned char *in, unsigned int length)
 {
-	assert(in != NULL);
+	assert(in != nullptr);
 	assert(length > 2U);
 
 	union {
@@ -84,7 +84,7 @@ void CCRC::addCCITT16(unsigned char *in, unsigned int length)
 
 bool CCRC::checkCCITT16(const unsigned char *in, unsigned int length)
 {
-	assert(in != NULL);
+	assert(in != nullptr);
 	assert(length > 2U);
 
 	union {
@@ -104,7 +104,7 @@ bool CCRC::checkCCITT16(const unsigned char *in, unsigned int length)
 
 unsigned char CCRC::addCRC(const unsigned char* in, unsigned int length)
 {
-	assert(in != NULL);
+	assert(in != nullptr);
 
 	unsigned char crc = 0U;
 
