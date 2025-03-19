@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2021,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ m_debug(debug),
 m_addr(),
 m_addrLen(0U),
 m_static(statc),
-m_ping(NULL),
-m_info(NULL),
+m_ping(nullptr),
+m_info(nullptr),
 m_reflector(reflector),
 m_print(),
 m_buffer(1000U, "FCS Network Buffer"),
@@ -44,7 +44,7 @@ m_n(0U),
 m_sendPollTimer(1000U, 0U, 800U),
 m_recvPollTimer(1000U, 60U),
 m_resetTimer(1000U, 1U),
-m_state(DS_NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN)
 {
 	m_info = new unsigned char[100U];
 	::sprintf((char*)m_info, "%9u%9u%-6.6s%-12.12s%7u", rxFrequency, txFrequency, locator.c_str(), FCS_VERSION, id);
@@ -85,7 +85,7 @@ bool CFCSNetwork::open()
 {
 	if (m_addrLen == 0U) {
 		LogError("Unable to resolve the address of %s", m_reflector.c_str());
-		m_state = DS_NOTOPEN;
+		m_state = DGID_STATUS::NOTOPEN;
 		return false;
 	}
 
@@ -93,10 +93,10 @@ bool CFCSNetwork::open()
 
 	bool ret = m_socket.open(m_addr);
 	if (!ret) {
-		m_state = DS_NOTOPEN;
+		m_state = DGID_STATUS::NOTOPEN;
 		return false;
 	} else {
-		m_state = DS_NOTLINKED;
+		m_state = DGID_STATUS::NOTLINKED;
 		return true;
 	}
 }
@@ -108,9 +108,9 @@ DGID_STATUS CFCSNetwork::getStatus()
 
 void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
-	if (m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKED)
 		return;
 
 	unsigned char buffer[130U];
@@ -127,10 +127,10 @@ void CFCSNetwork::write(unsigned int dgid, const unsigned char* data)
 
 void CFCSNetwork::link()
 {
-	if (m_state != DS_NOTLINKED)
+	if (m_state != DGID_STATUS::NOTLINKED)
 		return;
 
-	m_state = DS_LINKING;
+	m_state = DGID_STATUS::LINKING;
 
 	m_sendPollTimer.start();
 	m_recvPollTimer.start();
@@ -140,7 +140,7 @@ void CFCSNetwork::link()
 
 void CFCSNetwork::unlink()
 {
-	if (m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKED)
 		return;
 
 	m_socket.write((unsigned char*)"CLOSE      ", 11U, m_addr, m_addrLen);
@@ -150,20 +150,20 @@ void CFCSNetwork::unlink()
 
 	LogMessage("Unlinked from %s", m_print.c_str());
 
-	m_state = DS_NOTLINKED;
+	m_state = DGID_STATUS::NOTLINKED;
 }
 
 void CFCSNetwork::clock(unsigned int ms)
 {
-	if (m_state == DS_NOTOPEN)
+	if (m_state == DGID_STATUS::NOTOPEN)
 		return;
 
 	m_recvPollTimer.clock(ms);
 	if (m_recvPollTimer.isRunning() && m_recvPollTimer.hasExpired()) {
 		if (m_static) {
-			m_state = DS_LINKING;
+			m_state = DGID_STATUS::LINKING;
 		} else {
-			m_state = DS_NOTLINKED;
+			m_state = DGID_STATUS::NOTLINKED;
 			m_sendPollTimer.stop();
 		}
 
@@ -194,7 +194,7 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (m_debug)
 		CUtils::dump(1U, "FCS Network Data Received", buffer, length);
 
-	if (m_state == DS_NOTLINKED)
+	if (m_state == DGID_STATUS::NOTLINKED)
 		return;
 
 	if (!CUDPSocket::match(addr, m_addr))
@@ -206,10 +206,10 @@ void CFCSNetwork::clock(unsigned int ms)
 	if (length == 7 || length == 10) {
 		m_recvPollTimer.start();
 
-		if (m_state == DS_LINKING) {
+		if (m_state == DGID_STATUS::LINKING) {
 			LogMessage("Linked to %s", m_print.c_str());
 
-			m_state = DS_LINKED;
+			m_state = DGID_STATUS::LINKED;
 
 			if (m_debug)
 				CUtils::dump(1U, "FCS Network Data Sent", m_info, 100U);
@@ -229,7 +229,7 @@ void CFCSNetwork::clock(unsigned int ms)
 
 unsigned int CFCSNetwork::read(unsigned int dgid, unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_buffer.isEmpty())
 		return 0U;
@@ -261,12 +261,12 @@ void CFCSNetwork::close()
 
 	LogMessage("Closing FCS network connection");
 
-	m_state = DS_NOTOPEN;
+	m_state = DGID_STATUS::NOTOPEN;
 }
 
 void CFCSNetwork::writePoll()
 {
-	if (m_state != DS_LINKING && m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKING && m_state != DGID_STATUS::LINKED)
 		return;
 
 	if (m_debug)

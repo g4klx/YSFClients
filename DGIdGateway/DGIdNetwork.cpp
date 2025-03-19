@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -18,6 +18,13 @@
 
 #include "DGIdNetwork.h"
 
+CDGIdNetwork::CDGIdNetwork() :
+m_modes(0U),
+m_static(false),
+m_rfHangTime(0U),
+m_netHangTime(0U)
+{
+}
 
 CDGIdNetwork::~CDGIdNetwork()
 {

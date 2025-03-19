@@ -74,6 +74,9 @@
     <ClCompile Include="YSFReflectors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MQTTConnection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="APRSWriter.h">
@@ -146,6 +149,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="YSFReflectors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MQTTConnection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015-2020,2023 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015-2020,2023,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -26,18 +26,18 @@
 
 const int BUFFER_SIZE = 500;
 
-enum SECTION {
-	SECTION_NONE,
-	SECTION_GENERAL,
-	SECTION_INFO,
-	SECTION_LOG,
-	SECTION_APRS,
-	SECTION_MQTT,
-	SECTION_NETWORK,
-	SECTION_YSF_NETWORK,
-	SECTION_FCS_NETWORK,
-	SECTION_GPSD,
-	SECTION_REMOTE_COMMANDS
+enum class SECTION {
+	NONE,
+	GENERAL,
+	INFO,
+	LOG,
+	APRS,
+	MQTT,
+	NETWORK,
+	YSF_NETWORK,
+	FCS_NETWORK,
+	GPSD,
+	REMOTE_COMMANDS
 };
 
 CConf::CConf(const std::string& file) :
@@ -104,53 +104,53 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-	FILE* fp = ::fopen(m_file.c_str(), "rt");
-	if (fp == NULL) {
-		::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-		return false;
-  	}
+    FILE* fp = ::fopen(m_file.c_str(), "rt");
+    if (fp == nullptr) {
+	::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+	return false;
+    }
 
-	SECTION section = SECTION_NONE;
+    SECTION section = SECTION::NONE;
 
-	char buffer[BUFFER_SIZE];
-	while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
-		if (buffer[0U] == '#')
-			continue;
+    char buffer[BUFFER_SIZE];
+    while (::fgets(buffer, BUFFER_SIZE, fp) != nullptr) {
+	if (buffer[0U] == '#')
+		continue;
 
 		if (buffer[0U] == '[') {
 			if (::strncmp(buffer, "[General]", 9U) == 0)
-				section = SECTION_GENERAL;
+				section = SECTION::GENERAL;
 			else if (::strncmp(buffer, "[Info]", 6U) == 0)
-				section = SECTION_INFO;
+				section = SECTION::INFO;
 			else if (::strncmp(buffer, "[Log]", 5U) == 0)
-				section = SECTION_LOG;
+				section = SECTION::LOG;
 			else if (::strncmp(buffer, "[APRS]", 6U) == 0)
-				section = SECTION_APRS;
+				section = SECTION::APRS;
 			else if (::strncmp(buffer, "[MQTT]", 6U) == 0)
-				section = SECTION_MQTT;
+				section = SECTION::MQTT;
 			else if (::strncmp(buffer, "[Network]", 9U) == 0)
-				section = SECTION_NETWORK;
+				section = SECTION::NETWORK;
 			else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
-				section = SECTION_YSF_NETWORK;
+				section = SECTION::YSF_NETWORK;
 			else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-				section = SECTION_FCS_NETWORK;
+				section = SECTION::FCS_NETWORK;
 			else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
-				section = SECTION_GPSD;
+				section = SECTION::GPSD;
 			else if (::strncmp(buffer, "[Remote Commands]", 17U) == 0)
-				section = SECTION_REMOTE_COMMANDS;
+				section = SECTION::REMOTE_COMMANDS;
 			else
-				section = SECTION_NONE;
+				section = SECTION::NONE;
 
 			continue;
 		}
 
-		char* key = ::strtok(buffer, " \t=\r\n");
-		if (key == NULL)
-			continue;
+	char* key = ::strtok(buffer, " \t=\r\n");
+	if (key == nullptr)
+		continue;
 
-		char* value = ::strtok(NULL, "\r\n");
-		if (value == NULL)
-			continue;
+	char* value = ::strtok(nullptr, "\r\n");
+	if (value == nullptr)
+		continue;
 
 		// Remove quotes from the value
 		size_t len = ::strlen(value);
@@ -160,16 +160,16 @@ bool CConf::read()
 		} else {
 			char *p;
 
-			// if value is not quoted, remove after # (to make comment)
-			if ((p = strchr(value, '#')) != NULL)
-				*p = '\0';
+		// if value is not quoted, remove after # (to make comment)
+		if ((p = strchr(value, '#')) != nullptr)
+			*p = '\0';
 
 			// remove trailing tab/space
 			for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
 				*p = '\0';
 		}
 
-		if (section == SECTION_GENERAL) {
+		if (section == SECTION::GENERAL) {
 			if (::strcmp(key, "Callsign") == 0) {
 				// Convert the callsign to upper case
 				for (unsigned int i = 0U; value[i] != 0; i++)
@@ -198,7 +198,7 @@ bool CConf::read()
 				m_debug = ::atoi(value) == 1;
 			else if (::strcmp(key, "Daemon") == 0)
 				m_daemon = ::atoi(value) == 1;
-		} else if (section == SECTION_INFO) {
+		} else if (section == SECTION::INFO) {
 			if (::strcmp(key, "TXFrequency") == 0)
 				m_txFrequency = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "RXFrequency") == 0)
@@ -215,12 +215,12 @@ bool CConf::read()
 				m_name = value;
 			else if (::strcmp(key, "Description") == 0)
 				m_description = value;
-		} else if (section == SECTION_LOG) {
+		} else if (section == SECTION::LOG) {
 			if (::strcmp(key, "MQTTLevel") == 0)
 				m_logMQTTLevel = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "DisplayLevel") == 0)
 				m_logDisplayLevel = (unsigned int)::atoi(value);
-		} else if (section == SECTION_APRS) {
+		} else if (section == SECTION::APRS) {
 			if (::strcmp(key, "Enable") == 0)
 				m_aprsEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Suffix") == 0)
@@ -229,7 +229,7 @@ bool CConf::read()
 				m_aprsDescription = value;
 		        else if (::strcmp(key, "Symbol") == 0)
 		              	m_aprsSymbol = value;
-		} else if (section == SECTION_MQTT) {
+		} else if (section == SECTION::MQTT) {
 			if (::strcmp(key, "Address") == 0)
 				m_mqttAddress = value;
 			else if (::strcmp(key, "Port") == 0)
@@ -238,7 +238,7 @@ bool CConf::read()
 				m_mqttKeepalive = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Name") == 0)
 				m_mqttName = value;
-		} else if (section == SECTION_NETWORK) {
+		} else if (section == SECTION::NETWORK) {
 			if (::strcmp(key, "Startup") == 0)
 				m_networkStartup = value;
 			else if (::strcmp(key, "Options") == 0)
@@ -249,7 +249,7 @@ bool CConf::read()
 				m_networkRevert = ::atoi(value) == 1;
 			else if (::strcmp(key, "Debug") == 0)
 				m_networkDebug = ::atoi(value) == 1;
-		} else if (section == SECTION_YSF_NETWORK) {
+		} else if (section == SECTION::YSF_NETWORK) {
 			if (::strcmp(key, "Enable") == 0)
 				m_ysfNetworkEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Port") == 0)
@@ -274,21 +274,21 @@ bool CConf::read()
 				m_ysfNetworkYSF2P25Address = value;
 			else if (::strcmp(key, "YSF2P25Port") == 0)
 				m_ysfNetworkYSF2P25Port = (unsigned short)::atoi(value);
-		} else if (section == SECTION_FCS_NETWORK) {
+		} else if (section == SECTION::FCS_NETWORK) {
 			if (::strcmp(key, "Enable") == 0)
 				m_fcsNetworkEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Rooms") == 0)
 				m_fcsNetworkFile = value;
 			else if (::strcmp(key, "Port") == 0)
 				m_fcsNetworkPort = (unsigned short)::atoi(value);
-		} else if (section == SECTION_GPSD) {
+		} else if (section == SECTION::GPSD) {
 			if (::strcmp(key, "Enable") == 0)
 				m_gpsdEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Address") == 0)
 				m_gpsdAddress = value;
 			else if (::strcmp(key, "Port") == 0)
 				m_gpsdPort = value;
-		} else if (section == SECTION_REMOTE_COMMANDS) {
+		} else if (section == SECTION::REMOTE_COMMANDS) {
 			if (::strcmp(key, "Enable") == 0)
 				m_remoteCommandsEnabled = ::atoi(value) == 1;
 		}

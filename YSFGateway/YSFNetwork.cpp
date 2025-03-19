@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ m_socket(address, port),
 m_debug(debug),
 m_addr(),
 m_addrLen(0U),
-m_poll(NULL),
-m_options(NULL),
+m_poll(nullptr),
+m_options(nullptr),
 m_opt(),
-m_unlink(NULL),
+m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
 m_name(),
@@ -65,10 +65,10 @@ m_socket(port),
 m_debug(debug),
 m_addr(),
 m_addrLen(0U),
-m_poll(NULL),
-m_options(NULL),
+m_poll(nullptr),
+m_options(nullptr),
 m_opt(),
-m_unlink(NULL),
+m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
 m_name(),
@@ -140,7 +140,7 @@ void CYSFNetwork::clearDestination()
 
 void CYSFNetwork::write(const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_addrLen == 0U)
 		return;
@@ -249,7 +249,7 @@ void CYSFNetwork::clock(unsigned int ms)
 
 unsigned int CYSFNetwork::read(unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_buffer.isEmpty())
 		return 0U;

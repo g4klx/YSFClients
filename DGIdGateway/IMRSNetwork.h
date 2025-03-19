@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ public:
 	m_dgId(0U),
 	m_name(),
 	m_seqNo(0U),
-	m_source(NULL),
-	m_dest(NULL),
+	m_source(nullptr),
+	m_dest(nullptr),
 	m_destinations(),
 	m_debug(false),
 	m_buffer(1000U, "IMRS Buffer")

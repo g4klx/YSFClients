@@ -28,10 +28,10 @@
 #include <string>
 #include <map>
 
-enum FCS_STATE {
-	FCS_UNLINKED,
-	FCS_LINKING,
-	FCS_LINKED
+enum class FCS_STATE {
+	UNLINKED,
+	LINKING,
+	LINKED
 };
 
 class CFCSNetwork {

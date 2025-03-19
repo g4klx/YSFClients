@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2015-2020,2023 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2015-2020,2023,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -27,18 +27,18 @@
 
 const int BUFFER_SIZE = 500;
 
-enum SECTION {
-	SECTION_NONE,
-	SECTION_GENERAL,
-	SECTION_INFO,
-	SECTION_LOG,
-	SECTION_APRS,
-	SECTION_MQTT,
-	SECTION_YSF_NETWORK,
-	SECTION_FCS_NETWORK,
-	SECTION_IMRS_NETWORK,
-	SECTION_DGID,
-	SECTION_GPSD
+enum class SECTION {
+	NONE,
+	GENERAL,
+	INFO,
+	LOG,
+	APRS,
+	MQTT,
+	YSF_NETWORK,
+	FCS_NETWORK,
+	IMRS_NETWORK,
+	DGID,
+	GPSD
 };
 
 CConf::CConf(const std::string& file) :
@@ -95,58 +95,58 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-	FILE* fp = ::fopen(m_file.c_str(), "rt");
-	if (fp == NULL) {
-		::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-		return false;
-	}
+  FILE* fp = ::fopen(m_file.c_str(), "rt");
+  if (fp == nullptr) {
+    ::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+    return false;
+  }
 
-	SECTION section = SECTION_NONE;
+  SECTION section = SECTION::NONE;
 
-	DGIdData* dgIdData = NULL;
+  DGIdData* dgIdData = nullptr;
 
-	char buffer[BUFFER_SIZE];
-	while (::fgets(buffer, BUFFER_SIZE, fp) != NULL) {
-  		if (buffer[0U] == '#')
-			continue;
+  char buffer[BUFFER_SIZE];
+  while (::fgets(buffer, BUFFER_SIZE, fp) != nullptr) {
+    if (buffer[0U] == '#')
+      continue;
 
 		if (buffer[0U] == '[') {
 			if (::strncmp(buffer, "[General]", 9U) == 0)
-				section = SECTION_GENERAL;
+				section = SECTION::GENERAL;
 			else if (::strncmp(buffer, "[Info]", 6U) == 0)
-				section = SECTION_INFO;
+				section = SECTION::INFO;
 			else if (::strncmp(buffer, "[Log]", 5U) == 0)
-				section = SECTION_LOG;
+				section = SECTION::LOG;
 			else if (::strncmp(buffer, "[APRS]", 6U) == 0)
-				section = SECTION_APRS;
+				section = SECTION::APRS;
 			else if (::strncmp(buffer, "[MQTT]", 6U) == 0)
-				section = SECTION_MQTT;
+				section = SECTION::MQTT;
 			else if (::strncmp(buffer, "[YSF Network]", 13U) == 0)
-				section = SECTION_YSF_NETWORK;
+				section = SECTION::YSF_NETWORK;
 			else if (::strncmp(buffer, "[FCS Network]", 13U) == 0)
-				section = SECTION_FCS_NETWORK;
+				section = SECTION::FCS_NETWORK;
 			else if (::strncmp(buffer, "[IMRS Network]", 14U) == 0)
-				section = SECTION_IMRS_NETWORK;
+				section = SECTION::IMRS_NETWORK;
 			else if (::strncmp(buffer, "[DGId=", 6U) == 0) {
-				section = SECTION_DGID;
+				section = SECTION::DGID;
 				dgIdData = new DGIdData;
 				dgIdData->m_dgId = (unsigned int)::atoi(buffer + 6U);
 				m_dgIdData.push_back(dgIdData);
 			} else if (::strncmp(buffer, "[GPSD]", 6U) == 0)
-				section = SECTION_GPSD;
+				section = SECTION::GPSD;
 			else
-				section = SECTION_NONE;
+				section = SECTION::NONE;
 
 			continue;
 		}
 
-		char* key = ::strtok(buffer, " \t=\r\n");
-		if (key == NULL)
-			continue;
+	char* key = ::strtok(buffer, " \t=\r\n");
+	if (key == nullptr)
+		continue;
 
-		char* value = ::strtok(NULL, "\r\n");
-		if (value == NULL)
-			continue;
+	char* value = ::strtok(nullptr, "\r\n");
+	if (value == nullptr)
+		continue;
 
 		// Remove quotes from the value
 		size_t len = ::strlen(value);
@@ -156,16 +156,16 @@ bool CConf::read()
 		} else {
 			char *p;
 
-			// if value is not quoted, remove after # (to make comment)
-			if ((p = strchr(value, '#')) != NULL)
-				*p = '\0';
+		// if value is not quoted, remove after # (to make comment)
+		if ((p = strchr(value, '#')) != nullptr)
+			*p = '\0';
 
 			// remove trailing tab/space
 			for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
 				*p = '\0';
 		}
 
-		if (section == SECTION_GENERAL) {
+		if (section == SECTION::GENERAL) {
 			if (::strcmp(key, "Callsign") == 0) {
 				// Convert the callsign to upper case
 				for (unsigned int i = 0U; value[i] != 0; i++)
@@ -196,7 +196,7 @@ bool CConf::read()
 				m_debug = ::atoi(value) == 1;
 			else if (::strcmp(key, "Daemon") == 0)
 				m_daemon = ::atoi(value) == 1;
-		} else if (section == SECTION_INFO) {
+		} else if (section == SECTION::INFO) {
 			if (::strcmp(key, "TXFrequency") == 0)
 				m_txFrequency = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "RXFrequency") == 0)
@@ -211,12 +211,12 @@ bool CConf::read()
 				m_height = ::atoi(value);
 			else if (::strcmp(key, "Description") == 0)
 				m_description = value;
-		} else if (section == SECTION_LOG) {
+		} else if (section == SECTION::LOG) {
 			if (::strcmp(key, "MQTTLevel") == 0)
 				m_logMQTTLevel = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "DisplayLevel") == 0)
 				m_logDisplayLevel = (unsigned int)::atoi(value);
-		} else if (section == SECTION_APRS) {
+		} else if (section == SECTION::APRS) {
 			if (::strcmp(key, "Enable") == 0)
 				m_aprsEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Suffix") == 0)
@@ -225,7 +225,7 @@ bool CConf::read()
 				m_aprsDescription = value;
 		      	else if (::strcmp(key, "Symbol") == 0)
 		              	m_aprsSymbol = value;
-		} else if (section == SECTION_MQTT) {
+		} else if (section == SECTION::MQTT) {
 			if (::strcmp(key, "Address") == 0)
 				m_mqttAddress = value;
 			else if (::strcmp(key, "Port") == 0)
@@ -234,7 +234,7 @@ bool CConf::read()
 				m_mqttKeepalive = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Name") == 0)
 				m_mqttName = value;
-		} else if (section == SECTION_YSF_NETWORK) {
+		} else if (section == SECTION::YSF_NETWORK) {
 			if (::strcmp(key, "Hosts") == 0)
 				m_ysfNetHosts = value;
 			else if (::strcmp(key, "RFHangTime") == 0)
@@ -243,22 +243,22 @@ bool CConf::read()
 				m_ysfNetHangTime = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Debug") == 0)
 				m_ysfNetDebug = ::atoi(value) == 1;
-		} else if (section == SECTION_FCS_NETWORK) {
+		} else if (section == SECTION::FCS_NETWORK) {
 			if (::strcmp(key, "RFHangTime") == 0)
 				m_fcsRFHangTime = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "NetHangTime") == 0)
 				m_fcsNetHangTime = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Debug") == 0)
 				m_fcsNetDebug = ::atoi(value) == 1;
-		} else if (section == SECTION_IMRS_NETWORK) {
+		} else if (section == SECTION::IMRS_NETWORK) {
 			if (::strcmp(key, "RFHangTime") == 0)
 				m_imrsRFHangTime = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "NetHangTime") == 0)
 				m_imrsNetHangTime = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Debug") == 0)
 				m_imrsNetDebug = ::atoi(value) == 1;
-		} else if (section == SECTION_DGID) {
-			assert(dgIdData != NULL);
+		} else if (section == SECTION::DGID) {
+			assert(dgIdData != nullptr);
 			if (::strcmp(key, "Type") == 0) {
 				dgIdData->m_type = value;
 				dgIdData->m_static = false;
@@ -297,14 +297,14 @@ bool CConf::read()
 				dgIdData->m_netDGId = (unsigned int)::atoi(value);
 			else if (::strcmp(key, "Destination") == 0) {
 				char* p1 = ::strtok(value, ",");
-				char* p2 = ::strtok(NULL, "\r\n");
+				char* p2 = ::strtok(nullptr, "\r\n");
 				IMRSDestination* dest = new IMRSDestination;
 				dest->m_dgId    = (unsigned int)::atoi(p1);
 				dest->m_address = p2;
 				dgIdData->m_destinations.push_back(dest);
 			} else if (::strcmp(key, "Debug") == 0)
 				dgIdData->m_debug = ::atoi(value) == 1;
-		} else if (section == SECTION_GPSD) {
+		} else if (section == SECTION::GPSD) {
 			if (::strcmp(key, "Enable") == 0)
 				m_gpsdEnabled = ::atoi(value) == 1;
 			else if (::strcmp(key, "Address") == 0)

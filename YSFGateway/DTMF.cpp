@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2012,2013,2015,2017,2018 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2012,2013,2015,2017,2018,2025 by Jonathan Naylor G4KLX
  *   Copyright (C) 2011 by DV Developer Group. DJ0ABR
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -60,17 +60,17 @@ CDTMF::~CDTMF()
 
 WX_STATUS CDTMF::decodeVDMode2(unsigned char* payload, bool end)
 {
-	assert(payload != NULL);
+	assert(payload != nullptr);
 
 	payload += YSF_SYNC_LENGTH_BYTES + YSF_FICH_LENGTH_BYTES;
 
 	for (unsigned int offset = 5U; offset < 90U; offset += 18U) {
 		WX_STATUS status = decodeVDMode2Slice(payload + offset, end);
-		if (status != WXS_NONE)
+		if (status != WX_STATUS::NONE)
 			return status;
 	}
 
-	return WXS_NONE;
+	return WX_STATUS::NONE;
 }
 
 WX_STATUS CDTMF::decodeVDMode2Slice(unsigned char* ambe, bool end)
@@ -167,43 +167,43 @@ WX_STATUS CDTMF::decodeVDMode2Slice(unsigned char* ambe, bool end)
 WX_STATUS CDTMF::validate() const
 {
 	if (m_command.empty())
-		return WXS_NONE;
+		return WX_STATUS::NONE;
 
 	size_t length = m_command.length();
 	char first    = m_command.at(0U);
 
 	if (length == 1U && first == '#') {
-		return WXS_DISCONNECT;
+		return WX_STATUS::DISCONNECT;
 	} else if (length == 3U && first == 'A') {
 		for (unsigned int i = 1U; i < 3U; i++) {
 			char c = m_command.at(i);
 			if (c < '0' || c > '9')
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 		}
 
-		return WXS_CONNECT_FCS;
+		return WX_STATUS::CONNECT_FCS;
 	} else if (length == 4U && first == 'A') {
 		for (unsigned int i = 1U; i < 4U; i++) {
 			char c = m_command.at(i);
 			if (c < '0' || c > '9')
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 		}
 
-		return WXS_CONNECT_FCS;
+		return WX_STATUS::CONNECT_FCS;
 	} else if (length == 6U && first == '#') {
 		for (unsigned int i = 1U; i < 6U; i++) {
 			char c = m_command.at(i);
 			if (c < '0' || c > '9')
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 		}
 
 		if (m_command == "#99999")
-			return WXS_DISCONNECT;
+			return WX_STATUS::DISCONNECT;
 
-		return WXS_CONNECT_YSF;
+		return WX_STATUS::CONNECT_YSF;
 	}
 
-	return WXS_NONE;
+	return WX_STATUS::NONE;
 }
 
 std::string CDTMF::getReflector()

@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2019,2020 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2019,2020,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -48,26 +48,26 @@ m_callsign(callsign),
 m_node(),
 m_network(network),
 m_reflectors(reflectors),
-m_reflector(NULL),
+m_reflector(nullptr),
 m_id(),
 m_name(),
-m_command(NULL),
+m_command(nullptr),
 m_txFrequency(0U),
 m_rxFrequency(0U),
 m_timer(1000U, 1U),
 m_seqNo(0U),
-m_header(NULL),
-m_csd1(NULL),
-m_csd2(NULL),
-m_csd3(NULL),
-m_status(WXSI_NONE),
+m_header(nullptr),
+m_csd1(nullptr),
+m_csd2(nullptr),
+m_csd3(nullptr),
+m_status(WXSI_STATUS::NONE),
 m_start(0U),
 m_search(),
 m_busy(false),
 m_busyTimer(3000U, 1U),
 m_bufferTX(10000U, "YSF Wires-X TX Buffer")
 {
-	assert(network != NULL);
+	assert(network != nullptr);
 
 	m_node = callsign;
 	if (suffix.size() > 0U) {
@@ -187,35 +187,35 @@ bool CWiresX::start()
 
 WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* source, const CYSFFICH& fich, bool wiresXCommandPassthrough)
 {
-	assert(data != NULL);
-	assert(source != NULL);
+	assert(data != nullptr);
+	assert(source != nullptr);
 
 	unsigned char dt = fich.getDT();
 	if (dt != YSF_DT_DATA_FR_MODE)
-		return WXS_NONE;
+		return WX_STATUS::NONE;
 
 	unsigned char fi = fich.getFI();
 	if (fi != YSF_FI_COMMUNICATIONS)
-		return WXS_NONE;
+		return WX_STATUS::NONE;
 
 	CYSFPayload payload;
 
 	unsigned char fn = fich.getFN();
 	if (fn == 0U)
-		return WXS_NONE;
+		return WX_STATUS::NONE;
 
 	if (fn == 1U) {
 		bool valid = payload.readDataFRModeData2(data, m_command + 0U);
 		if (!valid)
-			return WXS_NONE;
+			return WX_STATUS::NONE;
 	} else {
 		bool valid = payload.readDataFRModeData1(data, m_command + (fn - 2U) * 40U + 20U);
 		if (!valid)
-			return WXS_NONE;
+			return WX_STATUS::NONE;
 
 		valid = payload.readDataFRModeData2(data, m_command + (fn - 2U) * 40U + 40U);
 		if (!valid)
-			return WXS_NONE;
+			return WX_STATUS::NONE;
 	}
 
 	unsigned char ft = fich.getFT();
@@ -234,52 +234,52 @@ WX_STATUS CWiresX::process(const unsigned char* data, const unsigned char* sourc
 		}
 
 		if (!valid)
-			return WXS_NONE;
+			return WX_STATUS::NONE;
 
 		CUtils::dump(1U, "Received Wires-X command", m_command, cmd_len);
 
 		// If we are using WiresX Passthrough (we already know we are on a YSF2xxx room from YSFGateway
 		if (wiresXCommandPassthrough) {
 			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
 				processDisconnect(source);
-				return WXS_DISCONNECT;
+				return WX_STATUS::DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			}
 		}
 		// Origional Code Here
 		else {
 			if (::memcmp(m_command + 1U, DX_REQ, 3U) == 0) {
 				processDX(source);
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else if (::memcmp(m_command + 1U, ALL_REQ, 3U) == 0) {
 				processAll(source, m_command + 5U);
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else if (::memcmp(m_command + 1U, CONN_REQ, 3U) == 0) {
 				return processConnect(source, m_command + 5U);
 			} else if (::memcmp(m_command + 1U, DISC_REQ, 3U) == 0) {
 				processDisconnect(source);
-				return WXS_DISCONNECT;
+				return WX_STATUS::DISCONNECT;
 			} else if (::memcmp(m_command + 1U, CAT_REQ, 3U) == 0) {
 				processCategory(source, m_command + 5U);
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			} else {
 				CUtils::dump("Unknown Wires-X command", m_command, cmd_len);
-				return WXS_NONE;
+				return WX_STATUS::NONE;
 			}
 		}
 	}
 
-	return WXS_NONE;
+	return WX_STATUS::NONE;
 }
 
 CYSFReflector* CWiresX::getReflector() const
@@ -296,7 +296,7 @@ void CWiresX::processDX(const unsigned char* source)
 {
 	::LogDebug("Received DX from %10.10s", source);
 
-	m_status = WXSI_DX;
+	m_status = WXSI_STATUS::DX;
 	m_timer.start();
 }
 
@@ -329,7 +329,7 @@ void CWiresX::processCategory(const unsigned char* source, const unsigned char* 
 			m_category.push_back(refl);
 	}
 
-	m_status = WXSI_CATEGORY;
+	m_status = WXSI_STATUS::CATEGORY;
 	m_timer.start();
 }
 
@@ -346,7 +346,7 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 		if (m_start > 0U)
 			m_start--;
 
-		m_status = WXSI_ALL;
+		m_status = WXSI_STATUS::ALL;
 
 		m_timer.start();
 	} else if (data[0U] == '1' && data[1U] == '1') {
@@ -358,7 +358,7 @@ void CWiresX::processAll(const unsigned char* source, const unsigned char* data)
 
 		m_search = std::string((char*)(data + 5U), 16U);
 
-		m_status = WXSI_SEARCH;
+		m_status = WXSI_STATUS::SEARCH;
 
 		m_timer.start();
 	}
@@ -374,19 +374,19 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 	std::string id = std::string((char*)data, 5U);
 
 	m_reflector = m_reflectors.findById(id);
-	if (m_reflector == NULL)
-		return WXS_NONE;
+	if (m_reflector == nullptr)
+		return WX_STATUS::NONE;
 
-	m_status = WXSI_CONNECT;
+	m_status = WXSI_STATUS::CONNECT;
 	m_timer.start();
 
 	switch (m_reflector->m_type) {
-	case YT_YSF:
-		return WXS_CONNECT_YSF;
-	case YT_FCS:
-		return WXS_CONNECT_FCS;
+	case YSF_TYPE::YSF:
+		return WX_STATUS::CONNECT_YSF;
+	case YSF_TYPE::FCS:
+		return WX_STATUS::CONNECT_FCS;
 	default:
-		return WXS_NONE;
+		return WX_STATUS::NONE;
 	}
 }
 
@@ -397,18 +397,18 @@ void CWiresX::processConnect(CYSFReflector* reflector)
 
 	m_reflector = reflector;
 
-	m_status = WXSI_CONNECT;
+	m_status = WXSI_STATUS::CONNECT;
 	m_timer.start();
 }
 
 void CWiresX::processDisconnect(const unsigned char* source)
 {
-	if (source != NULL)
+	if (source != nullptr)
 		::LogDebug("Received Disconect from %10.10s", source);
 
-	m_reflector = NULL;
+	m_reflector = nullptr;
 
-	m_status = WXSI_DISCONNECT;
+	m_status = WXSI_STATUS::DISCONNECT;
 	m_timer.start();
 }
 
@@ -421,29 +421,29 @@ void CWiresX::clock(unsigned int ms)
 	m_timer.clock(ms);
 	if (m_timer.isRunning() && m_timer.hasExpired()) {
 		switch (m_status) {
-		case WXSI_DX:
+		case WXSI_STATUS::DX:
 			sendDXReply();
 			break;
-		case WXSI_ALL:
+		case WXSI_STATUS::ALL:
 			sendAllReply();
 			break;
-		case WXSI_SEARCH:
+		case WXSI_STATUS::SEARCH:
 			sendSearchReply();
 			break;
-		case WXSI_CONNECT:
+		case WXSI_STATUS::CONNECT:
 			sendConnectReply();
 			break;
-		case WXSI_DISCONNECT:
+		case WXSI_STATUS::DISCONNECT:
 			sendDisconnectReply();
 			break;
-		case WXSI_CATEGORY:
+		case WXSI_STATUS::CATEGORY:
 			sendCategoryReply();
 			break;
 		default:
 			break;
 		}
 
-		m_status = WXSI_NONE;
+		m_status = WXSI_STATUS::NONE;
 		m_timer.stop();
 	}
 
@@ -468,13 +468,13 @@ void CWiresX::clock(unsigned int ms)
 
 void CWiresX::createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 	assert(length > 0U);
 
 	bool isYSF2XX = true;
 
 	// If we don't explicitly pass a network, use the default one.
-	if (network == NULL) {
+	if (network == nullptr) {
 		isYSF2XX = false;
 		network = m_network;
 	}
@@ -642,7 +642,7 @@ void CWiresX::sendDXReply()
 	for (unsigned int i = 0U; i < 14U; i++)
 		data[i + 20U] = m_name.at(i);
 
-	if (m_reflector == NULL) {
+	if (m_reflector == nullptr) {
 		data[34U] = '1';
 		data[35U] = '2';
 
@@ -718,7 +718,7 @@ void CWiresX::sendConnect(CYSFNetwork* network)
 
 void CWiresX::sendConnectReply()
 {
-	assert(m_reflector != NULL);
+	assert(m_reflector != nullptr);
 
 	unsigned char data[110U];
 	::memset(data, 0x00U, 110U);

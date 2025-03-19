@@ -1,5 +1,5 @@
 /*
- *	Copyright (C) 2009,2014,2015,2016,2023 Jonathan Naylor, G4KLX
+ *	Copyright (C) 2009,2014,2015,2016,2023,2025 Jonathan Naylor, G4KLX
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -26,14 +26,14 @@
 
 void CUtils::dump(const std::string& title, const unsigned char* data, unsigned int length)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	dump(2U, title, data, length);
 }
 
 void CUtils::dump(int level, const std::string& title, const unsigned char* data, unsigned int length)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	::Log(level, "%s", title.c_str());
 
@@ -88,7 +88,7 @@ std::string CUtils::createTimestamp()
 	::sprintf(buffer, "%04u-%02u-%02u %02u:%02u:%02u.%03u", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
 #else
 	struct timeval now;
-	::gettimeofday(&now, NULL);
+	::gettimeofday(&now, nullptr);
 
 	struct tm* tm = ::gmtime(&now.tv_sec);
 

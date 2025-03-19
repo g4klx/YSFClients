@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010,2016 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010,2016,2025 by Jonathan Naylor G4KLX
  *   Copyright (C) 2002 by Robert H. Morelos-Zaragoza. All rights reserved.
  */
 
@@ -1096,7 +1096,7 @@ unsigned int CGolay24128::decode24128(unsigned int code)
 
 unsigned int CGolay24128::decode24128(unsigned char* bytes)
 {
-	assert(bytes != NULL);
+	assert(bytes != nullptr);
 
 	unsigned int code = bytes[0U];
 	code <<= 8;

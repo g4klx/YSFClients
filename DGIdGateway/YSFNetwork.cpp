@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -33,13 +33,13 @@ m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_static(true),
-m_poll(NULL),
-m_unlink(NULL),
+m_poll(nullptr),
+m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
 m_name(name),
-m_state(DS_NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -62,13 +62,13 @@ m_debug(debug),
 m_addr(addr),
 m_addrLen(addrLen),
 m_static(statc),
-m_poll(NULL),
-m_unlink(NULL),
+m_poll(nullptr),
+m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
 m_name(name),
-m_state(DS_NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -105,7 +105,7 @@ bool CYSFNetwork::open()
 {
 	if (m_addrLen == 0U) {
 		LogError("Unable to resolve the address of the YSF network");
-		m_state = DS_NOTOPEN;
+		m_state = DGID_STATUS::NOTOPEN;
 		return false;
 	}
 
@@ -113,10 +113,10 @@ bool CYSFNetwork::open()
 
 	bool ret = m_socket.open(m_addr);
 	if (!ret) {
-		m_state = DS_NOTOPEN;
+		m_state = DGID_STATUS::NOTOPEN;
 		return false;
 	} else {
-		m_state = DS_NOTLINKED;
+		m_state = DGID_STATUS::NOTLINKED;
 		return true;
 	}
 }
@@ -128,9 +128,9 @@ DGID_STATUS CYSFNetwork::getStatus()
 
 void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
-	if (m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKED)
 		return;
 
 	if (m_debug)
@@ -141,10 +141,10 @@ void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 
 void CYSFNetwork::link()
 {
-	if (m_state != DS_NOTLINKED)
+	if (m_state != DGID_STATUS::NOTLINKED)
 		return;
 
-	m_state = DS_LINKING;
+	m_state = DGID_STATUS::LINKING;
 
 	m_sendPollTimer.start();
 	m_recvPollTimer.start();
@@ -154,7 +154,7 @@ void CYSFNetwork::link()
 
 void CYSFNetwork::writePoll()
 {
-	if (m_state != DS_LINKING && m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKING && m_state != DGID_STATUS::LINKED)
 		return;
 
 	if (m_debug)
@@ -165,7 +165,7 @@ void CYSFNetwork::writePoll()
 
 void CYSFNetwork::unlink()
 {
-	if (m_state != DS_LINKED)
+	if (m_state != DGID_STATUS::LINKED)
 		return;
 
 	m_sendPollTimer.stop();
@@ -178,20 +178,20 @@ void CYSFNetwork::unlink()
 
 	LogMessage("Unlinked from %s", m_name.c_str());
 
-	m_state = DS_NOTLINKED;
+	m_state = DGID_STATUS::NOTLINKED;
 }
 
 void CYSFNetwork::clock(unsigned int ms)
 {
-	if (m_state == DS_NOTOPEN)
+	if (m_state == DGID_STATUS::NOTOPEN)
 		return;
 
 	m_recvPollTimer.clock(ms);
 	if (m_recvPollTimer.isRunning() && m_recvPollTimer.hasExpired()) {
 		if (m_static) {
-			m_state = DS_LINKING;
+			m_state = DGID_STATUS::LINKING;
 		} else {
-			m_state = DS_NOTLINKED;
+			m_state = DGID_STATUS::NOTLINKED;
 			m_sendPollTimer.stop();
 		}
 
@@ -224,13 +224,13 @@ void CYSFNetwork::clock(unsigned int ms)
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {
 		m_recvPollTimer.start();
 
-		if (m_state == DS_LINKING) {
+		if (m_state == DGID_STATUS::LINKING) {
 			if (strcmp(m_name.c_str(), "MMDVM") == 0)
 				LogMessage("Link successful to %s", m_name.c_str());
 			else
 				LogMessage("Linked to %s", m_name.c_str());
 
-			m_state = DS_LINKED;
+			m_state = DGID_STATUS::LINKED;
 		}
 	}
 
@@ -246,7 +246,7 @@ void CYSFNetwork::clock(unsigned int ms)
 
 unsigned int CYSFNetwork::read(unsigned int dgid, unsigned char* data)
 {
-	assert(data != NULL);
+	assert(data != nullptr);
 
 	if (m_buffer.isEmpty())
 		return 0U;
@@ -265,5 +265,5 @@ void CYSFNetwork::close()
 
 	LogMessage("Closing YSF network connection");
 
-	m_state = DS_NOTOPEN;
+	m_state = DGID_STATUS::NOTOPEN;
 }
