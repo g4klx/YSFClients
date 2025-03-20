@@ -95,20 +95,20 @@ CConf::~CConf()
 
 bool CConf::read()
 {
-  FILE* fp = ::fopen(m_file.c_str(), "rt");
-  if (fp == nullptr) {
-    ::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
-    return false;
-  }
+	FILE* fp = ::fopen(m_file.c_str(), "rt");
+	if (fp == nullptr) {
+		::fprintf(stderr, "Couldn't open the .ini file - %s\n", m_file.c_str());
+		return false;
+	}
 
-  SECTION section = SECTION::NONE;
+	SECTION section = SECTION::NONE;
 
-  DGIdData* dgIdData = nullptr;
+	DGIdData* dgIdData = nullptr;
 
-  char buffer[BUFFER_SIZE];
-  while (::fgets(buffer, BUFFER_SIZE, fp) != nullptr) {
-    if (buffer[0U] == '#')
-      continue;
+	char buffer[BUFFER_SIZE];
+	while (::fgets(buffer, BUFFER_SIZE, fp) != nullptr) {
+		if (buffer[0U] == '#')
+			continue;
 
 		if (buffer[0U] == '[') {
 			if (::strncmp(buffer, "[General]", 9U) == 0)
@@ -140,13 +140,13 @@ bool CConf::read()
 			continue;
 		}
 
-	char* key = ::strtok(buffer, " \t=\r\n");
-	if (key == nullptr)
-		continue;
+		char* key = ::strtok(buffer, " \t=\r\n");
+		if (key == nullptr)
+			continue;
 
-	char* value = ::strtok(nullptr, "\r\n");
-	if (value == nullptr)
-		continue;
+		char* value = ::strtok(nullptr, "\r\n");
+		if (value == nullptr)
+			continue;
 
 		// Remove quotes from the value
 		size_t len = ::strlen(value);
@@ -156,9 +156,9 @@ bool CConf::read()
 		} else {
 			char *p;
 
-		// if value is not quoted, remove after # (to make comment)
-		if ((p = strchr(value, '#')) != nullptr)
-			*p = '\0';
+			// if value is not quoted, remove after # (to make comment)
+			if ((p = strchr(value, '#')) != nullptr)
+				*p = '\0';
 
 			// remove trailing tab/space
 			for (p = value + strlen(value) - 1U; p >= value && (*p == '\t' || *p == ' '); p--)
