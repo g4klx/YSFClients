@@ -119,6 +119,8 @@ bool CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage
 	m_addrLen = addrLen;
 	m_linked  = false;
 
+	close();
+
 	bool ret = open();
 	if (ret) {
 		m_pollTimer.start();
