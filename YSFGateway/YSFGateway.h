@@ -68,6 +68,8 @@ private:
 	CUDPSocket*     m_remoteSocket;
 
 	void startupLinking();
+	void reconnectReflector(const std::string& nameOrId);
+	void disconnectCurrentReflector();
 	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
 	void processDTMF(unsigned char* buffer, unsigned char dt);

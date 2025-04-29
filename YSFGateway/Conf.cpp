@@ -74,6 +74,7 @@ m_aprsSymbol("/r"),
 m_networkStartup(),
 m_networkOptions(),
 m_networkInactivityTimeout(0U),
+m_networkReconnect(false),
 m_networkRevert(false),
 m_networkDebug(false),
 m_ysfNetworkEnabled(false),
@@ -245,6 +246,8 @@ bool CConf::read()
 			m_networkOptions = value;
 		else if (::strcmp(key, "InactivityTimeout") == 0)
 			m_networkInactivityTimeout = (unsigned int)::atoi(value);
+		else if (::strcmp(key, "Reconnect") == 0)
+			m_networkReconnect = ::atoi(value) == 1;
 		else if (::strcmp(key, "Revert") == 0)
 			m_networkRevert = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
@@ -464,6 +467,11 @@ std::string CConf::getNetworkOptions() const
 unsigned int CConf::getNetworkInactivityTimeout() const
 {
 	return m_networkInactivityTimeout;
+}
+
+bool CConf::getNetworkReconnect() const
+{
+	return m_networkReconnect;
 }
 
 bool CConf::getNetworkRevert() const
