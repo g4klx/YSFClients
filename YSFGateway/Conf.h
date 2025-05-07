@@ -71,6 +71,7 @@ public:
   std::string  getNetworkStartup() const;
   std::string  getNetworkOptions() const;
   unsigned int getNetworkInactivityTimeout() const;
+  bool         getNetworkReconnect() const;
   bool         getNetworkRevert() const;
   bool         getNetworkDebug() const;
 
@@ -141,6 +142,7 @@ private:
   std::string  m_networkStartup;
   std::string  m_networkOptions;
   unsigned int m_networkInactivityTimeout;
+  bool         m_networkReconnect;
   bool         m_networkRevert;
   bool         m_networkDebug;
 
