@@ -10,6 +10,8 @@ The Gateways have ini files that contain the parameters for running the software
 
 The MMDVM .ini file should have the IP address and port number of the client in the [System Fusion Network] settings.
 
+The file that contains the information about the reachable YSF reflectors is held in the YSFHosts.txt files that should be donwloaded from the DVRef.com web site. A script to do this under Linux is included. This is handled automatically in WPSD and Pi-Star.
+
 They build on 32-bit and 64-bit Linux as well as on Windows using Visual Studio 2019 on x86 and x64.
 
 This software is licenced under the GPL v2 and is primarily intended for amateur and educational use.
