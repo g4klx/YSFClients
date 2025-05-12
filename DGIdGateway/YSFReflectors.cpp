@@ -67,8 +67,6 @@ bool CYSFReflectors::load()
 			else
 				fullName = country + " " + name;
 
-			LogMessage("Id: %s, name: %s", id.c_str(), fullName.c_str());
-
 			unsigned short port = it["port"];
 
 			sockaddr_storage addr_v4 = sockaddr_storage();

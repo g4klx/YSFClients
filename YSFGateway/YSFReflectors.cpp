@@ -138,9 +138,13 @@ bool CYSFReflectors::load()
 			else
 				fullName = country + " " + name;
 
-			std::string desc = it["description"];
-
-			LogMessage("Id: %s, name: %s, desc: %s", id.c_str(), fullName.c_str(), desc.c_str());
+			std::string desc;
+			if (it["description"].is_null()) {
+				desc = name;
+			} else {
+				std::string description = it["description"];
+				desc = description;
+			}
 
 			unsigned short port = it["port"];
 
