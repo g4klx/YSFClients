@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2021,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -37,21 +37,89 @@ public:
 	m_name(),
 	m_desc(),
 	m_count("000"),
-	m_addr(),
-	m_addrLen(0U),
 	m_type(YSF_TYPE::YSF),
 	m_wiresX(false)
 	{
+		IPv4.m_addrLen = 0U;
+		IPv6.m_addrLen = 0U;
 	}
 
-	std::string      m_id;
-	std::string      m_name;
-	std::string      m_desc;
-	std::string      m_count;
-	sockaddr_storage m_addr;
-	unsigned int     m_addrLen;
-	YSF_TYPE         m_type;
-	bool             m_wiresX;
+	CYSFReflector(const CYSFReflector& in)
+	{
+		m_id     = in.m_id;
+		m_name   = in.m_name;
+		m_desc   = in.m_desc;
+		m_count  = in.m_count;
+		m_type   = in.m_type;
+		m_wiresX = in.m_wiresX;
+
+		IPv4.m_addrLen = in.IPv4.m_addrLen;
+		IPv6.m_addrLen = in.IPv6.m_addrLen;
+
+		::memcpy(&IPv4.m_addr, &in.IPv4.m_addr, sizeof(sockaddr_storage));
+		::memcpy(&IPv6.m_addr, &in.IPv6.m_addr, sizeof(sockaddr_storage));
+	}
+
+	bool isEmpty() const
+	{
+		return m_id.empty();
+	}
+
+	bool isUsed() const
+	{
+		return !m_id.empty();
+	}
+
+	void reset()
+	{
+		m_id.clear();
+		m_name.clear();
+	}
+
+	bool hasIPv4() const
+	{
+		return IPv4.m_addrLen > 0U;
+	}
+
+	bool hasIPv6() const
+	{
+		return IPv6.m_addrLen > 0U;
+	}
+
+	std::string m_id;
+	std::string m_name;
+	std::string m_desc;
+	std::string m_count;
+	YSF_TYPE    m_type;
+	bool        m_wiresX;
+	struct {
+		sockaddr_storage m_addr;
+		unsigned int     m_addrLen;
+	} IPv4;
+	struct {
+		sockaddr_storage m_addr;
+		unsigned int     m_addrLen;
+	} IPv6;
+
+	CYSFReflector& operator=(const CYSFReflector& in)
+	{
+		if (&in != this) {
+			m_id     = in.m_id;
+			m_name   = in.m_name;
+			m_desc   = in.m_desc;
+			m_count  = in.m_count;
+			m_type   = in.m_type;
+			m_wiresX = in.m_wiresX;
+
+			IPv4.m_addrLen = in.IPv4.m_addrLen;
+			IPv6.m_addrLen = in.IPv6.m_addrLen;
+
+			::memcpy(&IPv4.m_addr, &in.IPv4.m_addr, sizeof(sockaddr_storage));
+			::memcpy(&IPv6.m_addr, &in.IPv6.m_addr, sizeof(sockaddr_storage));
+		}
+
+		return *this;
+	}
 };
 
 class CYSFReflectors {
@@ -59,7 +127,7 @@ public:
 	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper);
 	~CYSFReflectors();
 
-	void setParrot(const std::string& address, unsigned short port);	
+	void setParrot(const std::string& address, unsigned short port);
 	void setYSF2DMR(const std::string& address, unsigned short port);
 	void setYSF2NXDN(const std::string& address, unsigned short port);
 	void setYSF2P25(const std::string& address, unsigned short port);
@@ -76,7 +144,7 @@ public:
 
 	bool reload();
 
-	void clock(unsigned int ms);
+	void clock(unsigned int ms); 
 
 private:
 	std::string                 m_hostsFile;

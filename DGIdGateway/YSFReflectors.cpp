@@ -19,6 +19,9 @@
 #include "YSFReflectors.h"
 #include "Log.h"
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 #include <algorithm>
 #include <functional>
 #include <cstdio>
@@ -34,50 +37,82 @@ m_reflectors()
 
 CYSFReflectors::~CYSFReflectors()
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_reflectors.begin(); it != m_reflectors.end(); ++it)
-		delete *it;
-
-	m_reflectors.clear();
+	remove();
 }
 
 bool CYSFReflectors::load()
 {
-	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
-	if (fp != nullptr) {
-		char buffer[100U];
-		while (::fgets(buffer, 100U, fp) != nullptr) {
-			if (buffer[0U] == '#')
-				continue;
+	remove();
 
-			char* p1 = ::strtok(buffer, ";\r\n");
-			char* p2 = ::strtok(nullptr, ";\r\n");
-			char* p3 = ::strtok(nullptr, ";\r\n");
-			char* p4 = ::strtok(nullptr, ";\r\n");
-			char* p5 = ::strtok(nullptr, ";\r\n");
-			char* p6 = ::strtok(nullptr, "\r\n");
+	try {
+		std::fstream file(m_hostsFile);
 
-			if (p1 != nullptr && p2 != nullptr && p3 != nullptr && p4 != nullptr && p5 != nullptr && p6 != nullptr) {
-				std::string host = std::string(p4);
-				unsigned short port = (unsigned short)::atoi(p5);
+		nlohmann::json data = nlohmann::json::parse(file);
 
-				if (::strstr(p1, "YCS") == nullptr && ::strstr(p2, "YCS") == nullptr) {
-					sockaddr_storage addr;
-					unsigned int addrLen;
-					if (CUDPSocket::lookup(host, port, addr, addrLen) == 0) {
-						CYSFReflector* refl = new CYSFReflector;
-						refl->m_id = std::string(p1);
-						refl->m_name = std::string(p2);
-						refl->m_addr = addr;
-						refl->m_addrLen = addrLen;
-						m_reflectors.push_back(refl);
-					} else {
-						LogWarning("Unable to resolve the address for %s", host.c_str());
-					}
+		bool hasData = data["reflectors"].is_array();
+		if (!hasData)
+			throw;
+
+		nlohmann::json::array_t hosts = data["reflectors"];
+		for (const auto& it : hosts) {
+			std::string id = it["designator"];
+
+			std::string country = it["country"];
+			std::string name    = it["name"];
+			bool useXX          = it["use_xx_prefix"];
+
+			std::string fullName;
+			if (useXX)
+				fullName = "XX " + name;
+			else
+				fullName = country + " " + name;
+
+			LogMessage("Id: %s, name: %s", id.c_str(), fullName.c_str());
+
+			unsigned short port = it["port"];
+
+			sockaddr_storage addr_v4 = sockaddr_storage();
+			unsigned int     addrLen_v4 = 0U;
+
+			bool isNull = it["ipv4"].is_null();
+			if (!isNull) {
+				std::string ipv4 = it["ipv4"];
+				if (!CUDPSocket::lookup(ipv4, port, addr_v4, addrLen_v4) == 0) {
+					LogWarning("Unable to resolve the address of %s", ipv4.c_str());
+					addrLen_v4 = 0U;
 				}
 			}
-		}
 
-		::fclose(fp);
+			sockaddr_storage addr_v6 = sockaddr_storage();
+			unsigned int     addrLen_v6 = 0U;
+
+			isNull = it["ipv6"].is_null();
+			if (!isNull) {
+				std::string ipv6 = it["ipv6"];
+				if (!CUDPSocket::lookup(ipv6, port, addr_v6, addrLen_v6) == 0) {
+					LogWarning("Unable to resolve the address of %s", ipv6.c_str());
+					addrLen_v6 = 0U;
+				}
+			}
+
+			if ((addrLen_v4 > 0U) || (addrLen_v6 > 0U)) {
+				CYSFReflector* refl = new CYSFReflector;
+				refl->m_id           = id;
+				refl->m_name         = fullName;
+
+				refl->m_name.resize(16U, ' ');
+
+				refl->IPv4.m_addr    = addr_v4;
+				refl->IPv4.m_addrLen = addrLen_v4;
+				refl->IPv6.m_addr    = addr_v6;
+				refl->IPv6.m_addrLen = addrLen_v6;
+				m_reflectors.push_back(refl);
+			}
+		}
+	}
+	catch (...) {
+		LogError("Unable to load/parse JSON file %s", m_hostsFile.c_str());
+		return false;
 	}
 
 	size_t size = m_reflectors.size();
@@ -88,9 +123,9 @@ bool CYSFReflectors::load()
 
 CYSFReflector* CYSFReflectors::findById(const std::string& id)
 {
-	for (std::vector<CYSFReflector*>::const_iterator it = m_reflectors.cbegin(); it != m_reflectors.cend(); ++it) {
-		if (id == (*it)->m_id)
-			return *it;
+	for (const auto& it : m_reflectors) {
+		if (id == it->m_id)
+			return it;
 	}
 
 	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
@@ -100,9 +135,9 @@ CYSFReflector* CYSFReflectors::findById(const std::string& id)
 
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 {
-	for (std::vector<CYSFReflector*>::const_iterator it = m_reflectors.cbegin(); it != m_reflectors.cend(); ++it) {
-		if (name == (*it)->m_name)
-			return *it;
+	for (const auto& it : m_reflectors) {
+		if (name == it->m_name)
+			return it;
 	}
 
 	LogMessage("Trying to find non existent YSF reflector with a name of %s", name.c_str());
@@ -110,3 +145,10 @@ CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 	return nullptr;
 }
 
+void CYSFReflectors::remove()
+{
+	for (const auto& it : m_reflectors)
+		delete it;
+
+	m_reflectors.clear();
+}

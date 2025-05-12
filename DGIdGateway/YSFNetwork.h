@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define	YSFNetwork_H
 
 #include "DGIdNetwork.h"
+#include "YSFReflectors.h"
 #include "YSFDefines.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
@@ -32,6 +33,7 @@ class CYSFNetwork : public CDGIdNetwork {
 public:
 	CYSFNetwork(const std::string& localAddress, unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug);
 	CYSFNetwork(unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool statc, bool debug);
+	CYSFNetwork(unsigned short localPort, const CYSFReflector& reflector, const std::string& callsign, bool statc, bool debug);
 	virtual ~CYSFNetwork();
 
 	virtual std::string getDesc(unsigned int dgId);
@@ -57,16 +59,15 @@ public:
 private:
 	CUDPSocket                 m_socket;
 	bool                       m_debug;
-	sockaddr_storage           m_addr;
-	unsigned int               m_addrLen;
+	CYSFReflector              m_reflector;
 	bool                       m_static;
 	unsigned char*             m_poll;
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_sendPollTimer;
 	CTimer                     m_recvPollTimer;
-	std::string                m_name;
 	DGID_STATUS                m_state;
+	bool                       m_ipV6;
 
 	void writePoll();
 };

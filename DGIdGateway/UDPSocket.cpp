@@ -101,7 +101,7 @@ int CUDPSocket::lookup(const std::string& hostname, unsigned short port, sockadd
 		paddr->sin_family = AF_INET;
 		paddr->sin_port = htons(port);
 		paddr->sin_addr.s_addr = htonl(INADDR_NONE);
-		LogError("Cannot find address for host %s", hostname.c_str());
+		LogError("Cannot find an address for host %s on port %u, using IPv4 any", hostname.c_str(), port);
 		return err;
 	}
 
@@ -154,13 +154,6 @@ bool CUDPSocket::match(const sockaddr_storage& addr1, const sockaddr_storage& ad
 	}
 }
 
-bool CUDPSocket::isNone(const sockaddr_storage& addr)
-{
-	struct sockaddr_in *in = (struct sockaddr_in*)&addr;
-
-	return ((addr.ss_family == AF_INET) && (in->sin_addr.s_addr == htonl(INADDR_NONE)));
-}
-
 bool CUDPSocket::open(const sockaddr_storage& address)
 {
 	m_af = address.ss_family;
@@ -187,7 +180,17 @@ bool CUDPSocket::open()
 	// To determine protocol family, call lookup() on the local address first.
 	int err = lookup(m_localAddress, m_localPort, addr, addrlen, hints);
 	if (err != 0) {
-		LogError("The local address is invalid - %s", m_localAddress.c_str());
+		switch (m_af) {
+		case AF_INET:
+			LogError("The local IPv4 address on port %u is invalid - %s", m_localPort, m_localAddress.c_str());
+			break;
+		case AF_INET6:
+			LogError("The local IPv6 address on port %u is invalid - %s", m_localPort, m_localAddress.c_str());
+			break;
+		default:
+			LogError("Unknown protocol (%d) local address on port %u is invalid - %s", m_af, m_localPort, m_localAddress.c_str());
+			break;
+		}
 		return false;
 	}
 
@@ -196,20 +199,60 @@ bool CUDPSocket::open()
 	m_fd = ::socket(m_af, SOCK_DGRAM, 0);
 	if (m_fd < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Cannot create the UDP socket, err: %lu", ::GetLastError());
+		switch (m_af) {
+		case AF_INET:
+			LogError("Cannot create the IPv4 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		case AF_INET6:
+			LogError("Cannot create the IPv6 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		default:
+			LogError("Cannot create the unknown protocol (%d) UDP socket on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+			break;
+		}
 #else
-		LogError("Cannot create the UDP socket, err: %d", errno);
+		switch (m_af) {
+		case AF_INET:
+			LogError("Cannot create the IPv4 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		case AF_INET6:
+			LogError("Cannot create the IPv6 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		default:
+			LogError("Cannot create the unknown protocol (%d) UDP socket on port %u, err: %d", m_af, m_localPort, errno);
+			break;
+		}
 #endif
 		return false;
 	}
 
 	if (m_localPort > 0U) {
 		int reuse = 1;
-		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reuse, sizeof(reuse)) == -1) {
+		if (::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == -1) {
 #if defined(_WIN32) || defined(_WIN64)
-			LogError("Cannot set the UDP socket option, err: %lu", ::GetLastError());
+			switch (m_af) {
+			case AF_INET:
+				LogError("Cannot set the IPv4 UDP socket options on port %u, err: %lu", m_localPort, ::GetLastError());
+				break;
+			case AF_INET6:
+				LogError("Cannot set the IPv6 UDP socket options on port %u, err: %lu", m_localPort, ::GetLastError());
+				break;
+			default:
+				LogError("Cannot set the unknown protocol (%d) UDP socket options on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+				break;
+			}
 #else
-			LogError("Cannot set the UDP socket option, err: %d", errno);
+			switch (m_af) {
+			case AF_INET:
+				LogError("Cannot set the IPv4 UDP socket options on port %u, err: %d", m_localPort, errno);
+				break;
+			case AF_INET6:
+				LogError("Cannot set the IPv6 UDP socket options on port %u, err: %d", m_localPort, errno);
+				break;
+			default:
+				LogError("Cannot set the unknown protocol (%d) UDP socket options on port %u, err: %d", m_af, m_localPort, errno);
+				break;
+			}
 #endif
 			close();
 			return false;
@@ -217,21 +260,52 @@ bool CUDPSocket::open()
 
 		if (::bind(m_fd, (sockaddr*)&addr, addrlen) == -1) {
 #if defined(_WIN32) || defined(_WIN64)
-			LogError("Cannot bind the UDP address, err: %lu", ::GetLastError());
+			switch (m_af) {
+			case AF_INET:
+				LogError("Cannot bind the IPv4 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+				break;
+			case AF_INET6:
+				LogError("Cannot bind the IPv6 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+				break;
+			default:
+				LogError("Cannot bind the unknown protocol (%d) UDP socket on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+				break;
+			}
 #else
-			LogError("Cannot bind the UDP address, err: %d", errno);
+			switch (m_af) {
+			case AF_INET:
+				LogError("Cannot bind the IPv4 UDP socket on port %u, err: %d", m_localPort, errno);
+				break;
+			case AF_INET6:
+				LogError("Cannot bind the IPv6 UDP socket on port %u, err: %d", m_localPort, errno);
+				break;
+			default:
+				LogError("Cannot bind the unknown protocol (%d) UDP socket on port %u, err: %d", m_af, m_localPort, errno);
+				break;
+			}
 #endif
 			close();
 			return false;
 		}
 
-		LogInfo("Opening UDP port on %hu", m_localPort);
+		switch (m_af) {
+		case AF_INET:
+			LogInfo("Opening an IPv4 UDP port on %hu", m_localPort);
+			break;
+		case AF_INET6:
+			LogInfo("Opening an IPv6 UDP port on %hu", m_localPort);
+			break;
+		default:
+			LogError("Unknown IP protocol - %d", m_af);
+			close();
+			return false;
+		}
 	}
 
 	return true;
 }
 
-int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storage& address, unsigned int& addressLength)
+int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storage& address, unsigned int &addressLength)
 {
 	assert(buffer != nullptr);
 	assert(length > 0U);
@@ -258,9 +332,29 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storag
 #endif
 	if (ret < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from UDP poll, err: %lu", ::GetLastError());
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from poll on IPv4 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		case AF_INET6:
+			LogError("Error returned from poll on IPv6 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		default:
+			LogError("Error returned from poll on unknown protocol (%d) UDP socket on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+			break;
+		}
 #else
-		LogError("Error returned from UDP poll, err: %d", errno);
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from poll on IPv4 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		case AF_INET6:
+			LogError("Error returned from poll on IPv6 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		default:
+			LogError("Error returned from poll on unknown protocol (%d) UDP socket on port %u, err: %d", m_af, m_localPort, errno);
+			break;
+		}
 #endif
 		return -1;
 	}
@@ -275,18 +369,38 @@ int CUDPSocket::read(unsigned char* buffer, unsigned int length, sockaddr_storag
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)
-	int len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, &size);
+	int len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&address, &size);
 #else
-	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, &size);
+	ssize_t len = ::recvfrom(m_fd, (char*)buffer, length, 0, (sockaddr *)&address, &size);
 #endif
 	if (len <= 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from recvfrom, err: %lu", ::GetLastError());
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from recvfrom on IPv4 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		case AF_INET6:
+			LogError("Error returned from recvfrom on IPv6 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		default:
+			LogError("Error returned from recvfrom on unknown protocol (%d) UDP socket on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+			break;
+		}
 #else
-		LogError("Error returned from recvfrom, err: %d", errno);
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from recvfrom on IPv4 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		case AF_INET6:
+			LogError("Error returned from recvfrom on IPv6 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		default:
+			LogError("Error returned from recvfrom on unknown protocol (%d) UDP socket on port %u, err: %d", m_af, m_localPort, errno);
+			break;
+		}
 
-		if (len == -1 && errno == ENOTSOCK) {
-			LogMessage("Re-opening UDP port on %hu", m_localPort);
+		if ((len == -1) && (errno == ENOTSOCK)) {
+			LogMessage("Re-opening UDP port");
 			close();
 			open();
 		}
@@ -312,16 +426,36 @@ bool CUDPSocket::write(const unsigned char* buffer, unsigned int length, const s
 	bool result = false;
 
 #if defined(_WIN32) || defined(_WIN64)
-	int ret = ::sendto(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, addressLength);
+	int ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&address, addressLength);
 #else
-	ssize_t ret = ::sendto(m_fd, (char*)buffer, length, 0, (sockaddr*)&address, addressLength);
+	ssize_t ret = ::sendto(m_fd, (char *)buffer, length, 0, (sockaddr *)&address, addressLength);
 #endif
 
 	if (ret < 0) {
 #if defined(_WIN32) || defined(_WIN64)
-		LogError("Error returned from sendto, err: %lu", ::GetLastError());
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from sendto on IPv4 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		case AF_INET6:
+			LogError("Error returned from sendto on IPv6 UDP socket on port %u, err: %lu", m_localPort, ::GetLastError());
+			break;
+		default:
+			LogError("Error returned from sendto on unknown protocol (%d) UDP socket on port %u, err: %lu", m_af, m_localPort, ::GetLastError());
+			break;
+		}
 #else
-		LogError("Error returned from sendto, err: %d", errno);
+		switch (m_af) {
+		case AF_INET:
+			LogError("Error returned from sendto on IPv4 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		case AF_INET6:
+			LogError("Error returned from sendto on IPv6 UDP socket on port %u, err: %d", m_localPort, errno);
+			break;
+		default:
+			LogError("Error returned from sendto on unknown protocol (%d) UDP socket on port %u, err: %d", m_af, m_localPort, errno);
+			break;
+		}
 #endif
 	} else {
 #if defined(_WIN32) || defined(_WIN64)

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2009-2014,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2009-2014,2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define	YSFNetwork_H
 
 #include "YSFDefines.h"
+#include "YSFReflectors.h"
 #include "UDPSocket.h"
 #include "RingBuffer.h"
 #include "Timer.h"
@@ -34,6 +35,7 @@ public:
 	~CYSFNetwork();
 
 	bool setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen);
+	bool setDestination(const CYSFReflector& reflector);
 	void clearDestination();
 
 	void write(const unsigned char* data);
@@ -49,16 +51,15 @@ public:
 private:
 	CUDPSocket                 m_socket;
 	bool                       m_debug;
-	sockaddr_storage           m_addr;
-	unsigned int               m_addrLen;
+	CYSFReflector              m_reflector;
 	unsigned char*             m_poll;
 	unsigned char*             m_options;
 	std::string                m_opt;
 	unsigned char*             m_unlink;
 	CRingBuffer<unsigned char> m_buffer;
 	CTimer                     m_pollTimer;
-	std::string                m_name;
 	bool                       m_linked;
+	bool                       m_ipV6;
 
 	bool open();
 	void close();

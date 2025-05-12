@@ -30,17 +30,34 @@ const unsigned int BUFFER_LENGTH = 200U;
 CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
 m_socket(localAddress, localPort),
 m_debug(debug),
-m_addr(addr),
-m_addrLen(addrLen),
+m_reflector(),
 m_static(true),
 m_poll(nullptr),
 m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
-m_name(name),
-m_state(DGID_STATUS::NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN),
+m_ipV6(false)
 {
+	m_reflector.m_id   = "99999";
+	m_reflector.m_name = "Local";
+
+	switch (addr.ss_family) {
+	case AF_INET:
+		m_reflector.IPv4.m_addr    = addr;
+		m_reflector.IPv4.m_addrLen = addrLen;
+		m_reflector.IPv6.m_addrLen = 0U;
+		break;
+	case AF_INET6:
+		m_reflector.IPv6.m_addr    = addr;
+		m_reflector.IPv6.m_addrLen = addrLen;
+		m_reflector.IPv4.m_addrLen = 0U;
+		break;
+	default:
+		throw;
+	}
+
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
 
@@ -59,16 +76,61 @@ m_state(DGID_STATUS::NOTOPEN)
 CYSFNetwork::CYSFNetwork(unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool statc, bool debug) :
 m_socket(localPort),
 m_debug(debug),
-m_addr(addr),
-m_addrLen(addrLen),
+m_reflector(),
 m_static(statc),
 m_poll(nullptr),
 m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
-m_name(name),
-m_state(DGID_STATUS::NOTOPEN)
+m_state(DGID_STATUS::NOTOPEN),
+m_ipV6(false)
+{
+	m_reflector.m_id   = "99999";
+	m_reflector.m_name = name;
+
+	switch (addr.ss_family) {
+	case AF_INET:
+		m_reflector.IPv4.m_addr    = addr;
+		m_reflector.IPv4.m_addrLen = addrLen;
+		m_reflector.IPv6.m_addrLen = 0U;
+		break;
+	case AF_INET6:
+		m_reflector.IPv6.m_addr    = addr;
+		m_reflector.IPv6.m_addrLen = addrLen;
+		m_reflector.IPv4.m_addrLen = 0U;
+		break;
+	default:
+		throw;
+	}
+
+	m_poll = new unsigned char[14U];
+	::memcpy(m_poll + 0U, "YSFP", 4U);
+
+	m_unlink = new unsigned char[14U];
+	::memcpy(m_unlink + 0U, "YSFU", 4U);
+
+	std::string node = callsign;
+	node.resize(YSF_CALLSIGN_LENGTH, ' ');
+
+	for (unsigned int i = 0U; i < YSF_CALLSIGN_LENGTH; i++) {
+		m_poll[i + 4U] = node.at(i);
+		m_unlink[i + 4U] = node.at(i);
+	}
+}
+
+CYSFNetwork::CYSFNetwork(unsigned short localPort, const CYSFReflector& reflector, const std::string& callsign, bool statc, bool debug) :
+m_socket(localPort),
+m_debug(debug),
+m_reflector(reflector),
+m_static(statc),
+m_poll(nullptr),
+m_unlink(nullptr),
+m_buffer(1000U, "YSF Network Buffer"),
+m_sendPollTimer(1000U, 5U),
+m_recvPollTimer(1000U, 60U),
+m_state(DGID_STATUS::NOTOPEN),
+m_ipV6(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -93,7 +155,7 @@ CYSFNetwork::~CYSFNetwork()
 
 std::string CYSFNetwork::getDesc(unsigned int dgId)
 {
-	return "YSF: " + m_name;
+	return "YSF: " + m_reflector.m_name;
 }
 
 unsigned int CYSFNetwork::getDGId()
@@ -103,7 +165,7 @@ unsigned int CYSFNetwork::getDGId()
 
 bool CYSFNetwork::open()
 {
-	if (m_addrLen == 0U) {
+	if (m_reflector.isEmpty()) {
 		LogError("Unable to resolve the address of the YSF network");
 		m_state = DGID_STATUS::NOTOPEN;
 		return false;
@@ -111,7 +173,16 @@ bool CYSFNetwork::open()
 
 	LogMessage("Opening YSF network connection");
 
-	bool ret = m_socket.open(m_addr);
+	bool ret = false;
+	if (m_reflector.hasIPv6()) {
+		ret = m_socket.open(m_reflector.IPv6.m_addr);
+		m_ipV6 = true;
+	}
+	if (!ret && m_reflector.hasIPv4()) {
+		ret = m_socket.open(m_reflector.IPv4.m_addr);
+		m_ipV6 = false;
+	}
+
 	if (!ret) {
 		m_state = DGID_STATUS::NOTOPEN;
 		return false;
@@ -136,7 +207,10 @@ void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	m_socket.write(data, 155U, m_addr, m_addrLen);
+	if (m_ipV6)
+		m_socket.write(data, 155U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(data, 155U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 }
 
 void CYSFNetwork::link()
@@ -160,7 +234,10 @@ void CYSFNetwork::writePoll()
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", m_poll, 14U);
 
-	m_socket.write(m_poll, 14U, m_addr, m_addrLen);
+	if (m_ipV6)
+		m_socket.write(m_poll, 14U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(m_poll, 14U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 }
 
 void CYSFNetwork::unlink()
@@ -174,9 +251,12 @@ void CYSFNetwork::unlink()
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", m_unlink, 14U);
 
-	m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
+	if (m_ipV6)
+		m_socket.write(m_unlink, 14U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(m_unlink, 14U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 
-	LogMessage("Unlinked from %s", m_name.c_str());
+	LogMessage("Unlinked from %s", m_reflector.m_name.c_str());
 
 	m_state = DGID_STATUS::NOTLINKED;
 }
@@ -195,7 +275,7 @@ void CYSFNetwork::clock(unsigned int ms)
 			m_sendPollTimer.stop();
 		}
 
-		LogMessage("Lost link to %s", m_name.c_str());
+		LogMessage("Lost link to %s", m_reflector.m_name.c_str());
 		m_recvPollTimer.stop();
 	}
 
@@ -212,11 +292,16 @@ void CYSFNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (m_addrLen == 0U)
+	if (m_reflector.isEmpty())
 		return;
 
-	if (!CUDPSocket::match(addr, m_addr))
-		return;
+	if (m_ipV6) {
+		if (!CUDPSocket::match(addr, m_reflector.IPv6.m_addr))
+			return;
+	} else {
+		if (!CUDPSocket::match(addr, m_reflector.IPv4.m_addr))
+			return;
+	}
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
@@ -225,10 +310,10 @@ void CYSFNetwork::clock(unsigned int ms)
 		m_recvPollTimer.start();
 
 		if (m_state == DGID_STATUS::LINKING) {
-			if (strcmp(m_name.c_str(), "MMDVM") == 0)
-				LogMessage("Link successful to %s", m_name.c_str());
+			if (strcmp(m_reflector.m_name.c_str(), "MMDVM") == 0)
+				LogMessage("Link successful to %s", m_reflector.m_name.c_str());
 			else
-				LogMessage("Linked to %s", m_name.c_str());
+				LogMessage("Linked to %s", m_reflector.m_name.c_str());
 
 			m_state = DGID_STATUS::LINKED;
 		}

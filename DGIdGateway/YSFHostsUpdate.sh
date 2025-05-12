@@ -20,9 +20,9 @@
 #
 ###############################################################################
 #
-# Full path to the YSFHosts hosts file
+# Full path to the YSFHosts JSON file
 #
-YSFHOSTS=/path/to/YSFHosts.txt
+NXDNHOSTS=/path/to/YSFHosts.json
 
 ###############################################################################
 #
@@ -37,7 +37,7 @@ then
 	exit 1
 fi
 
-# Download the YSFHosts.txt file
-curl https://dvref.com/downloads/YSFHosts-resolved.txt > ${YSFHOSTS}
+# Download the YSFHosts.json file
+curl -X 'GET' 'https://dvref.com/ysf/reflectors/' -H 'accept: */*' > ${YSFHOSTS}
 
 exit 0

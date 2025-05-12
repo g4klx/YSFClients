@@ -578,7 +578,7 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 			CYSFReflector* reflector = m_wiresX->getReflector();
 			LogMessage("Connect to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+			m_ysfNetwork->setDestination(*reflector);
 			m_ysfNetwork->writePoll(3U);
 
 			m_current = reflector->m_id;
@@ -692,7 +692,7 @@ void CYSFGateway::processDTMF(unsigned char* buffer, unsigned char dt)
 
 				LogMessage("Connect via DTMF to %5.5s - \"%s\" has been requested by %10.10s", reflector->m_id.c_str(), reflector->m_name.c_str(), buffer + 14U);
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+				m_ysfNetwork->setDestination(*reflector);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = id;
@@ -861,7 +861,7 @@ void CYSFGateway::startupLinking()
 
 				m_wiresX->setReflector(reflector);
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+				m_ysfNetwork->setDestination(*reflector);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = m_startup;
@@ -903,7 +903,7 @@ void CYSFGateway::reconnectReflector(const std::string& refNameOrId) {
 
 			m_wiresX->setReflector(reflector);
 
-			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+			m_ysfNetwork->setDestination(*reflector);
 
 			m_ysfNetwork->setOptions(m_options);
 			m_ysfNetwork->writePoll(3U);
@@ -988,7 +988,7 @@ void CYSFGateway::processRemoteCommands()
 
 				LogMessage("Connect by remote command to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
 
-				m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+				m_ysfNetwork->setDestination(*reflector);
 				m_ysfNetwork->writePoll(3U);
 
 				m_current = id;

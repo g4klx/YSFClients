@@ -30,16 +30,15 @@ const unsigned int BUFFER_LENGTH = 200U;
 CYSFNetwork::CYSFNetwork(const std::string& address, unsigned short port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
-m_addr(),
-m_addrLen(0U),
+m_reflector(),
 m_poll(nullptr),
 m_options(nullptr),
 m_opt(),
 m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
-m_name(),
-m_linked(false)
+m_linked(false),
+m_ipV6(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -63,16 +62,15 @@ m_linked(false)
 CYSFNetwork::CYSFNetwork(unsigned short port, const std::string& callsign, bool debug) :
 m_socket(port),
 m_debug(debug),
-m_addr(),
-m_addrLen(0U),
+m_reflector(),
 m_poll(nullptr),
 m_options(nullptr),
 m_opt(),
 m_unlink(nullptr),
 m_buffer(1000U, "YSF Network Buffer"),
 m_pollTimer(1000U, 5U),
-m_name(),
-m_linked(false)
+m_linked(false),
+m_ipV6(false)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -102,22 +100,64 @@ CYSFNetwork::~CYSFNetwork()
 
 bool CYSFNetwork::open()
 {
-	if (m_addrLen == 0U) {
+	if (m_reflector.isEmpty()) {
 		LogError("Unable to resolve the address of the YSF network");
 		return false;
 	}
 
 	LogMessage("Opening YSF network connection");
 
-	return m_socket.open(m_addr);
+	bool ret = false;
+	if (m_reflector.hasIPv6()) {
+		ret = m_socket.open(m_reflector.IPv6.m_addr);
+		m_ipV6 = true;
+	}
+	if (!ret && m_reflector.hasIPv4()) {
+		ret = m_socket.open(m_reflector.IPv4.m_addr);
+		m_ipV6 = false;
+	}
+
+	return ret;
 }
 
 bool CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage& addr, unsigned int addrLen)
 {
-	m_name    = name;
-	m_addr    = addr;
-	m_addrLen = addrLen;
-	m_linked  = false;
+	m_reflector.m_id   = "99999";
+	m_reflector.m_name = name;
+
+	switch (addr.ss_family) {
+	case AF_INET:
+		m_reflector.IPv4.m_addr    = addr;
+		m_reflector.IPv4.m_addrLen = addrLen;
+		m_reflector.IPv6.m_addrLen = 0U;
+		break;
+	case AF_INET6:
+		m_reflector.IPv6.m_addr    = addr;
+		m_reflector.IPv6.m_addrLen = addrLen;
+		m_reflector.IPv4.m_addrLen = 0U;
+		break;
+	default:
+		throw;
+	}
+
+	m_linked = false;
+
+	close();
+
+	bool ret = open();
+	if (ret) {
+		m_pollTimer.start();
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool CYSFNetwork::setDestination(const CYSFReflector& reflector)
+{
+	m_reflector = reflector;
+	m_linked    = false;
 
 	close();
 
@@ -132,8 +172,8 @@ bool CYSFNetwork::setDestination(const std::string& name, const sockaddr_storage
 
 void CYSFNetwork::clearDestination()
 {
-	m_addrLen = 0U;
-	m_linked  = false;
+	m_reflector.reset();
+	m_linked = false;
 
 	m_pollTimer.stop();
 
@@ -144,18 +184,21 @@ void CYSFNetwork::write(const unsigned char* data)
 {
 	assert(data != nullptr);
 
-	if (m_addrLen == 0U)
+	if (m_reflector.isEmpty())
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", data, 155U);
 
-	m_socket.write(data, 155U, m_addr, m_addrLen);
+	if (m_ipV6)
+		m_socket.write(data, 155U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(data, 155U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 }
 
 void CYSFNetwork::writePoll(unsigned int count)
 {
-	if (m_addrLen == 0U)
+	if (m_reflector.isEmpty())
 		return;
 
 	m_pollTimer.start();
@@ -163,11 +206,19 @@ void CYSFNetwork::writePoll(unsigned int count)
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", m_poll, 14U);
 
-	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_poll, 14U, m_addr, m_addrLen);
+	for (unsigned int i = 0U; i < count; i++) {
+		if (m_ipV6)
+			m_socket.write(m_poll, 14U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+		else
+			m_socket.write(m_poll, 14U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
+	}
 
-	if (!m_opt.empty())
-		m_socket.write(m_options, 50U, m_addr, m_addrLen);
+	if (!m_opt.empty()) {
+		if (m_ipV6)
+			m_socket.write(m_options, 50U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+		else
+			m_socket.write(m_options, 50U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
+	}
 }
 
 void CYSFNetwork::setOptions(const std::string& options)
@@ -189,14 +240,18 @@ void CYSFNetwork::writeUnlink(unsigned int count)
 {
 	m_pollTimer.stop();
 
-	if (m_addrLen == 0U)
+	if (m_reflector.isEmpty())
 		return;
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Sent", m_unlink, 14U);
 
-	for (unsigned int i = 0U; i < count; i++)
-		m_socket.write(m_unlink, 14U, m_addr, m_addrLen);
+	for (unsigned int i = 0U; i < count; i++) {
+		if (m_ipV6)
+			m_socket.write(m_unlink, 14U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+		else
+			m_socket.write(m_unlink, 14U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
+	}
 
 	m_linked = false;
 }
@@ -214,11 +269,16 @@ void CYSFNetwork::clock(unsigned int ms)
 	if (length <= 0)
 		return;
 
-	if (m_addrLen == 0U)
+	if (m_reflector.isEmpty())
 		return;
 
-	if (!CUDPSocket::match(addr, m_addr))
-		return;
+	if (m_ipV6) {
+		if (!CUDPSocket::match(addr, m_reflector.IPv6.m_addr))
+			return;
+	} else {
+		if (!CUDPSocket::match(addr, m_reflector.IPv4.m_addr))
+			return;
+	}
 
 	if (m_debug)
 		CUtils::dump(1U, "YSF Network Data Received", buffer, length);
@@ -232,15 +292,19 @@ void CYSFNetwork::clock(unsigned int ms)
 		return;
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0 && !m_linked) {
-		if (strcmp(m_name.c_str(),"MMDVM")== 0)
-			LogMessage("Link successful to %s", m_name.c_str());
+		if (m_reflector.m_name == "MMDVM")
+			LogMessage("Link successful to %s", m_reflector.m_name.c_str());
 		else
-			LogMessage("Linked to %s", m_name.c_str());
+			LogMessage("Linked to %s", m_reflector.m_name.c_str());
 
 		m_linked = true;
 
-		if (!m_opt.empty())
-			m_socket.write(m_options, 50U, m_addr, m_addrLen);
+		if (!m_opt.empty()) {
+			if (m_ipV6)
+				m_socket.write(m_options, 50U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+			else
+				m_socket.write(m_options, 50U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
+		}
 	}
 
 	unsigned char len = length;

@@ -62,8 +62,6 @@ public:
 
 	static bool match(const sockaddr_storage& addr1, const sockaddr_storage& addr2, IPMATCHTYPE type = IPMATCHTYPE::ADDRESS_AND_PORT);
 
-	static bool isNone(const sockaddr_storage& addr);
-
 private:
 	std::string    m_localAddress;
 	unsigned short m_localPort;

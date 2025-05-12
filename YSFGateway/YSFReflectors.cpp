@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2021,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -18,6 +18,9 @@
 
 #include "YSFReflectors.h"
 #include "Log.h"
+
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -41,7 +44,7 @@ m_newReflectors(),
 m_currReflectors(),
 m_search(),
 m_makeUpper(makeUpper),
-m_timer(1000U, reloadTime * 60U)
+m_timer(1000U, reloadTime * 60U) 
 {
 	if (reloadTime > 0U)
 		m_timer.start();
@@ -49,11 +52,11 @@ m_timer(1000U, reloadTime * 60U)
 
 CYSFReflectors::~CYSFReflectors()
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
-		delete *it;
+	for (const auto& it : m_newReflectors)
+		delete it;
 
-	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it)
-		delete *it;
+	for (const auto& it : m_currReflectors)
+		delete it;
 
 	m_newReflectors.clear();
 	m_currReflectors.clear();
@@ -107,54 +110,87 @@ void CYSFReflectors::addFCSRoom(const std::string& id, const std::string& name)
 
 bool CYSFReflectors::load()
 {
-	for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it)
-		delete *it;
+	for (const auto& it : m_newReflectors)
+		delete it;
 
 	m_newReflectors.clear();
 
-	FILE* fp = ::fopen(m_hostsFile.c_str(), "rt");
-	if (fp != nullptr) {
-		char buffer[100U];
-		while (::fgets(buffer, 100U, fp) != nullptr) {
-			if (buffer[0U] == '#')
-				continue;
+	try {
+		std::fstream file(m_hostsFile);
 
-			char* p1 = ::strtok(buffer, ";\r\n");
-			char* p2 = ::strtok(nullptr, ";\r\n");
-			char* p3 = ::strtok(nullptr, ";\r\n");
-			char* p4 = ::strtok(nullptr, ";\r\n");
-			char* p5 = ::strtok(nullptr, ";\r\n");
-			char* p6 = ::strtok(nullptr, "\r\n");
+		nlohmann::json data = nlohmann::json::parse(file);
 
-			if (p1 != nullptr && p2 != nullptr && p3 != nullptr && p4 != nullptr && p5 != nullptr && p6 != nullptr) {
-				std::string host  = std::string(p4);
-				unsigned short port = (unsigned short)::atoi(p5);
+		bool hasData = data["reflectors"].is_array();
+		if (!hasData)
+			throw;
 
-				sockaddr_storage addr;
-				unsigned int addrLen;
-				if (CUDPSocket::lookup(host, port, addr, addrLen) == 0) {
-					CYSFReflector* refl = new CYSFReflector;
+		nlohmann::json::array_t hosts = data["reflectors"];
+		for (const auto& it : hosts) {
+			std::string id = it["designator"];
 
-					refl->m_id      = std::string(p1);
-					refl->m_name    = std::string(p2);
-					refl->m_desc    = std::string(p3);
-					refl->m_addr    = addr;
-					refl->m_addrLen = addrLen;
-					refl->m_count   = std::string(p6);
-					refl->m_type    = YSF_TYPE::YSF;
-					refl->m_wiresX  = (refl->m_name.compare(0, 3, "XLX") == 0);
+			std::string country = it["country"];
+			std::string name    = it["name"];
+			bool useXX          = it["use_xx_prefix"];
 
-					refl->m_name.resize(16U, ' ');
-					refl->m_desc.resize(14U, ' ');
+			std::string fullName;
+			if (useXX)
+				fullName = "XX " + name;
+			else
+				fullName = country + " " + name;
 
-					m_newReflectors.push_back(refl);
-				} else {
-					LogWarning("Unable to resolve the address of YSF reflector - %s", p2);
+			std::string desc = it["description"];
+
+			LogMessage("Id: %s, name: %s, desc: %s", id.c_str(), fullName.c_str(), desc.c_str());
+
+			unsigned short port = it["port"];
+
+			sockaddr_storage addr_v4 = sockaddr_storage();
+			unsigned int     addrLen_v4 = 0U;
+
+			bool isNull = it["ipv4"].is_null();
+			if (!isNull) {
+				std::string ipv4 = it["ipv4"];
+				if (!CUDPSocket::lookup(ipv4, port, addr_v4, addrLen_v4) == 0) {
+					LogWarning("Unable to resolve the address of %s", ipv4.c_str());
+					addrLen_v4 = 0U;
 				}
 			}
-		}
 
-		::fclose(fp);
+			sockaddr_storage addr_v6 = sockaddr_storage();
+			unsigned int     addrLen_v6 = 0U;
+
+			isNull = it["ipv6"].is_null();
+			if (!isNull) {
+				std::string ipv6 = it["ipv6"];
+				if (!CUDPSocket::lookup(ipv6, port, addr_v6, addrLen_v6) == 0) {
+					LogWarning("Unable to resolve the address of %s", ipv6.c_str());
+					addrLen_v6 = 0U;
+				}
+			}
+
+			if ((addrLen_v4 > 0U) || (addrLen_v6 > 0U)) {
+				CYSFReflector* refl = new CYSFReflector;
+				refl->m_id           = id;
+				refl->m_name         = fullName;
+				refl->m_desc         = desc;
+				refl->m_count        = "000";
+				refl->m_type         = YSF_TYPE::YSF;
+				refl->m_wiresX       = (name.compare(0, 3, "XLX") == 0);
+
+				refl->m_name.resize(16U, ' ');
+				refl->m_desc.resize(14U, ' ');
+
+				refl->IPv4.m_addr    = addr_v4;
+				refl->IPv4.m_addrLen = addrLen_v4;
+				refl->IPv6.m_addr    = addr_v6;
+				refl->IPv6.m_addrLen = addrLen_v6;
+				m_newReflectors.push_back(refl);
+			}
+		}
+	}
+	catch (...) {
+		LogError("Unable to load/parse JSON file %s", m_hostsFile.c_str());
+		return false;
 	}
 
 	size_t size = m_newReflectors.size();
@@ -169,8 +205,23 @@ bool CYSFReflectors::load()
 			refl->m_id      = "00001";
 			refl->m_name    = "ZZ Parrot       ";
 			refl->m_desc    = "Parrot        ";
-			refl->m_addr    = addr;
-			refl->m_addrLen = addrLen;
+			switch (addr.ss_family) {
+			case AF_INET:
+				refl->IPv4.m_addr    = addr;
+				refl->IPv4.m_addrLen = addrLen;
+				refl->IPv6.m_addrLen = 0U;
+				break;
+			case AF_INET6:
+				refl->IPv6.m_addr    = addr;
+				refl->IPv6.m_addrLen = addrLen;
+				refl->IPv4.m_addrLen = 0U;
+				break;
+			default:
+				refl->IPv6.m_addrLen = 0U;
+				refl->IPv4.m_addrLen = 0U;
+				LogWarning("Unknown address family for %s", m_parrotAddress.c_str());
+				break;
+			}
 			refl->m_count   = "000";
 			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = false;
@@ -192,8 +243,23 @@ bool CYSFReflectors::load()
 			refl->m_id      = "00002";
 			refl->m_name    = "YSF2DMR         ";
 			refl->m_desc    = "Link YSF2DMR  ";
-			refl->m_addr    = addr;
-			refl->m_addrLen = addrLen;
+			switch (addr.ss_family) {
+			case AF_INET:
+				refl->IPv4.m_addr = addr;
+				refl->IPv4.m_addrLen = addrLen;
+				refl->IPv6.m_addrLen = 0U;
+				break;
+			case AF_INET6:
+				refl->IPv6.m_addr = addr;
+				refl->IPv6.m_addrLen = addrLen;
+				refl->IPv4.m_addrLen = 0U;
+				break;
+			default:
+				refl->IPv6.m_addrLen = 0U;
+				refl->IPv4.m_addrLen = 0U;
+				LogWarning("Unknown address family for %s", m_parrotAddress.c_str());
+				break;
+			}
 			refl->m_count   = "000";
 			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
@@ -215,8 +281,23 @@ bool CYSFReflectors::load()
 			refl->m_id      = "00003";
 			refl->m_name    = "YSF2NXDN        ";
 			refl->m_desc    = "Link YSF2NXDN ";
-			refl->m_addr    = addr;
-			refl->m_addrLen = addrLen;
+			switch (addr.ss_family) {
+			case AF_INET:
+				refl->IPv4.m_addr = addr;
+				refl->IPv4.m_addrLen = addrLen;
+				refl->IPv6.m_addrLen = 0U;
+				break;
+			case AF_INET6:
+				refl->IPv6.m_addr = addr;
+				refl->IPv6.m_addrLen = addrLen;
+				refl->IPv4.m_addrLen = 0U;
+				break;
+			default:
+				refl->IPv6.m_addrLen = 0U;
+				refl->IPv4.m_addrLen = 0U;
+				LogWarning("Unknown address family for %s", m_parrotAddress.c_str());
+				break;
+			}
 			refl->m_count   = "000";
 			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
@@ -238,8 +319,23 @@ bool CYSFReflectors::load()
 			refl->m_id      = "00004";
 			refl->m_name    = "YSF2P25         ";
 			refl->m_desc    = "Link YSF2P25  ";
-			refl->m_addr    = addr;
-			refl->m_addrLen = addrLen;
+			switch (addr.ss_family) {
+			case AF_INET:
+				refl->IPv4.m_addr = addr;
+				refl->IPv4.m_addrLen = addrLen;
+				refl->IPv6.m_addrLen = 0U;
+				break;
+			case AF_INET6:
+				refl->IPv6.m_addr = addr;
+				refl->IPv6.m_addrLen = addrLen;
+				refl->IPv4.m_addrLen = 0U;
+				break;
+			default:
+				refl->IPv6.m_addrLen = 0U;
+				refl->IPv4.m_addrLen = 0U;
+				LogWarning("Unknown address family for %s", m_parrotAddress.c_str());
+				break;
+			}
 			refl->m_count   = "000";
 			refl->m_type    = YSF_TYPE::YSF;
 			refl->m_wiresX  = true;
@@ -253,7 +349,7 @@ bool CYSFReflectors::load()
 	}
 
 	unsigned int id = 9U;
-	for (std::vector<std::pair<std::string, std::string>>::const_iterator it1 = m_fcsRooms.cbegin(); it1 != m_fcsRooms.cend(); ++it1) {
+	for (const auto& it1 : m_fcsRooms) {
 		bool used;
 		do {
 			id++;
@@ -263,17 +359,18 @@ bool CYSFReflectors::load()
 		char text[10U];
 		::sprintf(text, "%05u", id);
 
-		std::string name = it1->first;
-		std::string desc = it1->second;
+		std::string name = it1.first;
+		std::string desc = it1.second;
 
 		CYSFReflector* refl = new CYSFReflector;
-		refl->m_id      = text;
-		refl->m_name    = name;
-		refl->m_desc    = desc;
-		refl->m_addrLen = 0U;
-		refl->m_count   = "000";
-		refl->m_type    = YSF_TYPE::FCS;
-		refl->m_wiresX  = false;
+		refl->m_id           = text;
+		refl->m_name         = name;
+		refl->m_desc         = desc;
+		refl->IPv4.m_addrLen = 0U;
+		refl->IPv6.m_addrLen = 0U;
+		refl->m_count        = "000";
+		refl->m_type         = YSF_TYPE::FCS;
+		refl->m_wiresX       = false;
 
 		refl->m_name.resize(16U, ' ');
 		refl->m_desc.resize(14U, ' ');
@@ -286,9 +383,9 @@ bool CYSFReflectors::load()
 		return false;
 
 	if (m_makeUpper) {
-		for (std::vector<CYSFReflector*>::iterator it = m_newReflectors.begin(); it != m_newReflectors.end(); ++it) {
-			std::transform((*it)->m_name.begin(), (*it)->m_name.end(), (*it)->m_name.begin(), ::toupper);
-			std::transform((*it)->m_desc.begin(), (*it)->m_desc.end(), (*it)->m_desc.begin(), ::toupper);
+		for (auto& it : m_newReflectors) {
+			std::transform(it->m_name.begin(), it->m_name.end(), it->m_name.begin(), ::toupper);
+			std::transform(it->m_desc.begin(), it->m_desc.end(), it->m_desc.begin(), ::toupper);
 		}
 	}
 
@@ -299,9 +396,9 @@ bool CYSFReflectors::load()
 
 CYSFReflector* CYSFReflectors::findById(const std::string& id)
 {
-	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
-		if (id == (*it)->m_id)
-			return *it;
+	for (const auto& it : m_currReflectors) {
+		if (id == it->m_id)
+			return it;
 	}
 
 	LogMessage("Trying to find non existent YSF reflector with an id of %s", id.c_str());
@@ -314,8 +411,8 @@ bool CYSFReflectors::findById(unsigned int id) const
 	char text[10U];
 	::sprintf(text, "%05u", id);
 
-	for (std::vector<CYSFReflector*>::const_iterator it = m_newReflectors.cbegin(); it != m_newReflectors.cend(); ++it) {
-		if (text == (*it)->m_id)
+	for (const auto& it : m_newReflectors) {
+		if (text == it->m_id)
 			return true;
 	}
 
@@ -325,9 +422,8 @@ bool CYSFReflectors::findById(unsigned int id) const
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 {
 	std::string fullName = name;
-	if (m_makeUpper) {
-                std::transform(fullName.begin(), fullName.end(), fullName.begin(), ::toupper);
-        }
+	if (m_makeUpper)
+		std::transform(fullName.begin(), fullName.end(), fullName.begin(), ::toupper);
 	fullName.resize(16U, ' ');
 
 	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {
@@ -356,19 +452,19 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 	// Removed now un-used variable
 	// size_t len = trimmed.size();
 
-	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
-		std::string reflector = (*it)->m_name;
+	for (auto& it : m_currReflectors) {
+		std::string reflector = it->m_name;
 		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
 
 		// Original match function - only matches start of string.
 		// if (trimmed == reflector.substr(0U, len))
 		// 	m_search.push_back(*it);
-		
+
 		// New match function searches the whole string
 		for (unsigned int refSrcPos = 0U; refSrcPos < reflector.length(); refSrcPos++) {
 			if (reflector.substr(refSrcPos, trimmed.length()) == trimmed) {
-				m_search.push_back(*it);
+				m_search.push_back(it);
 				break;
 			}
 		}
@@ -384,8 +480,8 @@ bool CYSFReflectors::reload()
 	if (m_newReflectors.empty())
 		return false;
 
-	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it)
-		delete *it;
+	for (const auto& it : m_currReflectors)
+		delete it;
 
 	m_currReflectors.clear();
 
