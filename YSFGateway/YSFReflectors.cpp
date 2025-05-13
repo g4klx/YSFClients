@@ -450,15 +450,15 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 	m_search.clear();
 
 	std::string trimmed = name;
-	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), trimmed.end());
+	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), trimmed.end());
 	std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), ::toupper);
 
 	// Removed now un-used variable
 	// size_t len = trimmed.size();
 
-	for (auto& it : m_currReflectors) {
+	for (const auto& it : m_currReflectors) {
 		std::string reflector = it->m_name;
-		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
+		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
 
 		// Original match function - only matches start of string.
