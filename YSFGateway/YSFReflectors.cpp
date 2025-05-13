@@ -131,12 +131,13 @@ bool CYSFReflectors::load()
 			std::string country = it["country"];
 			std::string name    = it["name"];
 			bool useXX          = it["use_xx_prefix"];
+			std::string count   = it["user_count"];
 
 			std::string fullName;
 			if (useXX)
-				fullName = "XX " + name;
+				fullName = "XX-" + name;
 			else
-				fullName = country + " " + name;
+				fullName = country + "-" + name;
 
 			std::string desc;
 			if (it["description"].is_null()) {
@@ -177,7 +178,7 @@ bool CYSFReflectors::load()
 				refl->m_id           = id;
 				refl->m_name         = fullName;
 				refl->m_desc         = desc;
-				refl->m_count        = "000";
+				refl->m_count        = count;
 				refl->m_type         = YSF_TYPE::YSF;
 				refl->m_wiresX       = (name.compare(0, 3, "XLX") == 0);
 

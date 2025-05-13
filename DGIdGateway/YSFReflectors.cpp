@@ -63,9 +63,9 @@ bool CYSFReflectors::load()
 
 			std::string fullName;
 			if (useXX)
-				fullName = "XX " + name;
+				fullName = "XX-" + name;
 			else
-				fullName = country + " " + name;
+				fullName = country + "-" + name;
 
 			unsigned short port = it["port"];
 
