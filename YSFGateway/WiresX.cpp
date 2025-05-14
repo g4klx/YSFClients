@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cassert>
 #include <cstdlib>
+#include <cctype>
 
 const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
@@ -852,7 +853,7 @@ void CWiresX::sendAllReply()
 			data[i + offset + 1U] = refl->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + offset + 6U] = refl->m_name.at(i);
+			data[i + offset + 6U] = std::toupper(refl->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + offset + 22U] = refl->m_count.at(i);
@@ -945,7 +946,7 @@ void CWiresX::sendSearchReply()
 			data[i + offset + 1U] = refl->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + offset + 6U] = refl->m_name.at(i);
+			data[i + offset + 6U] = std::toupper(refl->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + offset + 22U] = refl->m_count.at(i);
