@@ -106,6 +106,7 @@ private:
 
 	void sendDXReply();
 	void sendConnectReply();
+	void sendConnectFailedReply();
 	void sendDisconnectReply();
 	void sendAllReply();
 	void sendSearchReply();
@@ -113,7 +114,7 @@ private:
 	void sendCategoryReply();
 
 	void createReply(const unsigned char* data, unsigned int length, CYSFNetwork* network = nullptr);
-	void writeData(const unsigned char* data, CYSFNetwork* network, bool isYSF2XX);
+	void writeData(const unsigned char* data, CYSFNetwork* network, bool sendWiresXtoNetwork);
 	unsigned char calculateFT(unsigned int length, unsigned int offset) const;
 };
 

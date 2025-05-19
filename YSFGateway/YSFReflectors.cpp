@@ -142,8 +142,7 @@ bool CYSFReflectors::load()
 					refl->m_addrLen = addrLen;
 					refl->m_count   = std::string(p6);
 					refl->m_type    = YSF_TYPE::YSF;
-					refl->m_wiresX  = (refl->m_name.compare(0, 3, "XLX") == 0);
-
+					refl->m_wiresX = ( refl->m_name.compare(0, 3, "XLX") == 0 || refl->m_name.compare(2, 4, "-XLX") == 0 );
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
 
