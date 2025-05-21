@@ -323,14 +323,14 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
+				if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && wiresXCommandPassthrough && reflector != nullptr && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
+					processWiresX(buffer, fich, reflector->m_wiresX, wiresXCommandPassthrough); // Honour reflector->m_wiresX status
 				} else {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
-					reflector = m_wiresX->getReflector(); //reflector may have changed
-					if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && reflector->m_wiresX)
+					processWiresX(buffer, fich, false, wiresXCommandPassthrough); // Remove the assumption that wiresXCommandPassthrough is set
+					reflector = m_wiresX->getReflector(); // reflector may have changed
+					if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && reflector != nullptr && reflector->m_wiresX)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
@@ -560,11 +560,17 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
+void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool wiresXEnabledReflector, bool wiresXCommandPassthrough)
 {
 	assert(buffer != nullptr);
 
-	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, dontProcessWiresXLocal);
+	WX_STATUS status;
+	if (wiresXEnabledReflector && wiresXCommandPassthrough) { // If these are BOTH true, then we ignore anything but a WiresX disconnect
+		status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, true);
+	} else { // Otherwise process all WiresX commands locally
+		status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, false);
+	}
+
 	switch (status) {
 	case WX_STATUS::CONNECT_YSF: {
 			if (m_linkType == LINK_TYPE::YSF)
@@ -626,8 +632,9 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 	case WX_STATUS::DISCONNECT:
 		if (m_linkType == LINK_TYPE::YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
-			if ( (wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {
+			if ( (wiresXEnabledReflector && wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {
 				// Send the disconnect to the YSF2xxx gateway too
+				LogMessage("Forward WiresX Disconnect to Network");
 				m_ysfNetwork->write(buffer);
 			}
 
