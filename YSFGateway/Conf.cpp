@@ -77,6 +77,7 @@ m_mqttPassword(),
 m_networkStartup(),
 m_networkOptions(),
 m_networkInactivityTimeout(0U),
+m_networkReconnect(false),
 m_networkRevert(false),
 m_networkDebug(false),
 m_ysfNetworkEnabled(false),
@@ -481,6 +482,11 @@ std::string CConf::getNetworkOptions() const
 unsigned int CConf::getNetworkInactivityTimeout() const
 {
 	return m_networkInactivityTimeout;
+}
+
+bool CConf::getNetworkReconnect() const
+{
+	return m_networkReconnect;
 }
 
 bool CConf::getNetworkRevert() const

@@ -73,12 +73,13 @@ public:
 	std::string  getAPRSDescription() const;
 	std::string  getAPRSSymbol() const;
 
-	// The Network section
-	std::string  getNetworkStartup() const;
-	std::string  getNetworkOptions() const;
-	unsigned int getNetworkInactivityTimeout() const;
-	bool         getNetworkRevert() const;
-	bool         getNetworkDebug() const;
+  // The Network section
+  std::string  getNetworkStartup() const;
+  std::string  getNetworkOptions() const;
+  unsigned int getNetworkInactivityTimeout() const;
+  bool         getNetworkReconnect() const;
+  bool         getNetworkRevert() const;
+  bool         getNetworkDebug() const;
 
 	// The YSF Network section
 	bool         getYSFNetworkEnabled() const;
@@ -145,10 +146,11 @@ private:
 	bool         m_mqttAuthEnabled;
 	std::string  m_mqttUsername;
 	std::string  m_mqttPassword;
-
+	
 	std::string  m_networkStartup;
 	std::string  m_networkOptions;
 	unsigned int m_networkInactivityTimeout;
+	bool         m_networkReconnect;
 	bool         m_networkRevert;
 	bool         m_networkDebug;
 

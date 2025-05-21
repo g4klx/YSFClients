@@ -142,8 +142,7 @@ bool CYSFReflectors::load()
 					refl->m_addrLen = addrLen;
 					refl->m_count   = std::string(p6);
 					refl->m_type    = YSF_TYPE::YSF;
-					refl->m_wiresX  = (refl->m_name.compare(0, 3, "XLX") == 0);
-
+					refl->m_wiresX = ( refl->m_name.compare(0, 3, "XLX") == 0 || refl->m_name.compare(2, 4, "-XLX") == 0 );
 					refl->m_name.resize(16U, ' ');
 					refl->m_desc.resize(14U, ' ');
 
@@ -350,7 +349,7 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 	m_search.clear();
 
 	std::string trimmed = name;
-	trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), trimmed.end());
+        trimmed.erase(std::find_if(trimmed.rbegin(), trimmed.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), trimmed.end());
 	std::transform(trimmed.begin(), trimmed.end(), trimmed.begin(), ::toupper);
 
 	// Removed now un-used variable
@@ -358,13 +357,13 @@ std::vector<CYSFReflector*>& CYSFReflectors::search(const std::string& name)
 
 	for (std::vector<CYSFReflector*>::iterator it = m_currReflectors.begin(); it != m_currReflectors.end(); ++it) {
 		std::string reflector = (*it)->m_name;
-		reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), reflector.end());
+                reflector.erase(std::find_if(reflector.rbegin(), reflector.rend(),[](unsigned char ch) { return !std::isspace(ch); }).base(),reflector.end());
 		std::transform(reflector.begin(), reflector.end(), reflector.begin(), ::toupper);
 
 		// Original match function - only matches start of string.
 		// if (trimmed == reflector.substr(0U, len))
 		// 	m_search.push_back(*it);
-		
+
 		// New match function searches the whole string
 		for (unsigned int refSrcPos = 0U; refSrcPos < reflector.length(); refSrcPos++) {
 			if (reflector.substr(refSrcPos, trimmed.length()) == trimmed) {

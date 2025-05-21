@@ -298,9 +298,10 @@ int CYSFGateway::run()
 	m_startup   = m_conf.getNetworkStartup();
 	m_options   = m_conf.getNetworkOptions();
 	bool revert = m_conf.getNetworkRevert();
+	bool reconnect = m_conf.getNetworkReconnect();
 	bool wiresXCommandPassthrough = m_conf.getWiresXCommandPassthrough();
 
-	linking("startup");
+	startupLinking("startup");
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -322,14 +323,14 @@ int CYSFGateway::run()
 				unsigned char dt = fich.getDT();
 
 				CYSFReflector* reflector = m_wiresX->getReflector();
-				if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && wiresXCommandPassthrough && reflector->m_wiresX) {
+				if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && wiresXCommandPassthrough && reflector != nullptr && reflector->m_wiresX) {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fich, true, wiresXCommandPassthrough);
+					processWiresX(buffer, fich, reflector->m_wiresX, wiresXCommandPassthrough); // Honour reflector->m_wiresX status
 				} else {
 					processDTMF(buffer, dt);
-					processWiresX(buffer, fich, false, wiresXCommandPassthrough);
-					reflector = m_wiresX->getReflector(); //reflector may have changed
-					if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && reflector->m_wiresX)
+					processWiresX(buffer, fich, false, wiresXCommandPassthrough); // Remove the assumption that wiresXCommandPassthrough is set
+					reflector = m_wiresX->getReflector(); // reflector may have changed
+					if (m_ysfNetwork != nullptr && m_linkType == LINK_TYPE::YSF && reflector != nullptr && reflector->m_wiresX)
 						m_exclude = (dt == YSF_DT_DATA_FR_MODE);
 				}
 
@@ -398,45 +399,25 @@ int CYSFGateway::run()
 		m_inactivityTimer.clock(ms);
 		if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {
 			if (revert) {
-				if (m_current != m_startup) {
-					if (m_linkType == LINK_TYPE::YSF) {
-						writeJSONUnlinked("timer");
-						m_wiresX->processDisconnect();
-						m_ysfNetwork->writeUnlink(3U);
-						m_ysfNetwork->clearDestination();
-					}
-
-					if (m_linkType == LINK_TYPE::FCS) {
-						writeJSONUnlinked("timer");
-						m_fcsNetwork->writeUnlink(3U);
-						m_fcsNetwork->clearDestination();
-					}
-
-					m_current.clear();
-					m_lostTimer.stop();
-					m_linkType = LINK_TYPE::NONE;
-
-					linking("timer");
+				if ((m_linkType != LINK_TYPE::NONE) && (m_current != m_startup)) {
+					LogMessage("Reverting to startup ref due to inactivity");
+					writeJSONUnlinked("timer");
+					disconnectCurrentReflector();
+					startupLinking("timer");
+				} else if ((m_linkType == LINK_TYPE::NONE) && reconnect) {
+					// reconnect if current one is timeout and reconnect = 1
+					LogMessage("Reconnecting startup reflector ...");
+					startupLinking("timer");
 				}
 			} else {
-				if (m_linkType == LINK_TYPE::YSF) {
+				if ((m_linkType != LINK_TYPE::NONE) && !reconnect) {
 					LogMessage("Disconnecting due to inactivity");
 					writeJSONUnlinked("timer");
-					m_wiresX->processDisconnect();
-					m_ysfNetwork->writeUnlink(3U);
-					m_ysfNetwork->clearDestination();
+					disconnectCurrentReflector();
+				} else if ((m_linkType == LINK_TYPE::NONE) && reconnect) {
+					LogMessage("Reconnecting reflector ...");
+					reconnectReflector("timer", m_current);
 				}
-
-				if (m_linkType == LINK_TYPE::FCS) {
-					LogMessage("Disconnecting due to inactivity");
-					writeJSONUnlinked("timer");
-					m_fcsNetwork->writeUnlink(3U);
-					m_fcsNetwork->clearDestination();
-				}
-
-				m_current.clear();
-				m_lostTimer.stop();
-				m_linkType = LINK_TYPE::NONE;
 			}
 
 			m_inactivityTimer.start();
@@ -455,7 +436,6 @@ int CYSFGateway::run()
 				m_fcsNetwork->clearDestination();
 			}
 
-			m_current.clear();
 			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_TYPE::NONE;
@@ -572,11 +552,17 @@ void CYSFGateway::createWiresX(CYSFNetwork* rptNetwork)
 	m_wiresX->start();
 }
 
-void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough)
+void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool wiresXEnabledReflector, bool wiresXCommandPassthrough)
 {
 	assert(buffer != nullptr);
 
-	WX_STATUS status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, dontProcessWiresXLocal);
+	WX_STATUS status;
+	if (wiresXEnabledReflector && wiresXCommandPassthrough) { // If these are BOTH true, then we ignore anything but a WiresX disconnect
+		status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, true);
+	} else { // Otherwise process all WiresX commands locally
+		status = m_wiresX->process(buffer + 35U, buffer + 14U, fich, false);
+	}
+
 	switch (status) {
 	case WX_STATUS::CONNECT_YSF: {
 			if (m_linkType == LINK_TYPE::YSF) {
@@ -646,8 +632,9 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 	case WX_STATUS::DISCONNECT:
 		if (m_linkType == LINK_TYPE::YSF) {
 			LogMessage("Disconnect has been requested by %10.10s", buffer + 14U);
-			if ( (wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {
+			if ( (wiresXEnabledReflector && wiresXCommandPassthrough) && (::memcmp(buffer + 0U, "YSFD", 4U) == 0) ) {
 				// Send the disconnect to the YSF2xxx gateway too
+				LogMessage("Forward WiresX Disconnect to Network");
 				m_ysfNetwork->write(buffer);
 			}
 
@@ -671,6 +658,12 @@ void CYSFGateway::processWiresX(const unsigned char* buffer, const CYSFFICH& fic
 			m_inactivityTimer.start();
 			m_lostTimer.stop();
 			m_linkType = LINK_TYPE::NONE;
+		}
+		break;
+	case WX_STATUS::RECONNECT_CURRENT: {
+			if (m_linkType == LINK_TYPE::NONE && !m_current.empty())
+				reconnectReflector("user", m_current);
+
 		}
 		break;
 	default:
@@ -854,10 +847,10 @@ std::string CYSFGateway::calculateLocator()
 	return locator;
 }
 
-void CYSFGateway::linking(const std::string& reason)
+void CYSFGateway::startupLinking(const std::string& reason)
 {
 	if (!m_startup.empty()) {
-		if (m_startup.substr(0U, 3U) == "FCS" && m_fcsNetwork != nullptr) {
+		if ((m_startup.substr(0U, 3U) == "FCS") && (m_fcsNetwork != nullptr)) {
 			m_current.clear();
 			m_inactivityTimer.stop();
 			m_lostTimer.stop();
@@ -902,8 +895,69 @@ void CYSFGateway::linking(const std::string& reason)
 			}
 		}
 	}
+
 	if (m_startup.empty())
 		LogMessage("No connection startup");
+}
+
+void CYSFGateway::reconnectReflector(const std::string& reason, const std::string& refNameOrId)
+{
+	if ((refNameOrId.substr(0U, 3U) == "FCS") && (m_fcsNetwork != nullptr)) {
+		m_inactivityTimer.stop();
+		m_lostTimer.stop();
+
+		bool ok = m_fcsNetwork->writeLink(refNameOrId);
+		m_fcsNetwork->setOptions(m_options);
+
+		if (ok) {
+			LogMessage("(re-)connection to %s", refNameOrId.c_str());
+			writeJSONLinking(reason, "fcs", refNameOrId);
+
+			m_inactivityTimer.start();
+			m_lostTimer.start();
+			m_linkType = LINK_TYPE::FCS;
+		}
+	} else if (m_ysfNetwork != nullptr) {
+		m_inactivityTimer.stop();
+		m_lostTimer.stop();
+
+		CYSFReflector* reflector = m_reflectors->findById(refNameOrId);
+		if (reflector == nullptr)
+			reflector = m_reflectors->findByName(refNameOrId);
+
+		if (reflector != nullptr) {
+			LogMessage("(re-)connection to %5.5s - \"%s\"", reflector->m_id.c_str(), reflector->m_name.c_str());
+			writeJSONLinking(reason, "ysf", reflector->m_name);
+
+			m_wiresX->setReflector(reflector);
+
+			m_ysfNetwork->setDestination(reflector->m_name, reflector->m_addr, reflector->m_addrLen);
+
+			m_ysfNetwork->setOptions(m_options);
+			m_ysfNetwork->writePoll(3U);
+
+			m_inactivityTimer.start();
+			m_lostTimer.start();
+			m_linkType = LINK_TYPE::YSF;
+		}
+	}
+}
+
+void CYSFGateway::disconnectCurrentReflector() {
+	if (m_linkType == LINK_TYPE::YSF) {
+		m_wiresX->processDisconnect();
+		m_ysfNetwork->writeUnlink(3U);
+		m_ysfNetwork->clearDestination();
+	}
+
+	if (m_linkType == LINK_TYPE::FCS) {
+		m_fcsNetwork->writeUnlink(3U);
+		m_fcsNetwork->clearDestination();
+	}
+
+	// m_current.clear();
+	m_lostTimer.stop();
+	m_linkType = LINK_TYPE::NONE;
 }
 
 void CYSFGateway::readFCSRoomsFile(const std::string& filename)

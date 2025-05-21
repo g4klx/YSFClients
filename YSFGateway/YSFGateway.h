@@ -66,9 +66,11 @@ private:
 	CTimer          m_lostTimer;
 	bool            m_fcsNetworkEnabled;
 
-	void linking(const std::string& reason);
+	void startupLinking(const std::string& reason);
+	void reconnectReflector(const std::string& reason, const std::string& nameOrId);
+	void disconnectCurrentReflector();
 	std::string calculateLocator();
-	void processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool dontProcessWiresXLocal, bool wiresXCommandPassthrough);
+	void processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool wiresXEnabledReflector, bool wiresXCommandPassthrough);
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
