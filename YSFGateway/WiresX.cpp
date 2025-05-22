@@ -376,8 +376,11 @@ WX_STATUS CWiresX::processConnect(const unsigned char* source, const unsigned ch
 
 	m_reflector = m_reflectors.findById(id);
 	if (m_reflector == nullptr) {
+		if(source != nullptr)
+			processDisconnect(source);
 		sendConnectFailedReply();
-		return WX_STATUS::NONE;
+		// Keep state on Radio matched with YSFGateway
+		return WX_STATUS::DISCONNECT;
 	}
 
 	m_status = WXSI_STATUS::CONNECT;
