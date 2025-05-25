@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <cctype>
 
-const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
+const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU}; // Followed by 2B (FT-70D) 29 (FTM-100D) 28 (FT2D)
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
