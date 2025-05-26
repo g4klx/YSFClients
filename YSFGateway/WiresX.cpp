@@ -663,7 +663,7 @@ void CWiresX::sendDXReply()
 			data[i + 36U] = m_reflector->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + 41U] = m_reflector->m_name.at(i);
+			data[i + 41U] = std::toupper(m_reflector->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + 57U] = m_reflector->m_count.at(i);
@@ -751,7 +751,7 @@ void CWiresX::sendConnectReply()
 	data[i + 36U] = m_reflector->m_id.at(i);
 
 	for (unsigned int i = 0U; i < 16U; i++)
-		data[i + 41U] = m_reflector->m_name.at(i);
+		data[i + 41U] = std::toupper(m_reflector->m_name.at(i));
 
 	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 57U] = m_reflector->m_count.at(i);
@@ -1099,7 +1099,7 @@ void CWiresX::sendCategoryReply()
 			data[i + offset + 1U] = refl->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + offset + 6U] = refl->m_name.at(i);
+			data[i + offset + 6U] = std::toupper(refl->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + offset + 22U] = refl->m_count.at(i);
