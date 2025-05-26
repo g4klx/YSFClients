@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <cctype>
 
-const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU};
+const unsigned char DX_REQ[]    = {0x5DU, 0x71U, 0x5FU}; // Followed by 2B (FT-70D) 29 (FTM-100D) 28 (FT2D)
 const unsigned char CONN_REQ[]  = {0x5DU, 0x23U, 0x5FU};
 const unsigned char DISC_REQ[]  = {0x5DU, 0x2AU, 0x5FU};
 const unsigned char ALL_REQ[]   = {0x5DU, 0x66U, 0x5FU};
@@ -663,7 +663,7 @@ void CWiresX::sendDXReply()
 			data[i + 36U] = m_reflector->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + 41U] = m_reflector->m_name.at(i);
+			data[i + 41U] = std::toupper(m_reflector->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + 57U] = m_reflector->m_count.at(i);
@@ -751,7 +751,7 @@ void CWiresX::sendConnectReply()
 	data[i + 36U] = m_reflector->m_id.at(i);
 
 	for (unsigned int i = 0U; i < 16U; i++)
-		data[i + 41U] = m_reflector->m_name.at(i);
+		data[i + 41U] = std::toupper(m_reflector->m_name.at(i));
 
 	for (unsigned int i = 0U; i < 3U; i++)
 		data[i + 57U] = m_reflector->m_count.at(i);
@@ -1099,7 +1099,7 @@ void CWiresX::sendCategoryReply()
 			data[i + offset + 1U] = refl->m_id.at(i);
 
 		for (unsigned int i = 0U; i < 16U; i++)
-			data[i + offset + 6U] = refl->m_name.at(i);
+			data[i + offset + 6U] = std::toupper(refl->m_name.at(i));
 
 		for (unsigned int i = 0U; i < 3U; i++)
 			data[i + offset + 22U] = refl->m_count.at(i);
