@@ -279,9 +279,8 @@ int CYSFGateway::run()
 
 	std::string fileName = m_conf.getYSFNetworkHosts();
 	unsigned int reloadTime = m_conf.getYSFNetworkReloadTime();
-	bool wiresXMakeUpper = m_conf.getWiresXMakeUpper();
 
-	m_reflectors = new CYSFReflectors(fileName, reloadTime, wiresXMakeUpper);
+	m_reflectors = new CYSFReflectors(fileName, reloadTime);
 	m_reflectors->reload();
 
 	createWiresX(&rptNetwork);

@@ -48,7 +48,6 @@ m_rptAddress(),
 m_rptPort(0U),
 m_myAddress(),
 m_myPort(0U),
-m_wiresXMakeUpper(true),
 m_wiresXCommandPassthrough(false),
 m_debug(false),
 m_daemon(false),
@@ -190,8 +189,6 @@ bool CConf::read()
 			m_myAddress = value;
 		else if (::strcmp(key, "LocalPort") == 0)
 			m_myPort = (unsigned short)::atoi(value);
-		else if (::strcmp(key, "WiresXMakeUpper") == 0)
-			m_wiresXMakeUpper = ::atoi(value) == 1;
 		else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
 			m_wiresXCommandPassthrough = ::atoi(value) == 1;
 		else if (::strcmp(key, "Debug") == 0)
@@ -337,11 +334,6 @@ std::string CConf::getMyAddress() const
 unsigned short CConf::getMyPort() const
 {
 	return m_myPort;
-}
-
-bool CConf::getWiresXMakeUpper() const
-{
-	return m_wiresXMakeUpper;
 }
 
 bool CConf::getWiresXCommandPassthrough() const
