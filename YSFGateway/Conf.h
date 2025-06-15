@@ -37,7 +37,6 @@ public:
   unsigned short getRptPort() const;
   std::string  getMyAddress() const;
   unsigned short getMyPort() const;
-  bool         getWiresXMakeUpper() const;
   bool         getWiresXCommandPassthrough() const;
   bool         getDebug() const;
   bool         getDaemon() const;
@@ -112,7 +111,6 @@ private:
   unsigned short m_rptPort;
   std::string  m_myAddress;
   unsigned short m_myPort;
-  bool         m_wiresXMakeUpper;
   bool         m_wiresXCommandPassthrough;
   bool         m_debug;
   bool         m_daemon;
