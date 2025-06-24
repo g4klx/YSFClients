@@ -38,6 +38,6 @@ then
 fi
 
 # Download the YSFHosts.txt file
-curl https://dvref.com/downloads/YSFHosts-resolved.txt > ${YSFHOSTS}
+curl --fail --silent -S -L -o  ${YSFHOSTS} -A "YSFGateway - G4KLX" https://hostfiles.refcheck.radio/YSFHosts.txt
 
 exit 0
