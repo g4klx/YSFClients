@@ -38,6 +38,6 @@ then
 fi
 
 # Download the YSFHosts.json file
-curl -X 'GET' 'https://dvref.com/mrefd/reflectors/' -H 'accept: */*' > ${YSFHOSTS}
+curl --fail --silent -S -L -o  ${NXDNHOSTS} -A "YSFGateway - G4KLX" https://hostfiles.refcheck.radio/YSFHosts.json
 
 exit 0
