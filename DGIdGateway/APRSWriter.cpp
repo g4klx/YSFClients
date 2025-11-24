@@ -246,7 +246,7 @@ void CAPRSWriter::sendIdFrameFixed()
 	if (m_txFrequency >= 1200000000U)
 		band = "23cm/1.2GHz";
 	else if (m_txFrequency >= 420000000U)
-		band = "70cm`";
+		band = "70cm";
 	else if (m_txFrequency >= 144000000U)
 		band = "2m";
 	else if (m_txFrequency >= 50000000U)
