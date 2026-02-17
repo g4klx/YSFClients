@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016,2017,2018,2020,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016,2017,2018,2020,2023,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -65,10 +65,9 @@ private:
 	CTimer          m_inactivityTimer;
 	CTimer          m_lostTimer;
 	bool            m_fcsNetworkEnabled;
-	CUDPSocket*     m_remoteSocket;
 
-	void startupLinking();
-	void reconnectReflector(const std::string& nameOrId);
+	void startupLinking(const std::string& reason);
+	void reconnectReflector(const std::string& reason, const std::string& nameOrId);
 	void disconnectCurrentReflector();
 	std::string calculateLocator();
 	void processWiresX(const unsigned char* buffer, const CYSFFICH& fich, bool wiresXEnabledReflector, bool wiresXCommandPassthrough);
@@ -76,7 +75,16 @@ private:
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
 	void readFCSRoomsFile(const std::string& filename);
-	void processRemoteCommands();
+
+	void writeJSONStatus(const std::string& status);
+	void writeJSONLinking(const std::string& reason, const std::string& protocol, const std::string& reflector);
+	void writeJSONUnlinked(const std::string& reason);
+	void writeJSONRelinking(const std::string& protocol, const std::string& reflector);
+
+	void writeCommand(const std::string& command);
+
+	static void onCommand(const unsigned char* command, unsigned int length);
 };
 
 #endif
+

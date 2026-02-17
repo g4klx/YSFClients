@@ -43,6 +43,10 @@ private:
 	std::string calculateLocator();
 	void createGPS();
 	void sendPips(unsigned int n);
+
+	void writeJSONStatus(const std::string& status);
+	void writeJSONLinking(const std::string& reason, unsigned int id, const std::string& protocol, const std::string& description);
+	void writeJSONUnlinked(const std::string& reason);
 };
 
 #endif

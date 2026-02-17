@@ -124,7 +124,7 @@ public:
 
 class CYSFReflectors {
 public:
-	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper);
+	CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime);
 	~CYSFReflectors();
 
 	void setParrot(const std::string& address, unsigned short port);
@@ -160,7 +160,6 @@ private:
 	std::vector<CYSFReflector*> m_newReflectors;
 	std::vector<CYSFReflector*> m_currReflectors;
 	std::vector<CYSFReflector*> m_search;
-	bool                        m_makeUpper;
 	CTimer                      m_timer;
 
 	bool findById(unsigned int id) const;

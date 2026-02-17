@@ -29,7 +29,7 @@
 #include <cstring>
 #include <cctype>
 
-CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime, bool makeUpper) :
+CYSFReflectors::CYSFReflectors(const std::string& hostsFile, unsigned int reloadTime) :
 m_hostsFile(hostsFile),
 m_parrotAddress(),
 m_parrotPort(0U),
@@ -43,7 +43,6 @@ m_fcsRooms(),
 m_newReflectors(),
 m_currReflectors(),
 m_search(),
-m_makeUpper(makeUpper),
 m_timer(1000U, reloadTime * 60U) 
 {
 	if (reloadTime > 0U)
@@ -387,11 +386,9 @@ bool CYSFReflectors::load()
 	if (size == 0U)
 		return false;
 
-	if (m_makeUpper) {
-		for (auto& it : m_newReflectors) {
-			std::transform(it->m_name.begin(), it->m_name.end(), it->m_name.begin(), ::toupper);
-			std::transform(it->m_desc.begin(), it->m_desc.end(), it->m_desc.begin(), ::toupper);
-		}
+	for (auto& it : m_newReflectors) {
+		std::transform(it->m_name.begin(), it->m_name.end(), it->m_name.begin(), ::toupper);
+		std::transform(it->m_desc.begin(), it->m_desc.end(), it->m_desc.begin(), ::toupper);
 	}
 
 	std::sort(m_newReflectors.begin(), m_newReflectors.end(), refComparison);
@@ -427,8 +424,7 @@ bool CYSFReflectors::findById(unsigned int id) const
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 {
 	std::string fullName = name;
-	if (m_makeUpper)
-		std::transform(fullName.begin(), fullName.end(), fullName.begin(), ::toupper);
+	std::transform(fullName.begin(), fullName.end(), fullName.begin(), ::toupper);
 	fullName.resize(16U, ' ');
 
 	for (std::vector<CYSFReflector*>::const_iterator it = m_currReflectors.cbegin(); it != m_currReflectors.cend(); ++it) {

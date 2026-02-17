@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2010,2011,2012,2016,2017,2018,2020 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2010,2011,2012,2016,2017,2018,2020,2023 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #ifndef	APRSWriter_H
 #define	APRSWriter_H
 
-#include "UDPSocket.h"
 #include "Timer.h"
 
 #include <string>
@@ -42,7 +41,7 @@
 
 class CAPRSWriter {
 public:
-	CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& address, unsigned short port, const std::string& suffix, bool debug);
+	CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& suffix, bool debug);
 	~CAPRSWriter();
 
 	bool open();
@@ -71,9 +70,6 @@ private:
 	std::string       m_desc;
 	std::string       m_symbol;
 	std::string       m_suffix;
-	sockaddr_storage  m_aprsAddr;
-	unsigned int      m_aprsAddrLen;
-	CUDPSocket        m_aprsSocket;
 #if defined(USE_GPSD)
 	bool              m_gpsdEnabled;
 	std::string       m_gpsdAddress;

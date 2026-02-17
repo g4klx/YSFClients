@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020,2024,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2023,2024,2025 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
 *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "MQTTConnection.h"
 #include "YSFReflectors.h"
 #include "DGIdGateway.h"
 #include "DGIdNetwork.h"
@@ -54,14 +55,8 @@ const char* DEFAULT_INI_FILE = "/etc/DGIdGateway.ini";
 #include <clocale>
 #include <cmath>
 
-const unsigned int UNSET_DGID = 999U;
-
-const unsigned char WIRESX_DGID = 127U;
-
-const unsigned char DT_VD_MODE1      = 0x01U;
-const unsigned char DT_VD_MODE2      = 0x02U;
-const unsigned char DT_VOICE_FR_MODE = 0x04U;
-const unsigned char DT_DATA_FR_MODE  = 0x08U;
+// In Log.cpp
+extern CMQTTConnection* m_mqtt;
 
 static bool m_killed = false;
 static int  m_signal = 0;
@@ -73,6 +68,16 @@ static void sigHandler(int signum)
 	m_signal = signum;
 }
 #endif
+
+const unsigned int UNSET_DGID = 999U;
+
+const unsigned char WIRESX_DGID = 127U;
+
+const unsigned char DT_VD_MODE1      = 0x01U;
+const unsigned char DT_VD_MODE2      = 0x02U;
+const unsigned char DT_VOICE_FR_MODE = 0x04U;
+const unsigned char DT_DATA_FR_MODE  = 0x08U;
+
 
 int main(int argc, char** argv)
 {
@@ -126,6 +131,8 @@ int main(int argc, char** argv)
 				break;
 		}
 	} while (m_signal == 1);
+
+	::LogFinalise();
 
 	return ret;
 }
@@ -212,29 +219,27 @@ int CDGIdGateway::run()
 #endif
 
 #if !defined(_WIN32) && !defined(_WIN64)
-        ret = ::LogInitialise(m_daemon, m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel(), m_conf.getLogFileRotate());
-#else
-        ret = ::LogInitialise(false, m_conf.getLogFilePath(), m_conf.getLogFileRoot(), m_conf.getLogFileLevel(), m_conf.getLogDisplayLevel(), m_conf.getLogFileRotate());
-#endif
-	if (!ret) {
-		::fprintf(stderr, "DGIdGateway: unable to open the log file\n");
-		return 1;
-	}
-
-#if !defined(_WIN32) && !defined(_WIN64)
 	if (m_daemon) {
 		::close(STDIN_FILENO);
 		::close(STDOUT_FILENO);
 		::close(STDERR_FILENO);
 	}
 #endif
+	::LogInitialise(m_conf.getLogDisplayLevel(), m_conf.getLogMQTTLevel());
+
+	std::vector<std::pair<std::string, void (*)(const unsigned char*, unsigned int)>> subscriptions;
+	m_mqtt = new CMQTTConnection(m_conf.getMQTTAddress(), m_conf.getMQTTPort(), m_conf.getMQTTName(), m_conf.getMQTTAuthEnabled(), m_conf.getMQTTUsername(), m_conf.getMQTTPassword(), subscriptions, m_conf.getMQTTKeepalive());
+	ret = m_mqtt->open();
+	if (!ret)
+		delete m_mqtt;
+
 	m_callsign = m_conf.getCallsign();
 	m_suffix   = m_conf.getSuffix();
 
 	sockaddr_storage rptAddr;
 	unsigned int rptAddrLen;
 	if (CUDPSocket::lookup(m_conf.getRptAddress(), m_conf.getRptPort(), rptAddr, rptAddrLen) != 0) {
-		LogError("Unable to resolve the address of the host");
+		::LogError("Unable to resolve the address of the host");
 		return 1;
 	}
 
@@ -246,7 +251,6 @@ int CDGIdGateway::run()
 	ret = rptNetwork.open();
 	if (!ret) {
 		::LogError("Cannot open the repeater network port");
-		::LogFinalise();
 		return 1;
 	}
 
@@ -295,6 +299,7 @@ int CDGIdGateway::run()
 			dgIdNetwork[dgid]->m_static      = statc;
 			dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 			dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+			dgIdNetwork[dgid]->m_protocol    = "fcs";
 
 			LogMessage("Added FCS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 		} else if (type == "YSF") {
@@ -308,6 +313,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf";
 
 				LogMessage("Added YSF:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			} else {
@@ -340,6 +346,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = true;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "imrs";
 
 				LogMessage("Added IMRS:%s to DG-ID %u%s", name.c_str(), dgid, statc ? " (Static)" : "");
 			}
@@ -354,6 +361,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "gateway";
 
 				LogMessage("Added YSF Gateway to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -370,6 +378,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "parrot";
 
 				LogMessage("Added Parrot to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -386,6 +395,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2dmr";
 
 				LogMessage("Added YSF2DMR to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -402,6 +412,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2nxdn";
 
 				LogMessage("Added YSF2NXDN to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -418,6 +429,7 @@ int CDGIdGateway::run()
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
 				dgIdNetwork[dgid]->m_netHangTime = netHangTime;
+				dgIdNetwork[dgid]->m_protocol    = "ysf2p25";
 
 				LogMessage("Added YSF2P25 to DG-ID %u%s", dgid, statc ? " (Static)" : "");
 			} else {
@@ -448,11 +460,15 @@ int CDGIdGateway::run()
 	CStopWatch stopWatch;
 	stopWatch.start();
 
-	LogMessage("DGIdGateway-%s is starting", VERSION);
- 	LogMessage("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
+	LogInfo("DGIdGateway-%s is starting", VERSION);
+ 	LogInfo("Built %s %s (GitID #%.7s)", __TIME__, __DATE__, gitversion);
+
+	writeJSONStatus("DGIdGateway is starting");
 
 	DGID_STATUS state = DGID_STATUS::NOTLINKED;
 	unsigned int nPips = 0U;
+
+	writeJSONUnlinked("startup");
 
 	while (!m_killed) {
 		unsigned char buffer[200U];
@@ -475,11 +491,14 @@ int CDGIdGateway::run()
 					}
 
 					if (dgIdNetwork[dgId] != nullptr) {
-						std::string desc = dgIdNetwork[dgId]->getDesc(dgId);
-						LogMessage("DG-ID set to %u (%s) via RF", dgId, desc.c_str());
+						std::string desc  = dgIdNetwork[dgId]->getDesc(dgId);
+						std::string proto = dgIdNetwork[dgId]->m_protocol;
+						LogMessage("DG-ID set to %u (%s:%s) via RF", dgId, proto.c_str(), desc.c_str());
+						writeJSONLinking("user", dgId, proto, desc);
 						currentDGId = dgId;
 						state = DGID_STATUS::NOTLINKED;
 					} else {
+						writeJSONUnlinked("user");
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
 						state = DGID_STATUS::NOTOPEN;
 					}
@@ -539,8 +558,10 @@ int CDGIdGateway::run()
 						inactivityTimer.start();
 
 						if (currentDGId == UNSET_DGID) {
-							std::string desc = dgIdNetwork[i]->getDesc(i);
-							LogMessage("DG-ID set to %u (%s) via Network", i, desc.c_str());
+							std::string desc  = dgIdNetwork[i]->getDesc(i);
+							std::string proto = dgIdNetwork[i]->m_protocol;
+							LogMessage("DG-ID set to %u (%s:%s) via Network", i, proto.c_str(), desc.c_str());
+							writeJSONLinking("network", i, proto, desc);
 							currentDGId = i;
 							state = DGID_STATUS::LINKED;
 							fromRF = false;
@@ -566,6 +587,7 @@ int CDGIdGateway::run()
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
 			if (dgIdNetwork[currentDGId] != nullptr && !dgIdNetwork[currentDGId]->m_static) {
+				writeJSONUnlinked("timer");
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
 				dgIdNetwork[currentDGId]->unlink();
@@ -610,6 +632,9 @@ int CDGIdGateway::run()
 			CThread::sleep(5U);
 	}
 
+	LogInfo("DGIdGateway is stopping");
+	writeJSONStatus("DGIdGateway is stopping");
+
 	rptNetwork.unlink();
 	rptNetwork.close();
 
@@ -634,8 +659,6 @@ int CDGIdGateway::run()
 		delete imrs;
 	}
 
-	::LogFinalise();
-
 	return 0;
 }
 
@@ -644,12 +667,10 @@ void CDGIdGateway::createGPS()
 	if (!m_conf.getAPRSEnabled())
 		return;
 
-	std::string address = m_conf.getAPRSAddress();
-	unsigned short port = m_conf.getAPRSPort();
 	std::string suffix  = m_conf.getAPRSSuffix();
 	bool debug          = m_conf.getDebug();
 
-	m_writer = new CAPRSWriter(m_callsign, m_suffix, address, port, suffix, debug);
+	m_writer = new CAPRSWriter(m_callsign, m_suffix, suffix, debug);
 
 	unsigned int txFrequency = m_conf.getTxFrequency();
 	unsigned int rxFrequency = m_conf.getRxFrequency();
@@ -741,3 +762,39 @@ void CDGIdGateway::sendPips(unsigned int n)
 	if (bleep)
 		LogMessage("*** %u bleep!", n);
 }
+
+void CDGIdGateway::writeJSONStatus(const std::string& status)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["message"]   = status;
+
+	WriteJSON("status", json);
+}
+
+void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id, const std::string& protocol, const std::string& description)
+{
+	nlohmann::json json;
+
+	json["timestamp"]   = CUtils::createTimestamp();
+	json["action"]      = "linking";
+	json["reason"]      = reason;
+	json["dg-id"]       = int(id);
+	json["protocol"]    = protocol;
+	json["description"] = description;
+
+	WriteJSON("link", json);
+}
+
+void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "unlinked";
+	json["reason"]    = reason;
+
+	WriteJSON("link", json);
+}
+
