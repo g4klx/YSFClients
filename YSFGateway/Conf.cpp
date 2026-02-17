@@ -1,3 +1,4 @@
+
 /*
  *   Copyright (C) 2015-2020,2023,2025 by Jonathan Naylor G4KLX
  *
@@ -49,7 +50,6 @@ m_rptAddress(),
 m_rptPort(0U),
 m_myAddress(),
 m_myPort(0U),
-m_wiresXMakeUpper(true),
 m_wiresXCommandPassthrough(false),
 m_debug(false),
 m_daemon(false),
@@ -162,7 +162,7 @@ bool CConf::read()
 			value[len - 1U] = '\0';
 			value++;
 		} else {
-			char *p;
+			char* p;
 
 			// if value is not quoted, remove after # (to make comment)
 			if ((p = strchr(value, '#')) != nullptr)
@@ -194,8 +194,6 @@ bool CConf::read()
 				m_myAddress = value;
 			else if (::strcmp(key, "LocalPort") == 0)
 				m_myPort = (unsigned short)::atoi(value);
-			else if (::strcmp(key, "WiresXMakeUpper") == 0)
-				m_wiresXMakeUpper = ::atoi(value) == 1;
 			else if (::strcmp(key, "WiresXCommandPassthrough") == 0)
 				m_wiresXCommandPassthrough = ::atoi(value) == 1;
 			else if (::strcmp(key, "Debug") == 0)
@@ -231,8 +229,8 @@ bool CConf::read()
 				m_aprsSuffix = value;
 			else if (::strcmp(key, "Description") == 0)
 				m_aprsDescription = value;
-		        else if (::strcmp(key, "Symbol") == 0)
-		              	m_aprsSymbol = value;
+			else if (::strcmp(key, "Symbol") == 0)
+				m_aprsSymbol = value;
 		} else if (section == SECTION::MQTT) {
 			if (::strcmp(key, "Address") == 0)
 				m_mqttAddress = value;
@@ -344,11 +342,6 @@ unsigned short CConf::getMyPort() const
 	return m_myPort;
 }
 
-bool CConf::getWiresXMakeUpper() const
-{
-	return m_wiresXMakeUpper;
-}
-
 bool CConf::getWiresXCommandPassthrough() const
 {
 	return m_wiresXCommandPassthrough;
@@ -431,7 +424,7 @@ std::string CConf::getAPRSDescription() const
 
 std::string CConf::getAPRSSymbol() const
 {
-       return m_aprsSymbol;
+	return m_aprsSymbol;
 }
 
 std::string CConf::getMQTTAddress() const
@@ -593,4 +586,3 @@ bool CConf::getRemoteCommandsEnabled() const
 {
 	return m_remoteCommandsEnabled;
 }
-

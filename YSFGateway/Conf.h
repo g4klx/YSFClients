@@ -1,3 +1,4 @@
+
 /*
  *   Copyright (C) 2015-2020,2023,2025 by Jonathan Naylor G4KLX
  *
@@ -37,7 +38,6 @@ public:
 	unsigned short getRptPort() const;
 	std::string  getMyAddress() const;
 	unsigned short getMyPort() const;
-	bool         getWiresXMakeUpper() const;
 	bool         getWiresXCommandPassthrough() const;
 	bool         getDebug() const;
 	bool         getDaemon() const;
@@ -73,13 +73,13 @@ public:
 	std::string  getAPRSDescription() const;
 	std::string  getAPRSSymbol() const;
 
-  // The Network section
-  std::string  getNetworkStartup() const;
-  std::string  getNetworkOptions() const;
-  unsigned int getNetworkInactivityTimeout() const;
-  bool         getNetworkReconnect() const;
-  bool         getNetworkRevert() const;
-  bool         getNetworkDebug() const;
+	// The Network section
+	std::string  getNetworkStartup() const;
+	std::string  getNetworkOptions() const;
+	unsigned int getNetworkInactivityTimeout() const;
+	bool         getNetworkReconnect() const;
+	bool         getNetworkRevert() const;
+	bool         getNetworkDebug() const;
 
 	// The YSF Network section
 	bool         getYSFNetworkEnabled() const;
@@ -117,7 +117,6 @@ private:
 	unsigned short m_rptPort;
 	std::string  m_myAddress;
 	unsigned short m_myPort;
-	bool         m_wiresXMakeUpper;
 	bool         m_wiresXCommandPassthrough;
 	bool         m_debug;
 	bool         m_daemon;
@@ -146,7 +145,7 @@ private:
 	bool         m_mqttAuthEnabled;
 	std::string  m_mqttUsername;
 	std::string  m_mqttPassword;
-	
+
 	std::string  m_networkStartup;
 	std::string  m_networkOptions;
 	unsigned int m_networkInactivityTimeout;

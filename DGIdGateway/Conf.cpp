@@ -1,3 +1,4 @@
+
 /*
  *   Copyright (C) 2015-2020,2023,2025 by Jonathan Naylor G4KLX
  *
@@ -157,7 +158,7 @@ bool CConf::read()
 			value[len - 1U] = '\0';
 			value++;
 		} else {
-			char *p;
+			char* p;
 
 			// if value is not quoted, remove after # (to make comment)
 			if ((p = strchr(value, '#')) != nullptr)
@@ -226,8 +227,8 @@ bool CConf::read()
 				m_aprsSuffix = value;
 			else if (::strcmp(key, "Description") == 0)
 				m_aprsDescription = value;
-		      	else if (::strcmp(key, "Symbol") == 0)
-		              	m_aprsSymbol = value;
+			else if (::strcmp(key, "Symbol") == 0)
+				m_aprsSymbol = value;
 		} else if (section == SECTION::MQTT) {
 			if (::strcmp(key, "Address") == 0)
 				m_mqttAddress = value;
@@ -272,21 +273,21 @@ bool CConf::read()
 				dgIdData->m_type = value;
 				dgIdData->m_static = false;
 				if (::strcmp(value, "YSF") == 0) {
-					dgIdData->m_rfHangTime  = m_ysfRFHangTime;
+					dgIdData->m_rfHangTime = m_ysfRFHangTime;
 					dgIdData->m_netHangTime = m_ysfNetHangTime;
-					dgIdData->m_debug       = m_ysfNetDebug;
+					dgIdData->m_debug = m_ysfNetDebug;
 				} else if (::strcmp(value, "FCS") == 0) {
-					dgIdData->m_rfHangTime  = m_fcsRFHangTime;
+					dgIdData->m_rfHangTime = m_fcsRFHangTime;
 					dgIdData->m_netHangTime = m_fcsNetHangTime;
-					dgIdData->m_debug       = m_fcsNetDebug;
+					dgIdData->m_debug = m_fcsNetDebug;
 				} else if (::strcmp(value, "IMRS") == 0) {
-					dgIdData->m_rfHangTime  = m_imrsRFHangTime;
+					dgIdData->m_rfHangTime = m_imrsRFHangTime;
 					dgIdData->m_netHangTime = m_imrsNetHangTime;
-					dgIdData->m_debug       = m_imrsNetDebug;
+					dgIdData->m_debug = m_imrsNetDebug;
 				} else {
-					dgIdData->m_rfHangTime  = m_rfHangTime;
+					dgIdData->m_rfHangTime = m_rfHangTime;
 					dgIdData->m_netHangTime = m_netHangTime;
-					dgIdData->m_debug       = false;
+					dgIdData->m_debug = false;
 				}
 			} else if (::strcmp(key, "RFHangTime") == 0)
 				dgIdData->m_rfHangTime = (unsigned int)::atoi(value);
@@ -308,7 +309,7 @@ bool CConf::read()
 				char* p1 = ::strtok(value, ",");
 				char* p2 = ::strtok(nullptr, "\r\n");
 				IMRSDestination* dest = new IMRSDestination;
-				dest->m_dgId    = (unsigned int)::atoi(p1);
+				dest->m_dgId = (unsigned int)::atoi(p1);
 				dest->m_address = p2;
 				dgIdData->m_destinations.push_back(dest);
 			} else if (::strcmp(key, "Debug") == 0)
@@ -440,7 +441,7 @@ std::string CConf::getAPRSDescription() const
 
 std::string CConf::getAPRSSymbol() const
 {
-       return m_aprsSymbol;
+	return m_aprsSymbol;
 }
 
 std::string CConf::getMQTTAddress() const
@@ -502,4 +503,3 @@ std::string CConf::getGPSDPort() const
 {
 	return m_gpsdPort;
 }
-
