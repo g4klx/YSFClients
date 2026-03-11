@@ -1,18 +1,21 @@
 CC      = cc
 CXX     = c++
-CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
+CFLAGS  = -g -O3 -Wall -std=c++0x -MMD -MD -pthread
 LIBS    = -lpthread
 LDFLAGS = -g
 
-OBJECTS = Network.o Parrot.o StopWatch.o Thread.o Timer.o UDPSocket.o YSFParrot.o
+SRCS = $(wildcard *.cpp)
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(SRCS:.cpp=.d)
 
 all:		YSFParrot
 
-YSFParrot:	$(OBJECTS)
-		$(CXX) $(OBJECTS) $(CFLAGS) $(LIBS) -o YSFParrot
+YSFParrot:	$(OBJS)
+		$(CXX) $(OBJS) $(CFLAGS) $(LIBS) -o YSFParrot
 
 %.o: %.cpp
 		$(CXX) $(CFLAGS) -c -o $@ $<
+-include $(DEPS)
 
 YSFParrot.o: GitVersion.h FORCE
 

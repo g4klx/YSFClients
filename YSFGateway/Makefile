@@ -2,25 +2,27 @@ CC      = cc
 CXX     = c++
 
 # Use the following CFLAGS and LIBS if you don't want to use gpsd.
-CFLAGS  = -g -O3 -Wall -std=c++0x -pthread
+CFLAGS  = -g -O3 -Wall -std=c++0x -MMD -MD -pthread
 LIBS    = -lm -lpthread -lmosquitto
 
 # Use the following CFLAGS and LIBS if you do want to use gpsd.
-#CFLAGS  = -g -O3 -Wall -DUSE_GPSD -std=c++0x -pthread
+#CFLAGS  = -g -O3 -Wall -DUSE_GPSD -std=c++0x -MMD -MD -pthread
 #LIBS    = -lm -lpthread -lgps -lmosquitto
 
 LDFLAGS = -g
 
-OBJECTS = APRSWriter.o Conf.o CRC.o DTMF.o FCSNetwork.o Golay24128.o GPS.o Log.o MQTTConnection.o StopWatch.o Sync.o Thread.o \
-	  Timer.o UDPSocket.o Utils.o WiresX.o YSFConvolution.o YSFFICH.o YSFGateway.o YSFNetwork.o YSFPayload.o YSFReflectors.o
+SRCS = $(wildcard *.cpp)
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(SRCS:.cpp=.d)
 
 all:		YSFGateway
 
-YSFGateway:	$(OBJECTS)
-		$(CXX) $(OBJECTS) $(CFLAGS) $(LIBS) -o YSFGateway
+YSFGateway:	$(OBJS)
+		$(CXX) $(OBJS) $(CFLAGS) $(LIBS) -o YSFGateway
 
 %.o: %.cpp
 		$(CXX) $(CFLAGS) -c -o $@ $<
+-include $(DEPS)
 
 YSFGateway.o: GitVersion.h FORCE
 

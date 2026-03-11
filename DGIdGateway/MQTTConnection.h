@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2022,2023,2025 by Jonathan Naylor G4KLX
+ *   Copyright (C) 2022,2023,2025,2026 by Jonathan Naylor G4KLX
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 #include <string>
 
 enum class MQTT_QOS : int {
-	AT_MODE_ONCE  = 0U,
-	AT_LEAST_ONCE = 1U,
-	EXACTLY_ONCE  = 2U
+	AT_MODE_ONCE  = 0,
+	AT_LEAST_ONCE = 1,
+	EXACTLY_ONCE  = 2
 };
 
 class CMQTTConnection {
