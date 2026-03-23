@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020,2023,2024,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2023,2024,2025,2026 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -1120,7 +1120,7 @@ void CYSFGateway::writeJSONStatus(const std::string& status)
 	json["timestamp"] = CUtils::createTimestamp();
 	json["message"]   = status;
 
-	WriteJSON("status", json);
+	WriteJSON("status", json, false);
 }
 
 void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string& protocol, const std::string& reflector)
@@ -1133,7 +1133,7 @@ void CYSFGateway::writeJSONLinking(const std::string& reason, const std::string&
 	json["reflector"] = reflector;
 	json["protocol"]  = protocol;
 
-	WriteJSON("link", json);
+	WriteJSON("link", json, true);
 }
 
 void CYSFGateway::writeJSONUnlinked(const std::string& reason)
@@ -1144,7 +1144,7 @@ void CYSFGateway::writeJSONUnlinked(const std::string& reason)
 	json["action"]    = "unlinked";
 	json["reason"]    = reason;
 
-	WriteJSON("link", json);
+	WriteJSON("link", json, true);
 }
 
 void CYSFGateway::writeJSONRelinking(const std::string& protocol, const std::string& reflector)
@@ -1156,7 +1156,7 @@ void CYSFGateway::writeJSONRelinking(const std::string& protocol, const std::str
 	json["reflector"] = reflector;
 	json["protocol"]  = protocol;
 
-	WriteJSON("link", json);
+	WriteJSON("link", json, true);
 }
 
 void CYSFGateway::onCommand(const unsigned char* command, unsigned int length)

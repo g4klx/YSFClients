@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2016-2020,2023,2024,2025 by Jonathan Naylor G4KLX
+*   Copyright (C) 2016-2020,2023,2024,2025,2026 by Jonathan Naylor G4KLX
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -770,7 +770,7 @@ void CDGIdGateway::writeJSONStatus(const std::string& status)
 	json["timestamp"] = CUtils::createTimestamp();
 	json["message"]   = status;
 
-	WriteJSON("status", json);
+	WriteJSON("status", json, false);
 }
 
 void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id, const std::string& protocol, const std::string& description)
@@ -784,7 +784,7 @@ void CDGIdGateway::writeJSONLinking(const std::string& reason, unsigned int id, 
 	json["protocol"]    = protocol;
 	json["description"] = description;
 
-	WriteJSON("link", json);
+	WriteJSON("link", json, true);
 }
 
 void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
@@ -795,6 +795,5 @@ void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
 	json["action"]    = "unlinked";
 	json["reason"]    = reason;
 
-	WriteJSON("link", json);
+	WriteJSON("link", json, true);
 }
-

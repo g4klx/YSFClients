@@ -37,9 +37,9 @@ public:
 
 	bool open();
 
-	bool publish(const char* topic, const char* text);
-	bool publish(const char* topic, const std::string& text);
-	bool publish(const char* topic, const unsigned char* data, unsigned int len);
+	bool publish(const char* topic, const char* text, bool retain = false);
+	bool publish(const char* topic, const std::string& text, bool retain = false);
+	bool publish(const char* topic, const unsigned char* data, unsigned int len, bool retain = false);
 
 	void close();
 
