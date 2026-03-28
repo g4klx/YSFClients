@@ -992,7 +992,8 @@ void CYSFGateway::writeCommand(const std::string& command)
 		std::string id = command.substr(8);
 
 		// Left trim
-		id.erase(id.begin(), std::find_if(id.begin(), id.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+		id.erase(id.begin(), std::find_if(id.begin(), id.end(), [](unsigned char c) { return !std::isspace(c); }));
+
 		CYSFReflector* reflector = m_reflectors->findById(id);
 		if (reflector == nullptr)
 			reflector = m_reflectors->findByName(id);
@@ -1029,7 +1030,8 @@ void CYSFGateway::writeCommand(const std::string& command)
 		std::string raw = command.substr(8);
 
 		// Left trim
-		raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+		raw.erase(raw.begin(), std::find_if(raw.begin(), raw.end(), [](unsigned char c) { return !std::isspace(c); }));
+
 		std::string id = "FCS00";
 		std::string idShort = "FCS";
 
