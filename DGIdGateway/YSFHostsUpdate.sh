@@ -22,7 +22,7 @@
 #
 # Full path to the YSFHosts JSON file
 #
-NXDNHOSTS=/path/to/YSFHosts.json
+YSFHOSTS=/path/to/YSFHosts.json
 
 ###############################################################################
 #
@@ -38,6 +38,6 @@ then
 fi
 
 # Download the YSFHosts.json file
-curl -X 'GET' 'https://dvref.com/ysf/reflectors/' -H 'accept: */*' > ${YSFHOSTS}
+curl --fail --silent -S -L -o  ${YSFHOSTS} -A "YSFGateway - G4KLX" https://hostfiles.refcheck.radio/YSFHosts.json
 
 exit 0
