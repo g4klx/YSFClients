@@ -133,8 +133,11 @@ CYSFReflector* CYSFReflectors::findById(const std::string& id)
 
 CYSFReflector* CYSFReflectors::findByName(const std::string& name)
 {
+	std::string fullName = name;
+	fullName.resize(16U, ' ');
+	
 	for (const auto& it : m_reflectors) {
-		if (name == it->m_name)
+		if (fullName == it->m_name)
 			return it;
 	}
 
