@@ -27,6 +27,20 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
+static void copyPadded(unsigned char* dest, const std::string& src, unsigned int length)
+{
+	::memset(dest, ' ', length);
+	size_t copyLength = src.size() < length ? src.size() : length;
+	::memcpy(dest, src.c_str(), copyLength);
+}
+
+static void copyNumber(unsigned char* dest, unsigned int value, unsigned int length)
+{
+	char buffer[20U];
+	::sprintf(buffer, "%0*u", int(length), value);
+	::memcpy(dest, buffer, length);
+}
+
 CYSFNetwork::CYSFNetwork(const std::string& address, unsigned short port, const std::string& callsign, bool debug) :
 m_socket(address, port),
 m_debug(debug),
@@ -234,6 +248,31 @@ void CYSFNetwork::setOptions(const std::string& options)
 
 	for (unsigned int i = 0U; i < (50U - 4U - YSF_CALLSIGN_LENGTH); i++)
 		m_options[i + 4U + YSF_CALLSIGN_LENGTH] = m_opt.at(i);
+}
+
+void CYSFNetwork::writeInfo(unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& name, const std::string& type, unsigned int id)
+{
+	if (m_reflector.isEmpty())
+		return;
+
+	unsigned char info[80U];
+	::memset(info, ' ', 80U);
+	::memcpy(info + 0U, "YSFI", 4U);
+	::memcpy(info + 4U, m_poll + 4U, YSF_CALLSIGN_LENGTH);
+	copyNumber(info + 14U, rxFrequency, 9U);
+	copyNumber(info + 23U, txFrequency, 9U);
+	copyPadded(info + 32U, locator, 6U);
+	copyPadded(info + 38U, name, 20U);
+	copyPadded(info + 58U, type, 12U);
+	copyNumber(info + 70U, id, 7U);
+
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", info, 80U);
+
+	if (m_ipV6)
+		m_socket.write(info, 80U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(info, 80U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 }
 
 void CYSFNetwork::writeUnlink(unsigned int count)

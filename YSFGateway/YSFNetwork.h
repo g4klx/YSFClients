@@ -42,6 +42,7 @@ public:
 
 	void writePoll(unsigned int count = 1U);
 	void setOptions(const std::string& options = "");
+	void writeInfo(unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& name, const std::string& type, unsigned int id);
 	void writeUnlink(unsigned int count = 1U);
 
 	unsigned int read(unsigned char* data);

@@ -74,6 +74,7 @@ private:
 	void processDTMF(unsigned char* buffer, unsigned char dt);
 	void createWiresX(CYSFNetwork* rptNetwork);
 	void createGPS();
+	void writeYSFInfo();
 	void readFCSRoomsFile(const std::string& filename);
 
 	void writeJSONStatus(const std::string& status);
