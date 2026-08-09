@@ -27,6 +27,20 @@
 
 const unsigned int BUFFER_LENGTH = 200U;
 
+static void copyPadded(unsigned char* dest, const std::string& src, unsigned int length)
+{
+	::memset(dest, ' ', length);
+	size_t copyLength = src.size() < length ? src.size() : length;
+	::memcpy(dest, src.c_str(), copyLength);
+}
+
+static void copyNumber(unsigned char* dest, unsigned int value, unsigned int length)
+{
+	char buffer[20U];
+	::sprintf(buffer, "%0*u", int(length), value);
+	::memcpy(dest, buffer, length);
+}
+
 CYSFNetwork::CYSFNetwork(const std::string& localAddress, unsigned short localPort, const std::string& name, const sockaddr_storage& addr, unsigned int addrLen, const std::string& callsign, bool debug) :
 m_socket(localAddress, localPort),
 m_debug(debug),
@@ -38,7 +52,14 @@ m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
 m_state(DGID_STATUS::NOTOPEN),
-m_ipV6(false)
+m_ipV6(false),
+m_ysfInfoPending(false),
+m_rxFrequency(0U),
+m_txFrequency(0U),
+m_locator(),
+m_name(),
+m_type(),
+m_id(0U)
 {
 	m_reflector.m_id   = "99999";
 	m_reflector.m_name = "Local";
@@ -84,7 +105,14 @@ m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
 m_state(DGID_STATUS::NOTOPEN),
-m_ipV6(false)
+m_ipV6(false),
+m_ysfInfoPending(false),
+m_rxFrequency(0U),
+m_txFrequency(0U),
+m_locator(),
+m_name(),
+m_type(),
+m_id(0U)
 {
 	m_reflector.m_id   = "99999";
 	m_reflector.m_name = name;
@@ -130,7 +158,14 @@ m_buffer(1000U, "YSF Network Buffer"),
 m_sendPollTimer(1000U, 5U),
 m_recvPollTimer(1000U, 60U),
 m_state(DGID_STATUS::NOTOPEN),
-m_ipV6(false)
+m_ipV6(false),
+m_ysfInfoPending(false),
+m_rxFrequency(0U),
+m_txFrequency(0U),
+m_locator(),
+m_name(),
+m_type(),
+m_id(0U)
 {
 	m_poll = new unsigned char[14U];
 	::memcpy(m_poll + 0U, "YSFP", 4U);
@@ -197,6 +232,16 @@ DGID_STATUS CYSFNetwork::getStatus()
 	return m_state;
 }
 
+void CYSFNetwork::setInfo(unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& name, const std::string& type, unsigned int id)
+{
+	m_rxFrequency = rxFrequency;
+	m_txFrequency = txFrequency;
+	m_locator     = locator;
+	m_name        = name;
+	m_type        = type;
+	m_id          = id;
+}
+
 void CYSFNetwork::write(unsigned int dgid, const unsigned char* data)
 {
 	assert(data != nullptr);
@@ -219,11 +264,13 @@ void CYSFNetwork::link()
 		return;
 
 	m_state = DGID_STATUS::LINKING;
+	m_ysfInfoPending = true;
 
 	m_sendPollTimer.start();
 	m_recvPollTimer.start();
 
 	writePoll();
+	writeInfo();
 }
 
 void CYSFNetwork::writePoll()
@@ -238,6 +285,31 @@ void CYSFNetwork::writePoll()
 		m_socket.write(m_poll, 14U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
 	else
 		m_socket.write(m_poll, 14U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
+}
+
+void CYSFNetwork::writeInfo()
+{
+	if (m_name.empty() && m_type.empty())
+		return;
+
+	unsigned char info[80U];
+	::memset(info, ' ', 80U);
+	::memcpy(info + 0U, "YSFI", 4U);
+	::memcpy(info + 4U, m_poll + 4U, YSF_CALLSIGN_LENGTH);
+	copyNumber(info + 14U, m_rxFrequency, 9U);
+	copyNumber(info + 23U, m_txFrequency, 9U);
+	copyPadded(info + 32U, m_locator, 6U);
+	copyPadded(info + 38U, m_name, 20U);
+	copyPadded(info + 58U, m_type, 12U);
+	copyNumber(info + 70U, m_id, 7U);
+
+	if (m_debug)
+		CUtils::dump(1U, "YSF Network Data Sent", info, 80U);
+
+	if (m_ipV6)
+		m_socket.write(info, 80U, m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen);
+	else
+		m_socket.write(info, 80U, m_reflector.IPv4.m_addr, m_reflector.IPv4.m_addrLen);
 }
 
 void CYSFNetwork::unlink()
@@ -308,6 +380,11 @@ void CYSFNetwork::clock(unsigned int ms)
 
 	if (::memcmp(buffer, "YSFP", 4U) == 0) {
 		m_recvPollTimer.start();
+
+		if (m_ysfInfoPending) {
+			writeInfo();
+			m_ysfInfoPending = false;
+		}
 
 		if (m_state == DGID_STATUS::LINKING) {
 			if (strcmp(m_reflector.m_name.c_str(), "MMDVM") == 0)

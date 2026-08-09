@@ -56,6 +56,8 @@ public:
 
 	virtual void close();
 
+	void setInfo(unsigned int rxFrequency, unsigned int txFrequency, const std::string& locator, const std::string& name, const std::string& type, unsigned int id);
+
 private:
 	CUDPSocket                 m_socket;
 	bool                       m_debug;
@@ -68,8 +70,16 @@ private:
 	CTimer                     m_recvPollTimer;
 	DGID_STATUS                m_state;
 	bool                       m_ipV6;
+	bool                       m_ysfInfoPending;
+	unsigned int               m_rxFrequency;
+	unsigned int               m_txFrequency;
+	std::string                m_locator;
+	std::string                m_name;
+	std::string                m_type;
+	unsigned int               m_id;
 
 	void writePoll();
+	void writeInfo();
 };
 
 #endif

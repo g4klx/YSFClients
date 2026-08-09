@@ -308,7 +308,9 @@ int CDGIdGateway::run()
 
 			CYSFReflector* reflector = reflectors->findByName(name);
 			if (reflector != nullptr) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, *reflector, m_callsign, statc, debug);
+				CYSFNetwork* ysfNetwork = new CYSFNetwork(local, *reflector, m_callsign, statc, debug);
+				ysfNetwork->setInfo(m_conf.getRxFrequency(), m_conf.getTxFrequency(), calculateLocator(), m_callsign, "MMDVM", m_conf.getId());
+				dgIdNetwork[dgid] = ysfNetwork;
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -356,7 +358,9 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup(it1->m_address, it1->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "YSFGateway", addr, addrLen, m_callsign, statc, debug);
+				CYSFNetwork* ysfNetwork = new CYSFNetwork(local, "YSFGateway", addr, addrLen, m_callsign, statc, debug);
+				ysfNetwork->setInfo(m_conf.getRxFrequency(), m_conf.getTxFrequency(), calculateLocator(), m_callsign, "MMDVM", m_conf.getId());
+				dgIdNetwork[dgid] = ysfNetwork;
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
@@ -373,7 +377,9 @@ int CDGIdGateway::run()
 			sockaddr_storage addr;
 			unsigned int     addrLen;
 			if (CUDPSocket::lookup(it1->m_address, it1->m_port, addr, addrLen) == 0) {
-				dgIdNetwork[dgid] = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, statc, debug);
+				CYSFNetwork* ysfNetwork = new CYSFNetwork(local, "PARROT", addr, addrLen, m_callsign, statc, debug);
+				ysfNetwork->setInfo(m_conf.getRxFrequency(), m_conf.getTxFrequency(), calculateLocator(), m_callsign, "MMDVM", m_conf.getId());
+				dgIdNetwork[dgid] = ysfNetwork;
 				dgIdNetwork[dgid]->m_modes       = DT_VD_MODE1 | DT_VD_MODE2 | DT_VOICE_FR_MODE | DT_DATA_FR_MODE;
 				dgIdNetwork[dgid]->m_static      = statc;
 				dgIdNetwork[dgid]->m_rfHangTime  = rfHangTime;
