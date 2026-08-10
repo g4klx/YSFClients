@@ -47,6 +47,7 @@ private:
 	void writeJSONStatus(const std::string& status);
 	void writeJSONLinking(const std::string& reason, unsigned int id, const std::string& protocol, const std::string& description);
 	void writeJSONUnlinked(const std::string& reason);
+	void writeJSONFailed(const std::string& reason, unsigned int id);
 };
 
 #endif
