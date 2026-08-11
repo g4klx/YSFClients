@@ -426,12 +426,14 @@ int CYSFGateway::run()
 		if (m_lostTimer.isRunning() && m_lostTimer.hasExpired()) {
 			if (m_linkType == LINK_TYPE::YSF) {
 				LogWarning("Link has failed, polls lost");
+				writeJSONFailed("timer", m_current);
 				m_wiresX->processDisconnect();
 				m_ysfNetwork->clearDestination();
 			}
 
 			if (m_fcsNetwork != nullptr) {
 				LogWarning("Link has failed, polls lost");
+				writeJSONFailed("timer", m_current);
 				m_fcsNetwork->clearDestination();
 			}
 
@@ -1157,6 +1159,28 @@ void CYSFGateway::writeJSONRelinking(const std::string& protocol, const std::str
 	json["action"]    = "relinking";
 	json["reflector"] = reflector;
 	json["protocol"]  = protocol;
+
+	WriteJSON("link", json, true);
+}
+
+// "failed" was already declared in schema.json's action enum but never
+// actually published -- m_lostTimer's expiry handler in the main loop
+// already detects and logs this exact condition ("Link has failed, polls
+// lost", both YSF and FCS), covering a reflector that never answers a
+// link request at all (a mistyped/dead reflector ID -- the single most
+// likely real operator mistake) as well as one that goes silent
+// mid-session. It just never told MQTT, so the dashboard was left
+// showing a stale "linking" state indefinitely with no indication
+// anything was wrong.
+void CYSFGateway::writeJSONFailed(const std::string& reason, const std::string& reflector)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "failed";
+	json["reason"]    = reason;
+	if (!reflector.empty())
+		json["reflector"] = reflector;
 
 	WriteJSON("link", json, true);
 }

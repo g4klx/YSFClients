@@ -498,7 +498,7 @@ int CDGIdGateway::run()
 						currentDGId = dgId;
 						state = DGID_STATUS::NOTLINKED;
 					} else {
-						writeJSONUnlinked("user");
+						writeJSONFailed("user", dgId);
 						LogMessage("DG-ID set to %u (None) via RF", dgId);
 						state = DGID_STATUS::NOTOPEN;
 					}
@@ -794,6 +794,27 @@ void CDGIdGateway::writeJSONUnlinked(const std::string& reason)
 	json["timestamp"] = CUtils::createTimestamp();
 	json["action"]    = "unlinked";
 	json["reason"]    = reason;
+
+	WriteJSON("link", json, true);
+}
+
+// "failed" was already declared in schema.json's action enum but never
+// actually published. The real bug this fixes: selecting an RF DG-ID
+// that has no configured network mapping was previously reported as
+// "unlinked" -- which is wrong, not just incomplete. Nothing was ever
+// linked, so there's nothing to *un*link; this is a failed link attempt
+// (the DG-ID equivalent of DMR's wrong password or P25's unresolved
+// talkgroup -- a mistyped/unconfigured DG-ID is the likeliest real
+// operator mistake here), and deserves its own distinct signal rather
+// than being indistinguishable from a normal disconnect.
+void CDGIdGateway::writeJSONFailed(const std::string& reason, unsigned int id)
+{
+	nlohmann::json json;
+
+	json["timestamp"] = CUtils::createTimestamp();
+	json["action"]    = "failed";
+	json["reason"]    = reason;
+	json["dg-id"]     = int(id);
 
 	WriteJSON("link", json, true);
 }

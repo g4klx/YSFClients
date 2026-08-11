@@ -21,7 +21,7 @@
 		"reason": {"$ref": "#/$defs/reason"},
 		"dg-id": {"$ref": "#/defs/dg-id"},
 		"protocol": {"$ref": "#/defs/protocol"},
-		"descrption": {"type": "string"},
+		"description": {"type": "string"},
 		"required": ["timestamp", "action"]
 	}
 }
