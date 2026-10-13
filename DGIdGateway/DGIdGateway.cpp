@@ -693,6 +693,13 @@ void CDGIdGateway::createGPS()
 	m_writer->setInfo(txFrequency, rxFrequency, desc, symbol);
 
 	bool enabled = m_conf.getGPSDEnabled();
+#if !defined(USE_GPSD)
+	// Not built with gpsd: use the fixed position
+	if (enabled) {
+		LogWarning("GPSD is enabled but not compiled in, using the [Info] position");
+		enabled = false;
+	}
+#endif
 	if (enabled) {
 		std::string address = m_conf.getGPSDAddress();
 		std::string port    = m_conf.getGPSDPort();
