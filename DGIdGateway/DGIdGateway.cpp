@@ -467,6 +467,9 @@ int CDGIdGateway::run()
 
 	DGID_STATUS state = DGID_STATUS::NOTLINKED;
 	unsigned int nPips = 0U;
+	// The unconfigured DG-ID already reported for this transmission: every
+	// frame of it would otherwise report it again.
+	unsigned int failedDGId = UNSET_DGID;
 
 	writeJSONUnlinked("startup");
 
@@ -498,8 +501,11 @@ int CDGIdGateway::run()
 						currentDGId = dgId;
 						state = DGID_STATUS::NOTLINKED;
 					} else {
-						writeJSONFailed("user", dgId);
-						LogMessage("DG-ID set to %u (None) via RF", dgId);
+						if (dgId != failedDGId) {
+							writeJSONFailed("user", dgId);
+							LogMessage("DG-ID set to %u (None) via RF", dgId);
+							failedDGId = dgId;
+						}
 						state = DGID_STATUS::NOTOPEN;
 					}
 
@@ -532,6 +538,7 @@ int CDGIdGateway::run()
 			}
 
 			if ((buffer[34U] & 0x01U) == 0x01U) {
+				failedDGId = UNSET_DGID;
 				if (m_gps != nullptr)
 					m_gps->reset();
 				if (nPips > 0U && fromRF)
@@ -586,11 +593,17 @@ int CDGIdGateway::run()
 
 		inactivityTimer.clock(ms);
 		if (inactivityTimer.isRunning() && inactivityTimer.hasExpired()) {
-			if (dgIdNetwork[currentDGId] != nullptr && !dgIdNetwork[currentDGId]->m_static) {
+			if (currentDGId != UNSET_DGID) {
+				// Every timeout is reported, a static DG-ID's too: its
+				// network stays linked, but the DG-ID is no longer the one
+				// in use.
 				writeJSONUnlinked("timer");
-				dgIdNetwork[currentDGId]->unlink();
-				dgIdNetwork[currentDGId]->unlink();
-				dgIdNetwork[currentDGId]->unlink();
+
+				if (dgIdNetwork[currentDGId] != nullptr && !dgIdNetwork[currentDGId]->m_static) {
+					dgIdNetwork[currentDGId]->unlink();
+					dgIdNetwork[currentDGId]->unlink();
+					dgIdNetwork[currentDGId]->unlink();
+				}
 			}
 
 			LogMessage("DG-ID set to None via timeout");
