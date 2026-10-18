@@ -29,6 +29,14 @@
 // In Log.cpp
 extern CMQTTConnection* m_mqtt;
 
+#if defined(USE_GPSD)
+// gpsd beaconing: first fix, then 60 s while moving, hourly when parked.
+// 50 m clears GPS wander and the ~18 m APRS position resolution.
+const unsigned int MOBILE_MIN_INTERVAL_SECS = 60U;
+const unsigned int STATIONARY_INTERVAL_SECS = 3600U;
+const double       MOVED_DISTANCE_METRES    = 50.0;
+#endif
+
 CAPRSWriter::CAPRSWriter(const std::string& callsign, const std::string& rptSuffix, const std::string& suffix, bool debug) :
 m_idTimer(1000U),
 m_callsign(callsign),
@@ -45,7 +53,23 @@ m_suffix(suffix)
 ,m_gpsdEnabled(false),
 m_gpsdAddress(),
 m_gpsdPort(),
-m_gpsdData()
+m_gpsdData(),
+m_gpsdConnected(false),
+m_gpsdWarned(false),
+m_gpsdTimer(1000U, 30U),
+m_fixTimer(1000U, 30U),
+m_fixValid(false),
+m_fixLatitude(0.0),
+m_fixLongitude(0.0),
+m_fixAltitudeValid(false),
+m_fixAltitude(0.0),
+m_fixMotionValid(false),
+m_fixSpeed(0.0),
+m_fixTrack(0.0),
+m_refreshTimer(1000U, STATIONARY_INTERVAL_SECS),
+m_beaconSent(false),
+m_sentLatitude(0.0),
+m_sentLongitude(0.0)
 #endif
 {
 	assert(!callsign.empty());
@@ -90,17 +114,9 @@ void CAPRSWriter::setGPSDLocation(const std::string& address, const std::string&
 bool CAPRSWriter::open()
 {
 #if defined(USE_GPSD)
-	if (m_gpsdEnabled) {
-		int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
-		if (ret != 0) {
-			LogError("Error when opening access to gpsd - %d - %s", errno, ::gps_errstr(errno));
-			return false;
-		}
-
-		::gps_stream(&m_gpsdData, WATCH_ENABLE | WATCH_JSON, nullptr);
-
-		LogMessage("Connected to GPSD");
-	}
+	// gpsd may not be up yet; clock() retries
+	if (m_gpsdEnabled && !connectGPSD())
+		m_gpsdTimer.start();
 #endif
 	m_idTimer.setTimeout(60U);
 	m_idTimer.start();
@@ -181,9 +197,37 @@ void CAPRSWriter::clock(unsigned int ms)
 
 #if defined(USE_GPSD)
 	if (m_gpsdEnabled) {
-		if (m_idTimer.hasExpired()) {
+		if (m_gpsdConnected) {
+			readGPSD();
+		} else {
+			m_gpsdTimer.clock(ms);
+			if (m_gpsdTimer.hasExpired()) {
+				if (connectGPSD())
+					m_gpsdTimer.stop();
+				else
+					m_gpsdTimer.start();
+			}
+		}
+
+		// Don't beacon a stale fix
+		m_fixTimer.clock(ms);
+		if (m_fixTimer.hasExpired()) {
+			m_fixValid = false;
+			m_fixTimer.stop();
+		}
+
+		m_refreshTimer.clock(ms);
+
+		if (m_fixValid && mobileBeaconDue()) {
 			sendIdFrameMobile();
+
+			m_beaconSent    = true;
+			m_sentLatitude  = m_fixLatitude;
+			m_sentLongitude = m_fixLongitude;
+
+			m_idTimer.setTimeout(MOBILE_MIN_INTERVAL_SECS);
 			m_idTimer.start();
+			m_refreshTimer.start();
 		}
 
 	} else {
@@ -201,9 +245,9 @@ void CAPRSWriter::clock(unsigned int ms)
 void CAPRSWriter::close()
 {
 #if defined(USE_GPSD)
-	if (m_gpsdEnabled) {
+	if (m_gpsdEnabled && m_gpsdConnected) {
 		::gps_stream(&m_gpsdData, WATCH_DISABLE, nullptr);
-		::gps_close(&m_gpsdData);
+		disconnectGPSD();
 	}
 #endif
 }
@@ -277,44 +321,142 @@ void CAPRSWriter::sendIdFrameFixed()
 }
 
 #if defined(USE_GPSD)
-void CAPRSWriter::sendIdFrameMobile()
+bool CAPRSWriter::connectGPSD()
 {
-	if (!::gps_waiting(&m_gpsdData, 0))
-		return;
+	int ret = ::gps_open(m_gpsdAddress.c_str(), m_gpsdPort.c_str(), &m_gpsdData);
+	if (ret != 0) {
+		// -1: reason in errno (system error, or a libgps code on old libgps)
+		int err = (ret == -1) ? errno : ret;
+		const char* reason = (err < 0) ? ::gps_errstr(err) : ::strerror(err);
+
+		// Warn once per outage
+		if (!m_gpsdWarned)
+			LogWarning("Unable to connect to gpsd at %s:%s - %s, retrying every 30 seconds", m_gpsdAddress.c_str(), m_gpsdPort.c_str(), reason);
+		m_gpsdWarned = true;
+		return false;
+	}
+
+	::gps_stream(&m_gpsdData, WATCH_ENABLE | WATCH_JSON, nullptr);
+
+	m_gpsdConnected = true;
+	m_gpsdWarned    = false;
+
+	LogMessage("Connected to GPSD");
+
+	return true;
+}
+
+void CAPRSWriter::disconnectGPSD()
+{
+	::gps_close(&m_gpsdData);
+
+	m_gpsdConnected = false;
+	m_fixValid      = false;
+	m_fixTimer.stop();
+}
+
+// Drain gpsd and keep the latest fix: gps_read() returns one message.
+void CAPRSWriter::readGPSD()
+{
+	// Bounded; the rest is read next time
+	for (unsigned int n = 0U; n < 50U && ::gps_waiting(&m_gpsdData, 0); n++) {
+		// Non-TPV messages leave stale flags set
+		m_gpsdData.set = 0U;
 
 #if GPSD_API_MAJOR_VERSION >= 7
-	if (::gps_read(&m_gpsdData, nullptr, 0) <= 0)
-		return;
+		int ret = ::gps_read(&m_gpsdData, nullptr, 0);
 #else
-	if (::gps_read(&m_gpsdData) <= 0)
-		return;
+		int ret = ::gps_read(&m_gpsdData);
 #endif
+		if (ret < 0) {
+			LogWarning("Lost the connection to gpsd, retrying every 30 seconds");
+			disconnectGPSD();
+			m_gpsdWarned = true;
+			m_gpsdTimer.start();
+			return;
+		}
 
+		if (ret == 0)
+			return;
 
-#if GPSD_API_MAJOR_VERSION >= 10
-	if (m_gpsdData.fix.status != STATUS_FIX)
-#else
-	if (m_gpsdData.status != STATUS_FIX)
-#endif
-		return;
+		// TPV reports only
+		if ((m_gpsdData.set & MODE_SET) != MODE_SET)
+			continue;
 
-	bool latlonSet   = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
-	bool altitudeSet = (m_gpsdData.set & ALTITUDE_SET) == ALTITUDE_SET;
-	bool velocitySet = (m_gpsdData.set & SPEED_SET) == SPEED_SET;
-	bool bearingSet  = (m_gpsdData.set & TRACK_SET) == TRACK_SET;
+		// Any 2D/3D fix (GPS, DGPS, RTK...). gpsd doesn't range-check.
+		bool latlonSet = (m_gpsdData.set & LATLON_SET) == LATLON_SET;
+		double fixLat  = m_gpsdData.fix.latitude;
+		double fixLon  = m_gpsdData.fix.longitude;
+		bool latlonOK  = std::isfinite(fixLat) && std::isfinite(fixLon) &&
+		                 ::fabs(fixLat) <= 90.0 && ::fabs(fixLon) <= 180.0;
+		if (m_gpsdData.fix.mode < MODE_2D || !latlonSet || !latlonOK) {
+			m_fixValid = false;
+			m_fixTimer.stop();
+			continue;
+		}
 
-	if (!latlonSet)
-		return;
+		m_fixLatitude  = fixLat;
+		m_fixLongitude = fixLon;
 
-	float rawLatitude  = float(m_gpsdData.fix.latitude);
-	float rawLongitude = float(m_gpsdData.fix.longitude);
 #if GPSD_API_MAJOR_VERSION >= 9
-	float rawAltitude  = float(m_gpsdData.fix.altMSL);
+		m_fixAltitude = m_gpsdData.fix.altMSL;
 #else
-	float rawAltitude  = float(m_gpsdData.fix.altitude);
+		m_fixAltitude = m_gpsdData.fix.altitude;
 #endif
-	float rawVelocity  = float(m_gpsdData.fix.speed);
-	float rawBearing   = float(m_gpsdData.fix.track);
+		m_fixAltitudeValid = (m_gpsdData.fix.mode >= MODE_3D) && std::isfinite(m_fixAltitude) &&
+		                     m_fixAltitude >= -1000.0 && m_fixAltitude <= 100000.0;
+
+		bool speedSet = (m_gpsdData.set & SPEED_SET) == SPEED_SET;
+		bool trackSet = (m_gpsdData.set & TRACK_SET) == TRACK_SET;
+		m_fixSpeed       = m_gpsdData.fix.speed;
+		m_fixTrack       = m_gpsdData.fix.track;
+		m_fixMotionValid = speedSet && trackSet && std::isfinite(m_fixSpeed) && std::isfinite(m_fixTrack);
+
+		m_fixValid = true;
+		m_fixTimer.start();
+	}
+}
+
+bool CAPRSWriter::mobileBeaconDue()
+{
+	// First fix
+	if (!m_beaconSent)
+		return true;
+
+	// Parked: hourly refresh
+	if (m_refreshTimer.hasExpired())
+		return true;
+
+	// Moving: at most once a minute
+	if (!m_idTimer.hasExpired())
+		return false;
+
+	// Distance from the last position sent (equirectangular)
+	const double DEG_TO_RAD   = 0.017453292519943295;
+	const double EARTH_RADIUS = 6371000.0;
+
+	double dLon = (m_fixLongitude - m_sentLongitude) * DEG_TO_RAD;
+	if (dLon > 3.141592653589793)
+		dLon -= 2.0 * 3.141592653589793;
+	else if (dLon < -3.141592653589793)
+		dLon += 2.0 * 3.141592653589793;
+
+	double dLat   = (m_fixLatitude - m_sentLatitude) * DEG_TO_RAD;
+	double midLat = (m_fixLatitude + m_sentLatitude) * 0.5 * DEG_TO_RAD;
+
+	double x = dLon * ::cos(midLat);
+	double distance = ::sqrt(x * x + dLat * dLat) * EARTH_RADIUS;
+
+	return distance > MOVED_DISTANCE_METRES;
+}
+
+void CAPRSWriter::sendIdFrameMobile()
+{
+	if (!m_fixValid)
+		return;
+
+	double rawLatitude  = m_fixLatitude;
+	double rawLongitude = m_fixLongitude;
 
 	char desc[200U];
 	if (m_txFrequency != 0U) {
@@ -349,10 +491,10 @@ void CAPRSWriter::sendIdFrameMobile()
 	longitude = (tempLong - longitude) * 60.0 + longitude * 100.0;
 
 	char lat[20U];
-	::sprintf(lat, "%07.2lf", latitude);
+	::snprintf(lat, sizeof(lat), "%07.2lf", latitude);
 
 	char lon[20U];
-	::sprintf(lon, "%08.2lf", longitude);
+	::snprintf(lon, sizeof(lon), "%08.2lf", longitude);
 
 	std::string server = m_callsign;
 	std::string symbol = m_symbol;
@@ -366,18 +508,28 @@ void CAPRSWriter::sendIdFrameMobile()
                 symbol.append("D&");
 
 	char output[500U];
-	::sprintf(output, "%s>APDG03,TCPIP*,qAC,%s:!%s%c%c%s%c%c",
+	::snprintf(output, sizeof(output), "%s>APDG03,TCPIP*,qAC,%s:!%s%c%c%s%c%c",
 		m_callsign.c_str(), server.c_str(),
-		lat, (rawLatitude < 0.0F)  ? 'S' : 'N', symbol[0],
-		lon, (rawLongitude < 0.0F) ? 'W' : 'E', symbol[1]);
+		lat, (rawLatitude < 0.0)  ? 'S' : 'N', symbol[0],
+		lon, (rawLongitude < 0.0) ? 'W' : 'E', symbol[1]);
 
-	if (bearingSet && velocitySet)
-		::sprintf(output + ::strlen(output), "%03.0f/%03.0f", rawBearing, rawVelocity * 0.539957F);
+	if (m_fixMotionValid) {
+		// Course 001-360 (000 = unknown); speed m/s -> knots
+		int course = int(::lround(m_fixTrack)) % 360;
+		if (course <= 0)
+			course += 360;
+		long speed = ::lround(m_fixSpeed * 1.943844);
+		if (speed < 0L)
+			speed = 0L;
+		else if (speed > 999L)
+			speed = 999L;
+		::snprintf(output + ::strlen(output), sizeof(output) - ::strlen(output), "%03d/%03ld", course, speed);
+	}
 
-	if (altitudeSet)
-		::sprintf(output + ::strlen(output), "/A=%06.0f", float(rawAltitude) * 3.28F);
+	if (m_fixAltitudeValid)
+		::snprintf(output + ::strlen(output), sizeof(output) - ::strlen(output), "/A=%06.0f", m_fixAltitude * 3.28084);
 
-	::sprintf(output + ::strlen(output), "%s %s\r\n", band, desc);
+	::snprintf(output + ::strlen(output), sizeof(output) - ::strlen(output), "%s %s\r\n", band, desc);
 
 	if (m_debug)
 		LogDebug("APRS ==> %s", output);

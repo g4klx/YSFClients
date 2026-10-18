@@ -75,10 +75,32 @@ private:
 	std::string       m_gpsdAddress;
 	std::string       m_gpsdPort;
 	struct gps_data_t m_gpsdData;
+	bool              m_gpsdConnected;
+	bool              m_gpsdWarned;
+	CTimer            m_gpsdTimer;
+	CTimer            m_fixTimer;
+	bool              m_fixValid;
+	double            m_fixLatitude;
+	double            m_fixLongitude;
+	bool              m_fixAltitudeValid;
+	double            m_fixAltitude;
+	bool              m_fixMotionValid;
+	double            m_fixSpeed;
+	double            m_fixTrack;
+	CTimer            m_refreshTimer;
+	bool              m_beaconSent;
+	double            m_sentLatitude;
+	double            m_sentLongitude;
 #endif
 
 	void sendIdFrameFixed();
 	void sendIdFrameMobile();
+#if defined(USE_GPSD)
+	bool connectGPSD();
+	void disconnectGPSD();
+	void readGPSD();
+	bool mobileBeaconDue();
+#endif
 };
 
 #endif

@@ -6,7 +6,7 @@ CFLAGS  = -g -O3 -Wall -std=c++17 -Wno-psabi -MMD -MD -pthread
 LIBS    = -lm -lpthread -lmosquitto
 
 # Use the following CFLAGS and LIBS if you do want to use gpsd.
-#CFLAGS  = -g -O3 -Wall -DUSE_GPSD -std=c++0x -MMD -MD -pthread
+#CFLAGS  = -g -O3 -Wall -DUSE_GPSD -std=c++17 -Wno-psabi -MMD -MD -pthread
 #LIBS    = -lm -lpthread -lgps -lmosquitto
 
 LDFLAGS = -g
