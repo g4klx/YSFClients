@@ -256,6 +256,11 @@ void CYSFNetwork::writeUnlink(unsigned int count)
 	m_linked = false;
 }
 
+std::string CYSFNetwork::linkedTo() const
+{
+	return m_linked ? m_reflector.m_name : std::string();
+}
+
 void CYSFNetwork::clock(unsigned int ms)
 {
 	m_pollTimer.clock(ms);

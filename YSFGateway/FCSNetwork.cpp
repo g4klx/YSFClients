@@ -163,6 +163,11 @@ void CFCSNetwork::writeUnlink(unsigned int count)
 		m_socket.write((unsigned char*)"CLOSE      ", 11U, m_addr, m_addrLen);
 }
 
+std::string CFCSNetwork::linkedTo() const
+{
+	return (m_state == FCS_STATE::LINKED) ? m_print : std::string();
+}
+
 void CFCSNetwork::clock(unsigned int ms)
 {
 	m_pingTimer.clock(ms);
