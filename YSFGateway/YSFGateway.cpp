@@ -145,7 +145,8 @@ m_options(),
 m_exclude(false),
 m_inactivityTimer(1000U),
 m_lostTimer(1000U, 120U),
-m_fcsNetworkEnabled(false)
+m_fcsNetworkEnabled(false),
+m_linkedTo()
 {
 	CUDPSocket::startup();
 }
@@ -394,6 +395,17 @@ int CYSFGateway::run()
 		if (m_writer != nullptr)
 			m_writer->clock(ms);
 		m_wiresX->clock(ms);
+
+		// Report the link once the reflector answers (after a relink
+		// too), not only that it was asked for.
+		std::string linkedTo;
+		if ((m_linkType == LINK_TYPE::YSF) && (m_ysfNetwork != nullptr))
+			linkedTo = m_ysfNetwork->linkedTo();
+		else if ((m_linkType == LINK_TYPE::FCS) && (m_fcsNetwork != nullptr))
+			linkedTo = m_fcsNetwork->linkedTo();
+		if (!linkedTo.empty() && (linkedTo != m_linkedTo))
+			writeJSONLinking("established", (m_linkType == LINK_TYPE::FCS) ? "fcs" : "ysf", linkedTo);
+		m_linkedTo = linkedTo;
 
 		m_inactivityTimer.clock(ms);
 		if (m_inactivityTimer.isRunning() && m_inactivityTimer.hasExpired()) {

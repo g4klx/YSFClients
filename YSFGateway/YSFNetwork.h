@@ -46,6 +46,9 @@ public:
 
 	unsigned int read(unsigned char* data);
 
+	// The reflector this is linked to, once it answers ("" before).
+	std::string linkedTo() const;
+
 	void clock(unsigned int ms);
 
 private:
