@@ -4,7 +4,7 @@
 		"reflector": {"type": "string"},
 		"action": {"type": "string", "enum": ["linking", "unlinked", "failed", "relinking"]},
 		"protocol": {"type": "string", "enum": ["fcs", "ysf"]},
-		"reason": {"type": "string", "enum": ["user", "timer", "remote", "startup"]}
+		"reason": {"type": "string", "enum": ["user", "timer", "remote", "startup", "established"]}
 	},
 
 	"status": {
