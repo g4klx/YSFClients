@@ -174,9 +174,15 @@ bool CYSFNetwork::open()
 	LogMessage("Opening YSF network connection");
 
 	bool ret = false;
+	// IPv6 only when this host can reach the reflector's IPv6 address: the
+	// socket opens either way, and without a route every poll is lost.
 	if (m_reflector.hasIPv6()) {
-		ret = m_socket.open(m_reflector.IPv6.m_addr);
-		m_ipV6 = true;
+		if (CUDPSocket::isReachable(m_reflector.IPv6.m_addr, m_reflector.IPv6.m_addrLen)) {
+			ret = m_socket.open(m_reflector.IPv6.m_addr);
+			m_ipV6 = true;
+		} else if (m_reflector.hasIPv4()) {
+			LogMessage("No IPv6 route to the reflector, using IPv4");
+		}
 	}
 	if (!ret && m_reflector.hasIPv4()) {
 		ret = m_socket.open(m_reflector.IPv4.m_addr);
