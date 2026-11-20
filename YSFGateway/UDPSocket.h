@@ -61,6 +61,7 @@ public:
 	static int lookup(const std::string& hostName, unsigned short port, sockaddr_storage& address, unsigned int& addressLength, struct addrinfo& hints);
 
 	static bool match(const sockaddr_storage& addr1, const sockaddr_storage& addr2, IPMATCHTYPE type = IPMATCHTYPE::ADDRESS_AND_PORT);
+	static bool isReachable(const sockaddr_storage& addr, unsigned int addrLen);
 
 private:
 	std::string    m_localAddress;

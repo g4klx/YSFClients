@@ -114,6 +114,29 @@ int CUDPSocket::lookup(const std::string& hostname, unsigned short port, sockadd
 	return 0;
 }
 
+bool CUDPSocket::isReachable(const sockaddr_storage& addr, unsigned int addrLen)
+{
+	// A UDP connect() sends nothing: it only asks the kernel for a route,
+	// so it fails at once (ENETUNREACH) when there is none.
+#if defined(_WIN32) || defined(_WIN64)
+	SOCKET fd = ::socket(addr.ss_family, SOCK_DGRAM, 0);
+	if (fd == INVALID_SOCKET)
+		return false;
+
+	bool ok = ::connect(fd, (const sockaddr*)&addr, addrLen) == 0;
+	::closesocket(fd);
+#else
+	int fd = ::socket(addr.ss_family, SOCK_DGRAM, 0);
+	if (fd < 0)
+		return false;
+
+	bool ok = ::connect(fd, (const sockaddr*)&addr, addrLen) == 0;
+	::close(fd);
+#endif
+
+	return ok;
+}
+
 bool CUDPSocket::match(const sockaddr_storage& addr1, const sockaddr_storage& addr2, IPMATCHTYPE type)
 {
 	if (addr1.ss_family != addr2.ss_family)
