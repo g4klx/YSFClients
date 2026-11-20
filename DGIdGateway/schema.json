@@ -19,8 +19,8 @@
 		"timestamp": {"$ref": "#/$defs/timestamp"},
 		"action": {"$ref": "#/$defs/action"},
 		"reason": {"$ref": "#/$defs/reason"},
-		"dg-id": {"$ref": "#/defs/dg-id"},
-		"protocol": {"$ref": "#/defs/protocol"},
+		"dg-id": {"$ref": "#/$defs/dg-id"},
+		"protocol": {"$ref": "#/$defs/protocol"},
 		"description": {"type": "string"},
 		"required": ["timestamp", "action"]
 	}
