@@ -73,6 +73,12 @@ const unsigned int UNSET_DGID = 999U;
 
 const unsigned char WIRESX_DGID = 127U;
 
+// DG-IDs with no network of their own that are sent through the YSF
+// Gateway on DG-ID 0, keeping their DG-ID, for the systems behind it that
+// use the DG-ID (reflectors selecting a module: 10 = A to 35 = Z)
+const unsigned int FALLBACK_DGID_FIRST = 10U;
+const unsigned int FALLBACK_DGID_LAST  = 35U;
+
 const unsigned char DT_VD_MODE1      = 0x01U;
 const unsigned char DT_VD_MODE2      = 0x02U;
 const unsigned char DT_VOICE_FR_MODE = 0x04U;
@@ -268,6 +274,9 @@ int CDGIdGateway::run()
 	}
 
 	unsigned int currentDGId = UNSET_DGID;
+	// The network carrying the current DG-ID: its own, or the YSF Gateway
+	// on DG-ID 0 for a DG-ID it falls back to
+	unsigned int currentNet = UNSET_DGID;
 	bool fromRF = false;
 
 	CDGIdNetwork* dgIdNetwork[100U];
@@ -473,6 +482,13 @@ int CDGIdGateway::run()
 
 	writeJSONUnlinked("startup");
 
+	// A DG-ID the YSF Gateway on DG-ID 0 carries: 10 to 35, with no network
+	// of its own
+	auto viaGateway = [&dgIdNetwork](unsigned int dgId) {
+		return dgId >= FALLBACK_DGID_FIRST && dgId <= FALLBACK_DGID_LAST && dgIdNetwork[dgId] == nullptr &&
+			dgIdNetwork[0U] != nullptr && dgIdNetwork[0U]->m_protocol == "gateway";
+	};
+
 	while (!m_killed) {
 		unsigned char buffer[200U];
 		memset(buffer, 0U, 200U);
@@ -487,18 +503,32 @@ int CDGIdGateway::run()
 					dgId = 0U;
 
 				if (currentDGId == UNSET_DGID) {
-					if (dgIdNetwork[dgId] != nullptr && !dgIdNetwork[dgId]->m_static) {
-						dgIdNetwork[dgId]->link();
-						dgIdNetwork[dgId]->link();
-						dgIdNetwork[dgId]->link();
+					// The network for this DG-ID: its own; else, for a DG-ID
+					// the YSF Gateway takes, that. The FICH carries DG-IDs up
+					// to 127 but only 0 to 99 have networks: one above (not
+					// sent by radios) has none.
+					unsigned int net = UNSET_DGID;
+					if (dgId < 100U && dgIdNetwork[dgId] != nullptr)
+						net = dgId;
+					else if (viaGateway(dgId))
+						net = 0U;
+
+					if (net != UNSET_DGID && !dgIdNetwork[net]->m_static) {
+						dgIdNetwork[net]->link();
+						dgIdNetwork[net]->link();
+						dgIdNetwork[net]->link();
 					}
 
-					if (dgIdNetwork[dgId] != nullptr) {
-						std::string desc  = dgIdNetwork[dgId]->getDesc(dgId);
-						std::string proto = dgIdNetwork[dgId]->m_protocol;
-						LogMessage("DG-ID set to %u (%s:%s) via RF", dgId, proto.c_str(), desc.c_str());
+					if (net != UNSET_DGID) {
+						std::string desc  = dgIdNetwork[net]->getDesc(net);
+						std::string proto = dgIdNetwork[net]->m_protocol;
+						if (net != dgId)
+							LogMessage("DG-ID set to %u (%s:%s, via DG-ID %u) via RF", dgId, proto.c_str(), desc.c_str(), net);
+						else
+							LogMessage("DG-ID set to %u (%s:%s) via RF", dgId, proto.c_str(), desc.c_str());
 						writeJSONLinking("user", dgId, proto, desc);
 						currentDGId = dgId;
+						currentNet  = net;
 						state = DGID_STATUS::NOTLINKED;
 					} else {
 						if (dgId != failedDGId) {
@@ -510,29 +540,67 @@ int CDGIdGateway::run()
 					}
 
 					fromRF = true;
+				} else if (currentNet == 0U && dgId != currentDGId && (dgId == 0U || viaGateway(dgId))) {
+					// While the YSF Gateway on DG-ID 0 is in use (its hang
+					// time, or a DG-ID it carries), a transmission on another
+					// DG-ID it carries goes through it as that DG-ID
+					std::string desc  = dgIdNetwork[0U]->getDesc(0U);
+					std::string proto = dgIdNetwork[0U]->m_protocol;
+					if (dgId != 0U)
+						LogMessage("DG-ID set to %u (%s:%s, via DG-ID 0) via RF", dgId, proto.c_str(), desc.c_str());
+					else
+						LogMessage("DG-ID set to 0 (%s:%s) via RF", proto.c_str(), desc.c_str());
+					writeJSONLinking("user", dgId, proto, desc);
+					currentDGId = dgId;
+					fromRF = true;
+				} else if (currentNet == 0U && dgId != currentDGId && dgId >= FALLBACK_DGID_FIRST && dgId <= FALLBACK_DGID_LAST &&
+					dgIdNetwork[dgId] != nullptr && dgIdNetwork[0U]->m_protocol == "gateway") {
+					// A DG-ID from 10 to 35 with a network of its own, keyed
+					// while the YSF Gateway is in use: its own network wins
+					if (!dgIdNetwork[0U]->m_static) {
+						dgIdNetwork[0U]->unlink();
+						dgIdNetwork[0U]->unlink();
+						dgIdNetwork[0U]->unlink();
+					}
+					if (!dgIdNetwork[dgId]->m_static) {
+						dgIdNetwork[dgId]->link();
+						dgIdNetwork[dgId]->link();
+						dgIdNetwork[dgId]->link();
+					}
+
+					std::string desc  = dgIdNetwork[dgId]->getDesc(dgId);
+					std::string proto = dgIdNetwork[dgId]->m_protocol;
+					LogMessage("DG-ID set to %u (%s:%s) via RF", dgId, proto.c_str(), desc.c_str());
+					writeJSONLinking("user", dgId, proto, desc);
+					currentDGId = dgId;
+					currentNet  = dgId;
+					state = DGID_STATUS::NOTLINKED;
+					fromRF = true;
 				}
 
 				if (m_gps != nullptr)
 					m_gps->data(buffer + 14U, buffer + 35U, fich);
 
-				if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != nullptr) {
+				if (currentNet != UNSET_DGID && dgIdNetwork[currentNet] != nullptr) {
 					// Only allow the wanted modes through
 					unsigned char dt = fich.getDT();
-					if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE1) != 0U) ||
-						(dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentDGId]->m_modes & DT_DATA_FR_MODE) != 0U) ||
-						(dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentDGId]->m_modes & DT_VD_MODE2) != 0U) ||
-						(dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentDGId]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
+					if ((dt == YSF_DT_VD_MODE1      && (dgIdNetwork[currentNet]->m_modes & DT_VD_MODE1) != 0U) ||
+						(dt == YSF_DT_DATA_FR_MODE  && (dgIdNetwork[currentNet]->m_modes & DT_DATA_FR_MODE) != 0U) ||
+						(dt == YSF_DT_VD_MODE2      && (dgIdNetwork[currentNet]->m_modes & DT_VD_MODE2) != 0U) ||
+						(dt == YSF_DT_VOICE_FR_MODE && (dgIdNetwork[currentNet]->m_modes & DT_VOICE_FR_MODE) != 0U)) {
+						// A DG-ID the YSF Gateway carries keeps its DG-ID: it is
+						// what the system behind the gateway acts on
 						unsigned char origDGId = fich.getDGId();
-						if (origDGId != WIRESX_DGID) {
-							unsigned int newDGId = dgIdNetwork[currentDGId]->getDGId();
+						if (origDGId != WIRESX_DGID && !(currentNet == 0U && viaGateway(origDGId))) {
+							unsigned int newDGId = dgIdNetwork[currentNet]->getDGId();
 							fich.setDGId(newDGId);
 							fich.encode(buffer + 35U);
 						}
 
-						dgIdNetwork[currentDGId]->write(currentDGId, buffer);
+						dgIdNetwork[currentNet]->write(currentNet, buffer);
 					}
 
-					inactivityTimer.setTimeout(dgIdNetwork[currentDGId]->m_rfHangTime);
+					inactivityTimer.setTimeout(dgIdNetwork[currentNet]->m_rfHangTime);
 					inactivityTimer.start();
 				}
 			}
@@ -549,7 +617,10 @@ int CDGIdGateway::run()
 		for (unsigned int i = 0U; i < 100U; i++) {
 			if (dgIdNetwork[i] != nullptr) {
 				unsigned int len = dgIdNetwork[i]->read(i, buffer);
-				if (len > 0U && (i == currentDGId || currentDGId == UNSET_DGID)) {
+				// From the network carrying the DG-ID in use: replies to a
+				// DG-ID sent through the YSF Gateway come back from it, on
+				// its own DG-ID
+				if (len > 0U && (i == currentNet || currentDGId == UNSET_DGID)) {
 					CYSFFICH fich;
 					bool valid = fich.decode(buffer + 35U);
 					if (valid) {
@@ -570,6 +641,7 @@ int CDGIdGateway::run()
 							LogMessage("DG-ID set to %u (%s:%s) via Network", i, proto.c_str(), desc.c_str());
 							writeJSONLinking("network", i, proto, desc);
 							currentDGId = i;
+							currentNet  = i;
 							state = DGID_STATUS::LINKED;
 							fromRF = false;
 						}
@@ -599,10 +671,10 @@ int CDGIdGateway::run()
 				// in use.
 				writeJSONUnlinked("timer");
 
-				if (dgIdNetwork[currentDGId] != nullptr && !dgIdNetwork[currentDGId]->m_static) {
-					dgIdNetwork[currentDGId]->unlink();
-					dgIdNetwork[currentDGId]->unlink();
-					dgIdNetwork[currentDGId]->unlink();
+				if (dgIdNetwork[currentNet] != nullptr && !dgIdNetwork[currentNet]->m_static) {
+					dgIdNetwork[currentNet]->unlink();
+					dgIdNetwork[currentNet]->unlink();
+					dgIdNetwork[currentNet]->unlink();
 				}
 			}
 
@@ -610,6 +682,7 @@ int CDGIdGateway::run()
 
 			state = DGID_STATUS::NOTLINKED;
 			currentDGId = UNSET_DGID;
+			currentNet  = UNSET_DGID;
 			inactivityTimer.stop();
 
 			if (fromRF) {
@@ -625,9 +698,9 @@ int CDGIdGateway::run()
 			nPips = 0U;
 		}
 
-		if (currentDGId != UNSET_DGID && dgIdNetwork[currentDGId] != nullptr) {
-			DGID_STATUS netState = dgIdNetwork[currentDGId]->getStatus();
-			bool statc = dgIdNetwork[currentDGId]->m_static;
+		if (currentNet != UNSET_DGID && dgIdNetwork[currentNet] != nullptr) {
+			DGID_STATUS netState = dgIdNetwork[currentNet]->getStatus();
+			bool statc = dgIdNetwork[currentNet]->m_static;
 			if (fromRF && state != DGID_STATUS::LINKED && netState != DGID_STATUS::LINKED && statc)
 				nPips = 3U;
 			else if (fromRF && state != DGID_STATUS::LINKED && netState == DGID_STATUS::LINKED)
